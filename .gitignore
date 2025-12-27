@@ -1,0 +1,47 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+yarn-debug.log*
+package-lock.json
+yarn.lock
+
+# Expo
+.expo/
+.expo-shared/
+*.expo
+
+# Logs
+*.log
+
+# macOS
+.DS_Store
+
+# Xcode
+ios/build/
+ios/Pods/
+ios/DerivedData/
+*.xcodeproj/
+*.xcworkspace/
+
+# Android
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties
+
+# Metro Bundler cache
+metro-cache/
+.expo/cache/
+
+# TypeScript
+*.tsbuildinfo
+
+# Environment variables
+.env
+.env.*.local
+
+# Misc
+*.iml
+.idea/
+.vscode/

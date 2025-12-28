@@ -18,4 +18,19 @@ export const theme = {
     large: 28,
     round: 999,
   },
+  typography: {
+    sizes: {
+      xs: 11,
+      sm: 13,
+      base: 15,
+      lg: 17,
+      xl: 19,
+    },
+    weights: {
+      regular: '400',
+      medium: '500',
+      semibold: '600',
+      bold: '700',
+    },
+  },
 };

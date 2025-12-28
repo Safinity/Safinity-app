@@ -1,42 +1,103 @@
 import { Tabs } from 'expo-router';
-import { Platform } from 'react-native';
+import { Platform, View, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import styled from 'styled-components/native';
 
-const NavbarBackground = styled.View`
+
+const NavbarContainer = styled.View`
   background-color: ${({ theme }) => theme.colors.grayNavbar};
-  border-radius: ${({ theme }) => theme.borderRadius.xl}px;
+  border-radius: ${({ theme }) => theme.borderRadius.large}px;
   height: 73px;
   margin-horizontal: ${({ theme }) => theme.spacing.md}px;
-  margin-bottom: ${({ theme }) => 
-    Platform.OS === 'ios' ? theme.spacing.lg : theme.spacing.md}px;
+  margin-bottom: ${Platform.OS === 'ios' ? 20 : 16}px;
   shadow-color: #000;
   shadow-offset: 0px 4px;
   shadow-opacity: 0.15;
   shadow-radius: 12px;
   elevation: 8;
+  position: absolute;
+  bottom: 0;
+  left: 16px;
+  right: 16px;
 `;
 
-const TabItemContainer = styled.View`
-  height: 100%;
-  justify-content: center;
+const TabBarContent = styled.View`
+  flex: 1;
+  flex-direction: row;
+  justify-content: space-around;
   align-items: center;
+  padding-top: 8px;
+  padding-bottom: 8px;
 `;
 
-const IconWrapper = styled.View`
+const TabButton = styled.TouchableOpacity`
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  padding-top: 4px;
+  padding-bottom: 4px;
+`;
+
+const IconBox = styled.View`
   align-items: center;
   justify-content: center;
   height: 24px;
+  margin-bottom: 2px;
 `;
 
-const TabLabel = styled.Text<{ $focused: boolean }>`
-  font-size: ${({ theme }) => theme.typography.fontSizes.xs}px;
-  font-weight: ${({ theme }) => theme.typography.fontWeights.semibold};
+const TabText = styled.Text<{ $active: boolean }>`
+  font-size: 11px;
+  font-weight: 600;
   margin-top: 2px;
-  color: ${({ $focused, theme }) => 
-    $focused ? theme.colors.white : theme.colors.gray};
+  color: ${({ $active, theme }) => 
+    $active ? theme.colors.white : theme.colors.inactive};
 `;
-// ========== FIM STYLED COMPONENTS ==========
+
+function CustomTabBar({ state, descriptors, navigation }: any) {
+  return (
+    <NavbarContainer>
+      <TabBarContent>
+        {state.routes.map((route: any, index: number) => {
+          const { options } = descriptors[route.key];
+          const isFocused = state.index === index;
+
+          const onPress = () => {
+            const event = navigation.emit({
+              type: 'tabPress',
+              target: route.key,
+              canPreventDefault: true,
+            });
+
+            if (!isFocused && !event.defaultPrevented) {
+              navigation.navigate(route.name);
+            }
+          };
+
+          return (
+            <TabButton
+              key={route.key}
+              onPress={onPress}
+              accessibilityRole="button"
+              accessibilityState={isFocused ? { selected: true } : {}}
+              accessibilityLabel={options.tabBarAccessibilityLabel}
+            >
+              <IconBox>
+                <Ionicons
+                  name={isFocused ? options.iconName : `${options.iconName}-outline`}
+                  size={22}
+                  color={isFocused ? '#FFFFFF' : '#A0A0A5'}
+                />
+              </IconBox>
+              <TabText $active={isFocused}>
+                {options.title}
+              </TabText>
+            </TabButton>
+          );
+        })}
+      </TabBarContent>
+    </NavbarContainer>
+  );
+}
 
 const tabConfigs = [
   { name: 'index', title: 'Home', icon: 'home' },
@@ -50,48 +111,19 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarStyle: {
-          backgroundColor: 'transparent',
-          borderTopWidth: 0,
-          height: 73,
-          position: 'absolute',
-          marginHorizontal: 16,
-          marginBottom: Platform.OS === 'ios' ? 20 : 16,
-          borderRadius: 28,
-          justifyContent: 'center',
-          alignItems: 'center',
-          paddingVertical: 0,
-          paddingBottom: 8,
-          paddingTop: 8,
+        tabBarStyle: { 
+          display: 'none',
         },
-        tabBarBackground: () => <NavbarBackground />,
-        tabBarItemStyle: {
-          height: '100%',
-          justifyContent: 'center',
-          alignItems: 'center',
-        },
-      }}>
-
+      }}
+      tabBar={props => <CustomTabBar {...props} />}
+    >
       {tabConfigs.map((tab) => (
         <Tabs.Screen
           key={tab.name}
           name={tab.name}
           options={{
             title: tab.title,
-            tabBarIcon: ({ color, focused }) => (
-              <IconWrapper>
-                <Ionicons
-                  name={focused ? tab.icon : `${tab.icon}-outline`}
-                  size={22}
-                  color={color}
-                />
-              </IconWrapper>
-            ),
-            tabBarLabel: ({ focused, children }) => (
-              <TabLabel $focused={focused}>
-                {children}
-              </TabLabel>
-            ),
+            iconName: tab.icon,
           }}
         />
       ))}

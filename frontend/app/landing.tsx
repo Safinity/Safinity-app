@@ -1,7 +1,7 @@
 import { router } from "expo-router";
 import styled from "styled-components/native";
 import { ImageBackground } from "react-native";
-import bgImage from "@/assets/images/landing-bg.jpg";
+import bgImage from "../assets/images/landing-bg.jpg";
 
 const Background = styled(ImageBackground)`
   flex: 1;
@@ -40,7 +40,7 @@ export default function Landing() {
   return (
     <Background source={bgImage}>
       <Content>
-        <Button onPress={() => router.push("/login")}>
+        <Button onPress={() => router.push("./map")}>
           <ButtonText>Log in</ButtonText>
         </Button>
 

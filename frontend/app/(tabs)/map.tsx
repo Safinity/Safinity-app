@@ -1,40 +1,46 @@
-import { StyleSheet, Text, View, Pressable } from 'react-native';
+import { Pressable } from 'react-native';
 import { router } from 'expo-router';
+import styled from 'styled-components/native';
+
+const Container = styled.View`
+  flex: 1;
+  background-color: ${({ theme }) => theme.colors.background};
+`;
+
+const Content = styled.View`
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+`;
+
+const Title = styled.Text`
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #FFFFFF;
+`;
+
+const Button = styled(Pressable)`
+  background-color: #007AFF;
+  padding-horizontal: 16px;
+  padding-vertical: 10px;
+  border-radius: 8px;
+`;
+
+const ButtonText = styled.Text`
+  color: #fff;
+  font-weight: 600;
+`;
 
 export default function MapScreen() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Map Screen</Text>
-
-      <Pressable
-        style={styles.button}
-        onPress={() => router.push('/teste-not-found')}
-      >
-        <Text style={styles.buttonText}>Ir para página inexistente</Text>
-      </Pressable>
-    </View>
+    <Container>
+      <Content>
+        <Title>Map Screen</Title>
+        <Button onPress={() => router.push('/teste-not-found')}>
+          <ButtonText>Ir para página inexistente</ButtonText>
+        </Button>
+      </Content>
+    </Container>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  text: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  button: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: '600',
-  },
-});

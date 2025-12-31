@@ -1,21 +1,23 @@
-import { StyleSheet, Text, View } from 'react-native';
+import styled from 'styled-components/native';
+
+
+const Container = styled.View`
+  flex: 1;
+  background-color: ${({ theme }) => theme.colors.background};
+  justify-content: center;
+  align-items: center;
+`;
+
+const Title = styled.Text`
+  font-size: 20px;
+  font-weight: bold;
+  color: ${({ theme }) => theme.colors.white};
+`;
 
 export default function CalendarScreen() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Calendar Screen</Text>
-    </View>
+    <Container>
+      <Title>Calendar</Title>
+    </Container>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  text: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-});

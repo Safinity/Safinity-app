@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import styled from "styled-components/native";
 import { Animated } from "react-native";
 import { router } from "expo-router";
-import Logo from "@/assets/images/loading-logo.png";
+import Logo from "../assets/logos/loading-logo.png";
 
 const Container = styled.View`
   flex: 1;

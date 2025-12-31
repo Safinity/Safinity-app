@@ -1,15 +1,22 @@
-import { Stack } from 'expo-router';
+// app/_layout.tsx
+import { Slot } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { ThemeProvider } from 'styled-components/native';
-import { theme } from './theme';
+import { theme } from '../constants/theme';
+import styled from 'styled-components/native'; 
+
+const Container = styled.View`
+  flex: 1;
+  background-color: ${({ theme }) => theme.colors.background};
+`;
 
 export default function RootLayout() {
   return (
     <ThemeProvider theme={theme}>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" />
-      </Stack>
-      <StatusBar />
+      <Container> 
+        <Slot />
+      </Container>
+      <StatusBar style="light" />
     </ThemeProvider>
   );
 }

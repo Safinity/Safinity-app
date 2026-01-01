@@ -10,10 +10,7 @@ const NavbarContainer = styled.View`
   height: 73px;
   margin-horizontal: ${({ theme }) => theme.spacing.md}px;
   margin-bottom: ${Platform.OS === 'ios' ? 20 : 16}px;
-  shadow-color: #000;
-  shadow-offset: 0px 4px;
-  shadow-opacity: 0.15;
-  shadow-radius: 12px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
   elevation: 8;
   position: absolute;
   bottom: 0;

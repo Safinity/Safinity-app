@@ -17,11 +17,11 @@ const Title = styled.Text`
   font-size: 20px;
   font-weight: bold;
   margin-bottom: 20px;
-  color: #FFFFFF;
+  color: #ffffff;
 `;
 
 const Button = styled(Pressable)`
-  background-color: #007AFF;
+  background-color: #007aff;
   padding-horizontal: 16px;
   padding-vertical: 10px;
   border-radius: 8px;

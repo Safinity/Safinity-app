@@ -1,8 +1,8 @@
-import { useEffect, useRef } from "react";
-import styled from "styled-components/native";
-import { Animated } from "react-native";
-import { router } from "expo-router";
-import Logo from "../assets/logos/loading-logo.png";
+import { useEffect, useRef } from 'react';
+import styled from 'styled-components/native';
+import { Animated } from 'react-native';
+import { router } from 'expo-router';
+import Logo from '../assets/logos/loading-logo.png';
 
 const Container = styled.View`
   flex: 1;
@@ -21,17 +21,17 @@ export default function LoadingScreen() {
       useNativeDriver: true,
     }).start();
 
-    const t = setTimeout(() => router.replace("/landing"), 2000);
+    const t = setTimeout(() => router.replace('/landing'), 2000);
 
     return () => clearTimeout(t);
-  }, []);
+  }, [opacity]);
 
   return (
     <Container>
       <Animated.Image
         source={Logo}
         style={{
-          width: "80%",
+          width: '80%',
           aspectRatio: 1,
           opacity,
         }}

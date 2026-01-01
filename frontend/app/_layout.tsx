@@ -1,9 +1,8 @@
 // app/_layout.tsx
 import { Slot } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { ThemeProvider } from 'styled-components/native';
+import styled, { ThemeProvider } from 'styled-components/native';
 import { theme } from '../constants/theme';
-import styled from 'styled-components/native'; 
 
 const Container = styled.View`
   flex: 1;
@@ -13,7 +12,7 @@ const Container = styled.View`
 export default function RootLayout() {
   return (
     <ThemeProvider theme={theme}>
-      <Container> 
+      <Container>
         <Slot />
       </Container>
       <StatusBar style="light" />

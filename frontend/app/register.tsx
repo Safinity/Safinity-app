@@ -1,8 +1,8 @@
-import { useState } from "react";
-import styled from "styled-components/native";
-import { Ionicons } from "@expo/vector-icons";
-import { ScrollView, TouchableOpacity, View } from "react-native";
-import { router } from "expo-router";
+import { useState } from 'react';
+import styled from 'styled-components/native';
+import { Ionicons } from '@expo/vector-icons';
+import { ScrollView, TouchableOpacity } from 'react-native';
+import { router } from 'expo-router';
 
 const Screen = styled.SafeAreaView`
   flex: 1;
@@ -99,10 +99,7 @@ export default function Register() {
     <Screen>
       <Container contentContainerStyle={{ paddingBottom: 40 }}>
         {/* Back */}
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={{ marginBottom: 10 }}
-        >
+        <TouchableOpacity onPress={() => router.back()} style={{ marginBottom: 10 }}>
           <Ionicons name="arrow-back" size={26} color="white" />
         </TouchableOpacity>
 
@@ -113,20 +110,14 @@ export default function Register() {
           <InputWrapper>
             <Label>First Name</Label>
             <InputBox>
-              <TextInput
-                placeholder="First Name"
-                placeholderTextColor="#8a90a5"
-              />
+              <TextInput placeholder="First Name" placeholderTextColor="#8a90a5" />
             </InputBox>
           </InputWrapper>
 
           <InputWrapper>
             <Label>Last Name</Label>
             <InputBox>
-              <TextInput
-                placeholder="Last Name"
-                placeholderTextColor="#8a90a5"
-              />
+              <TextInput placeholder="Last Name" placeholderTextColor="#8a90a5" />
             </InputBox>
           </InputWrapper>
         </Row>
@@ -153,14 +144,10 @@ export default function Register() {
         <InputWrapper>
           <Label>Password</Label>
           <InputBox>
-            <TextInput
-              placeholder=" "
-              placeholderTextColor="#8a90a5"
-              secureTextEntry={!showPass}
-            />
+            <TextInput placeholder=" " placeholderTextColor="#8a90a5" secureTextEntry={!showPass} />
             <TouchableOpacity onPress={() => setShowPass(!showPass)}>
               <Ionicons
-                name={showPass ? "eye-off-outline" : "eye-outline"}
+                name={showPass ? 'eye-off-outline' : 'eye-outline'}
                 size={22}
                 color="#cfd3e0"
               />
@@ -178,7 +165,7 @@ export default function Register() {
             />
             <TouchableOpacity onPress={() => setShowConfirm(!showConfirm)}>
               <Ionicons
-                name={showConfirm ? "eye-off-outline" : "eye-outline"}
+                name={showConfirm ? 'eye-off-outline' : 'eye-outline'}
                 size={22}
                 color="#cfd3e0"
               />
@@ -188,20 +175,12 @@ export default function Register() {
 
         {/* Terms */}
         <CheckboxRow>
-          <TouchableOpacity
-            onPress={() => setChecked(!checked)}
-            style={{ marginRight: 8 }}
-          >
-            <Ionicons
-              name={checked ? "checkbox" : "square-outline"}
-              size={22}
-              color="#9f6bff"
-            />
+          <TouchableOpacity onPress={() => setChecked(!checked)} style={{ marginRight: 8 }}>
+            <Ionicons name={checked ? 'checkbox' : 'square-outline'} size={22} color="#9f6bff" />
           </TouchableOpacity>
 
           <TermsText>
-            I agree to the <Link>Terms of use</Link> and{" "}
-            <Link>Privacy Policy</Link>.
+            I agree to the <Link>Terms of use</Link> and <Link>Privacy Policy</Link>.
           </TermsText>
         </CheckboxRow>
 
@@ -211,8 +190,7 @@ export default function Register() {
 
         <BottomRow>
           <Small>
-            Already have an account?{" "}
-            <Link onPress={() => router.push("/login")}>Log in</Link>
+            Already have an account? <Link onPress={() => router.push('/login')}>Log in</Link>
           </Small>
         </BottomRow>
       </Container>

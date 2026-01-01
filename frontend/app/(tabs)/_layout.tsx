@@ -1,8 +1,7 @@
 import { Tabs } from 'expo-router';
-import { Platform, View, StyleSheet } from 'react-native';
+import { Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import styled from 'styled-components/native';
-
 
 const NavbarContainer = styled.View`
   background-color: ${({ theme }) => theme.colors.grayNavbar};
@@ -46,8 +45,7 @@ const TabText = styled.Text<{ $active: boolean }>`
   font-size: 11px;
   font-weight: 600;
   margin-top: 2px;
-  color: ${({ $active, theme }) => 
-    $active ? theme.colors.white : theme.colors.inactive};
+  color: ${({ $active, theme }) => ($active ? theme.colors.white : theme.colors.inactive)};
 `;
 
 function CustomTabBar({ state, descriptors, navigation }: any) {
@@ -85,9 +83,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
                   color={isFocused ? '#FFFFFF' : '#A0A0A5'}
                 />
               </IconBox>
-              <TabText $active={isFocused}>
-                {options.title}
-              </TabText>
+              <TabText $active={isFocused}>{options.title}</TabText>
             </TabButton>
           );
         })}
@@ -108,13 +104,13 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarStyle: { 
+        tabBarStyle: {
           display: 'none',
         },
       }}
       tabBar={props => <CustomTabBar {...props} />}
     >
-      {tabConfigs.map((tab) => (
+      {tabConfigs.map(tab => (
         <Tabs.Screen
           key={tab.name}
           name={tab.name}

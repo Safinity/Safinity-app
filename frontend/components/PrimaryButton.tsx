@@ -1,0 +1,23 @@
+import styled from 'styled-components/native';
+
+const Button = styled.TouchableOpacity<{ disabled?: boolean }>`
+  padding: 16px;
+  border-radius: ${({ theme }) => theme.borderRadius.medium}px;
+  background-color: ${({ disabled, theme }) =>
+    disabled ? theme.colors.palette.primary.dark60 : theme.colors.palette.primary.normal};
+  opacity: ${({ disabled }) => (disabled ? 0.8 : 1)};
+`;
+
+const Label = styled.Text`
+  text-align: center;
+  color: ${({ theme }) => theme.colors.white};
+  font-weight: 600;
+`;
+
+export default function PrimaryButton({ title, onPress, disabled }: any) {
+  return (
+    <Button disabled={disabled} onPress={onPress}>
+      <Label>{title}</Label>
+    </Button>
+  );
+}

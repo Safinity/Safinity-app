@@ -6,7 +6,7 @@ import Logo from '../assets/logos/loading-logo.png';
 
 const Container = styled.View`
   flex: 1;
-  background-color: #222734;
+  background-color: ${({ theme }) => theme.colors.background};
   justify-content: center;
   align-items: center;
 `;

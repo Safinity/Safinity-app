@@ -27,13 +27,13 @@ const Title = styled.Text`
 
 const Message = styled.Text`
   font-size: 16px;
-  color: #C9CCD6;
+  color: #c9ccd6;
   text-align: center;
   margin-bottom: 32px;
 `;
 
 const Button = styled(Pressable)`
-  background-color: #8A4CCF;
+  background-color: #8a4ccf;
   padding-vertical: 16px;
   border-radius: 20px;
   align-items: center;
@@ -51,9 +51,7 @@ export default function NotFound() {
     <Container>
       <Content>
         <Title>Opss!</Title>
-        <Message>
-          Unable to find the location{'\n'}of this page
-        </Message>
+        <Message>Unable to find the location{'\n'}of this page</Message>
         <GradientText text="404" style={styles.errorCode} />
       </Content>
       <Button onPress={() => router.replace('./map')}>

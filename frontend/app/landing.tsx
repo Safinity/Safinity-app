@@ -1,7 +1,7 @@
-import { router } from "expo-router";
-import styled from "styled-components/native";
-import { ImageBackground } from "react-native";
-import bgImage from "../assets/images/landing-bg.jpg";
+import { router } from 'expo-router';
+import styled from 'styled-components/native';
+import { ImageBackground } from 'react-native';
+import bgImage from '../assets/images/landing-bg.jpg';
 
 const Background = styled(ImageBackground)`
   flex: 1;
@@ -19,14 +19,13 @@ const Content = styled.View`
 const Button = styled.TouchableOpacity<{ secondary?: boolean }>`
   padding: 16px;
   border-radius: ${({ theme }) => theme.borderRadius.medium}px;
-  background-color: ${({ secondary, theme }) =>
-    secondary ? "#E9D9F5" : "#9242CC"};
+  background-color: ${({ secondary, theme }) => (secondary ? '#E9D9F5' : '#9242CC')};
 `;
 
 const ButtonText = styled.Text<{ secondary?: boolean }>`
   text-align: center;
   font-weight: 600;
-  color: ${({ secondary }) => (secondary ? "#492166" : "white")};
+  color: ${({ secondary }) => (secondary ? '#492166' : 'white')};
 `;
 
 const LinkText = styled.Text`
@@ -40,11 +39,11 @@ export default function Landing() {
   return (
     <Background source={bgImage}>
       <Content>
-        <Button onPress={() => router.push("./map")}>
+        <Button onPress={() => router.push('./map')}>
           <ButtonText>Log in</ButtonText>
         </Button>
 
-        <Button secondary onPress={() => router.push("/register")}>
+        <Button secondary onPress={() => router.push('/register')}>
           <ButtonText secondary>Create account</ButtonText>
         </Button>
 

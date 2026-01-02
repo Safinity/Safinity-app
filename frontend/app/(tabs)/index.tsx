@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FlatList, ScrollView, StatusBar } from 'react-native';
+import { FlatList, StatusBar } from 'react-native';
 import styled from 'styled-components/native';
 
 import Header from '../../components/ui/header';
@@ -80,8 +80,8 @@ export default function HomeScreen() {
           selectedTags={[selectedCategory]}
           onTagPress={tag => setSelectedCategory(tag)}
           contentContainerStyle={{
-            paddingLeft: 40,   // Alinha com a margem lateral
-            paddingRight: 40,  // Resolve o problema da margem à direita no fim do scroll
+            paddingLeft: 40, // Alinha com a margem lateral
+            paddingRight: 40, // Resolve o problema da margem à direita no fim do scroll
           }}
         />
 

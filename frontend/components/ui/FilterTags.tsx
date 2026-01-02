@@ -15,7 +15,7 @@ interface FilterTagsProps {
   contentContainerStyle?: any;
 }
 
-const TagsScrollView = styled.ScrollView.attrs((props) => ({
+const TagsScrollView = styled.ScrollView.attrs(props => ({
   horizontal: true,
   showsHorizontalScrollIndicator: false,
   // Mantemos a esquerda a 0 para não duplicar margem
@@ -40,8 +40,7 @@ const Tag = styled.Pressable<{
   color?: string;
   selectedColor?: string;
 }>`
-  background-color: ${({ selected }) =>
-    selected ? Colors.primary : Colors.grayNavbar};
+  background-color: ${({ selected }) => (selected ? Colors.primary : Colors.grayNavbar)};
   padding: ${Spacing.sm}px 18px;
   border-radius: ${BorderRadius.round}px;
   border-width: 1px;
@@ -82,7 +81,7 @@ const FilterTags: React.FC<FilterTagsProps> = ({
       contentContainerStyle={contentContainerStyle}
     >
       <TagsContainer>
-        {tags.map((tag) => {
+        {tags.map(tag => {
           const isSelected = selectedTags.includes(tag);
 
           return (

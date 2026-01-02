@@ -17,7 +17,6 @@ const Header: React.FC<HeaderProps> = ({
   onProfilePress,
   showBottomDivider = false,
 }) => {
-  const theme = useTheme();
 
   // Cálculo da altura: Safe Area (status bar) + 60px de conteúdo
   const statusBarHeight = Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 24;

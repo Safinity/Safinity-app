@@ -12,12 +12,14 @@ export const Colors = {
   primary: '#9242CC',
   inactive: '#A0A0A5',
   white: '#FFFFFF',
+  error: '#D34A4A',
 };
 
 export const BorderRadius = {
   small: 8,
   medium: 16,
   large: 24,
+  xlarge: 32,
   round: 999,
 };
 
@@ -25,8 +27,9 @@ export const Spacing = {
   xs: 4,
   sm: 8,
   md: 16,
-  lg: 24,
+  lg: 20,
   xl: 32,
+  xxl: 130,
 };
 
 export const Fonts = Platform.select({
@@ -50,9 +53,6 @@ export const Fonts = Platform.select({
   },
 });
 
-/**
- * Theme usado pelo styled-components
- */
 export const theme = {
   colors: Colors,
   borderRadius: BorderRadius,

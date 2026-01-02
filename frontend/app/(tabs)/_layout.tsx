@@ -5,7 +5,7 @@ import styled from 'styled-components/native';
 
 const NavbarContainer = styled.View`
   background-color: ${({ theme }) => theme.colors.grayNavbar};
-  border-radius: ${({ theme }) => theme.borderRadius.large}px;
+  border-radius: ${({ theme }) => theme.borderRadius.xlarge}px;
   height: 73px;
   margin-horizontal: ${({ theme }) => theme.spacing.md}px;
   margin-bottom: ${Platform.OS === 'ios' ? 20 : 16}px;

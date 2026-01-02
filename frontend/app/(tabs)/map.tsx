@@ -9,8 +9,8 @@ import FilterTags from '../../components/ui/FilterTags';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
-const IMAGE_WIDTH = screenWidth * 6; 
-const IMAGE_HEIGHT = screenHeight * 2; 
+const IMAGE_WIDTH = screenWidth * 6;
+const IMAGE_HEIGHT = screenHeight * 2;
 
 const Container = styled.View`
   flex: 1;
@@ -35,14 +35,14 @@ const MapContainer = styled.View`
 
 const MapScrollView = styled.ScrollView.attrs({
   maximumZoomScale: 3,
-  minimumZoomScale: 0.7, 
+  minimumZoomScale: 0.7,
   showsHorizontalScrollIndicator: false,
   showsVerticalScrollIndicator: false,
-  bounces: false, 
-  bouncesZoom: false, 
-  overScrollMode: 'never', 
-  alwaysBounceHorizontal: false, 
-  alwaysBounceVertical: false, 
+  bounces: false,
+  bouncesZoom: false,
+  overScrollMode: 'never',
+  alwaysBounceHorizontal: false,
+  alwaysBounceVertical: false,
   scrollEnabled: true,
   pinchGestureEnabled: true,
 })`
@@ -121,7 +121,7 @@ export default function MapScreen() {
       // Calcula o centro da imagem
       const centerX = (IMAGE_WIDTH - screenWidth) / 2;
       const centerY = (IMAGE_HEIGHT - screenHeight) / 2;
-      
+
       setTimeout(() => {
         scrollViewRef.current?.scrollTo({
           x: centerX,
@@ -132,14 +132,11 @@ export default function MapScreen() {
     }
   }, []);
 
-  const handleNotificationPress = () => {
-  };
+  const handleNotificationPress = () => {};
 
-  const handleProfilePress = () => {
-  };
+  const handleProfilePress = () => {};
 
-  const handleSearchSubmit = () => {
-  };
+  const handleSearchSubmit = () => {};
 
   const handleTagPress = (tag: string) => {
     setSelectedTags(prev => {
@@ -160,7 +157,7 @@ export default function MapScreen() {
     <Container>
       <MainContent>
         <MapContainer>
-          <MapScrollView 
+          <MapScrollView
             ref={scrollViewRef}
             contentContainerStyle={{
               // Limites do scroll para não passar das bordas da imagem

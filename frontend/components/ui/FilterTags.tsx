@@ -30,32 +30,30 @@ const TagsContainer = styled.View`
   padding-right: ${Spacing.md}px;
 `;
 
-const Tag = styled.Pressable<{ 
-  selected: boolean; 
+const Tag = styled.Pressable<{
+  selected: boolean;
   color?: string;
   selectedColor?: string;
 }>`
-  background-color: ${({ selected, color, selectedColor }) => 
+  background-color: ${({ selected, color, selectedColor }) =>
     selected ? Colors.primary : Colors.background};
   padding: ${Spacing.sm}px ${Spacing.md}px;
   border-radius: ${BorderRadius.round}px;
   border-width: 1px;
-  border-color: ${({ selected, selectedColor }) => 
-    selected ? (selectedColor || Colors.primary) : 'transparent'};
+  border-color: ${({ selected, selectedColor }) =>
+    selected ? selectedColor || Colors.primary : 'transparent'};
   min-height: 42px;
   justify-content: center;
 `;
 
-const TagText = styled.Text<{ 
+const TagText = styled.Text<{
   selected: boolean;
   textColor?: string;
   selectedTextColor?: string;
 }>`
-  color: ${({ selected, textColor, selectedTextColor }) => 
-    selected 
-      ? (selectedTextColor || Colors.white) 
-      : (textColor || Colors.inactive)};
-  font-weight: ${({ selected }) => selected ? '400' : '400'};
+  color: ${({ selected, textColor, selectedTextColor }) =>
+    selected ? selectedTextColor || Colors.white : textColor || Colors.inactive};
+  font-weight: ${({ selected }) => (selected ? '400' : '400')};
   font-size: 14px;
   text-align: center;
 `;
@@ -73,24 +71,24 @@ const FilterTags: React.FC<FilterTagsProps> = ({
   contentContainerStyle,
 }) => {
   return (
-    <TagsScrollView 
+    <TagsScrollView
       style={style}
       showsHorizontalScrollIndicator={showsHorizontalScrollIndicator}
       contentContainerStyle={contentContainerStyle}
     >
       <TagsContainer>
-        {tags.map((tag) => {
+        {tags.map(tag => {
           const isSelected = selectedTags.includes(tag);
-          
+
           return (
-            <Tag 
-              key={tag} 
+            <Tag
+              key={tag}
               selected={isSelected}
               color={color}
               selectedColor={selectedColor}
               onPress={() => onTagPress(tag)}
             >
-              <TagText 
+              <TagText
                 selected={isSelected}
                 textColor={textColor}
                 selectedTextColor={selectedTextColor}

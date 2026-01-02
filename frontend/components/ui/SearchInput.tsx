@@ -38,7 +38,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
   return (
     <SearchBox style={style}>
       <Ionicons name="search" size={18} color={placeholderTextColor} />
-      <StyledInput 
+      <StyledInput
         placeholder={placeholder}
         placeholderTextColor={placeholderTextColor}
         value={value}

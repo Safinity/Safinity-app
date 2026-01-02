@@ -6,50 +6,53 @@ import { Colors, Spacing } from '../../constants/theme';
 import logo from '../../assets/logos/logo-header.png';
 
 interface HeaderProps {
-    showIcons?: boolean;
-    onNotificationPress?: () => void;
-    onProfilePress?: () => void;
-    showBottomDivider?: boolean;
+  showIcons?: boolean;
+  onNotificationPress?: () => void;
+  onProfilePress?: () => void;
+  showBottomDivider?: boolean;
 }
 
 const Header: React.FC<HeaderProps> = ({
-    showIcons = true,
-    onNotificationPress,
-    onProfilePress,
-    showBottomDivider = false,
+  showIcons = true,
+  onNotificationPress,
+  onProfilePress,
+  showBottomDivider = false,
 }) => {
-    const theme = useTheme();
-    const headerHeight = (Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 24) + 60;
+  const theme = useTheme();
+  const headerHeight = (Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 24) + 60;
 
-    return (
-        <>
-            <HeaderFixedContainer height={headerHeight}>
-                <SafeArea />
-                <HeaderContent>
-                    <HeaderRow>
-                        <LogoContainer>
-                            <LogoImage source={require('../../assets/logos/logo-header.png')} resizeMode="contain" />
-                        </LogoContainer>
+  return (
+    <>
+      <HeaderFixedContainer height={headerHeight}>
+        <SafeArea />
+        <HeaderContent>
+          <HeaderRow>
+            <LogoContainer>
+              <LogoImage
+                source={require('../../assets/logos/logo-header.png')}
+                resizeMode="contain"
+              />
+            </LogoContainer>
 
-                        {showIcons && (
-                            <IconRow>
-                                <IconButton onPress={onNotificationPress}>
-                                    <Ionicons name="notifications-outline" size={22} color={Colors.white} />
-                                </IconButton>
-                                <IconButton onPress={onProfilePress}>
-                                    <Ionicons name="person-circle" size={28} color={Colors.white} />
-                                </IconButton>
-                            </IconRow>
-                        )}
-                    </HeaderRow>
+            {showIcons && (
+              <IconRow>
+                <IconButton onPress={onNotificationPress}>
+                  <Ionicons name="notifications-outline" size={22} color={Colors.white} />
+                </IconButton>
+                <IconButton onPress={onProfilePress}>
+                  <Ionicons name="person-circle" size={28} color={Colors.white} />
+                </IconButton>
+              </IconRow>
+            )}
+          </HeaderRow>
 
-                    {showBottomDivider && <Divider />}
-                </HeaderContent>
-            </HeaderFixedContainer>
+          {showBottomDivider && <Divider />}
+        </HeaderContent>
+      </HeaderFixedContainer>
 
-            <HeaderSpacer height={headerHeight} />
-        </>
-    );
+      <HeaderSpacer height={headerHeight} />
+    </>
+  );
 };
 
 const HeaderFixedContainer = styled.View<{ height: number }>`

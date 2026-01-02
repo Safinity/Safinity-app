@@ -13,7 +13,6 @@ export const Colors = {
   inactive: '#A0A0A5',
   white: '#FFFFFF',
   error: '#D34A4A',
-  
 };
 
 export const BorderRadius = {
@@ -31,7 +30,6 @@ export const Spacing = {
   lg: 20,
   xl: 32,
   xxl: 130,
-
 };
 
 export const Fonts = Platform.select({
@@ -54,7 +52,6 @@ export const Fonts = Platform.select({
     mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
   },
 });
-
 
 export const theme = {
   colors: Colors,

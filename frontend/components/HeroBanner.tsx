@@ -42,7 +42,9 @@ const MapText = styled.Text`
 export const HeroBanner = ({ event }: any) => (
   <BannerContainer source={{ uri: event.image }} imageStyle={{ borderRadius: 0 }}>
     <GradientOverlay>
-      <EventName>{event.name}, <StatusTag>now</StatusTag></EventName>
+      <EventName>
+        {event.name}, <StatusTag>now</StatusTag>
+      </EventName>
       <ViewMapLink>
         <MapText>View the map</MapText>
       </ViewMapLink>

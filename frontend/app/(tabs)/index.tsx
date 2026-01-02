@@ -30,7 +30,7 @@ const SectionHeader = styled.View`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  margin-top: 40px; 
+  margin-top: 40px;
   margin-bottom: ${({ theme }) => theme.spacing.md}px;
 `;
 
@@ -52,10 +52,10 @@ const SearchWrapper = styled.View`
 
 export default function HomeScreen() {
   const [selectedCategory, setSelectedCategory] = useState('Musical');
-  
+
   const liveEvent = eventsData.events.find(e => e.status === 'live');
   const upcomingEvents = eventsData.events.filter(
-    e => e.status === 'upcoming' && e.category.toLowerCase() === selectedCategory.toLowerCase()
+    e => e.status === 'upcoming' && e.category.toLowerCase() === selectedCategory.toLowerCase(),
   );
 
   const categories = ['Musical', 'Technology', 'Cultural', 'Educational'];
@@ -64,7 +64,7 @@ export default function HomeScreen() {
     <Container>
       <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
       <Header />
-      
+
       <Content>
         {/* 1. Hero Banner - Sem margens (Full Width) */}
         {liveEvent && <HeroBanner event={liveEvent} />}
@@ -74,11 +74,11 @@ export default function HomeScreen() {
           <SearchWrapper>
             <SearchInput placeholder="Find your next event" />
           </SearchWrapper>
-          
-          <FilterTags 
-            tags={categories} 
-            selectedTags={[selectedCategory]} 
-            onTagPress={(tag) => setSelectedCategory(tag)} 
+
+          <FilterTags
+            tags={categories}
+            selectedTags={[selectedCategory]}
+            onTagPress={tag => setSelectedCategory(tag)}
           />
 
           <SectionHeader>
@@ -92,14 +92,14 @@ export default function HomeScreen() {
           horizontal
           data={upcomingEvents}
           renderItem={({ item }) => <EventCard event={item} />}
-          keyExtractor={(item) => item.id}
+          keyExtractor={item => item.id}
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ 
-            paddingLeft: 40, 
-            paddingRight: 40, 
-            paddingBottom: 100 
+          contentContainerStyle={{
+            paddingLeft: 40,
+            paddingRight: 40,
+            paddingBottom: 100,
           }}
-          snapToInterval={280 + 16} 
+          snapToInterval={280 + 16}
           decelerationRate="fast"
         />
       </Content>

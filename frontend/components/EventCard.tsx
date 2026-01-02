@@ -29,7 +29,7 @@ const TimeText = styled.Text`
 `;
 
 const CardFooter = styled.View`
-  background-color: rgba(0,0,0,0.1);
+  background-color: rgba(0, 0, 0, 0.1);
 `;
 
 const DateText = styled.Text`
@@ -52,7 +52,9 @@ export const EventCard = ({ event }: any) => (
         </TimeBadge>
       )}
       <CardFooter>
-        <DateText>{event.start_date} - {event.end_date}</DateText>
+        <DateText>
+          {event.start_date} - {event.end_date}
+        </DateText>
         <TitleText>{event.name}</TitleText>
       </CardFooter>
     </BackgroundImage>

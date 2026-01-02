@@ -15,7 +15,7 @@ const SearchBox = styled.View`
   flex-direction: row;
   align-items: center;
   height: 58px;
-  background-color: ${Colors.background};
+  background-color: ${Colors.grayNavbar};
   border-radius: ${BorderRadius.large}px;
   padding: ${Spacing.sm}px ${Spacing.md}px;
   margin-bottom: ${Spacing.md}px;

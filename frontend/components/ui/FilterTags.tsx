@@ -36,7 +36,7 @@ const Tag = styled.Pressable<{
   selectedColor?: string;
 }>`
   background-color: ${({ selected, color, selectedColor }) =>
-    selected ? Colors.primary : Colors.background};
+    selected ? Colors.primary : Colors.grayNavbar};
   padding: ${Spacing.sm}px ${Spacing.md}px;
   border-radius: ${BorderRadius.round}px;
   border-width: 1px;

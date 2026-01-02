@@ -21,7 +21,6 @@ const Content = styled.ScrollView.attrs({
   flex: 1;
 `;
 
-// Container para elementos que respeitam a margem de 40px
 const PaddedContent = styled.View`
   padding: 0 40px;
 `;
@@ -42,8 +41,8 @@ const SectionTitle = styled.Text`
 
 const SeeMore = styled.Text`
   font-size: 14px;
-  color: ${({ theme }) => theme.colors.primary};
-  opacity: 0.8;
+  color: ${({ theme }) => theme.colors.primary_50};
+  font-weight: extralight;
 `;
 
 const SearchWrapper = styled.View`
@@ -66,28 +65,34 @@ export default function HomeScreen() {
       <Header />
 
       <Content>
-        {/* 1. Hero Banner - Sem margens (Full Width) */}
         {liveEvent && <HeroBanner event={liveEvent} />}
 
-        {/* 2. Conteúdo Estático com Margem de 40px */}
+        {/* 1. Mantenho a Search aqui porque ela é estática */}
         <PaddedContent>
           <SearchWrapper>
             <SearchInput placeholder="Find your next event" />
           </SearchWrapper>
+        </PaddedContent>
 
-          <FilterTags
-            tags={categories}
-            selectedTags={[selectedCategory]}
-            onTagPress={tag => setSelectedCategory(tag)}
-          />
+        {/* 2. Filtros FORA do PaddedContent para o scroll ir até à borda direita */}
+        <FilterTags
+          tags={categories}
+          selectedTags={[selectedCategory]}
+          onTagPress={tag => setSelectedCategory(tag)}
+          contentContainerStyle={{
+            paddingLeft: 40,   // Alinha com a margem lateral
+            paddingRight: 40,  // Resolve o problema da margem à direita no fim do scroll
+          }}
+        />
 
+        {/* 3. Título volta para o PaddedContent */}
+        <PaddedContent>
           <SectionHeader>
             <SectionTitle>{selectedCategory} events</SectionTitle>
             <SeeMore>See more</SeeMore>
           </SectionHeader>
         </PaddedContent>
 
-        {/* 3. Carrossel Horizontal - Padding de 40px no início da lista */}
         <FlatList
           horizontal
           data={upcomingEvents}
@@ -97,7 +102,7 @@ export default function HomeScreen() {
           contentContainerStyle={{
             paddingLeft: 40,
             paddingRight: 40,
-            paddingBottom: 100,
+            paddingBottom: 120,
           }}
           snapToInterval={280 + 16}
           decelerationRate="fast"

@@ -15,19 +15,24 @@ interface FilterTagsProps {
   contentContainerStyle?: any;
 }
 
-const TagsScrollView = styled.ScrollView.attrs({
+const TagsScrollView = styled.ScrollView.attrs((props) => ({
   horizontal: true,
-  overflow: 'visible',
   showsHorizontalScrollIndicator: false,
-})`
+  // Mantemos a esquerda a 0 para não duplicar margem
+  // Adicionamos 40px à direita para o fim do scroll
+  contentContainerStyle: {
+    paddingRight: 40,
+    ...props.contentContainerStyle,
+  },
+}))`
   flex-grow: 0;
+  margin-top: ${Spacing.md}px;
 `;
 
 const TagsContainer = styled.View`
   flex-direction: row;
   gap: ${Spacing.sm}px;
   padding-vertical: ${Spacing.xs}px;
-  padding-right: ${Spacing.md}px;
 `;
 
 const Tag = styled.Pressable<{
@@ -35,15 +40,16 @@ const Tag = styled.Pressable<{
   color?: string;
   selectedColor?: string;
 }>`
-  background-color: ${({ selected, color, selectedColor }) =>
+  background-color: ${({ selected }) =>
     selected ? Colors.primary : Colors.grayNavbar};
-  padding: ${Spacing.sm}px ${Spacing.md}px;
+  padding: ${Spacing.sm}px 18px;
   border-radius: ${BorderRadius.round}px;
   border-width: 1px;
   border-color: ${({ selected, selectedColor }) =>
     selected ? selectedColor || Colors.primary : 'transparent'};
   min-height: 42px;
   justify-content: center;
+  align-items: center;
 `;
 
 const TagText = styled.Text<{
@@ -53,9 +59,8 @@ const TagText = styled.Text<{
 }>`
   color: ${({ selected, textColor, selectedTextColor }) =>
     selected ? selectedTextColor || Colors.white : textColor || Colors.inactive};
-  font-weight: ${({ selected }) => (selected ? '400' : '400')};
+  font-weight: 500;
   font-size: 14px;
-  text-align: center;
 `;
 
 const FilterTags: React.FC<FilterTagsProps> = ({
@@ -77,7 +82,7 @@ const FilterTags: React.FC<FilterTagsProps> = ({
       contentContainerStyle={contentContainerStyle}
     >
       <TagsContainer>
-        {tags.map(tag => {
+        {tags.map((tag) => {
           const isSelected = selectedTags.includes(tag);
 
           return (

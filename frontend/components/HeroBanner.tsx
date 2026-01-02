@@ -1,18 +1,28 @@
 import React from 'react';
 import styled from 'styled-components/native';
-import { Colors, Spacing, BorderRadius } from '../constants/theme';
-import { ImageBackground } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Colors, Spacing } from '../constants/theme';
+import { eventImages } from '../assets/images/Events';
 
-const BannerContainer = styled.ImageBackground`
+const BannerContainer = styled.ImageBackground.attrs({
+  resizeMode: 'cover',
+})`
   width: 100%;
-  height: 362px;
+  height: 330px;
   justify-content: flex-end;
 `;
 
-const GradientOverlay = styled.View`
-  background-color: rgba(0, 0, 0, 0.4);
-  padding: ${Spacing.lg}px;
-  flex: 1;
+// Configuração do Gradiente: Transparente no topo/meio, cor de fundo na base
+const HeroGradient = styled(LinearGradient).attrs(({ theme }) => ({
+  colors: ['transparent', theme.colors.background],
+  // Começa a transição no meio (0.5) e termina no fundo (1.0)
+  start: { x: 0, y: 0.5 }, 
+  end: { x: 0, y: 1 },
+}))`
+  width: 100%;
+  height: 100%;
+  /* Reduzimos o padding inferior para o mínimo (ex: 10px) */
+  padding: 20px 20px 10px 40px; 
   justify-content: flex-end;
 `;
 
@@ -29,7 +39,7 @@ const StatusTag = styled.Text`
 `;
 
 const ViewMapLink = styled.TouchableOpacity`
-  margin-top: ${Spacing.xs}px;
+  margin-top: ${Spacing.sm}px;
 `;
 
 const MapText = styled.Text`
@@ -39,15 +49,19 @@ const MapText = styled.Text`
   opacity: 0.8;
 `;
 
-export const HeroBanner = ({ event }: any) => (
-  <BannerContainer source={{ uri: event.image }} imageStyle={{ borderRadius: 0 }}>
-    <GradientOverlay>
-      <EventName>
-        {event.name}, <StatusTag>now</StatusTag>
-      </EventName>
-      <ViewMapLink>
-        <MapText>View the map</MapText>
-      </ViewMapLink>
-    </GradientOverlay>
-  </BannerContainer>
-);
+export const HeroBanner = ({ event }: any) => {
+  const imageSource = eventImages[event.id] || { uri: event.image };
+
+  return (
+    <BannerContainer source={imageSource} imageStyle={{ borderRadius: 0 }}>
+      <HeroGradient>
+        <EventName>
+          {event.name}, <StatusTag>now</StatusTag>
+        </EventName>
+        <ViewMapLink>
+          <MapText>View the map</MapText>
+        </ViewMapLink>
+      </HeroGradient>
+    </BannerContainer>
+  );
+};

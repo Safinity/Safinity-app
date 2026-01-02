@@ -18,7 +18,6 @@ const SearchBox = styled.View`
   background-color: ${Colors.grayNavbar};
   border-radius: ${BorderRadius.large}px;
   padding: ${Spacing.sm}px ${Spacing.md}px;
-  margin-bottom: ${Spacing.md}px;
 `;
 
 const StyledInput = styled.TextInput`

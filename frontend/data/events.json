@@ -4,7 +4,7 @@
       "id": "web-summit-2025",
       "name": "Web Summit",
       "category": "technology",
-      "image": "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800&q=80",
+      "image": "web-summit.png",
       "start_date": "2025-11-10",
       "end_date": "2025-11-13",
       "location": "Lisbon, Portugal",
@@ -14,10 +14,10 @@
       "id": "superbock-superrock-2025",
       "name": "Super Bock Super Rock",
       "category": "musical",
-      "image": "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800&q=80",
+      "image": "super-bock-super-rock.jpg",
       "start_date": "2025-07-08",
       "end_date": "2025-07-10",
-      "location": "Lisbon, Portugal",
+      "location": "Meco, Portugal",
       "status": "upcoming",
       "time_left": "9 days 21 hours"
     },
@@ -25,11 +25,111 @@
       "id": "nos-alive-2025",
       "name": "NOS Alive",
       "category": "musical",
-      "image": "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=800&q=80",
+      "image": "NOS-Alive.jpg",
       "start_date": "2025-07-10",
       "end_date": "2025-07-12",
       "location": "Algés, Portugal",
-      "status": "upcoming"
+      "status": "upcoming",
+      "time_left": "10 days 22 hours"
+    },
+    {
+      "id": "meo-mares-vivas-2025",
+      "name": "MEO Marés Vivas",
+      "category": "musical",
+      "image": "meo-mares-vivas.jpg",
+      "start_date": "2025-07-18",
+      "end_date": "2025-07-20",
+      "location": "Vila Nova de Gaia, Portugal",
+      "status": "upcoming",
+      "time_left": "19 days 15 hours"
+    },
+    {
+      "id": "meo-sudoeste-2025",
+      "name": "MEO Sudoeste",
+      "category": "musical",
+      "image": "meo_sudoeste.jpg",
+      "start_date": "2025-08-09",
+      "end_date": "2025-08-12",
+      "location": "Zambujeira do Mar, Portugal",
+      "status": "upcoming",
+      "time_left": "41 days 8 hours"
+    },
+    {
+      "id": "tech-business-summit-2026",
+      "name": "Tech Business Summit",
+      "category": "technology",
+      "image": "tech-business-summit.jpg",
+      "start_date": "2026-03-13",
+      "end_date": "2026-03-13",
+      "location": "Lisbon, Portugal",
+      "status": "upcoming",
+      "time_left": "9 days 21 hours"
+    },
+    {
+      "id": "futurtech-experience-2026",
+      "name": "FuturTech Experience",
+      "category": "technology",
+      "image": "future-tech.webp",
+      "start_date": "2026-05-15",
+      "end_date": "2026-05-15",
+      "location": "Porto, Portugal",
+      "status": "upcoming",
+      "time_left": "9 days 21 hours"
+    },
+    {
+      "id": "portugal-tech-week-2026",
+      "name": "Portugal Tech Week",
+      "category": "technology",
+      "image": "Portugal-Tech-Week.png",
+      "start_date": "2026-10-20",
+      "end_date": "2026-10-27",
+      "location": "Lisbon, Portugal",
+      "status": "upcoming",
+      "time_left": "9 days 21 hours"
+    },
+    {
+      "id": "grande-arraial-belem-2025",
+      "name": "Grande Arraial Belém",
+      "category": "cultural",
+      "image": "arraial-belem.webp",
+      "start_date": "2025-05-30",
+      "end_date": "2025-06-15",
+      "location": "Belém, Portugal",
+      "status": "upcoming",
+      "time_left": "9 days 21 hours"
+    },
+    {
+      "id": "olhao-city-festival-2025",
+      "name": "Olhão City Festival",
+      "category": "cultural",
+      "image": "olhao.webp",
+      "start_date": "2025-06-14",
+      "end_date": "2025-06-16",
+      "location": "Olhão, Portugal",
+      "status": "upcoming",
+      "time_left": "9 days 21 hours"
+    },
+    {
+      "id": "festival-dos-canais-2025",
+      "name": "Festival dos Canais",
+      "category": "cultural",
+      "image": "Festival-dos-Canais.jpg",
+      "start_date": "2025-07-16",
+      "end_date": "2025-07-20",
+      "location": "Aveiro, Portugal",
+      "status": "upcoming",
+      "time_left": "9 days 21 hours"
+    },
+    {
+      "id": "santos-populares-2025",
+      "name": "Santos Populares",
+      "category": "cultural",
+      "image": "santos-populares.webp",
+      "start_date": "2025-06-01",
+      "end_date": "2025-06-30",
+      "location": "Lisbon, Portugal",
+      "status": "upcoming",
+      "time_left": "9 days 21 hours"
     }
   ]
 }

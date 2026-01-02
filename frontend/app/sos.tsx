@@ -109,7 +109,6 @@ const ButtonTextConfirm = styled.Text`
 `;
 
 export default function SOSForm() {
-
   const [selected, setSelected] = useState<number[]>([]);
   const [notes, setNotes] = useState('');
 
@@ -117,17 +116,18 @@ export default function SOSForm() {
     setSelected(prev => (prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]));
   };
 
-  const handleSubmit = async () => { 
-    const payload = { 
-        tags: selected, 
-        notes: notes.trim(), 
-    }; 
-    try { 
-        console.log('Payload pronto para enviar:', payload); 
-        // Aqui adiciona-se a lógica para enviar o payload ao backend
-        } catch (error) { 
-            console.error(error); } 
-        };
+  const handleSubmit = async () => {
+    const payload = {
+      tags: selected,
+      notes: notes.trim(),
+    };
+    try {
+      console.log('Payload pronto para enviar:', payload);
+      // Aqui adiciona-se a lógica para enviar o payload ao backend
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const handleCancel = () => {
     setSelected([]);

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Platform, StatusBar } from 'react-native';
-import styled, { useTheme } from 'styled-components/native';
+import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing } from '../../constants/theme';
 
@@ -17,7 +17,6 @@ const Header: React.FC<HeaderProps> = ({
   onProfilePress,
   showBottomDivider = false,
 }) => {
-
   // Cálculo da altura: Safe Area (status bar) + 60px de conteúdo
   const statusBarHeight = Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 24;
   const headerHeight = statusBarHeight + 60;

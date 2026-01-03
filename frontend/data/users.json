@@ -1,0 +1,44 @@
+[
+  {
+    "id": "u1",
+    "name": "André Dora",
+    "email": "andre@example.com",
+    "avatar": "https://example.com/andre.png",
+    "createdAt": "2024-01-01"
+  },
+  {
+    "id": "u2",
+    "name": "Beatriz Castro",
+    "email": "bea@example.com",
+    "avatar": "https://example.com/bea.png",
+    "createdAt": "2024-01-02"
+  },
+  {
+    "id": "u3",
+    "name": "Inês Ferreira",
+    "email": "ines@example.com",
+    "avatar": "https://example.com/ines.png",
+    "createdAt": "2024-01-03"
+  },
+  {
+    "id": "u4",
+    "name": "Marta Silva",
+    "email": "marta@example.com",
+    "avatar": "https://example.com/marta.png",
+    "createdAt": "2024-01-04"
+  },
+  {
+    "id": "u5",
+    "name": "Sara Pombo",
+    "email": "sara@example.com",
+    "avatar": "https://example.com/sara.png",
+    "createdAt": "2024-01-05"
+  },
+  {
+    "id": "u6",
+    "name": "Carlota Vasconcelos",
+    "email": "carlota@example.com",
+    "avatar": "https://example.com/carlota.png",
+    "createdAt": "2024-01-06"
+  }
+]

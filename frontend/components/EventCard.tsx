@@ -4,7 +4,7 @@ import styled from 'styled-components/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors, Spacing, BorderRadius } from '../constants/theme';
 // Importa o mapeamento que criaste na pasta Events
-import { eventImages } from '../assets/images/Events'; 
+import { eventImages } from '../assets/images/Events';
 
 const CardContainer = styled.TouchableOpacity`
   width: 280px;
@@ -15,13 +15,13 @@ const CardContainer = styled.TouchableOpacity`
 `;
 
 const BackgroundImage = styled.ImageBackground.attrs({
-    resizeMode: 'cover', // Garante que a imagem preencha o card sem distorcer
-  })`
-    flex: 1;
-    width: 100%;
-    height: 100%;
-  `;
-  
+  resizeMode: 'cover', // Garante que a imagem preencha o card sem distorcer
+})`
+  flex: 1;
+  width: 100%;
+  height: 100%;
+`;
+
 const GradientLayer = styled(LinearGradient).attrs({
   colors: ['transparent', 'rgba(0,0,0,0.8)'],
   locations: [0.4, 1.0],
@@ -95,13 +95,11 @@ export const EventCard = ({ event }: any) => {
               <TimeText>{event.time_left}</TimeText>
             </TimeBadge>
           ) : (
-            <View /> 
+            <View />
           )}
-          
+
           <CardFooter>
-            <DateText>
-              {formatEventDate(event.start_date, event.end_date)}
-            </DateText>
+            <DateText>{formatEventDate(event.start_date, event.end_date)}</DateText>
             <TitleText>{event.name}</TitleText>
           </CardFooter>
         </GradientLayer>

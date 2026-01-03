@@ -80,8 +80,8 @@ export default function HomeScreen() {
           selectedTags={[selectedCategory]}
           onTagPress={tag => setSelectedCategory(tag)}
           contentContainerStyle={{
-            paddingLeft: 40,   // Alinha com a margem lateral
-            paddingRight: 40,  // Resolve o problema da margem à direita no fim do scroll
+            paddingLeft: 40, // Alinha com a margem lateral
+            paddingRight: 40, // Resolve o problema da margem à direita no fim do scroll
           }}
         />
 

@@ -11,6 +11,7 @@ export const Colors = {
   inactive: '#A0A0A5',
   white: '#FFFFFF',
   black: '#000000',
+  neutralGray: '#666666',
   error: '#D34A4A',
   palette: {
     primary: {

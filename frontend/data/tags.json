@@ -1,0 +1,15 @@
+{
+  "tags": [
+    { "id": 1, "label": "Fight" },
+    { "id": 2, "label": "Bleeding" },
+    { "id": 3, "label": "Faint" },
+    { "id": 4, "label": "Pain" },
+    { "id": 5, "label": "Seizure" },
+    { "id": 6, "label": "Claustrophobic" },
+    { "id": 7, "label": "Panic" },
+    { "id": 8, "label": "Fire" },
+    { "id": 9, "label": "Theft" },
+    { "id": 10, "label": "Agression" },
+    { "id": 11, "label": "Allergy" }
+  ]
+}

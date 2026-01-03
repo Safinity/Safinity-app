@@ -7,14 +7,13 @@ const NavbarContainer = styled.View`
   background-color: ${({ theme }) => theme.colors.grayNavbar};
   border-radius: ${({ theme }) => theme.borderRadius.xlarge}px;
   height: 73px;
-  margin-horizontal: ${({ theme }) => theme.spacing.md}px;
   margin-bottom: ${Platform.OS === 'ios' ? 20 : 16}px;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
   elevation: 8;
   position: absolute;
   bottom: 0;
-  left: 16px;
-  right: 16px;
+  left: ${({ theme }) => theme.spacing.margemLateral}px;
+  right: ${({ theme }) => theme.spacing.margemLateral}px;
 `;
 
 const TabBarContent = styled.View`

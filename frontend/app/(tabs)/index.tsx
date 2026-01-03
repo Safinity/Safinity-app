@@ -22,7 +22,7 @@ const Content = styled.ScrollView.attrs({
 `;
 
 const PaddedContent = styled.View`
-  padding: 0 40px;
+  padding: 0 ${({ theme }) => theme.spacing.margemLateral}px;
 `;
 
 const SectionHeader = styled.View`
@@ -50,14 +50,16 @@ const SearchWrapper = styled.View`
 `;
 
 export default function HomeScreen() {
+  // ✅ Adicionei o estado para o SearchInput
+  const [searchValue, setSearchValue] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Musical');
+
+  const categories = ['Musical', 'Technology', 'Cultural', 'Educational'];
 
   const liveEvent = eventsData.events.find(e => e.status === 'live');
   const upcomingEvents = eventsData.events.filter(
     e => e.status === 'upcoming' && e.category.toLowerCase() === selectedCategory.toLowerCase(),
   );
-
-  const categories = ['Musical', 'Technology', 'Cultural', 'Educational'];
 
   return (
     <Container>
@@ -65,27 +67,25 @@ export default function HomeScreen() {
       <Header />
 
       <Content>
+        {/* Hero Banner */}
         {liveEvent && <HeroBanner event={liveEvent} />}
 
-        {/* 1. Mantenho a Search aqui porque ela é estática */}
+        {/* Search Input */}
         <PaddedContent>
           <SearchWrapper>
-            <SearchInput placeholder="Find your next event" />
+            <SearchInput value={searchValue} onChangeText={setSearchValue} variant="homepage" />
           </SearchWrapper>
         </PaddedContent>
 
-        {/* 2. Filtros FORA do PaddedContent para o scroll ir até à borda direita */}
+        {/* Filter Tags */}
         <FilterTags
           tags={categories}
           selectedTags={[selectedCategory]}
-          onTagPress={tag => setSelectedCategory(tag)}
-          contentContainerStyle={{
-            paddingLeft: 40, // Alinha com a margem lateral
-            paddingRight: 40, // Resolve o problema da margem à direita no fim do scroll
-          }}
+          onTagPress={setSelectedCategory}
+          variant="homepage"
         />
 
-        {/* 3. Título volta para o PaddedContent */}
+        {/* Section Header */}
         <PaddedContent>
           <SectionHeader>
             <SectionTitle>{selectedCategory} events</SectionTitle>
@@ -93,6 +93,7 @@ export default function HomeScreen() {
           </SectionHeader>
         </PaddedContent>
 
+        {/* Upcoming Events List */}
         <FlatList
           horizontal
           data={upcomingEvents}

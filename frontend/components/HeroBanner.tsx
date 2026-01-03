@@ -16,13 +16,13 @@ const BannerContainer = styled.ImageBackground.attrs({
 const HeroGradient = styled(LinearGradient).attrs(({ theme }) => ({
   colors: ['transparent', theme.colors.background],
   // Começa a transição no meio (0.5) e termina no fundo (1.0)
-  start: { x: 0, y: 0.5 }, 
+  start: { x: 0, y: 0.5 },
   end: { x: 0, y: 1 },
 }))`
   width: 100%;
   height: 100%;
   /* Reduzimos o padding inferior para o mínimo (ex: 10px) */
-  padding: 20px 20px 10px 40px; 
+  padding: 20px 20px 10px 40px;
   justify-content: flex-end;
 `;
 

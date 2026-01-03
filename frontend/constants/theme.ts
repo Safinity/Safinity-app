@@ -10,6 +10,7 @@ export const Colors = {
   grayNavbar: '#303B49',
   background: '#222734',
   primary: '#9242CC',
+  primary_50: '#C9A0E5',
   inactive: '#A0A0A5',
   white: '#FFFFFF',
   black: '#000000',

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FlatList, ScrollView, StatusBar } from 'react-native';
+import { FlatList, StatusBar } from 'react-native';
 import styled from 'styled-components/native';
 
 import Header from '../../components/ui/header';

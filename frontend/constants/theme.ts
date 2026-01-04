@@ -122,6 +122,10 @@ export const TextStyles = {
     lineHeight: 14,
   },
   titulo: {
+    h: {
+      fontFamily: 'PlusJakartaSans_600SemiBold',
+      fontSize: 24,
+    },
     h1: {
       fontFamily: 'PlusJakartaSans_600SemiBold',
       fontSize: 22,

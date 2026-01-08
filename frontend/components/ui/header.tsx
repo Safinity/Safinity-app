@@ -1,9 +1,8 @@
 import React from 'react';
 import { Platform, StatusBar } from 'react-native';
-import styled, { useTheme } from 'styled-components/native';
+import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing } from '../../constants/theme';
-import logo from '../../assets/logos/logo-header.png';
 
 interface HeaderProps {
   showIcons?: boolean;
@@ -18,65 +17,55 @@ const Header: React.FC<HeaderProps> = ({
   onProfilePress,
   showBottomDivider = false,
 }) => {
-  const theme = useTheme();
-  const headerHeight = (Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 24) + 60;
+  const statusBarHeight = Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 24;
+  const headerHeight = statusBarHeight + 60;
 
   return (
-    <>
-      <HeaderFixedContainer height={headerHeight}>
-        <SafeArea />
-        <HeaderContent>
-          <HeaderRow>
-            <LogoContainer>
-              <LogoImage
-                source={require('../../assets/logos/logo-header.png')}
-                resizeMode="contain"
-              />
-            </LogoContainer>
+    <HeaderFixedContainer height={headerHeight}>
+      <SafeArea height={statusBarHeight} />
+      <HeaderContent>
+        <HeaderRow>
+          <LogoContainer>
+            <LogoImage
+              source={require('../../assets/logos/logo-header.png')}
+              resizeMode="contain"
+            />
+          </LogoContainer>
 
-            {showIcons && (
-              <IconRow>
-                <IconButton onPress={onNotificationPress}>
-                  <Ionicons name="notifications-outline" size={22} color={Colors.white} />
-                </IconButton>
-                <IconButton onPress={onProfilePress}>
-                  <Ionicons name="person-circle" size={28} color={Colors.white} />
-                </IconButton>
-              </IconRow>
-            )}
-          </HeaderRow>
+          {showIcons && (
+            <IconRow>
+              <IconButton onPress={onNotificationPress}>
+                <Ionicons name="notifications-outline" size={24} color={Colors.white} />
+              </IconButton>
+              <IconButton onPress={onProfilePress}>
+                <Ionicons name="person-circle" size={30} color={Colors.white} />
+              </IconButton>
+            </IconRow>
+          )}
+        </HeaderRow>
 
-          {showBottomDivider && <Divider />}
-        </HeaderContent>
-      </HeaderFixedContainer>
-
-      <HeaderSpacer height={headerHeight} />
-    </>
+        {showBottomDivider && <Divider />}
+      </HeaderContent>
+    </HeaderFixedContainer>
   );
 };
 
 const HeaderFixedContainer = styled.View<{ height: number }>`
   position: absolute;
   top: 0;
-  left: 0;
-  right: 0;
+  left: ${Spacing.margemLateral}px;
+  right: ${Spacing.margemLateral}px;
   z-index: 1000;
   height: ${({ height }) => height}px;
+  background-color: transparent; /* Garante que a imagem por baixo apareça */
 `;
 
-const HeaderSpacer = styled.View<{ height: number }>`
+const SafeArea = styled.View<{ height: number }>`
   height: ${({ height }) => height}px;
-  width: 100%;
-`;
-
-const SafeArea = styled.View`
-  height: ${Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 24}px;
-  background-color: transparent;
 `;
 
 const HeaderContent = styled.View`
   flex: 1;
-  padding: 0 ${Spacing.md}px;
   justify-content: center;
 `;
 
@@ -89,15 +78,17 @@ const HeaderRow = styled.View`
 const LogoContainer = styled.View``;
 
 const LogoImage = styled.Image`
-  width: 120px;
-  height: 22px;
+  width: 124px;
+  height: 24px;
 `;
 
-const LogoText = styled.Text`
-  font-size: 28px;
-  font-weight: bold;
-  color: ${Colors.white};
+const IconRow = styled.View`
+  flex-direction: row;
+  gap: ${Spacing.md}px;
+  align-items: center;
 `;
+
+const IconButton = styled.Pressable``;
 
 const Divider = styled.View`
   height: 1px;
@@ -106,16 +97,6 @@ const Divider = styled.View`
   bottom: 0;
   left: 0;
   right: 0;
-`;
-
-const IconRow = styled.View`
-  flex-direction: row;
-  gap: ${Spacing.lg}px;
-  align-items: center;
-`;
-
-const IconButton = styled.Pressable`
-  padding: ${Spacing.xs}px;
 `;
 
 export default Header;

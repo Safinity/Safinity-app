@@ -2,79 +2,87 @@ import React from 'react';
 import styled from 'styled-components/native';
 import { Colors, BorderRadius, Spacing } from '../../constants/theme';
 
+export type FilterTagsVariant = 'homepage' | 'mapa';
+
+const TAG_THEME = {
+  homepage: {
+    color: Colors.grayNavbar,
+    selectedColor: Colors.primary,
+    textColor: Colors.inactive,
+    selectedTextColor: Colors.white,
+    paddingLeft: 40,
+    paddingRight: 40,
+  },
+  mapa: {
+    color: Colors.background,
+    selectedColor: Colors.primary,
+    textColor: Colors.inactive,
+    selectedTextColor: Colors.white,
+    paddingLeft: 40,
+    paddingRight: 40,
+  },
+} as const;
+
 interface FilterTagsProps {
   tags: string[];
   selectedTags: string[];
   onTagPress: (tag: string) => void;
-  color?: string;
-  selectedColor?: string;
-  textColor?: string;
-  selectedTextColor?: string;
+  variant: FilterTagsVariant;
   style?: any;
   showsHorizontalScrollIndicator?: boolean;
-  contentContainerStyle?: any;
 }
 
-const TagsScrollView = styled.ScrollView.attrs({
+const TagsScrollView = styled.ScrollView.attrs(props => ({
   horizontal: true,
-  overflow: 'visible',
   showsHorizontalScrollIndicator: false,
-})`
+  contentContainerStyle: props.contentContainerStyle,
+}))`
   flex-grow: 0;
+  margin-top: ${Spacing.md}px;
 `;
 
 const TagsContainer = styled.View`
   flex-direction: row;
   gap: ${Spacing.sm}px;
   padding-vertical: ${Spacing.xs}px;
-  padding-right: ${Spacing.md}px;
 `;
 
-const Tag = styled.Pressable<{
-  selected: boolean;
-  color?: string;
-  selectedColor?: string;
-}>`
-  background-color: ${({ selected, color, selectedColor }) =>
-    selected ? Colors.primary : Colors.background};
-  padding: ${Spacing.sm}px ${Spacing.md}px;
+const Tag = styled.Pressable<{ selected: boolean; color: string; selectedColor: string }>`
+  background-color: ${({ selected, color, selectedColor }) => (selected ? selectedColor : color)};
+  padding: ${Spacing.sm}px 18px;
   border-radius: ${BorderRadius.round}px;
   border-width: 1px;
-  border-color: ${({ selected, selectedColor }) =>
-    selected ? selectedColor || Colors.primary : 'transparent'};
+  border-color: ${({ selected, selectedColor }) => (selected ? selectedColor : 'transparent')};
   min-height: 42px;
   justify-content: center;
+  align-items: center;
 `;
 
-const TagText = styled.Text<{
-  selected: boolean;
-  textColor?: string;
-  selectedTextColor?: string;
-}>`
+const TagText = styled.Text<{ selected: boolean; textColor: string; selectedTextColor: string }>`
   color: ${({ selected, textColor, selectedTextColor }) =>
-    selected ? selectedTextColor || Colors.white : textColor || Colors.inactive};
-  font-weight: ${({ selected }) => (selected ? '400' : '400')};
+    selected ? selectedTextColor : textColor};
+  font-weight: 500;
   font-size: 14px;
-  text-align: center;
 `;
 
 const FilterTags: React.FC<FilterTagsProps> = ({
   tags,
   selectedTags,
   onTagPress,
-  color,
-  selectedColor,
-  textColor,
-  selectedTextColor,
+  variant,
   style,
   showsHorizontalScrollIndicator = false,
-  contentContainerStyle,
 }) => {
+  const theme = TAG_THEME[variant];
+
   return (
     <TagsScrollView
       style={style}
       showsHorizontalScrollIndicator={showsHorizontalScrollIndicator}
-      contentContainerStyle={contentContainerStyle}
+      contentContainerStyle={{
+        paddingLeft: theme.paddingLeft,
+        paddingRight: theme.paddingRight,
+      }}
     >
       <TagsContainer>
         {tags.map(tag => {
@@ -84,14 +92,14 @@ const FilterTags: React.FC<FilterTagsProps> = ({
             <Tag
               key={tag}
               selected={isSelected}
-              color={color}
-              selectedColor={selectedColor}
+              color={theme.color}
+              selectedColor={theme.selectedColor}
               onPress={() => onTagPress(tag)}
             >
               <TagText
                 selected={isSelected}
-                textColor={textColor}
-                selectedTextColor={selectedTextColor}
+                textColor={theme.textColor}
+                selectedTextColor={theme.selectedTextColor}
               >
                 {tag}
               </TagText>

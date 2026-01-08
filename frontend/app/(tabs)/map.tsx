@@ -52,13 +52,18 @@ const MapScrollView = styled.ScrollView.attrs({
   flex: 1;
 `;
 
+// Overlay (header + search + tags)
 const OverlayContent = styled.View`
   position: absolute;
   top: ${Platform.OS === 'ios' ? 90 : 70}px;
   left: 0;
   right: 0;
   z-index: 100;
-  padding: 0 ${Spacing.md}px;
+`;
+
+// Novo PaddedContent igual à HomePage
+const PaddedContent = styled.View`
+  padding: 0 ${Spacing.margemLateral}px;
 `;
 
 const PageHeader = styled.View`
@@ -77,7 +82,7 @@ const PageTitle = styled.Text`
 const SosButton = styled.Pressable`
   position: absolute;
   bottom: ${Spacing.xxl}px;
-  right: ${Spacing.xl}px;
+  right: ${Spacing.margemLateral}px;
   width: 56px;
   height: 56px;
   border-radius: 28px;

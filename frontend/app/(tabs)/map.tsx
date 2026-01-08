@@ -1,17 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
-import Header from '../../components/ui/header';
 import { Platform, Dimensions } from 'react-native';
-import { Colors, Spacing } from '../../constants/theme';
+
+import Header from '../../components/ui/header';
 import SearchInput from '../../components/ui/SearchInput';
 import FilterTags from '../../components/ui/FilterTags';
+
+import { Colors, Spacing } from '../../constants/theme';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 const IMAGE_WIDTH = screenWidth * 6;
 const IMAGE_HEIGHT = screenHeight * 2;
 
+// Containers principais
 const Container = styled.View`
   flex: 1;
   background-color: ${Colors.background};
@@ -22,15 +25,14 @@ const MainContent = styled.View`
   position: relative;
 `;
 
-// Container do mapa com cor escura (mesma cor de fundo)
 const MapContainer = styled.View`
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: ${Colors.background}; /* Mesma cor do container */
-  overflow: hidden; /* Importante: esconde qualquer conteúdo fora dos limites */
+  background-color: ${Colors.background};
+  overflow: hidden;
 `;
 
 const MapScrollView = styled.ScrollView.attrs({
@@ -43,13 +45,11 @@ const MapScrollView = styled.ScrollView.attrs({
   overScrollMode: 'never',
   alwaysBounceHorizontal: false,
   alwaysBounceVertical: false,
-  scrollEnabled: true,
   pinchGestureEnabled: true,
 })`
   flex: 1;
 `;
 
-// Imagem do mapa
 const MapImage = styled.Image.attrs({
   source: require('../../assets/images/map.png'),
 })`
@@ -58,13 +58,18 @@ const MapImage = styled.Image.attrs({
   resize-mode: cover;
 `;
 
+// Overlay (header + search + tags)
 const OverlayContent = styled.View`
   position: absolute;
   top: ${Platform.OS === 'ios' ? 90 : 70}px;
   left: 0;
   right: 0;
   z-index: 100;
-  padding: 0 ${Spacing.md}px;
+`;
+
+// Novo PaddedContent igual à HomePage
+const PaddedContent = styled.View`
+  padding: 0 ${Spacing.margemLateral}px;
 `;
 
 const PageHeader = styled.View`
@@ -72,22 +77,19 @@ const PageHeader = styled.View`
   margin-bottom: ${Spacing.md}px;
   flex-direction: row;
   align-items: center;
-  align-content: center;
   gap: ${Spacing.sm}px;
 `;
 
 const PageTitle = styled.Text`
   font-size: 24px;
-  margin-top: ${Spacing.xs}px;
   font-weight: bold;
   color: ${Colors.white};
-  margin-bottom: ${Spacing.xs}px;
 `;
 
 const SosButton = styled.Pressable`
   position: absolute;
   bottom: ${Spacing.xxl}px;
-  right: ${Spacing.xl}px;
+  right: ${Spacing.margemLateral}px;
   width: 56px;
   height: 56px;
   border-radius: 28px;
@@ -111,19 +113,17 @@ const SOSButtonText = styled.Text`
 export default function MapScreen() {
   const [searchValue, setSearchValue] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const scrollViewRef = useRef(null);
+  const scrollViewRef = useRef<any>(null);
 
   const tags = ['Exits', 'Friends', 'Stages', 'Food', 'Emergency'];
 
   useEffect(() => {
-    // Posiciona no centro da imagem
     if (scrollViewRef.current) {
-      // Calcula o centro da imagem
       const centerX = (IMAGE_WIDTH - screenWidth) / 2;
       const centerY = (IMAGE_HEIGHT - screenHeight) / 2;
 
       setTimeout(() => {
-        scrollViewRef.current?.scrollTo({
+        scrollViewRef.current.scrollTo({
           x: centerX,
           y: centerY,
           animated: false,
@@ -132,21 +132,8 @@ export default function MapScreen() {
     }
   }, []);
 
-  const handleNotificationPress = () => {};
-
-  const handleProfilePress = () => {};
-
-  const handleSearchSubmit = () => {};
-
   const handleTagPress = (tag: string) => {
-    setSelectedTags(prev => {
-      if (prev.includes(tag)) {
-        return prev.filter(t => t !== tag);
-      } else {
-        return [...prev, tag];
-      }
-    });
-    console.log('Tag selected:', tag);
+    setSelectedTags(prev => (prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]));
   };
 
   const handleSOSPress = () => {
@@ -156,57 +143,41 @@ export default function MapScreen() {
   return (
     <Container>
       <MainContent>
+        {/* MAPA */}
         <MapContainer>
           <MapScrollView
             ref={scrollViewRef}
             contentContainerStyle={{
-              // Limites do scroll para não passar das bordas da imagem
               width: IMAGE_WIDTH,
               height: IMAGE_HEIGHT,
             }}
-            // IMPORTANTE: Define os limites máximos do scroll
-            maximumContentOffset={{
-              x: IMAGE_WIDTH - screenWidth,
-              y: IMAGE_HEIGHT - screenHeight,
-            }}
-            minimumContentOffset={{ x: 0, y: 0 }}
           >
             <MapImage />
           </MapScrollView>
         </MapContainer>
 
-        <Header
-          showTime={true}
-          onNotificationPress={handleNotificationPress}
-          onProfilePress={handleProfilePress}
-        />
+        {/* HEADER */}
+        <Header showTime />
 
+        {/* OVERLAY */}
         <OverlayContent>
-          <PageHeader>
-            <Ionicons name="location" size={32} color={Colors.primary} />
-            <PageTitle>Web Summit</PageTitle>
-          </PageHeader>
+          <PaddedContent>
+            <PageHeader>
+              <Ionicons name="location" size={32} color={Colors.primary} />
+              <PageTitle>Web Summit</PageTitle>
+            </PageHeader>
 
-          <SearchInput
-            placeholder="Search locations or points of interest..."
-            placeholderTextColor={Colors.inactive}
-            value={searchValue}
-            onChangeText={setSearchValue}
-            onSubmitEditing={handleSearchSubmit}
-            returnKeyType="search"
-          />
-
+            <SearchInput value={searchValue} onChangeText={setSearchValue} variant="mapa" />
+          </PaddedContent>
           <FilterTags
             tags={tags}
             selectedTags={selectedTags}
             onTagPress={handleTagPress}
-            color="rgba(48, 59, 73, 0.9)"
-            selectedColor={Colors.primary}
-            textColor={Colors.inactive}
-            selectedTextColor={Colors.white}
+            variant="mapa"
           />
         </OverlayContent>
 
+        {/* SOS */}
         <SosButton onPress={handleSOSPress}>
           <SOSButtonText>SOS</SOSButtonText>
         </SosButton>

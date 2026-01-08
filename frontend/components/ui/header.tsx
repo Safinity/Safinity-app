@@ -17,7 +17,6 @@ const Header: React.FC<HeaderProps> = ({
   onProfilePress,
   showBottomDivider = false,
 }) => {
-  // Cálculo da altura: Safe Area (status bar) + 60px de conteúdo
   const statusBarHeight = Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 24;
   const headerHeight = statusBarHeight + 60;
 
@@ -51,13 +50,11 @@ const Header: React.FC<HeaderProps> = ({
   );
 };
 
-// Estilos Styled Components
-
 const HeaderFixedContainer = styled.View<{ height: number }>`
   position: absolute;
   top: 0;
-  left: 0;
-  right: 0;
+  left: ${Spacing.margemLateral}px;
+  right: ${Spacing.margemLateral}px;
   z-index: 1000;
   height: ${({ height }) => height}px;
   background-color: transparent; /* Garante que a imagem por baixo apareça */
@@ -69,7 +66,6 @@ const SafeArea = styled.View<{ height: number }>`
 
 const HeaderContent = styled.View`
   flex: 1;
-  padding: 0 ${Spacing.md}px;
   justify-content: center;
 `;
 
@@ -92,9 +88,7 @@ const IconRow = styled.View`
   align-items: center;
 `;
 
-const IconButton = styled.Pressable`
-  padding: 4px;
-`;
+const IconButton = styled.Pressable``;
 
 const Divider = styled.View`
   height: 1px;

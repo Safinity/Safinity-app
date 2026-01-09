@@ -12,7 +12,7 @@ import { MapPin } from '../../components/maps/MapPin';
 import { UserMarker } from '../../components/maps/UserMarker';
 import { Colors, Spacing } from '../../constants/theme';
 import mapData from '../../data/mapdata.json';
-import { latLngToPixelFromBounds } from "../../utils/coordinates";
+import { latLngToPixelFromBounds } from '../../utils/coordinates';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const IMAGE_WIDTH = screenWidth * 2.5;
@@ -91,7 +91,6 @@ export default function MapScreen() {
     setTimeout(() => scrollRef.current?.scrollTo({ x: centerX, y: centerY, animated: false }), 50);
   }, []);
 
-
   const handlePinPress = (pin: (typeof pins)[number]) => {
     // Calculate pixel coordinates for route
     const start = latLngToPixelFromBounds(
@@ -102,20 +101,13 @@ export default function MapScreen() {
       IMAGE_HEIGHT,
     );
 
-    const end = latLngToPixelFromBounds(
-      pin.lat,
-      pin.lng,
-      bounds,
-      IMAGE_WIDTH,
-      IMAGE_HEIGHT,
-    );
+    const end = latLngToPixelFromBounds(pin.lat, pin.lng, bounds, IMAGE_WIDTH, IMAGE_HEIGHT);
 
     setActiveRoute([start, end]);
     Alert.alert('Route', `Showing route to ${pin.name}`);
   };
   return (
     <Container>
-
       <MapScrollView ref={scrollRef}>
         {/* Static Map */}
         <StaticMapPreview center={universityCoords} width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
@@ -132,12 +124,23 @@ export default function MapScreen() {
           )}
         </Svg>
 
-
         {pins.map(pin => (
-          <MapPin key={pin.id} pin={pin} bounds={bounds} width={IMAGE_WIDTH} height={IMAGE_HEIGHT} onPress={handlePinPress} />
+          <MapPin
+            key={pin.id}
+            pin={pin}
+            bounds={bounds}
+            width={IMAGE_WIDTH}
+            height={IMAGE_HEIGHT}
+            onPress={handlePinPress}
+          />
         ))}
 
-        <UserMarker location={CURRENT_LOCATION} bounds={bounds} width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
+        <UserMarker
+          location={CURRENT_LOCATION}
+          bounds={bounds}
+          width={IMAGE_WIDTH}
+          height={IMAGE_HEIGHT}
+        />
       </MapScrollView>
 
       <Header onNotificationPress={() => {}} onProfilePress={() => {}} />
@@ -159,7 +162,9 @@ export default function MapScreen() {
           tags={tags}
           selectedTags={selectedTags}
           onTagPress={tag =>
-            setSelectedTags(prev => (prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]))
+            setSelectedTags(prev =>
+              prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag],
+            )
           }
           variant="mapa"
           style={{ marginTop: Spacing.md }}

@@ -5,7 +5,14 @@ import { Colors, BorderRadius, Spacing } from '../../constants/theme';
 
 export type SearchInputVariant = 'homepage' | 'mapa';
 
-const SEARCH_THEME = {
+const SEARCH_THEME: Record<
+  SearchInputVariant,
+  {
+    backgroundColor: string;
+    iconColor: string;
+    textColor: string;
+  }
+> = {
   homepage: {
     backgroundColor: Colors.grayNavbar,
     iconColor: Colors.inactive,
@@ -16,13 +23,13 @@ const SEARCH_THEME = {
     iconColor: Colors.white,
     textColor: Colors.white,
   },
-} as const;
+};
 
 interface SearchInputProps {
   placeholder?: string;
   value?: string;
   onChangeText?: (text: string) => void;
-  variant: SearchInputVariant;
+  variant?: SearchInputVariant;
   style?: any;
 }
 
@@ -46,7 +53,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
   placeholder = 'Search',
   value,
   onChangeText,
-  variant,
+  variant = 'homepage',
   style,
 }) => {
   const theme = SEARCH_THEME[variant];

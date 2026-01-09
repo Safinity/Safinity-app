@@ -11,9 +11,6 @@ import { Colors, Spacing } from '../../constants/theme';
 import { StaticMapPreview } from '../../components/maps/StaticMapPreview';
 import mapData from '../data/mapdata.json'; // JSON with pins, bounds & universityCoords
 
-/* -------------------------------------------------------------------------- */
-/*                               CONFIGURATION                                */
-/* -------------------------------------------------------------------------- */
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const IMAGE_WIDTH = screenWidth * 2.5;
@@ -61,11 +58,6 @@ const OverlayContent = styled.View`
   z-index: 100;
 `;
 
-// Novo PaddedContent igual à HomePage
-const PaddedContent = styled.View`
-  padding: 0 ${Spacing.margemLateral}px;
-`;
-
 const PageHeader = styled.View`
   margin-bottom: ${Spacing.md}px;
   flex-direction: row;
@@ -97,10 +89,6 @@ const SOSButtonText = styled.Text`
   font-size: 18px;
 `;
 
-/* -------------------------------------------------------------------------- */
-/*                            COORDINATE PROJECTION                            */
-/* -------------------------------------------------------------------------- */
-
 /**
  * Convert latitude/longitude to pixel coordinates based on the bounding box
  * of the static map image
@@ -117,9 +105,7 @@ const latLngToPixelFromBounds = (
   return { x, y };
 };
 
-/* -------------------------------------------------------------------------- */
-/*                                 COMPONENT                                  */
-/* -------------------------------------------------------------------------- */
+
 
 export default function MapScreen() {
   const scrollRef = useRef<ScrollView>(null);
@@ -226,6 +212,7 @@ export default function MapScreen() {
         </PageHeader>
 
         <SearchInput
+          variant="mapa"
           placeholder="Search locations or points of interest..."
           value={searchValue}
           onChangeText={setSearchValue}
@@ -239,10 +226,8 @@ export default function MapScreen() {
               prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag],
             )
           }
-          color="rgba(48, 59, 73, 0.9)"
-          selectedColor={Colors.primary}
-          textColor={Colors.inactive}
-          selectedTextColor={Colors.white}
+          variant="mapa"
+          style={{ marginTop: Spacing.md }}
         />
       </OverlayContent>
 

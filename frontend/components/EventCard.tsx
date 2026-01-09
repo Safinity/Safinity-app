@@ -66,9 +66,6 @@ const TitleText = styled.Text`
 `;
 
 export const EventCard = ({ event }: any) => {
-  // LÓGICA DE IMAGEM CORRIGIDA:
-  // Se o id do evento existir no nosso mapeamento, usa a imagem local.
-  // Caso contrário, usa o placeholder para não quebrar a app.
   const imageSource = eventImages[event.id] || { uri: 'https://via.placeholder.com/300' };
 
   const formatEventDate = (start: string, end: string) => {

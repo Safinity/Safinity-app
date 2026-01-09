@@ -8,7 +8,6 @@ const NavbarContainer = styled.View`
   border-radius: ${({ theme }) => theme.borderRadius.xlarge}px;
   height: 73px;
   margin-bottom: ${Platform.OS === 'ios' ? 20 : 16}px;
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
   elevation: 8;
   position: absolute;
   bottom: 0;
@@ -21,23 +20,19 @@ const TabBarContent = styled.View`
   flex-direction: row;
   justify-content: space-around;
   align-items: center;
-  padding-top: 8px;
-  padding-bottom: 8px;
 `;
 
 const TabButton = styled.TouchableOpacity`
   flex: 1;
   align-items: center;
   justify-content: center;
-  padding-top: 4px;
-  padding-bottom: 4px;
 `;
 
 const IconBox = styled.View`
-  align-items: center;
-  justify-content: center;
   height: 24px;
   margin-bottom: 2px;
+  align-items: center;
+  justify-content: center;
 `;
 
 const TabText = styled.Text<{ $active: boolean }>`
@@ -47,42 +42,39 @@ const TabText = styled.Text<{ $active: boolean }>`
   color: ${({ $active, theme }) => ($active ? theme.colors.white : theme.colors.inactive)};
 `;
 
-function CustomTabBar({ state, descriptors, navigation }: any) {
+const tabConfigs = [
+  { name: 'index', title: 'Home', icon: 'home' },
+  { name: 'map', title: 'Map', icon: 'map' },
+  { name: 'calendar', title: 'Calendar', icon: 'calendar' },
+  { name: 'friends', title: 'Friends', icon: 'people' },
+] as const;
+
+function CustomTabBar({ state, navigation }: any) {
   return (
     <NavbarContainer>
       <TabBarContent>
-        {state.routes.map((route: any, index: number) => {
-          const { options } = descriptors[route.key];
-          const isFocused = state.index === index;
+        {tabConfigs.map(tab => {
+          const routeIndex = state.routes.findIndex((r: any) => r.name === tab.name);
+          const isFocused = state.index === routeIndex;
+
+          if (routeIndex === -1) return null;
 
           const onPress = () => {
-            const event = navigation.emit({
-              type: 'tabPress',
-              target: route.key,
-              canPreventDefault: true,
-            });
-
-            if (!isFocused && !event.defaultPrevented) {
-              navigation.navigate(route.name);
+            if (!isFocused) {
+              navigation.navigate(tab.name);
             }
           };
 
           return (
-            <TabButton
-              key={route.key}
-              onPress={onPress}
-              accessibilityRole="button"
-              accessibilityState={isFocused ? { selected: true } : {}}
-              accessibilityLabel={options.tabBarAccessibilityLabel}
-            >
+            <TabButton key={tab.name} onPress={onPress}>
               <IconBox>
                 <Ionicons
-                  name={isFocused ? options.iconName : `${options.iconName}-outline`}
+                  name={isFocused ? tab.icon : `${tab.icon}-outline`}
                   size={22}
                   color={isFocused ? '#FFFFFF' : '#A0A0A5'}
                 />
               </IconBox>
-              <TabText $active={isFocused}>{options.title}</TabText>
+              <TabText $active={isFocused}>{tab.title}</TabText>
             </TabButton>
           );
         })}
@@ -91,33 +83,17 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
   );
 }
 
-const tabConfigs = [
-  { name: 'index', title: 'Home', icon: 'home' },
-  { name: 'map', title: 'Map', icon: 'map' },
-  { name: 'calendar', title: 'Calendar', icon: 'calendar' },
-  { name: 'friends', title: 'Friends', icon: 'people' },
-] as const;
-
-export default function TabLayout() {
+export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarStyle: {
-          display: 'none',
-        },
+        tabBarStyle: { display: 'none' },
       }}
       tabBar={props => <CustomTabBar {...props} />}
     >
       {tabConfigs.map(tab => (
-        <Tabs.Screen
-          key={tab.name}
-          name={tab.name}
-          options={{
-            title: tab.title,
-            iconName: tab.icon,
-          }}
-        />
+        <Tabs.Screen key={tab.name} name={tab.name} />
       ))}
     </Tabs>
   );

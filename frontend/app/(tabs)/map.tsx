@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { ScrollView, Dimensions, Platform, Alert, Image } from 'react-native';
+import { ScrollView, Dimensions, Platform, Alert } from 'react-native';
 import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
 import Svg, { Polyline } from 'react-native-svg';
@@ -7,30 +7,18 @@ import Svg, { Polyline } from 'react-native-svg';
 import Header from '../../components/ui/header';
 import SearchInput from '../../components/ui/SearchInput';
 import FilterTags from '../../components/ui/FilterTags';
-import { Colors, Spacing } from '../../constants/theme';
 import { StaticMapPreview } from '../../components/maps/StaticMapPreview';
-import mapData from '../data/mapdata.json'; // JSON with pins, bounds & universityCoords
-
+import { MapPin } from '../../components/maps/MapPin';
+import { UserMarker } from '../../components/maps/UserMarker';
+import { Colors, Spacing } from '../../constants/theme';
+import mapData from '../../data/mapdata.json';
+import { latLngToPixelFromBounds } from "../../utils/coordinates";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const IMAGE_WIDTH = screenWidth * 2.5;
 const IMAGE_HEIGHT = screenHeight * 1.6;
 
-// Mock user location
 const CURRENT_LOCATION = { lat: 40.63021152549589, lng: -8.656757232421452 };
-
-// Pin icons
-const PIN_ICONS: Record<string, any> = {
-  friend: require('../../assets/images/friend-pin.png'),
-  food: require('../../assets/images/food-pin.png'),
-  wc: require('../../assets/images/wc-pin.png'),
-};
-
-const USER_ICON = require('../../assets/images/user-location.png');
-
-/* -------------------------------------------------------------------------- */
-/*                                   STYLES                                   */
-/* -------------------------------------------------------------------------- */
 
 const Container = styled.View`
   flex: 1;
@@ -49,7 +37,6 @@ const MapScrollView = styled.ScrollView.attrs({
   flex: 1;
 `;
 
-// Overlay (header + search + tags)
 const OverlayContent = styled.View`
   position: absolute;
   top: ${Platform.OS === 'ios' ? 90 : 70}px;
@@ -89,24 +76,6 @@ const SOSButtonText = styled.Text`
   font-size: 18px;
 `;
 
-/**
- * Convert latitude/longitude to pixel coordinates based on the bounding box
- * of the static map image
- */
-const latLngToPixelFromBounds = (
-  lat: number,
-  lng: number,
-  bounds: { north: number; south: number; west: number; east: number },
-  width: number,
-  height: number,
-) => {
-  const x = ((lng - bounds.west) / (bounds.east - bounds.west)) * width;
-  const y = ((bounds.north - lat) / (bounds.north - bounds.south)) * height;
-  return { x, y };
-};
-
-
-
 export default function MapScreen() {
   const scrollRef = useRef<ScrollView>(null);
   const [searchValue, setSearchValue] = useState('');
@@ -116,14 +85,15 @@ export default function MapScreen() {
   const { universityCoords, pins, bounds } = mapData;
   const tags = ['Exits', 'Friends', 'Stages', 'Food', 'Emergency'];
 
-  // Center map on load
   useEffect(() => {
     const centerX = (IMAGE_WIDTH - screenWidth) / 2;
     const centerY = (IMAGE_HEIGHT - screenHeight) / 2;
     setTimeout(() => scrollRef.current?.scrollTo({ x: centerX, y: centerY, animated: false }), 50);
   }, []);
 
+
   const handlePinPress = (pin: (typeof pins)[number]) => {
+    // Calculate pixel coordinates for route
     const start = latLngToPixelFromBounds(
       CURRENT_LOCATION.lat,
       CURRENT_LOCATION.lng,
@@ -131,13 +101,21 @@ export default function MapScreen() {
       IMAGE_WIDTH,
       IMAGE_HEIGHT,
     );
-    const end = latLngToPixelFromBounds(pin.lat, pin.lng, bounds, IMAGE_WIDTH, IMAGE_HEIGHT);
+
+    const end = latLngToPixelFromBounds(
+      pin.lat,
+      pin.lng,
+      bounds,
+      IMAGE_WIDTH,
+      IMAGE_HEIGHT,
+    );
+
     setActiveRoute([start, end]);
     Alert.alert('Route', `Showing route to ${pin.name}`);
   };
-
   return (
     <Container>
+
       <MapScrollView ref={scrollRef}>
         {/* Static Map */}
         <StaticMapPreview center={universityCoords} width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
@@ -154,53 +132,12 @@ export default function MapScreen() {
           )}
         </Svg>
 
-        {/* Render Pins */}
-        {pins.map(pin => {
-          const { x, y } = latLngToPixelFromBounds(
-            pin.lat,
-            pin.lng,
-            bounds,
-            IMAGE_WIDTH,
-            IMAGE_HEIGHT,
-          );
-          return (
-            <Image
-              key={pin.id}
-              source={PIN_ICONS[pin.type] || PIN_ICONS.friend}
-              style={{
-                position: 'absolute',
-                width: 32,
-                height: 42,
-                left: x - 16,
-                top: y - 42,
-              }}
-              onTouchEnd={() => handlePinPress(pin)}
-            />
-          );
-        })}
 
-        {/* User location */}
-        {(() => {
-          const { x, y } = latLngToPixelFromBounds(
-            CURRENT_LOCATION.lat,
-            CURRENT_LOCATION.lng,
-            bounds,
-            IMAGE_WIDTH,
-            IMAGE_HEIGHT,
-          );
-          return (
-            <Image
-              source={USER_ICON}
-              style={{
-                position: 'absolute',
-                width: 24,
-                height: 36,
-                left: x - 12,
-                top: y - 36,
-              }}
-            />
-          );
-        })()}
+        {pins.map(pin => (
+          <MapPin key={pin.id} pin={pin} bounds={bounds} width={IMAGE_WIDTH} height={IMAGE_HEIGHT} onPress={handlePinPress} />
+        ))}
+
+        <UserMarker location={CURRENT_LOCATION} bounds={bounds} width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
       </MapScrollView>
 
       <Header onNotificationPress={() => {}} onProfilePress={() => {}} />
@@ -222,9 +159,7 @@ export default function MapScreen() {
           tags={tags}
           selectedTags={selectedTags}
           onTagPress={tag =>
-            setSelectedTags(prev =>
-              prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag],
-            )
+            setSelectedTags(prev => (prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]))
           }
           variant="mapa"
           style={{ marginTop: Spacing.md }}

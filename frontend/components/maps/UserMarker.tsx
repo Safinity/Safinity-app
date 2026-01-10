@@ -20,10 +20,10 @@ export const UserMarker = ({
       source={USER_ICON}
       style={{
         position: 'absolute',
-        width: 24,
-        height: 36,
+        width: 31,
+        height: 26,
         left: x - 12,
-        top: y - 36,
+        top: y - 0,
       }}
     />
   );

@@ -23,10 +23,10 @@ export const MapPin = ({
       source={PIN_ICONS[pin.type] || PIN_ICONS.friend}
       style={{
         position: 'absolute',
-        width: 32,
-        height: 42,
+        width: 28,
+        height: 40,
         left: x - 16,
-        top: y - 42,
+        top: y - 20,
       }}
       onTouchEnd={() => onPress(pin)}
     />

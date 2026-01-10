@@ -76,6 +76,15 @@ const SOSButtonText = styled.Text`
   font-size: 18px;
 `;
 
+const TAG_TO_PIN_TYPE: Record<string, string[]> = {
+  Friends: ['friend'],
+  Food: ['food'],
+  WC: ['wc'],
+  Exits: ['exit'],
+  Stages: ['stage'],
+  Emergency: ['emergency'],
+};
+
 export default function MapScreen() {
   const scrollRef = useRef<ScrollView>(null);
   const [searchValue, setSearchValue] = useState('');
@@ -86,6 +95,7 @@ export default function MapScreen() {
   const tags = ['Exits', 'Friends', 'Stages', 'Food', 'Emergency'];
 
   useEffect(() => {
+    // Center map on load
     const centerX = (IMAGE_WIDTH - screenWidth) / 2;
     const centerY = (IMAGE_HEIGHT - screenHeight) / 2;
     setTimeout(() => scrollRef.current?.scrollTo({ x: centerX, y: centerY, animated: false }), 50);
@@ -100,12 +110,19 @@ export default function MapScreen() {
       IMAGE_WIDTH,
       IMAGE_HEIGHT,
     );
-
     const end = latLngToPixelFromBounds(pin.lat, pin.lng, bounds, IMAGE_WIDTH, IMAGE_HEIGHT);
 
-    setActiveRoute([start, end]);
-    Alert.alert('Route', `Showing route to ${pin.name}`);
+    // Simple straight-line route for demonstration
+    const route = [start, end].map(p => ({ x: p.x, y: p.y + USER_HEIGHT / 2 }));
+    setActiveRoute(route);
   };
+
+  // Filter pins based on selected tags
+  const visiblePins =
+    selectedTags.length === 0
+      ? pins
+      : pins.filter(pin => selectedTags.some(tag => TAG_TO_PIN_TYPE[tag]?.includes(pin.type)));
+
   return (
     <Container>
       <MapScrollView ref={scrollRef}>
@@ -117,14 +134,15 @@ export default function MapScreen() {
           {activeRoute && (
             <Polyline
               points={activeRoute.map(p => `${p.x},${p.y}`).join(' ')}
-              stroke="#ac25ebff"
+              stroke={Colors.primary}
               strokeWidth={4}
               fill="none"
             />
           )}
         </Svg>
 
-        {pins.map(pin => (
+        {/* Render filtered pins */}
+        {visiblePins.map(pin => (
           <MapPin
             key={pin.id}
             pin={pin}
@@ -135,6 +153,7 @@ export default function MapScreen() {
           />
         ))}
 
+        {/* User location */}
         <UserMarker
           location={CURRENT_LOCATION}
           bounds={bounds}

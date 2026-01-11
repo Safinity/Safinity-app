@@ -45,7 +45,7 @@ const SeeMore = styled.Text`
   font-size: 14px;
   color: ${({ theme }) => theme.colors.primary_50};
   font-weight: extralight;
-  padding: 5px; 
+  padding: 5px;
 `;
 
 const SearchWrapper = styled.View`
@@ -88,12 +88,11 @@ export default function HomeScreen() {
         <PaddedContent>
           <SectionHeader>
             <SectionTitle>{selectedCategory} events</SectionTitle>
-            
+
             {/* 4. Envolver o texto num Pressable para capturar o clique */}
             <Pressable onPress={() => router.push('/events-list')}>
               <SeeMore>See more</SeeMore>
             </Pressable>
-            
           </SectionHeader>
         </PaddedContent>
 

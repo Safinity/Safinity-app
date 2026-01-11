@@ -26,14 +26,16 @@ const GradientLayer = styled(LinearGradient).attrs({
   locations: [0.4, 1.0],
 })`
   flex: 1;
-  padding: ${({ isCompact }: any) => (isCompact ? '15px' : '20px')}; /* Padding reduzido no compacto */
+  padding: ${({ isCompact }: any) =>
+    isCompact ? '15px' : '20px'}; /* Padding reduzido no compacto */
   justify-content: space-between;
 `;
 
 const TimeBadge = styled.View<{ isCompact?: boolean }>`
   background-color: rgba(146, 66, 204, 0.5);
   align-self: flex-end;
-  padding: ${({ isCompact }) => (isCompact ? '4px 10px' : '8px 14px')}; /* Badge mais pequeno no compacto */
+  padding: ${({ isCompact }) =>
+    isCompact ? '4px 10px' : '8px 14px'}; /* Badge mais pequeno no compacto */
   border-radius: ${BorderRadius.round}px;
 `;
 
@@ -87,7 +89,6 @@ export const EventCard = ({ event, variant }: any) => {
       <BackgroundImage source={imageSource}>
         {/* Passamos isCompact para o GradientLayer para ajustar o padding interno */}
         <GradientLayer isCompact={isCompact}>
-          
           {/* Agora o badge aparece sempre que houver time_left, mesmo no compacto */}
           {event.time_left ? (
             <TimeBadge isCompact={isCompact}>

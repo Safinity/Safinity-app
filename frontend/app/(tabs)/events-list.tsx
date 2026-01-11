@@ -56,9 +56,13 @@ const VerticalSpacer = styled.View`
 export default function EventsListScreen() {
   const router = useRouter();
   const [searchValue, setSearchValue] = useState('');
-  
+
   // Categorias que aparecem selecionadas por defeito
-  const [selectedCategories, setSelectedCategories] = useState(['Musical', 'Technology', 'Cultural']);
+  const [selectedCategories, setSelectedCategories] = useState([
+    'Musical',
+    'Technology',
+    'Cultural',
+  ]);
   const allCategories = ['Musical', 'Technology', 'Cultural', 'Educational'];
 
   // Função para gerir o filtro de tags (múltipla seleção)
@@ -77,10 +81,10 @@ export default function EventsListScreen() {
 
       <Content>
         {/* 1. Hero Banner configurado com o ID que criaste no mapeamento */}
-        <HeroBanner 
-          event={{ 
-            id: 'banner-lista-eventos' // Chamada direta pelo ID do mapeamento
-          }} 
+        <HeroBanner
+          event={{
+            id: 'banner-lista-eventos', // Chamada direta pelo ID do mapeamento
+          }}
           title="What's Coming Up"
           description="Discover events with safety you can trust"
           hideMap={true}
@@ -89,10 +93,10 @@ export default function EventsListScreen() {
         {/* 2. Barra de Pesquisa */}
         <PaddedContent>
           <SearchWrapper>
-            <SearchInput 
-              value={searchValue} 
-              onChangeText={setSearchValue} 
-              variant="homepage" 
+            <SearchInput
+              value={searchValue}
+              onChangeText={setSearchValue}
+              variant="homepage"
               placeholder="Find your next event"
             />
           </SearchWrapper>
@@ -107,9 +111,9 @@ export default function EventsListScreen() {
         />
 
         {/* 4. Mapeamento das listas horizontais por categoria */}
-        {selectedCategories.map((category) => {
+        {selectedCategories.map(category => {
           const sectionEvents = eventsData.events.filter(
-            e => e.category.toLowerCase() === category.toLowerCase()
+            e => e.category.toLowerCase() === category.toLowerCase(),
           );
 
           if (sectionEvents.length === 0) return null;
@@ -125,7 +129,7 @@ export default function EventsListScreen() {
               <FlatList
                 horizontal
                 data={sectionEvents}
-                renderItem={({ item }) => <EventCard event={item} variant="compact" />}                
+                renderItem={({ item }) => <EventCard event={item} variant="compact" />}
                 keyExtractor={item => `${category}-${item.id}`}
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={{

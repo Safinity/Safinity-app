@@ -22,8 +22,8 @@ export const UserMarker = ({
         position: 'absolute',
         width: 31,
         height: 26,
-        left: x - 12,
-        top: y - 0,
+        left: x - 20,
+        top: y - 10,
       }}
     />
   );

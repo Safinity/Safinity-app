@@ -44,7 +44,6 @@ const TagsScrollView = styled.ScrollView.attrs(props => ({
 const TagsContainer = styled.View`
   flex-direction: row;
   gap: ${Spacing.sm}px;
-  padding-vertical: ${Spacing.xs}px;
 `;
 
 const Tag = styled.Pressable<{ selected: boolean; color: string; selectedColor: string }>`

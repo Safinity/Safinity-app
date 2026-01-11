@@ -22,7 +22,6 @@ const IMAGE_WIDTH = screenWidth * 2.5;
 const IMAGE_HEIGHT = screenHeight * 1.6;
 const CURRENT_LOCATION = { lat: 40.63021152549589, lng: -8.656757232421452 };
 
-
 const Container = styled.View`
   flex: 1;
   background-color: ${Colors.background};

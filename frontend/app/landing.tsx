@@ -25,7 +25,7 @@ export default function Landing() {
   return (
     <Background source={bgImage}>
       <Content>
-        <PrimaryButton title="Log in" onPress={() => router.push('./map')} />
+        <PrimaryButton title="Log in" onPress={() => router.push('./login')} />
 
         <SecondaryButton title="Create account" onPress={() => router.push('/register')} />
 

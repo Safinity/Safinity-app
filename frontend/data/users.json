@@ -4,35 +4,40 @@
     "name": "André Dora",
     "email": "andre@example.com",
     "image": "https://example.com/andre.png",
-    "createdAt": "2024-01-01"
+    "createdAt": "2024-01-01",
+    "password": "123safinityIsTheBest!"
   },
   {
     "id": "u2",
     "name": "Beatriz Castro",
     "email": "bea@example.com",
     "image": "https://example.com/bea.png",
-    "createdAt": "2024-01-02"
+    "createdAt": "2024-01-02",
+    "password": "123safinityIsTheBest!"
   },
   {
     "id": "u3",
     "name": "Inês Ferreira",
     "email": "ines@example.com",
     "image": "https://example.com/ines.png",
-    "createdAt": "2024-01-03"
+    "createdAt": "2024-01-03",
+    "password": "123safinityIsTheBest!"
   },
   {
     "id": "u4",
     "name": "Marta Silva",
     "email": "marta@example.com",
     "image": "https://example.com/marta.png",
-    "createdAt": "2024-01-04"
+    "createdAt": "2024-01-04",
+    "password": "123safinityIsTheBest!"
   },
   {
     "id": "u5",
     "name": "Sara Pombo",
     "email": "sara@example.com",
     "image": "https://example.com/sara.png",
-    "createdAt": "2024-01-05"
+    "createdAt": "2024-01-05",
+    "password": "123safinityIsTheBest!"
   },
   {
     "id": "u6",
@@ -41,6 +46,7 @@
     "email": "carlota@example.com",
     "image": "carlota.png",
     "createdAt": "2024-01-06",
+    "password": "123safinityIsTheBest!",
     "pastEvents": ["meo-sudoeste-2025", "nos-alive-2025", "superbock-superrock-2025"]
   }
 ]

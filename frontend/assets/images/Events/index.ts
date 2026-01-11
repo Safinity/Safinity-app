@@ -1,4 +1,8 @@
 export const eventImages: { [key: string]: any } = {
+
+  // IMAGENS GERAIS / UI
+  'banner-lista-eventos': require('../lista-eventos.jpg'),
+ 
   // CULTURAL
   'grande-arraial-belem-2025': require('./cultural/arraial-belem.webp'),
   'festival-dos-canais-2025': require('./cultural/Festival-dos-Canais.jpg'),

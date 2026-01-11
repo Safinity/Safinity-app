@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { FlatList, StatusBar } from 'react-native';
+import { FlatList, StatusBar, Pressable } from 'react-native'; // Adicionado Pressable
 import styled from 'styled-components/native';
+import { useRouter } from 'expo-router'; // 1. Importar o hook de navegação
 
 import Header from '../../components/ui/header';
 import SearchInput from '../../components/ui/SearchInput';
@@ -39,10 +40,12 @@ const SectionTitle = styled.Text`
   color: ${({ theme }) => theme.colors.white};
 `;
 
+// 2. Ajustei o SeeMore para parecer um botão (adicionado padding para facilitar o toque)
 const SeeMore = styled.Text`
   font-size: 14px;
   color: ${({ theme }) => theme.colors.primary_50};
   font-weight: extralight;
+  padding: 5px;
 `;
 
 const SearchWrapper = styled.View`
@@ -50,7 +53,7 @@ const SearchWrapper = styled.View`
 `;
 
 export default function HomeScreen() {
-  // ✅ Adicionei o estado para o SearchInput
+  const router = useRouter(); // 3. Inicializar o router
   const [searchValue, setSearchValue] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Musical');
 
@@ -67,17 +70,14 @@ export default function HomeScreen() {
       <Header />
 
       <Content>
-        {/* Hero Banner */}
         {liveEvent && <HeroBanner event={liveEvent} />}
 
-        {/* Search Input */}
         <PaddedContent>
           <SearchWrapper>
             <SearchInput value={searchValue} onChangeText={setSearchValue} variant="homepage" />
           </SearchWrapper>
         </PaddedContent>
 
-        {/* Filter Tags */}
         <FilterTags
           tags={categories}
           selectedTags={[selectedCategory]}
@@ -85,15 +85,17 @@ export default function HomeScreen() {
           variant="homepage"
         />
 
-        {/* Section Header */}
         <PaddedContent>
           <SectionHeader>
             <SectionTitle>{selectedCategory} events</SectionTitle>
-            <SeeMore>See more</SeeMore>
+
+            {/* 4. Envolver o texto num Pressable para capturar o clique */}
+            <Pressable onPress={() => router.push('/events-list')}>
+              <SeeMore>See more</SeeMore>
+            </Pressable>
           </SectionHeader>
         </PaddedContent>
 
-        {/* Upcoming Events List */}
         <FlatList
           horizontal
           data={upcomingEvents}

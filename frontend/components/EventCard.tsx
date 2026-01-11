@@ -1,21 +1,20 @@
 import React from 'react';
-import { View } from 'react-native'; // Importação que faltava
+import { View } from 'react-native';
 import styled from 'styled-components/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors, Spacing, BorderRadius } from '../constants/theme';
-// Importa o mapeamento que criaste na pasta Events
 import { eventImages } from '../assets/images/Events';
 
-const CardContainer = styled.TouchableOpacity`
+const CardContainer = styled.TouchableOpacity<{ isCompact?: boolean }>`
   width: 280px;
-  height: 380px;
+  height: ${({ isCompact }) => (isCompact ? '240px' : '380px')};
   margin-right: ${Spacing.md}px;
   border-radius: ${BorderRadius.large}px;
   overflow: hidden;
 `;
 
 const BackgroundImage = styled.ImageBackground.attrs({
-  resizeMode: 'cover', // Garante que a imagem preencha o card sem distorcer
+  resizeMode: 'cover',
 })`
   flex: 1;
   width: 100%;
@@ -27,45 +26,48 @@ const GradientLayer = styled(LinearGradient).attrs({
   locations: [0.4, 1.0],
 })`
   flex: 1;
-  padding: 20px;
+  padding: ${({ isCompact }: any) =>
+    isCompact ? '15px' : '20px'}; /* Padding reduzido no compacto */
   justify-content: space-between;
 `;
 
-const TimeBadge = styled.View`
+const TimeBadge = styled.View<{ isCompact?: boolean }>`
   background-color: rgba(146, 66, 204, 0.5);
   align-self: flex-end;
-  padding: 8px 14px;
+  padding: ${({ isCompact }) =>
+    isCompact ? '4px 10px' : '8px 14px'}; /* Badge mais pequeno no compacto */
   border-radius: ${BorderRadius.round}px;
 `;
 
 const TimeText = styled.Text`
   color: ${Colors.white};
   font-size: 12px;
-  font-weight: 600; /* Aumentado para 600 para ler melhor com a opacidade */
+  font-weight: 600;
   text-align: center;
 `;
 
 const CardFooter = styled.View`
   margin-top: auto;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
 `;
 
-const DateText = styled.Text`
+const DateText = styled.Text<{ isCompact?: boolean }>`
   color: ${Colors.white};
-  font-size: 14px;
-  margin-bottom: 6px;
+  font-size: ${({ isCompact }) => (isCompact ? '12px' : '14px')};
+  margin-bottom: 4px;
   font-weight: 400;
   opacity: 0.9;
 `;
 
-const TitleText = styled.Text`
+const TitleText = styled.Text<{ isCompact?: boolean }>`
   color: ${Colors.white};
-  font-size: 22px;
+  font-size: ${({ isCompact }) => (isCompact ? '18px' : '22px')};
   font-weight: bold;
-  line-height: 28px;
+  line-height: ${({ isCompact }) => (isCompact ? '22px' : '28px')};
 `;
 
-export const EventCard = ({ event }: any) => {
+export const EventCard = ({ event, variant }: any) => {
+  const isCompact = variant === 'compact';
   const imageSource = eventImages[event.id] || { uri: 'https://via.placeholder.com/300' };
 
   const formatEventDate = (start: string, end: string) => {
@@ -83,12 +85,13 @@ export const EventCard = ({ event }: any) => {
   };
 
   return (
-    <CardContainer>
-      {/* source alterada de {uri: ...} para a variável imageSource */}
+    <CardContainer isCompact={isCompact}>
       <BackgroundImage source={imageSource}>
-        <GradientLayer>
+        {/* Passamos isCompact para o GradientLayer para ajustar o padding interno */}
+        <GradientLayer isCompact={isCompact}>
+          {/* Agora o badge aparece sempre que houver time_left, mesmo no compacto */}
           {event.time_left ? (
-            <TimeBadge>
+            <TimeBadge isCompact={isCompact}>
               <TimeText>{event.time_left}</TimeText>
             </TimeBadge>
           ) : (
@@ -96,8 +99,10 @@ export const EventCard = ({ event }: any) => {
           )}
 
           <CardFooter>
-            <DateText>{formatEventDate(event.start_date, event.end_date)}</DateText>
-            <TitleText>{event.name}</TitleText>
+            <DateText isCompact={isCompact}>
+              {formatEventDate(event.start_date, event.end_date)}
+            </DateText>
+            <TitleText isCompact={isCompact}>{event.name}</TitleText>
           </CardFooter>
         </GradientLayer>
       </BackgroundImage>

@@ -1,0 +1,128 @@
+:root {
+  --gray-navbar: #303B49;
+  --background: #222734;
+  --primary: #9242CC;
+  --primary-50: #C9A0E5;
+  --inactive: #A0A0A5;
+  --white: #FFFFFF;
+  --black: #000000;
+  --neutral-gray: #666666;
+  --error: #D34A4A;
+
+  /* PALETTE */
+  /* Primary */
+  --primary-light90: #F4ECFA;
+  --primary-light80: #E9D9F5;
+  --primary-light60: #D3B3EB;
+  --primary-light50: #C8A0E5;
+  --primary-light40: #BE8EE0;
+  --primary-light20: #9D55D1;
+  --primary-normal: #9242CC;
+  --primary-dark20: #7535A3;
+  --primary-dark40: #58267A;
+  --primary-dark50: #492166;
+  --primary-dark60: #3A1A52;
+  --primary-dark80: #1D0D29;
+  --primary-dark90: #0F0715;
+
+  /* Secondary */
+  --secondary-icy-blue: #A3D9F2;
+  --secondary-turquoise: #0FD6BF;
+  --secondary-deep-saffron: #FF982A;
+
+  /* Error */
+  --error-light75: #F4D2D2;
+  --error-light50: #E9A4A4;
+  --error-normal: #D34A4A;
+  --error-dark50: #6A2525;
+  --error-dark75: #351313;
+
+  /* Neutral */
+  --neutral0: #000000;
+  --neutral20: #333333;
+  --neutral40: #666666;
+  --neutral50: #7F7F7F;
+  --neutral60: #999999;
+  --neutral80: #CCCCCC;
+  --neutral100: #FFFFFF;
+
+  /* BORDER RADIUS */
+  --radius-small: 8px;
+  --radius-medium: 16px;
+  --radius-large: 24px;
+  --radius-xlarge: 32px;
+  --radius-round: 999px;
+
+  /* SPACING */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 20px;
+  --spacing-xl: 32px;
+  --spacing-xxl: 130px;
+  --spacing-margem-lateral: 40px;
+
+  /* FONT FAMILY */
+  --font-family: 'PlusJakartaSans', sans-serif;
+
+  /* FONT WEIGHTS */
+  --weight-extralight: 200;
+  --weight-light: 300;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* FONT SIZES */
+  --font-xs: 11px;
+  --font-sm: 13px;
+  --font-base: 15px;
+  --font-lg: 17px;
+  --font-xl: 19px;
+
+  /* TEXT STYLES */
+  --text-botao-font: 'PlusJakartaSans_500Medium', sans-serif;
+  --text-botao-size: 16px;
+  --text-botao-line-height: 22px;
+
+  --text-icones-navbar-font: 'PlusJakartaSans_200ExtraLight', sans-serif;
+  --text-icones-navbar-size: 12px;
+  --text-icones-navbar-line-height: 22px;
+
+  --text-pequeno-font: 'PlusJakartaSans_200ExtraLight', sans-serif;
+  --text-pequeno-size: 14px;
+  --text-pequeno-line-height: 18px;
+
+  --text-label-font: 'PlusJakartaSans_300Light', sans-serif;
+  --text-label-size: 10px;
+  --text-label-line-height: 20px;
+
+  --text-filtros-font: 'PlusJakartaSans_400Regular', sans-serif;
+  --text-filtros-size: 14px;
+  --text-filtros-line-height: 22px;
+
+  --text-cards-calendar-font: 'PlusJakartaSans_500Medium', sans-serif;
+  --text-cards-calendar-size: 11px;
+  --text-cards-calendar-line-height: 14px;
+
+  /* TITLES */
+  --title-h-font: 'PlusJakartaSans_600SemiBold', sans-serif;
+  --title-h-size: 24px;
+
+  --title-h1-font: 'PlusJakartaSans_600SemiBold', sans-serif;
+  --title-h1-size: 22px;
+  --title-h1-line-height: 28px;
+
+  --title-h2-font: 'PlusJakartaSans_600SemiBold', sans-serif;
+  --title-h2-size: 18px;
+  --title-h2-line-height: 22px;
+
+  --title-h3-font: 'PlusJakartaSans_600SemiBold', sans-serif;
+  --title-h3-size: 16px;
+  --title-h3-line-height: 20px;
+
+  /* BODY TEXT */
+  --body-font: 'PlusJakartaSans_300Light', sans-serif;
+  --body-size: 16px;
+  --body-line-height: 22px;
+}

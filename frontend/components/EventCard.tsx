@@ -2,15 +2,14 @@ import React from 'react';
 import { View } from 'react-native';
 import styled from 'styled-components/native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Colors, Spacing, BorderRadius } from '../constants/theme';
 import { eventImages } from '../assets/images/Events';
-import { useRouter } from 'expo-router'; // Importação do router
+import { useRouter } from 'expo-router';
 
 const CardContainer = styled.TouchableOpacity<{ isCompact?: boolean }>`
   width: 280px;
   height: ${({ isCompact }) => (isCompact ? '240px' : '380px')};
-  margin-right: ${Spacing.md}px;
-  border-radius: ${BorderRadius.large}px;
+  margin-right: ${({ theme }) => theme.spacing.md}px;
+  border-radius: ${({ theme }) => theme.borderRadius.large}px;
   overflow: hidden;
 `;
 
@@ -23,28 +22,28 @@ const BackgroundImage = styled.ImageBackground.attrs({
 `;
 
 const GradientLayer = styled(LinearGradient).attrs({
-    colors: ['transparent', 'rgba(0,0,0,0.8)'],
-    locations: [0.4, 1.0],
-  })<{ isCompact?: boolean }>`
-    flex: 1;
-    /* Removidas as aspas e px literais dentro da função */
-    padding: ${({ isCompact }) => (isCompact ? 15 : 20)}px; 
-    justify-content: space-between;
-  `;
-  
-  const TimeBadge = styled.View<{ isCompact?: boolean }>`
-    background-color: rgba(146, 66, 204, 0.5);
-    align-self: flex-end;
-    /* Ajuste aqui também */
-    padding: ${({ isCompact }) => (isCompact ? '4px 10px' : '8px 14px')};
-    border-radius: ${BorderRadius.round}px;
-  `;
+  colors: ['transparent', 'rgba(0,0,0,0.8)'],
+  locations: [0.4, 1.0],
+})<{ isCompact?: boolean }>`
+  flex: 1;
+  padding: ${({ isCompact }) => (isCompact ? 15 : 20)}px;
+  justify-content: space-between;
+`;
+
+const TimeBadge = styled.View<{ isCompact?: boolean }>`
+  /* Usamos a cor primária com 50% de opacidade conforme o teu design */
+  background-color: ${({ theme }) => theme.colors.primary}80;
+  align-self: flex-end;
+  padding: ${({ isCompact }) => (isCompact ? '4px 10px' : '8px 14px')};
+  border-radius: ${({ theme }) => theme.borderRadius.round}px;
+`;
 
 const TimeText = styled.Text`
-  color: ${Colors.white};
-  font-size: 12px;
-  font-weight: 600;
-  text-align: center;
+  color: ${({ theme }) => theme.colors.white};
+  /* Token: label */
+  font-family: ${({ theme }) => theme.text.label.fontFamily};
+  font-size: ${({ theme }) => theme.text.label.fontSize}px;
+  line-height: ${({ theme }) => theme.text.label.lineHeight}px;
 `;
 
 const CardFooter = styled.View`
@@ -52,27 +51,31 @@ const CardFooter = styled.View`
   margin-bottom: 5px;
 `;
 
-const DateText = styled.Text<{ isCompact?: boolean }>`
-  color: ${Colors.white};
-  font-size: ${({ isCompact }) => (isCompact ? '12px' : '14px')};
+const DateText = styled.Text`
+  color: ${({ theme }) => theme.colors.white};
+  /* Token: textoPequeno */
+  font-family: ${({ theme }) => theme.text.textoPequeno.fontFamily};
+  font-size: ${({ theme }) => theme.text.textoPequeno.fontSize}px;
+  line-height: ${({ theme }) => theme.text.textoPequeno.lineHeight}px;
   margin-bottom: 4px;
-  font-weight: 400;
   opacity: 0.9;
 `;
 
-const TitleText = styled.Text<{ isCompact?: boolean }>`
-  color: ${Colors.white};
-  font-size: ${({ isCompact }) => (isCompact ? '18px' : '22px')};
-  font-weight: bold;
-  line-height: ${({ isCompact }) => (isCompact ? '22px' : '28px')};
+const TitleText = styled.Text`
+  color: ${({ theme }) => theme.colors.white};
+  /* Token: h1 */
+  font-family: ${({ theme }) => theme.text.titulo.h1.fontFamily};
+  font-size: ${({ theme }) => theme.text.titulo.h1.fontSize}px;
+  line-height: ${({ theme }) => theme.text.titulo.h1.lineHeight}px;
 `;
 
 export const EventCard = ({ event, variant }: any) => {
-  const router = useRouter(); // Inicialização do router
+  const router = useRouter();
   const isCompact = variant === 'compact';
   const imageSource = eventImages[event.id] || { uri: 'https://via.placeholder.com/300' };
 
   const formatEventDate = (start: string, end: string) => {
+    if (!start || !end) return '';
     const startDate = new Date(start);
     const endDate = new Date(end);
     const startDay = startDate.getDate();
@@ -86,7 +89,6 @@ export const EventCard = ({ event, variant }: any) => {
     return `${startDay} ${startDate.toLocaleString('en-GB', { month: 'short' })} - ${endDay} ${endDate.toLocaleString('en-GB', { month: 'short' })} ${year}`;
   };
 
-  // Função para lidar com o clique e navegar para a rota dinâmica
   const handlePress = () => {
     router.push(`/event-details/${event.id}`);
   };
@@ -104,10 +106,8 @@ export const EventCard = ({ event, variant }: any) => {
           )}
 
           <CardFooter>
-            <DateText isCompact={isCompact}>
-              {formatEventDate(event.start_date, event.end_date)}
-            </DateText>
-            <TitleText isCompact={isCompact}>{event.name}</TitleText>
+            <DateText>{formatEventDate(event.start_date, event.end_date)}</DateText>
+            <TitleText>{event.name}</TitleText>
           </CardFooter>
         </GradientLayer>
       </BackgroundImage>

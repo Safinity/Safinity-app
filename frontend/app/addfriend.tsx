@@ -13,7 +13,7 @@ export default function AddFriendScreen() {
   const filteredUsers = users.filter(
     user =>
       user.name.toLowerCase().includes(query.toLowerCase()) ||
-      user.username.toLowerCase().includes(query.toLowerCase())
+      user.username.toLowerCase().includes(query.toLowerCase()),
   );
 
   // Adiciona à lista de pesquisas recentes

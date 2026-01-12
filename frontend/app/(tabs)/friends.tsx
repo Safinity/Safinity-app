@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {TouchableOpacity } from 'react-native';
+import { TouchableOpacity } from 'react-native';
 import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -12,10 +12,7 @@ import FindFriendButton from '@/components/FindFriendButton';
 import PingFriend from '@/components/VibrateButton';
 import RemoveFriend from '@/components/RemoveFriend';
 
-
-
 export default function FriendsScreen() {
-  
   const navigation = useNavigation();
 
   // Estado que guarda o utilizador autenticado
@@ -58,8 +55,8 @@ export default function FriendsScreen() {
   };
 
   const handleAddFriend = () => {
-    router.push ('/addfriend');
-  }
+    router.push('/addfriend');
+  };
 
   return (
     <Container>

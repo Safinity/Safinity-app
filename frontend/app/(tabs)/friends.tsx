@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, TouchableOpacity } from 'react-native';
+import {TouchableOpacity } from 'react-native';
 import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { router } from 'expo-router';
 
 import users from '@/data/users.json';
 import auth from '@/data/auth.json';
@@ -10,7 +12,12 @@ import FindFriendButton from '@/components/FindFriendButton';
 import PingFriend from '@/components/VibrateButton';
 import RemoveFriend from '@/components/RemoveFriend';
 
+
+
 export default function FriendsScreen() {
+  
+  const navigation = useNavigation();
+
   // Estado que guarda o utilizador autenticado
   const [currentUser, setCurrentUser] = useState<any>(null);
 
@@ -50,6 +57,10 @@ export default function FriendsScreen() {
     }));
   };
 
+  const handleAddFriend = () => {
+    router.push ('/addfriend');
+  }
+
   return (
     <Container>
       <Header variant="default" title="Friends" showBottomDivider={false} />
@@ -57,7 +68,7 @@ export default function FriendsScreen() {
       <ScrollArea>
         <SectionTitle>
           <Title>Friends</Title>
-          <TouchableOpacity onPress={() => {}}>
+          <TouchableOpacity onPress={() => handleAddFriend()}>
             <Ionicons name="person-add-outline" size={24} color="white" />
           </TouchableOpacity>
         </SectionTitle>

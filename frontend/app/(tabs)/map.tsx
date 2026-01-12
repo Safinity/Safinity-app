@@ -14,7 +14,6 @@ import { MapCallout } from '../../components/maps/MapCallout';
 import { Colors, Spacing } from '../../constants/theme';
 import mapData from '../../data/mapdata.json';
 import { latLngToPixelFromBounds } from '../../utils/coordinates';
-import { MapThemeToggle } from '../../components/maps/MapThemeToggle';
 import { MapStage } from '../../components/maps/MapStage';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
@@ -29,6 +28,7 @@ const Container = styled.View`
 
 const MapScrollView = styled.ScrollView.attrs({
   horizontal: true,
+  vertical: true,
   maximumZoomScale: 1.5,
   minimumZoomScale: 0.3,
   showsHorizontalScrollIndicator: false,
@@ -66,9 +66,8 @@ const PageTitle = styled.Text`
   color: ${Colors.white};
 `;
 
-const SosButton = styled.Pressable<{ $isNavigating: boolean }>`
+const SosButton = styled.Pressable`
   position: absolute;
-  /* Moves up if the navigation bar is visible */
   bottom: ${Spacing.xxl}px;
   right: ${Spacing.margemLateral}px;
   width: 56px;
@@ -93,7 +92,6 @@ const SOSButtonText = styled.Text`
 
 const NavigationFooter = styled.View`
   position: absolute;
-  /* Moved up to 50px to stay well above the device nav bar */
   bottom: ${Spacing.xxl}px;
   left: ${Spacing.margemLateral}px;
   right: 100px;
@@ -126,51 +124,61 @@ const DestinationText = styled.Text`
   font-size: 14px;
 `;
 
-// --- Logic ---
-
 const TAG_TO_PIN_TYPE: Record<string, string[]> = {
   Friends: ['friend'],
   Food: ['food'],
   WC: ['wc'],
   Exits: ['exit'],
   Stages: ['stage'],
-  Emergency: ['emergency'],
+  Entrance: ['entrance'],
+};
+
+const matchesSearch = (item: any, query: string) => {
+  if (!query) return true;
+
+  const q = query.toLowerCase();
+  return item.name?.toLowerCase().includes(q) || item.type?.toLowerCase().includes(q);
 };
 
 export default function MapScreen() {
   const scrollRef = useRef<ScrollView>(null);
+
+  const zoomScaleRef = useRef(1);
+
   const [searchValue, setSearchValue] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [mapTheme, setMapTheme] = useState<'light' | 'dark'>('dark');
-
   const [selectedPin, setSelectedPin] = useState<any>(null);
   const [activeRoute, setActiveRoute] = useState<{ x: number; y: number }[] | null>(null);
   const [destinationName, setDestinationName] = useState('');
 
   const { universityCoords, pins, stages, bounds } = mapData;
-  const tags = ['Exits', 'Friends', 'Stages', 'Food', 'Emergency'];
+  const tags = ['Exits', 'Friends', 'Stages', 'Food', 'Entrance'];
 
   useEffect(() => {
     const centerX = (IMAGE_WIDTH - screenWidth) / 2;
     const centerY = (IMAGE_HEIGHT - screenHeight) / 2;
-    setTimeout(() => scrollRef.current?.scrollTo({ x: centerX, y: centerY, animated: false }), 50);
+    setTimeout(() => {
+      scrollRef.current?.scrollTo({ x: centerX, y: centerY, animated: false });
+    }, 50);
   }, []);
-
-  const toggleTheme = () => setMapTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
 
   const handlePinPress = (pin: any) => {
     const pos = latLngToPixelFromBounds(pin.lat, pin.lng, bounds, IMAGE_WIDTH, IMAGE_HEIGHT);
+
+    const scale = zoomScaleRef.current;
+
     setSelectedPin({ ...pin, px: pos.x, py: pos.y });
 
     scrollRef.current?.scrollTo({
-      x: pos.x - screenWidth / 2,
-      y: pos.y - screenHeight / 2,
+      x: pos.x * scale - screenWidth / 2,
+      y: pos.y * scale - screenHeight / 2,
       animated: true,
     });
   };
 
   const handleShowRoute = () => {
     if (!selectedPin) return;
+
     setDestinationName(selectedPin.name || 'Destino');
 
     const start = latLngToPixelFromBounds(
@@ -180,6 +188,7 @@ export default function MapScreen() {
       IMAGE_WIDTH,
       IMAGE_HEIGHT,
     );
+
     const end = { x: selectedPin.px, y: selectedPin.py };
 
     setActiveRoute([start, end]);
@@ -193,27 +202,35 @@ export default function MapScreen() {
 
   const visiblePins =
     selectedTags.length === 0
-      ? pins
-      : pins.filter(pin => selectedTags.some(tag => TAG_TO_PIN_TYPE[tag]?.includes(pin.type)));
+      ? pins.filter(pin => matchesSearch(pin, searchValue))
+      : pins.filter(
+          pin =>
+            selectedTags.some(tag => TAG_TO_PIN_TYPE[tag]?.includes(pin.type)) &&
+            matchesSearch(pin, searchValue),
+        );
 
+  const visibleStages =
+    selectedTags.length === 0 || selectedTags.includes('Stages')
+      ? stages.filter(stage => matchesSearch(stage, searchValue))
+      : [];
   return (
     <Container>
-      <MapScrollView ref={scrollRef}>
-        {/* Layer 1: The Map */}
-
-        <Pressable
-          onPress={() => {
-            setSelectedPin(null);
-          }}
-        >
+      <MapScrollView
+        ref={scrollRef}
+        scrollEventThrottle={16}
+        onScroll={e => {
+          zoomScaleRef.current = e.nativeEvent.zoomScale ?? 1;
+        }}
+      >
+        <Pressable onPress={() => setSelectedPin(null)}>
           <StaticMapPreview
             center={universityCoords}
             width={IMAGE_WIDTH}
             height={IMAGE_HEIGHT}
-            theme={mapTheme}
+            theme="dark"
           />
         </Pressable>
-        {/* Layer 2: The Route Path */}
+
         <Svg
           width={IMAGE_WIDTH}
           height={IMAGE_HEIGHT}
@@ -231,7 +248,6 @@ export default function MapScreen() {
           )}
         </Svg>
 
-        {/* Layer 3: Pins (Rendered first) */}
         {visiblePins.map(pin => (
           <MapPin
             key={pin.id}
@@ -243,8 +259,7 @@ export default function MapScreen() {
           />
         ))}
 
-        {/* Layer 4: Stages (Rendered on top of pins for better clickability) */}
-        {stages.map(stage => (
+        {visibleStages.map(stage => (
           <MapStage
             key={stage.id}
             stage={stage}
@@ -255,7 +270,6 @@ export default function MapScreen() {
           />
         ))}
 
-        {/* Layer 5: Callout Bubble */}
         {selectedPin && (
           <MapCallout
             x={selectedPin.px}
@@ -273,23 +287,23 @@ export default function MapScreen() {
         />
       </MapScrollView>
 
-      {/* UI Overlays */}
       <Header onNotificationPress={() => {}} onProfilePress={() => {}} />
 
       <OverlayContent pointerEvents="box-none">
         <PageHeader>
-          <MapThemeToggle theme={mapTheme} onToggle={toggleTheme} />
           <Ionicons name="location" size={28} color={Colors.primary} />
-          <PageTitle>Universidade de Aveiro</PageTitle>
+          <PageTitle>University of Aveiro</PageTitle>
         </PageHeader>
+
         <PaddingSearchInput>
           <SearchInput
             variant="mapa"
-            placeholder="Pesquisar..."
+            placeholder="Search..."
             value={searchValue}
             onChangeText={setSearchValue}
           />
         </PaddingSearchInput>
+
         <FilterTags
           tags={tags}
           selectedTags={selectedTags}
@@ -303,7 +317,6 @@ export default function MapScreen() {
         />
       </OverlayContent>
 
-      {/* Navigation Mode Footer */}
       {activeRoute && (
         <NavigationFooter>
           <LongCancelButton onPress={handleCancelRoute}>

@@ -120,7 +120,7 @@ const ModalOverlay = styled.View`
 `;
 
 const ModalContent = styled.View`
-  background-color: #303B49; /* Cor aproximada da imagem */
+  background-color: #303b49; /* Cor aproximada da imagem */
   width: 95%;
   border-radius: 30px;
   padding: 30px;
@@ -177,7 +177,7 @@ const ModalBtnText = styled.Text<{ isPrimary?: boolean }>`
   font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
   font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
   font-weight: bold;
-  
+
   color: ${({ isPrimary, theme }) => (isPrimary ? theme.colors.white : theme.colors.primary)};
 `;
 
@@ -214,14 +214,17 @@ export default function EventDetailsScreen() {
           <ModalContent>
             <ModalTitle>Link my ticket</ModalTitle>
             <ModalDescription>
-              Your ticket, whether physical or digital, has a{" "}
+              Your ticket, whether physical or digital, has a{' '}
               <ModalDescription style={{ color: '#D3B3EB', fontWeight: 'bold' }}>
                 6-digit validation code
-              </ModalDescription>. Now is the time to confirm your entry to the event by entering that code below.
+              </ModalDescription>
+              . Now is the time to confirm your entry to the event by entering that code below.
             </ModalDescription>
 
             <CodeRow>
-              {[1, 2, 3, 4, 5, 6].map((i) => <CodeBox key={i} />)}
+              {[1, 2, 3, 4, 5, 6].map(i => (
+                <CodeBox key={i} />
+              ))}
             </CodeRow>
 
             <ModalButtons>

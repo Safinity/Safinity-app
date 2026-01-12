@@ -13,7 +13,11 @@ const Button = styled.TouchableOpacity`
 export default function RemoveFriend({ onPress, disabled }: any) {
   return (
     <Button disabled={disabled} onPress={onPress}>
-      <Ionicons name="person-remove-outline" size={24} color={theme.colors.palette.primary.normal} />
+      <Ionicons
+        name="person-remove-outline"
+        size={24}
+        color={theme.colors.palette.primary.normal}
+      />
     </Button>
   );
 }

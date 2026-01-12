@@ -11,7 +11,6 @@ import PingFriend from '@/components/VibrateButton';
 import RemoveFriend from '@/components/RemoveFriend';
 
 export default function FriendsScreen() {
-
   // Estado que guarda o utilizador autenticado
   const [currentUser, setCurrentUser] = useState<any>(null);
 
@@ -39,7 +38,7 @@ export default function FriendsScreen() {
 
   // Amigos que estão no mesmo evento que o utilizador
   const onSameEvent = friends.filter((f: any) => f.currentEventId === currentUser.currentEventId);
-  
+
   // Amigos que NÃO estão no mesmo evento
   const otherFriends = friends.filter((f: any) => f.currentEventId !== currentUser.currentEventId);
 

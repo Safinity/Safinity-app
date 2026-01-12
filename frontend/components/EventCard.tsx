@@ -4,6 +4,7 @@ import styled from 'styled-components/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors, Spacing, BorderRadius } from '../constants/theme';
 import { eventImages } from '../assets/images/Events';
+import { useRouter } from 'expo-router'; // Importação do router
 
 const CardContainer = styled.TouchableOpacity<{ isCompact?: boolean }>`
   width: 280px;
@@ -22,22 +23,22 @@ const BackgroundImage = styled.ImageBackground.attrs({
 `;
 
 const GradientLayer = styled(LinearGradient).attrs({
-  colors: ['transparent', 'rgba(0,0,0,0.8)'],
-  locations: [0.4, 1.0],
-})`
-  flex: 1;
-  padding: ${({ isCompact }: any) =>
-    isCompact ? '15px' : '20px'}; /* Padding reduzido no compacto */
-  justify-content: space-between;
-`;
-
-const TimeBadge = styled.View<{ isCompact?: boolean }>`
-  background-color: rgba(146, 66, 204, 0.5);
-  align-self: flex-end;
-  padding: ${({ isCompact }) =>
-    isCompact ? '4px 10px' : '8px 14px'}; /* Badge mais pequeno no compacto */
-  border-radius: ${BorderRadius.round}px;
-`;
+    colors: ['transparent', 'rgba(0,0,0,0.8)'],
+    locations: [0.4, 1.0],
+  })<{ isCompact?: boolean }>`
+    flex: 1;
+    /* Removidas as aspas e px literais dentro da função */
+    padding: ${({ isCompact }) => (isCompact ? 15 : 20)}px; 
+    justify-content: space-between;
+  `;
+  
+  const TimeBadge = styled.View<{ isCompact?: boolean }>`
+    background-color: rgba(146, 66, 204, 0.5);
+    align-self: flex-end;
+    /* Ajuste aqui também */
+    padding: ${({ isCompact }) => (isCompact ? '4px 10px' : '8px 14px')};
+    border-radius: ${BorderRadius.round}px;
+  `;
 
 const TimeText = styled.Text`
   color: ${Colors.white};
@@ -67,6 +68,7 @@ const TitleText = styled.Text<{ isCompact?: boolean }>`
 `;
 
 export const EventCard = ({ event, variant }: any) => {
+  const router = useRouter(); // Inicialização do router
   const isCompact = variant === 'compact';
   const imageSource = eventImages[event.id] || { uri: 'https://via.placeholder.com/300' };
 
@@ -84,12 +86,15 @@ export const EventCard = ({ event, variant }: any) => {
     return `${startDay} ${startDate.toLocaleString('en-GB', { month: 'short' })} - ${endDay} ${endDate.toLocaleString('en-GB', { month: 'short' })} ${year}`;
   };
 
+  // Função para lidar com o clique e navegar para a rota dinâmica
+  const handlePress = () => {
+    router.push(`/event-details/${event.id}`);
+  };
+
   return (
-    <CardContainer isCompact={isCompact}>
+    <CardContainer isCompact={isCompact} onPress={handlePress}>
       <BackgroundImage source={imageSource}>
-        {/* Passamos isCompact para o GradientLayer para ajustar o padding interno */}
         <GradientLayer isCompact={isCompact}>
-          {/* Agora o badge aparece sempre que houver time_left, mesmo no compacto */}
           {event.time_left ? (
             <TimeBadge isCompact={isCompact}>
               <TimeText>{event.time_left}</TimeText>

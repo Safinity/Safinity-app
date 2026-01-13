@@ -59,7 +59,7 @@ const Button = styled.button`
 `;
 
 const Text = styled.p<{ color?: string }>`
-  color: ${(props) => props.color || 'var(--white)'};
+  color: ${props => props.color || 'var(--white)'};
   margin-top: 1rem;
 `;
 
@@ -80,17 +80,13 @@ export default function Home() {
       <Title>Vite + React</Title>
 
       <Card>
-        <Button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </Button>
+        <Button onClick={() => setCount(count => count + 1)}>count is {count}</Button>
         <Text>
           Edit <code>src/App.tsx</code> and save to test HMR
         </Text>
       </Card>
 
-      <Text color="var(--neutral60)">
-        Click on the Vite and React logos to learn more
-      </Text>
+      <Text color="var(--neutral60)">Click on the Vite and React logos to learn more</Text>
     </Container>
   );
 }

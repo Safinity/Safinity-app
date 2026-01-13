@@ -1,6 +1,3 @@
-
-
-
 export const userImages: { [key: string]: any } = {
   'carlota.png': require('./carlota.png'),
   'maria.png': require('./maria.png'),

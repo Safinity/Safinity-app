@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { FlatList, View, Image } from 'react-native';
+import { FlatList, Image } from 'react-native';
 import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
 
-import Header from '../../components/ui/header';
+import Header from '@/components/ui/header';
+import { userImages } from '../../assets/images/Users/userImages';
 import { Colors, Spacing, TextStyles, BorderRadius } from '../../constants/theme';
 import initialData from '../../data/notifications.json';
 
@@ -20,20 +21,20 @@ const PageHeaderContent = styled.View`
 
 const Title = styled.Text`
   font-family: ${TextStyles.titulo.h.fontFamily};
-  font-size: 24px; /* Keeping the large size for the main page title */
+  font-size: 24px;
   color: ${Colors.white};
-  margin-bottom: ${Spacing.sm}px;
+  margin-bottom: 8px;
 `;
 
 const CountText = styled.Text`
   font-family: ${TextStyles.corpo.corpoTexto.fontFamily};
   font-size: ${TextStyles.corpo.corpoTexto.fontSize}px;
   color: ${Colors.white};
-  margin-bottom: ${Spacing.md}px;
 `;
 
 const BoldCount = styled.Text`
   font-family: ${TextStyles.titulo.h3.fontFamily};
+  font-weight: bold;
 `;
 
 const MarkReadButton = styled.Pressable`
@@ -41,7 +42,7 @@ const MarkReadButton = styled.Pressable`
   padding: 10px 20px;
   border-radius: ${BorderRadius.medium}px;
   align-self: flex-end;
-  margin-top: ${Spacing.xs}px;
+  margin-top: 16px;
 `;
 
 const MarkReadText = styled.Text`
@@ -50,38 +51,38 @@ const MarkReadText = styled.Text`
   color: ${Colors.white};
 `;
 
-// --- Notification Card Components ---
-
 const NotificationCard = styled.View<{ $isNew: boolean }>`
   flex-direction: row;
-  padding: ${Spacing.md}px;
+  padding: 18px ${Spacing.margemLateral}px;
+  margin-bottom: 8px;
+  background-color: ${props => (props.$isNew ? 'rgba(255, 255, 255, 0.08)' : 'transparent')};
+`;
 
-  /* separation using palette based backgrounds */
-  background-color: ${props =>
-    props.$isNew ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.03)'};
-
-  border-width: 1px;
-  border-color: ${props => (props.$isNew ? 'rgba(255, 255, 255, 0.1)' : 'transparent')};
+const Avatar = styled.Image`
+  width: 70px;
+  height: 70px;
+  border-radius: ${BorderRadius.round}px;
+  background-color: #ccc;
 `;
 
 const IconCircle = styled.View`
-  width: 56px;
-  height: 56px;
+  width: 70px;
+  height: 70px;
   border-radius: ${BorderRadius.round}px;
   background-color: ${Colors.white};
   justify-content: center;
   align-items: center;
-  margin-right: ${Spacing.md}px;
 `;
 
 const CardContent = styled.View`
   flex: 1;
+  margin-left: 12px;
 `;
 
 const CardHeader = styled.View`
   flex-direction: row;
   justify-content: space-between;
-  margin-bottom: ${Spacing.xs}px;
+  margin-bottom: 4px;
 `;
 
 const CardTitle = styled.Text`
@@ -98,18 +99,18 @@ const CardTime = styled.Text`
 
 const CardMessage = styled.Text`
   font-family: ${TextStyles.corpo.corpoTexto.fontFamily};
-  font-size: 14px; /* Slightly smaller for message density */
+  font-size: 14px;
   line-height: 20px;
   color: ${Colors.palette.neutral.neutral80};
 `;
 
 const ActionRow = styled.View`
   flex-direction: row;
-  margin-top: ${Spacing.md}px;
-  gap: ${Spacing.md}px;
+  margin-top: 12px;
+  gap: 12px;
 `;
 
-const AcceptButton = styled.Pressable`
+const AcceptButton = styled.TouchableOpacity`
   background-color: ${Colors.primary};
   flex: 1;
   height: 40px;
@@ -118,7 +119,7 @@ const AcceptButton = styled.Pressable`
   align-items: center;
 `;
 
-const RemoveButton = styled.Pressable`
+const RemoveButton = styled.TouchableOpacity`
   background-color: rgba(146, 66, 204, 0.15);
   flex: 1;
   height: 40px;
@@ -128,20 +129,17 @@ const RemoveButton = styled.Pressable`
 `;
 
 const SectionLabel = styled.Text`
-  font-family: ${TextStyles.textoFiltros.fontFamily};
-  font-size: ${TextStyles.textoFiltros.fontSize}px;
-  color: ${Colors.inactive};
+  color: ${Colors.palette.primary.light50};
+  font-size: ${TextStyles.titulo.h3.fontSize}px;
+  font-family: ${TextStyles.titulo.h3.fontFamily};
   margin: 20px ${Spacing.margemLateral}px 10px;
 `;
-
-// --- Logic ---
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState(initialData);
 
   const newNotifications = notifications.filter(n => !n.read);
   const oldNotifications = notifications.filter(n => n.read);
-  const newCount = newNotifications.length;
 
   const dataToRender = [
     ...newNotifications,
@@ -152,17 +150,17 @@ export default function NotificationsPage() {
   const getIcon = (type: string) => {
     switch (type) {
       case 'emergency':
-        return <Ionicons name="alert-circle" size={30} color={Colors.palette.error.normal} />;
+        return <Ionicons name="alert-circle" size={32} color={Colors.palette.error.normal} />;
       case 'activity':
-        return <Ionicons name="notifications" size={28} color={Colors.primary} />;
+        return <Ionicons name="notifications" size={30} color={Colors.primary} />;
       case 'crowd':
-        return <Ionicons name="people" size={28} color={Colors.primary} />;
+        return <Ionicons name="people" size={30} color={Colors.primary} />;
       case 'hydrate':
-        return <Ionicons name="water" size={28} color={Colors.primary} />;
+        return <Ionicons name="water" size={30} color={Colors.primary} />;
       case 'security':
-        return <Ionicons name="shield-checkmark" size={28} color={Colors.primary} />;
+        return <Ionicons name="shield-checkmark" size={30} color={Colors.primary} />;
       default:
-        return <Ionicons name="mail" size={28} color={Colors.primary} />;
+        return <Ionicons name="mail" size={30} color={Colors.primary} />;
     }
   };
 
@@ -170,43 +168,16 @@ export default function NotificationsPage() {
     setNotifications(notifications.map(n => ({ ...n, read: true })));
   };
 
-  const ListHeader = () => (
-    <PageHeaderContent>
-      <Title>Notifications</Title>
-      <CountText>
-        You have <BoldCount>{newCount}</BoldCount> new notifications.
-      </CountText>
-
-      <MarkReadButton onPress={handleMarkAllRead}>
-        <MarkReadText>Mark all as read</MarkReadText>
-      </MarkReadButton>
-    </PageHeaderContent>
-  );
-
   const renderItem = ({ item }: { item: any }) => {
-    if (item.isDivider) {
-      return <SectionLabel>Oldest</SectionLabel>;
-    }
+    if (item.isDivider) return <SectionLabel>Oldest</SectionLabel>;
 
     return (
-      <NotificationCard
-        $isNew={!item.read}
-        style={
-          item.type === 'emergency'
-            ? { borderColor: `${Colors.palette.error.normal}44`, borderWidth: 1 }
-            : null
-        }
-      >
-        <IconCircle>
-          {item.type === 'friend' ? (
-            <Image
-              source={{ uri: item.avatar }}
-              style={{ width: 56, height: 56, borderRadius: 28 }}
-            />
-          ) : (
-            getIcon(item.type)
-          )}
-        </IconCircle>
+      <NotificationCard $isNew={!item.read}>
+        {item.type === 'friend' ? (
+          <Avatar source={userImages[item.avatar]} />
+        ) : (
+          <IconCircle>{getIcon(item.type)}</IconCircle>
+        )}
 
         <CardContent>
           <CardHeader>
@@ -241,7 +212,17 @@ export default function NotificationsPage() {
         data={dataToRender}
         keyExtractor={item => item.id.toString()}
         renderItem={renderItem}
-        ListHeaderComponent={ListHeader}
+        ListHeaderComponent={
+          <PageHeaderContent>
+            <Title>Notifications</Title>
+            <CountText>
+              You have <BoldCount>{newNotifications.length}</BoldCount> new notifications.
+            </CountText>
+            <MarkReadButton onPress={handleMarkAllRead}>
+              <MarkReadText>Mark all as read</MarkReadText>
+            </MarkReadButton>
+          </PageHeaderContent>
+        }
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 50 }}
       />

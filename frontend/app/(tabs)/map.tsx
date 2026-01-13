@@ -15,11 +15,12 @@ import { Colors, Spacing } from '../../constants/theme';
 import mapData from '../../data/mapdata.json';
 import { latLngToPixelFromBounds } from '../../utils/coordinates';
 import { MapStage } from '../../components/maps/MapStage';
+import { router } from 'expo-router';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const IMAGE_WIDTH = screenWidth * 2.5;
 const IMAGE_HEIGHT = screenHeight * 1.6;
-const CURRENT_LOCATION = { lat: 40.63021152549589, lng: -8.656757232421452 };
+const CURRENT_LOCATION = mapData.currentLocation;
 
 const Container = styled.View`
   flex: 1;
@@ -327,7 +328,7 @@ export default function MapScreen() {
         </NavigationFooter>
       )}
 
-      <SosButton onPress={() => Alert.alert('SOS', 'Emergency services notified')}>
+      <SosButton onPress={() => router.push('/sos')}>
         <SOSButtonText>SOS</SOSButtonText>
       </SosButton>
     </Container>

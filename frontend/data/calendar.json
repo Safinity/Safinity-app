@@ -1,0 +1,172 @@
+{
+  "activities": [
+    {
+      "id": "1",
+      "date": "Nov 10th",
+      "title": "Welcome to the Web Summit 2025",
+      "location": "Center Stage",
+      "startTime": "18h05",
+      "endTime": "18h15",
+      "image": "1.jpg",
+      "description": "Opening Remarks.",
+      "category": "Stages",
+      "featuring": ["Carlos Moedas", "Gonçalo Matias"]
+    },
+    {
+      "id": "2",
+      "date": "Nov 10th",
+      "title": "Smarter plays: How AI is changing the game",
+      "location": "Stage 1",
+      "startTime": "18h35",
+      "endTime": "19h00",
+      "image": "2.jpg",
+      "description": "AI is reshaping the $680 billion sports industry - not just on the field, but in how we connect, compete, and experience the game. Join Maria Sharapova and Sarah Meron as they explore how the same AI powering leading enterprises is transforming sports.",
+      "category": "Stages",
+      "featuring": ["Maria Sharapova", "Sarah Meron", "Jessica Sibley"]
+    },
+    {
+      "id": "3",
+      "date": "Nov 11th",
+      "title": "The business of saving the planet",
+      "location": "Center Stage",
+      "startTime": "10h30",
+      "endTime": "10h50",
+      "image": "3.jpg",
+      "description": "Albert from UBQ Materials discusses how climate action can be both a smart business decision and a sustainable choice. Discover how turning everyday waste into valuable materials can drive innovation, profit, and real environmental impact.",
+      "category": "Stages",
+      "featuring": ["Albert Douer", "Amy Nordrum"]
+    },
+    {
+      "id": "4",
+      "date": "Nov 11th",
+      "title": "The CEO's role in brand resilience & cultural relevance",
+      "location": "Stage 7",
+      "startTime": "13h10",
+      "endTime": "13h30",
+      "image": "4.jpg",
+      "description": "A candid conversation exploring how CEOs can shape resilient brands and foster cultural relevance in an ever-changing world. This session unpacks the leadership mindset, strategic choices, and authentic storytelling needed to keep organizations connected...",
+      "category": "Business",
+      "featuring": ["Corey duBrowa", "Greg Williams"]
+    },
+    {
+      "id": "5",
+      "date": "Nov 10th",
+      "title": "The community of founders pledging billions for good",
+      "location": "Center Stage",
+      "startTime": "10h30",
+      "endTime": "10h50",
+      "image": "5.jpg",
+      "description": "It’s no secret that founders and investors can generate immense wealth by building the right companies and backing the right ideas. But what if they committed to impact as boldly as they committed to growth? Meet Founders Pledge, a global community of...",
+      "category": "Business",
+      "featuring": ["Corey duBrowa"]
+    },
+    {
+      "id": "6",
+      "date": "Nov 12th",
+      "title": "How to turn into an AI first company",
+      "location": "Stage 5",
+      "startTime": "10h35",
+      "endTime": "10h55",
+      "image": "6.jpg",
+      "description": "AI is shaking up SaaS, and not every company makes the leap. In this chat, Intercom co-founder Des Traynor unpacks his journey through an AI pivot, the tough calls along the way, and the lessons learned along the way.",
+      "category": "Stages",
+      "featuring": ["Des Traynor"]
+    },
+    {
+      "id": "7",
+      "date": "Nov 10th",
+      "title": "A post-American, enshittification-resistant internet",
+      "location": "Center Stage",
+      "startTime": "10h30",
+      "endTime": "10h50",
+      "image": "7.jpg",
+      "description": "The Internet didn’t have to be like this. Author, Cory Doctorow, and Rabble, a long-term advocate for decentralized technology, will explore how and why “enshittification” happened, including the role of US trade reps who used the threat of tariffs to bully...",
+      "category": "Podcasts",
+      "featuring": ["Cory Doctorow", "Rabble"]
+    },
+    {
+      "id": "8",
+      "date": "Nov 13th",
+      "title": "The new frontier: AI meets Hollywood",
+      "location": "Center Stage",
+      "startTime": "10h30",
+      "endTime": "10h50",
+      "image": "8.jpg",
+      "description": "As Hollywood evolves, AI is no longer a disruption, it's a collaborator. Actor Scott Eastwood and Jonathan Yunger, producer and Co-founder & CEO of Arcana Labs, explore how artificial intelligence is reshaping the art and business of storytelling. Through...",
+      "category": "Stages",
+      "featuring": ["Jonathan Yunger", "Scott Eastwood", "Maer Roshan"]
+    },
+    {
+      "id": "9",
+      "date": "Nov 13th",
+      "title": "Hanging in the balance",
+      "location": "Center Stage",
+      "startTime": "10h30",
+      "endTime": "10h50",
+      "image": "9.jpg",
+      "description": "World Wide Web inventor Sir Tim Berners-Lee has been anticipating 'agents' since the mid-1990s. They're finally here, thanks to the Generative AI revolution. But what kind of web will these agents encounter, and what kind of web will they leave behind? Join...",
+      "category": "Stages",
+      "featuring": ["Tim Berners-Lee", "John Bruce", "Lauren Jackson"]
+    },
+    {
+      "id": "10",
+      "date": "Nov 12th",
+      "title": "Scaling Mobile Apps: From 0 to 1M Users",
+      "location": "Workshop Room A",
+      "startTime": "14h00",
+      "endTime": "15h30",
+      "image": "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800",
+      "description": "In this hands-on workshop, learn the infrastructure and performance strategies required to scale your React Native application to millions of users without compromising speed.",
+      "category": "Workshops",
+      "featuring": ["Alex Costa", "Sarah Jenkins"]
+    },
+    {
+      "id": "11",
+      "date": "Nov 13th",
+      "title": "Deep Dive into UI/UX Trends for 2026",
+      "location": "Workshop Room C",
+      "startTime": "11h00",
+      "endTime": "12h30",
+      "image": "https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=800",
+      "description": "Explore the upcoming trends in digital design, from neumorphism's evolution to accessibility-first interfaces. Participants will work on a collaborative design challenge.",
+      "category": "Workshops",
+      "featuring": ["David Miller"]
+    },
+    {
+      "id": "12",
+      "date": "Nov 11th",
+      "title": "Crypto & Coffee: Morning Market Live",
+      "location": "Podcast Studio B",
+      "startTime": "09h00",
+      "endTime": "09h45",
+      "image": "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800",
+      "description": "A live podcast session discussing the morning's crypto market movements and the impact of institutional adoption on decentralized finance.",
+      "category": "Podcasts",
+      "featuring": ["Michael Saylor", "Elena Nadolinski"]
+    },
+    {
+      "id": "13",
+      "date": "Nov 12th",
+      "title": "Cybersecurity in the Age of Quantum",
+      "location": "Workshop Room B",
+      "startTime": "16h00",
+      "endTime": "17h30",
+      "image": "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800",
+      "description": "Prepare for the next decade of threats. Learn how quantum computing will change encryption and what you can do to keep your data safe today.",
+      "category": "Workshops",
+      "featuring": ["Dr. Alice Smith"]
+    },
+    {
+      "id": "14",
+      "date": "Nov 10th",
+      "title": "Future of Fintech",
+      "location": "Stage 4",
+      "startTime": "14h00",
+      "endTime": "14h45",
+      "image": "14.jpg",
+      "description": "Global leaders discuss how digital currencies and embedded finance are changing the way we pay and save.",
+      "category": "Business",
+      "featuring": ["Anne Boden", "Nikolay Storonsky"]
+    }
+  ]
+}

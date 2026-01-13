@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FlatList, Image } from 'react-native';
+import { FlatList } from 'react-native';
 import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
 

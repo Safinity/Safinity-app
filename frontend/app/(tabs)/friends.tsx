@@ -80,7 +80,14 @@ export default function FriendsScreen() {
 
               <Buttons>
                 <PingFriend onPress={() => console.log('Vibrar amigo')} />
-                <FindFriendButton onPress={() => console.log('Localizar amigo')} />
+                <FindFriendButton
+                  onPress={() => {
+                    router.push({
+                      pathname: '/map',
+                      params: { focusId: friend.id }, // Passes the specific ID to the map screen
+                    });
+                  }}
+                />
               </Buttons>
             </FriendRow>
           </TouchableOpacity>

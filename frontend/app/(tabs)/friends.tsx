@@ -69,8 +69,8 @@ export default function FriendsScreen() {
 
         <SectionSubtitle>On the same event</SectionSubtitle>
         {onSameEvent.map((friend: any) => (
-          <TouchableOpacity onPress={() => router.push(`/${friend.id}`)}>
-            <FriendRow key={friend.id}>
+          <TouchableOpacity key={friend.id} onPress={() => router.push(`/${friend.id}`)}>
+            <FriendRow>
               <Avatar source={{ uri: friend.image }} />
               <Info>
                 <Name>{friend.name}</Name>
@@ -87,8 +87,8 @@ export default function FriendsScreen() {
 
         <SectionSubtitle>Other Friends</SectionSubtitle>
         {otherFriends.map((friend: any) => (
-          <TouchableOpacity onPress={() => router.push(`/${friend.id}`)}>
-            <FriendRow key={friend.id}>
+          <TouchableOpacity key={friend.id} onPress={() => router.push(`/${friend.id}`)}>
+            <FriendRow>
               <Avatar source={{ uri: friend.image }} />
               <Info>
                 <Name>{friend.name}</Name>

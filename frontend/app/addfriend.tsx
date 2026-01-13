@@ -65,7 +65,7 @@ export default function AddFriendScreen() {
               <EmptyText>No recent searches</EmptyText>
             ) : (
               recentSearches.map((item, index) => (
-                <RecentItem key={index} onPress={() => setSearch(item)}>
+                <RecentItem key={item} onPress={() => setSearch(item)}>
                   <Ionicons name="time-outline" size={18} color="white" />
                   <RecentText>{item}</RecentText>
                 </RecentItem>
@@ -77,8 +77,8 @@ export default function AddFriendScreen() {
             <Subtitle>Results</Subtitle>
 
             {filteredUsers.map(user => (
-              <TouchableOpacity onPress={() => router.push(`/${user.id}`)}>
-                <UserRow key={user.id}>
+              <TouchableOpacity key={user.id} onPress={() => router.push(`/${user.id}`)}>
+                <UserRow>
                   <Avatar source={{ uri: user.image }} />
                   <Info>
                     <Name>{user.name}</Name>

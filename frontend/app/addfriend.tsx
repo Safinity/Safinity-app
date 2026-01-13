@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 
 import { useUser } from '@/context/UserContext';
 import users from '@/data/users.json';
 import Header from '@/components/ui/header';
 import SearchBarQR from '@/components/SearchBarQR';
 import FriendActionButton from '@/components/FriendActionButton';
+import { TouchableOpacity } from 'react-native';
 
 export default function AddFriendScreen() {
   const { currentUser, addFriend, removeFriend } = useUser();
@@ -52,7 +54,7 @@ export default function AddFriendScreen() {
           value={search}
           onChangeText={setSearch}
           onSubmitEditing={handleSubmitSearch}
-          onPressQR={() => console.log('abrir scanner')}
+          onPressQR={() => router.push('/qrcode')}
           placeholder="Find friends"
         />
         {search.length === 0 ? (
@@ -75,19 +77,21 @@ export default function AddFriendScreen() {
             <Subtitle>Results</Subtitle>
 
             {filteredUsers.map(user => (
-              <UserRow key={user.id}>
-                <Avatar source={{ uri: user.image }} />
-                <Info>
-                  <Name>{user.name}</Name>
-                  <Username>@{user.username}</Username>
-                </Info>
+              <TouchableOpacity onPress={() => router.push(`/${user.id}`)}>
+                <UserRow key={user.id}>
+                  <Avatar source={{ uri: user.image }} />
+                  <Info>
+                    <Name>{user.name}</Name>
+                    <Username>@{user.username}</Username>
+                  </Info>
 
-                {isFriend(user.id) ? (
-                  <FriendActionButton variant="remove" onPress={() => removeFriend(user.id)} />
-                ) : (
-                  <FriendActionButton variant="add" onPress={() => addFriend(user.id)} />
-                )}
-              </UserRow>
+                  {isFriend(user.id) ? (
+                    <FriendActionButton variant="remove" onPress={() => removeFriend(user.id)} />
+                  ) : (
+                    <FriendActionButton variant="add" onPress={() => addFriend(user.id)} />
+                  )}
+                </UserRow>
+              </TouchableOpacity>
             ))}
           </>
         )}

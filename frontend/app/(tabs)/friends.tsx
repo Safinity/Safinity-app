@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { TouchableOpacity } from 'react-native';
 import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
 import { router } from 'expo-router';
 
 import users from '@/data/users.json';
@@ -70,32 +69,36 @@ export default function FriendsScreen() {
 
         <SectionSubtitle>On the same event</SectionSubtitle>
         {onSameEvent.map((friend: any) => (
-          <FriendRow key={friend.id}>
-            <Avatar source={{ uri: friend.image }} />
-            <Info>
-              <Name>{friend.name}</Name>
-              <Username>@{friend.username}</Username>
-            </Info>
+          <TouchableOpacity onPress={() => router.push(`/${friend.id}`)}>
+            <FriendRow key={friend.id}>
+              <Avatar source={{ uri: friend.image }} />
+              <Info>
+                <Name>{friend.name}</Name>
+                <Username>@{friend.username}</Username>
+              </Info>
 
-            <Buttons>
-              <PingFriend onPress={() => console.log('Vibrar amigo')} />
-              <FindFriendButton onPress={() => console.log('Localizar amigo')} />
-            </Buttons>
-          </FriendRow>
+              <Buttons>
+                <PingFriend onPress={() => console.log('Vibrar amigo')} />
+                <FindFriendButton onPress={() => console.log('Localizar amigo')} />
+              </Buttons>
+            </FriendRow>
+          </TouchableOpacity>
         ))}
 
         <SectionSubtitle>Other Friends</SectionSubtitle>
         {otherFriends.map((friend: any) => (
-          <FriendRow key={friend.id}>
-            <Avatar source={{ uri: friend.image }} />
-            <Info>
-              <Name>{friend.name}</Name>
-              <Username>@{friend.username}</Username>
-            </Info>
-            <Buttons>
-              <RemoveFriend onPress={() => removeFriend(friend.id)} />
-            </Buttons>
-          </FriendRow>
+          <TouchableOpacity onPress={() => router.push(`/${friend.id}`)}>
+            <FriendRow key={friend.id}>
+              <Avatar source={{ uri: friend.image }} />
+              <Info>
+                <Name>{friend.name}</Name>
+                <Username>@{friend.username}</Username>
+              </Info>
+              <Buttons>
+                <RemoveFriend onPress={() => removeFriend(friend.id)} />
+              </Buttons>
+            </FriendRow>
+          </TouchableOpacity>
         ))}
       </ScrollArea>
     </Container>

@@ -1,7 +1,6 @@
 import { router } from 'expo-router';
 import styled from 'styled-components/native';
 import { ImageBackground } from 'react-native';
-// Ajustado para importar do ficheiro específico que criaste
 import { StaticImages } from '../assets/images/landing';
 
 import PrimaryButton from '../components/PrimaryButton';
@@ -10,8 +9,8 @@ import TertiaryButton from '../components/TertiaryButton';
 
 const Background = styled(ImageBackground).attrs({
   imageStyle: {
-    objectFit: 'cover', // Melhora a renderização no browser
-    objectPosition: 'center', // Garante que o foco da imagem seja o meio
+    objectFit: 'cover',
+    objectPosition: 'center',
   },
 })`
   flex: 1;
@@ -31,7 +30,6 @@ export default function Landing() {
   return (
     <Background source={StaticImages.landingBg}>
       <Content>
-        {/* Corrigida a rota do login para ser absoluta '/' */}
         <PrimaryButton title="Log in" onPress={() => router.push('/login')} />
 
         <SecondaryButton title="Create account" onPress={() => router.push('/register')} />

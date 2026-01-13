@@ -2,10 +2,9 @@ import React from 'react';
 import styled from 'styled-components/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router'; // 1. Importa o useRouter
 import { Colors, Spacing } from '../constants/theme';
 import { eventImages } from '../assets/images/Events';
-
-// 1. IMPORTA O MAPEAMENTO DO CALENDÁRIO
 import { calendarImages } from '../assets/images/Calendar/index';
 
 const BannerContainer = styled.ImageBackground.attrs({
@@ -102,31 +101,20 @@ export const HeroBanner = ({
   hideMap = false,
   isDetail = false,
 }: any) => {
-  // 2. LÓGICA DE IMAGEM CORRIGIDA PARA EVITAR 404
+  const router = useRouter(); // 2. Inicializa o router
+
   const getSource = () => {
     if (!event) return null;
-
-    // Se for imagem local do calendário (ex: "1.jpg")
-    if (calendarImages[event.image]) {
-      return calendarImages[event.image];
-    }
-
-    // Se for mapeamento de Eventos (ID)
-    if (event.id && eventImages[event.id]) {
-      return eventImages[event.id];
-    }
-
-    // Se for uma URL da web (ex: Unsplash)
+    if (calendarImages[event.image]) return calendarImages[event.image];
+    if (event.id && eventImages[event.id]) return eventImages[event.id];
     if (typeof event.image === 'string' && event.image.startsWith('http')) {
       return { uri: event.image };
     }
-
     return null;
   };
 
   const imageSource = getSource();
 
-  // LOGICA DE DISTINÇÃO (Mantida igual)
   const isCalendar = isDetail && event?.title;
   const isEventDetail = isDetail && event?.name;
   const isList = !isDetail && title;
@@ -135,14 +123,17 @@ export const HeroBanner = ({
   return (
     <BannerContainer source={imageSource} imageStyle={{ borderRadius: 0 }}>
       <HeroGradient>
-        {/* CASO 1: ATIVIDADE DO CALENDÁRIO */}
         {isCalendar && (
           <>
             <TitleRow>
               <EventName style={{ flex: 1, marginRight: 15 }} numberOfLines={2}>
                 {event.title}
               </EventName>
-              <AddCalendarButton activeOpacity={0.8}>
+              {/* 3. Adiciona o onPress aqui para navegar para o my-calendar */}
+              <AddCalendarButton
+                activeOpacity={0.8}
+                onPress={() => router.push('/(tabs)/my-calendar')}
+              >
                 <Ionicons name="calendar-outline" size={26} color="#9333EA" />
               </AddCalendarButton>
             </TitleRow>
@@ -161,7 +152,7 @@ export const HeroBanner = ({
           </>
         )}
 
-        {/* CASO 2: DETALHE DE EVENTO */}
+        {/* ... Restante do código (isEventDetail, isList, isHome) mantém-se igual ... */}
         {isEventDetail && (
           <>
             <EventName>{event.name}</EventName>
@@ -180,7 +171,6 @@ export const HeroBanner = ({
           </>
         )}
 
-        {/* CASO 3: BANNER DE LISTA */}
         {isList && (
           <>
             <EventName>{title}</EventName>
@@ -188,7 +178,6 @@ export const HeroBanner = ({
           </>
         )}
 
-        {/* CASO 4: BANNER DA HOME */}
         {isHome && (
           <>
             <EventName>

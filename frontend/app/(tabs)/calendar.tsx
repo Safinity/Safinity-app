@@ -3,15 +3,16 @@ import { View, StatusBar } from 'react-native';
 import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router'; // 1. Importar o router
 
 import Header from '../../components/ui/header';
 import SearchInput from '../../components/ui/SearchInput';
 import FilterTags from '../../components/ui/FilterTags';
 import { CalendarCard } from '../../components/CalendarCard';
 
-// 1. Importar os dados do JSON
 import calendarData from '../../data/calendar.json';
 
+// ... (teus styled components mantêm-se iguais)
 const Container = styled.View`
   flex: 1;
   background-color: ${({ theme }) => theme.colors.background};
@@ -70,11 +71,11 @@ const ButtonText = styled.Text`
 
 export default function CalendarScreen() {
   const insets = useSafeAreaInsets();
+  const router = useRouter(); // 2. Inicializar o router
   const [searchValue, setSearchValue] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Stages');
   const categories = ['Stages', 'Workshops', 'Podcasts', 'Business'];
 
-  // 2. Filtrar as atividades com base na categoria selecionada e na pesquisa
   const filteredActivities = calendarData.activities.filter(activity => {
     const matchesCategory = activity.category === selectedCategory;
     const matchesSearch = activity.title.toLowerCase().includes(searchValue.toLowerCase());
@@ -108,11 +109,9 @@ export default function CalendarScreen() {
           />
         </View>
 
-        {/* 3. Renderizar a lista filtrada */}
         {filteredActivities.length > 0 ? (
           filteredActivities.map((item, index) => (
             <View key={item.id}>
-              {/* Lógica para mostrar a data apenas quando ela muda na lista */}
               {(index === 0 || filteredActivities[index - 1].date !== item.date) && (
                 <DateHeader>{item.date}</DateHeader>
               )}
@@ -128,7 +127,8 @@ export default function CalendarScreen() {
         <View style={{ height: 180 }} />
       </ScrollContent>
 
-      <MyCalendarButton activeOpacity={0.8}>
+      {/* 3. Adicionar o onPress para navegar para a nova página */}
+      <MyCalendarButton activeOpacity={0.8} onPress={() => router.push('/(tabs)/my-calendar')}>
         <ButtonText>My calendar</ButtonText>
       </MyCalendarButton>
     </Container>

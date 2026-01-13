@@ -17,7 +17,7 @@
     },
     {
       "id": 1,
-      "name": "DECA",
+      "friendId": "u5",
       "lat": 40.628839261866396,
       "lng": -8.656657637412769,
       "type": "friend"
@@ -42,6 +42,27 @@
       "lat": 40.6315,
       "lng": -8.6555,
       "type": "entrance"
+    },
+    {
+      "id": 5,
+      "friendId": "u8",
+      "lat": 40.631,
+      "lng": -8.657,
+      "type": "friend"
+    },
+    {
+      "id": 6,
+      "friendId": "u1",
+      "lat": 40.6295,
+      "lng": -8.655,
+      "type": "friend"
+    },
+    {
+      "id": 7,
+      "friendId": "u9",
+      "lat": 40.63137772570192,
+      "lng": -8.659995788860291,
+      "type": "friend"
     }
   ],
   "stages": [

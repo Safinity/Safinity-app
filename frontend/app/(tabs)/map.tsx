@@ -1,8 +1,12 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { ScrollView, Dimensions, Platform, Alert, Pressable } from 'react-native';
+import { ScrollView, Dimensions, Platform, Pressable } from 'react-native';
 import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
 import Svg, { Polyline } from 'react-native-svg';
+
+// --- Imports for Association ---
+import users from '@/data/users.json';
+import { userImages } from '../../assets/images/Users/userImages';
 
 import Header from '../../components/ui/header';
 import SearchInput from '../../components/ui/SearchInput';
@@ -15,7 +19,7 @@ import { Colors, Spacing } from '../../constants/theme';
 import mapData from '../../data/mapdata.json';
 import { latLngToPixelFromBounds } from '../../utils/coordinates';
 import { MapStage } from '../../components/maps/MapStage';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const IMAGE_WIDTH = screenWidth * 2.5;
@@ -109,7 +113,6 @@ const LongCancelButton = styled.Pressable`
   gap: 6px;
   padding: 0 20px;
   elevation: 10;
-
   shadow-opacity: 0.3;
   shadow-offset: 0px 4px;
 `;
@@ -134,16 +137,24 @@ const TAG_TO_PIN_TYPE: Record<string, string[]> = {
   Entrance: ['entrance'],
 };
 
+// --- RESTORED & IMPROVED SEARCH LOGIC ---
+const getDisplayName = (item: any) => {
+  if (item.type === 'friend' && item.friendId) {
+    const user = users.find(u => u.id === item.friendId);
+    return user ? user.name : item.name;
+  }
+  return item.name;
+};
+
 const matchesSearch = (item: any, query: string) => {
   if (!query) return true;
-
   const q = query.toLowerCase();
-  return item.name?.toLowerCase().includes(q) || item.type?.toLowerCase().includes(q);
+  const name = getDisplayName(item).toLowerCase();
+  return name.includes(q) || item.type?.toLowerCase().includes(q);
 };
 
 export default function MapScreen() {
   const scrollRef = useRef<ScrollView>(null);
-
   const zoomScaleRef = useRef(1);
 
   const [searchValue, setSearchValue] = useState('');
@@ -165,10 +176,10 @@ export default function MapScreen() {
 
   const handlePinPress = (pin: any) => {
     const pos = latLngToPixelFromBounds(pin.lat, pin.lng, bounds, IMAGE_WIDTH, IMAGE_HEIGHT);
-
     const scale = zoomScaleRef.current;
 
-    setSelectedPin({ ...pin, px: pos.x, py: pos.y });
+    // Set selected pin with the dynamic name from user data
+    setSelectedPin({ ...pin, name: getDisplayName(pin), px: pos.x, py: pos.y });
 
     scrollRef.current?.scrollTo({
       x: pos.x * scale - screenWidth / 2,
@@ -179,9 +190,7 @@ export default function MapScreen() {
 
   const handleShowRoute = () => {
     if (!selectedPin) return;
-
     setDestinationName(selectedPin.name || 'Destino');
-
     const start = latLngToPixelFromBounds(
       CURRENT_LOCATION.lat,
       CURRENT_LOCATION.lng,
@@ -189,9 +198,7 @@ export default function MapScreen() {
       IMAGE_WIDTH,
       IMAGE_HEIGHT,
     );
-
     const end = { x: selectedPin.px, y: selectedPin.py };
-
     setActiveRoute([start, end]);
     setSelectedPin(null);
   };
@@ -201,6 +208,7 @@ export default function MapScreen() {
     setDestinationName('');
   };
 
+  // --- RESTORED ORIGINAL FILTERING FLOW ---
   const visiblePins =
     selectedTags.length === 0
       ? pins.filter(pin => matchesSearch(pin, searchValue))
@@ -214,6 +222,24 @@ export default function MapScreen() {
     selectedTags.length === 0 || selectedTags.includes('Stages')
       ? stages.filter(stage => matchesSearch(stage, searchValue))
       : [];
+
+  const { focusId } = useLocalSearchParams();
+
+  useEffect(() => {
+    if (focusId && pins) {
+      // Find the pin that matches the ID we sent
+      const targetPin = pins.find(p => p.friendId === focusId);
+
+      if (targetPin) {
+        // Wait a split second for the map image to render
+        const timer = setTimeout(() => {
+          handlePinPress(targetPin);
+        }, 300);
+
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [focusId, pins]);
   return (
     <Container>
       <MapScrollView
@@ -249,16 +275,21 @@ export default function MapScreen() {
           )}
         </Svg>
 
-        {visiblePins.map(pin => (
-          <MapPin
-            key={pin.id}
-            pin={pin}
-            bounds={bounds}
-            width={IMAGE_WIDTH}
-            height={IMAGE_HEIGHT}
-            onPress={() => handlePinPress(pin)}
-          />
-        ))}
+        {visiblePins.map(pin => {
+          // Association for the pin image
+          const friendData = pin.type === 'friend' ? users.find(u => u.id === pin.friendId) : null;
+          return (
+            <MapPin
+              key={pin.id}
+              pin={pin}
+              avatar={friendData ? userImages[friendData.image] : null}
+              bounds={bounds}
+              width={IMAGE_WIDTH}
+              height={IMAGE_HEIGHT}
+              onPress={() => handlePinPress(pin)}
+            />
+          );
+        })}
 
         {visibleStages.map(stage => (
           <MapStage
@@ -288,14 +319,13 @@ export default function MapScreen() {
         />
       </MapScrollView>
 
-      <Header onNotificationPress={() => {}} onProfilePress={() => {}} />
+      <Header />
 
       <OverlayContent pointerEvents="box-none">
         <PageHeader>
           <Ionicons name="location" size={28} color={Colors.primary} />
           <PageTitle>University of Aveiro</PageTitle>
         </PageHeader>
-
         <PaddingSearchInput>
           <SearchInput
             variant="mapa"
@@ -304,7 +334,6 @@ export default function MapScreen() {
             onChangeText={setSearchValue}
           />
         </PaddingSearchInput>
-
         <FilterTags
           tags={tags}
           selectedTags={selectedTags}

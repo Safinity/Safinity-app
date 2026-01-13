@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { ScrollView, Dimensions, Platform, Pressable } from 'react-native';
 import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -174,19 +174,22 @@ export default function MapScreen() {
     }, 50);
   }, []);
 
-  const handlePinPress = (pin: any) => {
-    const pos = latLngToPixelFromBounds(pin.lat, pin.lng, bounds, IMAGE_WIDTH, IMAGE_HEIGHT);
-    const scale = zoomScaleRef.current;
+  const handlePinPress = useCallback(
+    (pin: any) => {
+      const pos = latLngToPixelFromBounds(pin.lat, pin.lng, bounds, IMAGE_WIDTH, IMAGE_HEIGHT);
+      const scale = zoomScaleRef.current;
 
-    // Set selected pin with the dynamic name from user data
-    setSelectedPin({ ...pin, name: getDisplayName(pin), px: pos.x, py: pos.y });
+      // Set selected pin with the dynamic name from user data
+      setSelectedPin({ ...pin, name: getDisplayName(pin), px: pos.x, py: pos.y });
 
-    scrollRef.current?.scrollTo({
-      x: pos.x * scale - screenWidth / 2,
-      y: pos.y * scale - screenHeight / 2,
-      animated: true,
-    });
-  };
+      scrollRef.current?.scrollTo({
+        x: pos.x * scale - screenWidth / 2,
+        y: pos.y * scale - screenHeight / 2,
+        animated: true,
+      });
+    },
+    [bounds],
+  );
 
   const handleShowRoute = () => {
     if (!selectedPin) return;
@@ -239,7 +242,7 @@ export default function MapScreen() {
         return () => clearTimeout(timer);
       }
     }
-  }, [focusId, pins]);
+  }, [focusId, pins, handlePinPress]);
   return (
     <Container>
       <MapScrollView

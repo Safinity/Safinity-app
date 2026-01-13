@@ -121,7 +121,7 @@ export default function CalendarScreen() {
           ))
         ) : (
           <DateHeader style={{ textAlign: 'center', marginTop: 50 }}>
-            No events found for "{selectedCategory}"
+            No events found for &quot;{selectedCategory}&quot;
           </DateHeader>
         )}
 

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ScrollView, StatusBar, View, Modal, Pressable } from 'react-native';
+import React from 'react'; // Removido o useState
+import { ScrollView, StatusBar, View } from 'react-native'; // Removido o Modal
 import { useLocalSearchParams, useRouter, useNavigation } from 'expo-router';
 import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';

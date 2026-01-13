@@ -9,4 +9,5 @@ export const calendarImages: { [key: string]: any } = {
   '7.jpg': require('./7.jpg'),
   '8.jpg': require('./8.jpg'),
   '9.jpg': require('./9.jpg'),
+  '14.jpg': require('./14.jpg'),
 };

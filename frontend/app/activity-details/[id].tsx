@@ -1,19 +1,18 @@
-import React from 'react'; // Removido o useState
-import { ScrollView, StatusBar, View } from 'react-native'; // Removido o Modal
-import { useLocalSearchParams, useRouter, useNavigation } from 'expo-router';
+import React from 'react'; 
+import { ScrollView, StatusBar, View } from 'react-native'; 
+import { useLocalSearchParams, useRouter } from 'expo-router'; 
 import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
 
 // Componentes e Dados
 import { HeroBanner } from '../../components/HeroBanner';
-import calendarData from '../../data/calendar.json'; // Certifica-te que o caminho está correto
+import calendarData from '../../data/calendar.json'; 
 
 const Container = styled.View`
   flex: 1;
   background-color: ${({ theme }) => theme.colors.background};
 `;
 
-// Estilo da Seta de Voltar Corrigido
 const BackButton = styled.Pressable`
   position: absolute;
   top: 50px;
@@ -92,19 +91,14 @@ const Avatar = styled.Image`
 export default function ActivityDetailsScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
-  const navigation = useNavigation();
 
-  // Procura a atividade no teu JSON do calendário
+  // Procura a atividade no JSON
   const activity = calendarData.activities.find(item => item.id === id);
 
   if (!activity) return null;
 
   const handleBack = () => {
-    if (navigation.canGoBack()) {
-      navigation.goBack();
-    } else {
-      router.replace('/(tabs)/calendar');
-    }
+    router.push('/(tabs)/calendar');
   };
 
   return (
@@ -119,9 +113,7 @@ export default function ActivityDetailsScreen() {
           <DescriptionText>{activity.description || 'No description available.'}</DescriptionText>
 
           <RouteCard activeOpacity={0.8}>
-            <View
-              style={{ backgroundColor: 'rgba(255,255,255,0.1)', padding: 10, borderRadius: 12 }}
-            >
+            <View style={{ backgroundColor: 'rgba(255,255,255,0.1)', padding: 10, borderRadius: 12 }}>
               <Ionicons name="location" size={24} color="white" />
             </View>
             <RouteInfo>
@@ -132,20 +124,29 @@ export default function ActivityDetailsScreen() {
 
           <SectionTitle>Featuring</SectionTitle>
           <FeaturingSection>
-            <AvatarStack>
-              <Avatar source={{ uri: 'https://i.pravatar.cc/100?u=1' }} />
-              <Avatar source={{ uri: 'https://i.pravatar.cc/100?u=2' }} />
-            </AvatarStack>
-            <DescriptionText style={{ flex: 1 }}>
-              {activity.speakers ? activity.speakers.join(', ') : 'TBA'}
-            </DescriptionText>
+            {activity.featuring && activity.featuring.length > 0 ? (
+              <>
+                <AvatarStack>
+                  {activity.featuring.slice(0, 3).map((person, index) => (
+                    <Avatar 
+                      key={index} 
+                      source={{ uri: `https://i.pravatar.cc/100?u=${encodeURIComponent(person)}` }} 
+                    />
+                  ))}
+                </AvatarStack>
+                <DescriptionText style={{ flex: 1, marginLeft: 10 }}>
+                  {activity.featuring.join(', ')}
+                </DescriptionText>
+              </>
+            ) : (
+              <DescriptionText>To Be Announced</DescriptionText>
+            )}
           </FeaturingSection>
 
           <View style={{ height: 100 }} />
         </ContentCard>
       </ScrollView>
 
-      {/* A SETA AQUI NO FINAL GARANTE QUE FICA NO TOPO DE TUDO */}
       <BackButton onPress={handleBack}>
         <Ionicons name="chevron-back" size={28} color="white" />
       </BackButton>

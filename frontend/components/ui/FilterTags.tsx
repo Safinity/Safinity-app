@@ -1,27 +1,7 @@
 import React from 'react';
-import styled from 'styled-components/native';
-import { Colors, BorderRadius, Spacing } from '../../constants/theme';
+import styled, { useTheme } from 'styled-components/native';
 
 export type FilterTagsVariant = 'homepage' | 'mapa';
-
-const TAG_THEME = {
-  homepage: {
-    color: Colors.grayNavbar,
-    selectedColor: Colors.primary,
-    textColor: Colors.inactive,
-    selectedTextColor: Colors.white,
-    paddingLeft: 40,
-    paddingRight: 40,
-  },
-  mapa: {
-    color: Colors.background,
-    selectedColor: Colors.primary,
-    textColor: Colors.inactive,
-    selectedTextColor: Colors.white,
-    paddingLeft: 40,
-    paddingRight: 40,
-  },
-} as const;
 
 interface FilterTagsProps {
   tags: string[];
@@ -38,22 +18,20 @@ const TagsScrollView = styled.ScrollView.attrs(props => ({
   contentContainerStyle: props.contentContainerStyle,
 }))`
   flex-grow: 0;
-  margin-top: ${Spacing.md}px;
+  margin-top: ${({ theme }) => theme.spacing.md}px;
 `;
 
 const TagsContainer = styled.View`
   flex-direction: row;
-  gap: ${Spacing.sm}px;
-  padding-vertical: ${Spacing.xs}px;
+  gap: ${({ theme }) => theme.spacing.sm}px;
+  padding-vertical: ${({ theme }) => theme.spacing.xs}px;
 `;
 
 const Tag = styled.Pressable<{ selected: boolean; color: string; selectedColor: string }>`
   background-color: ${({ selected, color, selectedColor }) => (selected ? selectedColor : color)};
-  padding: ${Spacing.sm}px 18px;
-  border-radius: ${BorderRadius.round}px;
-  border-width: 1px;
-  border-color: ${({ selected, selectedColor }) => (selected ? selectedColor : 'transparent')};
-  min-height: 42px;
+  padding: ${({ theme }) => theme.spacing.sm}px 22px;
+  border-radius: ${({ theme }) => theme.borderRadius.round}px;
+  min-height: 44px;
   justify-content: center;
   align-items: center;
 `;
@@ -61,8 +39,11 @@ const Tag = styled.Pressable<{ selected: boolean; color: string; selectedColor: 
 const TagText = styled.Text<{ selected: boolean; textColor: string; selectedTextColor: string }>`
   color: ${({ selected, textColor, selectedTextColor }) =>
     selected ? selectedTextColor : textColor};
-  font-weight: 500;
-  font-size: 14px;
+
+  /* Token: textoFiltros */
+  font-family: ${({ theme }) => theme.text.textoFiltros.fontFamily};
+  font-size: ${({ theme }) => theme.text.textoFiltros.fontSize}px;
+  line-height: ${({ theme }) => theme.text.textoFiltros.lineHeight}px;
 `;
 
 const FilterTags: React.FC<FilterTagsProps> = ({
@@ -73,15 +54,37 @@ const FilterTags: React.FC<FilterTagsProps> = ({
   style,
   showsHorizontalScrollIndicator = false,
 }) => {
-  const theme = TAG_THEME[variant];
+  const themeContext = useTheme();
+
+  // Mapeamento de cores utilizando os tokens do theme
+  const TAG_THEME = {
+    homepage: {
+      color: themeContext.colors.grayNavbar,
+      selectedColor: themeContext.colors.primary,
+      textColor: themeContext.colors.inactive,
+      selectedTextColor: themeContext.colors.white,
+      paddingLeft: 40,
+      paddingRight: 40,
+    },
+    mapa: {
+      color: themeContext.colors.background,
+      selectedColor: themeContext.colors.primary,
+      textColor: themeContext.colors.inactive,
+      selectedTextColor: themeContext.colors.white,
+      paddingLeft: 40,
+      paddingRight: 40,
+    },
+  } as const;
+
+  const config = TAG_THEME[variant];
 
   return (
     <TagsScrollView
       style={style}
       showsHorizontalScrollIndicator={showsHorizontalScrollIndicator}
       contentContainerStyle={{
-        paddingLeft: theme.paddingLeft,
-        paddingRight: theme.paddingRight,
+        paddingLeft: config.paddingLeft,
+        paddingRight: config.paddingRight,
       }}
     >
       <TagsContainer>
@@ -92,14 +95,14 @@ const FilterTags: React.FC<FilterTagsProps> = ({
             <Tag
               key={tag}
               selected={isSelected}
-              color={theme.color}
-              selectedColor={theme.selectedColor}
+              color={config.color}
+              selectedColor={config.selectedColor}
               onPress={() => onTagPress(tag)}
             >
               <TagText
                 selected={isSelected}
-                textColor={theme.textColor}
-                selectedTextColor={theme.selectedTextColor}
+                textColor={config.textColor}
+                selectedTextColor={config.selectedTextColor}
               >
                 {tag}
               </TagText>

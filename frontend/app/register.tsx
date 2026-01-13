@@ -52,7 +52,11 @@ export default function Register() {
 
         <Checkbox checked={checked} onToggle={() => setChecked(!checked)} />
 
-        <PrimaryButton title="Create account" disabled={!checked} onPress={() => {}} />
+        <PrimaryButton
+          title="Create account"
+          disabled={!checked}
+          onPress={() => router.push('/onboarding')}
+        />
       </Container>
     </Screen>
   );

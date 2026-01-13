@@ -35,16 +35,21 @@ const SectionHeader = styled.View`
 `;
 
 const SectionTitle = styled.Text`
-  font-size: 22px;
-  font-weight: bold;
   color: ${({ theme }) => theme.colors.white};
+  /* Token: h */
+  font-family: ${({ theme }) => theme.text.titulo.h.fontFamily};
+  font-size: ${({ theme }) => theme.text.titulo.h.fontSize}px;
 `;
 
 // 2. Ajustei o SeeMore para parecer um botão (adicionado padding para facilitar o toque)
 const SeeMore = styled.Text`
-  font-size: 14px;
+  /* Token: corpo.corpoTexto */
+  font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
+  font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
+  line-height: ${({ theme }) => theme.text.corpo.corpoTexto.lineHeight}px;
+
+  /* Cor e espaçamento */
   color: ${({ theme }) => theme.colors.primary_50};
-  font-weight: extralight;
   padding: 5px;
 `;
 

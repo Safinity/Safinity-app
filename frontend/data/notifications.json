@@ -1,0 +1,51 @@
+[
+  {
+    "id": "1",
+    "type": "emergency",
+    "title": "Security Alert",
+    "message": "Heavy rain expected in 15 mins. Please move to covered areas near the Food Court.",
+    "time": "2m ago",
+    "read": false
+  },
+  {
+    "id": "2",
+    "type": "crowd",
+    "title": "Crowd Warning",
+    "message": "Stage 1 is currently at 90% capacity. Consider heading to Stage 3 for more space.",
+    "time": "20m ago",
+    "read": false
+  },
+  {
+    "id": "3",
+    "type": "hydrate",
+    "title": "Stay Hydrated!",
+    "message": "It's 28°C. Remember to drink water. Nearest fountain is 50m behind you.",
+    "time": "1h ago",
+    "read": true
+  },
+  {
+    "id": "4",
+    "type": "friend",
+    "title": "Friend Request",
+    "message": "João wants to join your circle. Accept to see their location on the map.",
+    "time": "2h ago",
+    "avatar": "https://i.pravatar.cc/150?u=joao",
+    "read": true
+  },
+  {
+    "id": "5",
+    "type": "event",
+    "title": "Show Ending",
+    "message": "The performance at the Acoustic Tent is finishing. Check the schedule for what's next!",
+    "time": "3h ago",
+    "read": true
+  },
+  {
+    "id": "6",
+    "type": "activity",
+    "title": "Lost & Found",
+    "message": "A set of keys was turned in near your last location. Check the Info Point.",
+    "time": "5h ago",
+    "read": true
+  }
+]

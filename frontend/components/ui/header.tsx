@@ -38,7 +38,7 @@ const Header: React.FC<HeaderProps> = ({
             </LogoContainer>
 
             <IconRow>
-              <IconButton>
+              <IconButton onPress={() => router.push('/notifications')}>
                 <Ionicons name="notifications-outline" size={24} color={Colors.white} />
               </IconButton>
 
@@ -53,7 +53,7 @@ const Header: React.FC<HeaderProps> = ({
           <BackContainer>
             <BackButtonRow>
               <IconButton onPress={() => router.back()}>
-                <Ionicons name="arrow-back" size={26} color={Colors.white} />
+                <Ionicons name="arrow-back" size={23} color={Colors.white} />
               </IconButton>
             </BackButtonRow>
 

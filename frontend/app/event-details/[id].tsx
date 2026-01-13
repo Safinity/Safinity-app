@@ -129,7 +129,7 @@ const ModalContent = styled.View`
 
 const ModalTitle = styled.Text`
   color: ${({ theme }) => theme.colors.white};
-  font-family: ${({ theme }) => theme.text.titulo.h1.fontFamily};
+  font-family: ${({ theme }) => theme.text.titulo.h.fontFamily};
   font-size: 24px;
   margin-bottom: 20px;
 `;
@@ -162,6 +162,7 @@ const ModalButtons = styled.View`
   flex-direction: row;
   justify-content: space-between;
   width: 100%;
+  font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
 `;
 
 const ModalBtn = styled.TouchableOpacity<{ isPrimary?: boolean }>`
@@ -173,11 +174,8 @@ const ModalBtn = styled.TouchableOpacity<{ isPrimary?: boolean }>`
 `;
 
 const ModalBtnText = styled.Text<{ isPrimary?: boolean }>`
-  /* Aplicando o estilo corpoTexto conforme solicitado */
-  font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
-  font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
   font-weight: bold;
-
+  font-size: 16px;
   color: ${({ isPrimary, theme }) => (isPrimary ? theme.colors.white : theme.colors.primary)};
 `;
 
@@ -215,7 +213,7 @@ export default function EventDetailsScreen() {
             <ModalTitle>Link my ticket</ModalTitle>
             <ModalDescription>
               Your ticket, whether physical or digital, has a{' '}
-              <ModalDescription style={{ color: '#D3B3EB', fontWeight: 'bold' }}>
+              <ModalDescription style={{ color: '#E5D9F2', fontWeight: 'bold' }}>
                 6-digit validation code
               </ModalDescription>
               . Now is the time to confirm your entry to the event by entering that code below.

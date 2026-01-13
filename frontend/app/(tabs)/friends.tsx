@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 
 import users from '@/data/users.json';
+import { userImages } from '../../assets/images/Users/userImages';
 import auth from '@/data/auth.json';
 import Header from '@/components/ui/header';
 import FindFriendButton from '@/components/FindFriendButton';
@@ -71,7 +72,7 @@ export default function FriendsScreen() {
         {onSameEvent.map((friend: any) => (
           <TouchableOpacity key={friend.id} onPress={() => router.push(`/${friend.id}`)}>
             <FriendRow>
-              <Avatar source={{ uri: friend.image }} />
+              <Avatar source={userImages[friend.image]} />
               <Info>
                 <Name>{friend.name}</Name>
                 <Username>@{friend.username}</Username>
@@ -89,7 +90,7 @@ export default function FriendsScreen() {
         {otherFriends.map((friend: any) => (
           <TouchableOpacity key={friend.id} onPress={() => router.push(`/${friend.id}`)}>
             <FriendRow>
-              <Avatar source={{ uri: friend.image }} />
+              <Avatar source={userImages[friend.image]} />
               <Info>
                 <Name>{friend.name}</Name>
                 <Username>@{friend.username}</Username>

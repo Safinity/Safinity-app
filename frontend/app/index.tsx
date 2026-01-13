@@ -31,7 +31,7 @@ export default function LoadingScreen() {
       <Animated.Image
         source={Logo}
         style={{
-          width: '80%',
+          height: 140,
           aspectRatio: 1,
           opacity,
         }}

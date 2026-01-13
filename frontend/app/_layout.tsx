@@ -3,6 +3,7 @@ import { Slot } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import styled, { ThemeProvider } from 'styled-components/native';
 import { theme } from '../constants/theme';
+import { UserProvider } from '@/context/UserContext';
 
 import {
   useFonts,
@@ -32,11 +33,13 @@ export default function RootLayout() {
   if (!fontsLoaded) return null;
 
   return (
-    <ThemeProvider theme={theme}>
-      <Container>
-        <Slot />
-      </Container>
-      <StatusBar style="light" />
-    </ThemeProvider>
+    <UserProvider>
+      <ThemeProvider theme={theme}>
+        <Container>
+          <Slot />
+        </Container>
+        <StatusBar style="light" />
+      </ThemeProvider>
+    </UserProvider>
   );
 }

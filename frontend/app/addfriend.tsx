@@ -1,124 +1,176 @@
 import React, { useState } from 'react';
-import { FlatList, TextInput } from 'react-native';
 import styled from 'styled-components/native';
-import Header from '@/components/ui/header';
-import users from '@/data/users.json';
 import { Ionicons } from '@expo/vector-icons';
 
+import { useUser } from '@/context/UserContext';
+import users from '@/data/users.json';
+import Header from '@/components/ui/header';
+import SearchBarQR from '@/components/SearchBarQR';
+import FriendActionButton from '@/components/FriendActionButton';
+
 export default function AddFriendScreen() {
-  const [query, setQuery] = useState('');
-  const [recentSearches, setRecentSearches] = useState<any[]>([]);
+  const { currentUser, addFriend, removeFriend } = useUser();
+  const [search, setSearch] = useState('');
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
 
-  // Filtra utilizadores por nome ou username
-  const filteredUsers = users.filter(
-    user =>
-      user.name.toLowerCase().includes(query.toLowerCase()) ||
-      user.username.toLowerCase().includes(query.toLowerCase()),
-  );
+  if (!currentUser) {
+    return (
+      <Container>
+        <LoadingText>Loading...</LoadingText>
+      </Container>
+    );
+  }
 
-  // Adiciona à lista de pesquisas recentes
-  const handleSelectUser = (user: any) => {
-    if (!recentSearches.find(u => u.id === user.id)) {
-      setRecentSearches(prev => [user, ...prev]);
+  const handleSubmitSearch = () => {
+    if (search.trim().length > 0) {
+      setRecentSearches(prev => {
+        const updated = [search, ...prev.filter(item => item !== search)];
+        return updated.slice(0, 5);
+      });
     }
-    // Aqui podes adicionar lógica para adicionar amigo
   };
+
+  const filteredUsers =
+    search.length === 0
+      ? []
+      : users.filter(u => {
+          const text = search.toLowerCase();
+          const matches =
+            u.name.toLowerCase().includes(text) || u.username.toLowerCase().includes(text);
+
+          return u.id !== currentUser.id && matches;
+        });
+
+  const isFriend = (id: string) => currentUser.friends.includes(id);
 
   return (
     <Container>
-      <Header variant="default" title="Add friend" showBottomDivider={false} />
+      <Header variant="back" title="Add friend" showBottomDivider={false} />
 
-      <SearchBar>
-        <SearchInput
+      <ScrollArea>
+        <SearchBarQR
+          value={search}
+          onChangeText={setSearch}
+          onSubmitEditing={handleSubmitSearch}
+          onPressQR={() => console.log('abrir scanner')}
           placeholder="Find friends"
-          placeholderTextColor="#aaa"
-          value={query}
-          onChangeText={setQuery}
         />
-        <QRButton>
-          <Ionicons name="qr-code-outline" size={24} color="white" />
-        </QRButton>
-      </SearchBar>
+        {search.length === 0 ? (
+          <>
+            <Subtitle>Recent searches</Subtitle>
 
-      <SectionTitle>Recent searches</SectionTitle>
-      <FlatList
-        data={recentSearches}
-        keyExtractor={item => item.id}
-        renderItem={({ item }) => (
-          <UserRow onPress={() => handleSelectUser(item)}>
-            <Avatar source={{ uri: item.image }} />
-            <UserInfo>
-              <Name>{item.name}</Name>
-              <Username>@{item.username}</Username>
-            </UserInfo>
-            <AddIcon>
-              <Ionicons name="person-add-outline" size={22} color="white" />
-            </AddIcon>
-          </UserRow>
+            {recentSearches.length === 0 ? (
+              <EmptyText>No recent searches</EmptyText>
+            ) : (
+              recentSearches.map((item, index) => (
+                <RecentItem key={index} onPress={() => setSearch(item)}>
+                  <Ionicons name="time-outline" size={18} color="white" />
+                  <RecentText>{item}</RecentText>
+                </RecentItem>
+              ))
+            )}
+          </>
+        ) : (
+          <>
+            <Subtitle>Results</Subtitle>
+
+            {filteredUsers.map(user => (
+              <UserRow key={user.id}>
+                <Avatar source={{ uri: user.image }} />
+                <Info>
+                  <Name>{user.name}</Name>
+                  <Username>@{user.username}</Username>
+                </Info>
+
+                {isFriend(user.id) ? (
+                  <FriendActionButton variant="remove" onPress={() => removeFriend(user.id)} />
+                ) : (
+                  <FriendActionButton variant="add" onPress={() => addFriend(user.id)} />
+                )}
+              </UserRow>
+            ))}
+          </>
         )}
-      />
+      </ScrollArea>
     </Container>
   );
 }
 
 const Container = styled.View`
   flex: 1;
-  background-color: ${({ theme }) => theme.colors.background.main};
+  background-color: ${({ theme }) => theme.colors.background};
+  padding: ${({ theme }) => theme.spacing.margemLateral}px;
+  padding-top: 80px;
 `;
 
-const SearchBar = styled.View`
-  flex-direction: row;
-  align-items: center;
-  margin: 16px;
-  background-color: ${({ theme }) => theme.colors.background.alt};
-  border-radius: 12px;
-  padding: 8px 12px;
+const LoadingText = styled.Text`
+  margin-top: 50px;
+  text-align: center;
+  color: ${({ theme }) => theme.colors.white};
 `;
 
-const SearchInput = styled.TextInput`
+const ScrollArea = styled.ScrollView.attrs({
+  showsVerticalScrollIndicator: false,
+  bounces: false,
+  contentContainerStyle: {
+    paddingTop: 50,
+  },
+})`
   flex: 1;
-  color: white;
-  font-size: 16px;
 `;
 
-const QRButton = styled.TouchableOpacity`
-  padding: 4px;
+const Subtitle = styled.Text`
+  font-family: ${({ theme }) => theme.text.titulo.h3.fontFamily};
+  font-size: ${({ theme }) => theme.text.titulo.h3.fontSize}px;
+  color: ${({ theme }) => theme.colors.palette.primary.light50};
+  margin-bottom: 16px;
 `;
 
-const SectionTitle = styled.Text`
-  margin: 16px;
-  font-size: 16px;
-  font-weight: bold;
-  color: white;
+const EmptyText = styled.Text`
+  color: ${({ theme }) => theme.colors.white};
+  opacity: 0.5;
+  font-size: 14px;
+  margin-bottom: 20px;
 `;
 
-const UserRow = styled.TouchableOpacity`
+const RecentItem = styled.TouchableOpacity`
   flex-direction: row;
   align-items: center;
-  padding: 12px 16px;
+  padding-vertical: 10px;
+`;
+
+const RecentText = styled.Text`
+  color: ${({ theme }) => theme.colors.white};
+  font-size: 16px;
+  margin-left: 10px;
+`;
+
+const UserRow = styled.View`
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 16px;
 `;
 
 const Avatar = styled.Image`
-  width: 40px;
-  height: 40px;
-  border-radius: 20px;
+  width: 70px;
+  height: 70px;
+  border-radius: ${({ theme }) => theme.borderRadius.round}px;
+  background-color: #ccc;
 `;
 
-const UserInfo = styled.View`
+const Info = styled.View`
   flex: 1;
   margin-left: 12px;
 `;
 
 const Name = styled.Text`
-  color: white;
-  font-size: 16px;
+  font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
+  font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
+  color: ${({ theme }) => theme.colors.white};
 `;
 
 const Username = styled.Text`
-  color: #aaa;
-  font-size: 14px;
-`;
-
-const AddIcon = styled.View`
-  padding: 4px;
+  font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
+  font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
+  color: ${({ theme }) => theme.colors.white};
 `;

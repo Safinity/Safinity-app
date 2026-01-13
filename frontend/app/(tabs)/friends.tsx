@@ -10,11 +10,9 @@ import auth from '@/data/auth.json';
 import Header from '@/components/ui/header';
 import FindFriendButton from '@/components/FindFriendButton';
 import PingFriend from '@/components/VibrateButton';
-import RemoveFriend from '@/components/RemoveFriend';
+import RemoveFriend from '@/components/FriendActionButton';
 
 export default function FriendsScreen() {
-  const navigation = useNavigation();
-
   // Estado que guarda o utilizador autenticado
   const [currentUser, setCurrentUser] = useState<any>(null);
 

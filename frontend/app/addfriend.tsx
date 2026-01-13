@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 
 import { useUser } from '@/context/UserContext';
+import { userImages } from '../assets/images/Users/userImages';
 import users from '@/data/users.json';
 import Header from '@/components/ui/header';
 import SearchBarQR from '@/components/SearchBarQR';
@@ -79,7 +80,7 @@ export default function AddFriendScreen() {
             {filteredUsers.map(user => (
               <TouchableOpacity key={user.id} onPress={() => router.push(`/${user.id}`)}>
                 <UserRow>
-                  <Avatar source={{ uri: user.image }} />
+                  <Avatar source={userImages[user.image]} />
                   <Info>
                     <Name>{user.name}</Name>
                     <Username>@{user.username}</Username>

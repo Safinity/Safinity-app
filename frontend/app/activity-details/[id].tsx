@@ -1,12 +1,12 @@
-import React from 'react'; 
-import { ScrollView, StatusBar, View } from 'react-native'; 
-import { useLocalSearchParams, useRouter } from 'expo-router'; 
+import React from 'react';
+import { ScrollView, StatusBar, View } from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
 
 // Componentes e Dados
 import { HeroBanner } from '../../components/HeroBanner';
-import calendarData from '../../data/calendar.json'; 
+import calendarData from '../../data/calendar.json';
 
 const Container = styled.View`
   flex: 1;
@@ -113,7 +113,9 @@ export default function ActivityDetailsScreen() {
           <DescriptionText>{activity.description || 'No description available.'}</DescriptionText>
 
           <RouteCard activeOpacity={0.8}>
-            <View style={{ backgroundColor: 'rgba(255,255,255,0.1)', padding: 10, borderRadius: 12 }}>
+            <View
+              style={{ backgroundColor: 'rgba(255,255,255,0.1)', padding: 10, borderRadius: 12 }}
+            >
               <Ionicons name="location" size={24} color="white" />
             </View>
             <RouteInfo>
@@ -128,9 +130,9 @@ export default function ActivityDetailsScreen() {
               <>
                 <AvatarStack>
                   {activity.featuring.slice(0, 3).map((person, index) => (
-                    <Avatar 
-                      key={index} 
-                      source={{ uri: `https://i.pravatar.cc/100?u=${encodeURIComponent(person)}` }} 
+                    <Avatar
+                      key={index}
+                      source={{ uri: `https://i.pravatar.cc/100?u=${encodeURIComponent(person)}` }}
                     />
                   ))}
                 </AvatarStack>

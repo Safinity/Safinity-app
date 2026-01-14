@@ -7,11 +7,10 @@ import imgCard from '../assets/image-home-card.png';
 
 const Page = styled.div`
   min-height: 100vh;
-  background-color: var(--background);
 `;
 
 const Content = styled.div`
-  padding: 64px var(--spacing-margem-lateral);
+  padding: 64px;
 
   display: grid;
   grid-template-columns: 1fr 1fr;

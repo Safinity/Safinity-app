@@ -1,8 +1,8 @@
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { FlatList, ScrollView } from 'react-native';
+import { FlatList, ScrollView, TouchableOpacity, Pressable, View } from 'react-native';
 import styled from 'styled-components/native';
-import Header from '../../../components/ui/header';
+import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { userImages } from '../../../assets/images/Users/userImages';
@@ -14,126 +14,29 @@ import users from '../../../data/users.json';
 
 import EditIcon from '../../../assets/Icons/edit.png';
 
-export default function Profile() {
-  const [user, setUser] = useState<any>(null);
-  const [imageSource, setImageSource] = useState<any>(null);
+// --- Styled Components do Header ---
+const HeaderContainer = styled.View`
+  margin-bottom: 10px;
+  padding: 60px 30px 0px;
+  z-index: 2;
+`;
 
-  useEffect(() => {
-    const currentId = auth.currentUserId;
-    const foundUser = users.find(u => u.id === currentId);
-    setUser(foundUser);
+const BackButton = styled.TouchableOpacity`
+  margin-bottom: 20px;
+  width: 40px;
+`;
 
-    if (foundUser) {
-      const imageFileName = foundUser.image;
+const Title = styled.Text`
+  color: ${({ theme }) => theme.colors.white};
+  font-family: ${({ theme }) => theme.text.titulo.h1.fontFamily};
+  font-size: ${({ theme }) => theme.text.titulo.h1.fontSize}px;
+  font-weight: bold;
+`;
 
-      const userImage = userImages[imageFileName] || userImages['default'];
-
-      if (userImage) {
-        setImageSource(userImage);
-      } else {
-        console.warn(`Imagem não encontrada para: ${imageFileName}`);
-        setImageSource(userImages['default']);
-      }
-    }
-  }, []);
-
-  if (!user || !imageSource) {
-    return null;
-  }
-
-  const userPastEvents = eventsData.events.filter(event => user.pastEvents.includes(event.id));
-
-  const handleEditProfile = () => {
-    router.push('/perfil/edit-profile');
-  };
-
-  const handleNotifications = () => {
-    router.push('/perfil/notifications-settings');
-  };
-
-  const handleSecurity = () => {
-    router.push('/perfil/security');
-  };
-
-  return (
-    <Container>
-      <TopGradient
-        colors={['rgba(190, 142, 224)', 'rgba(34, 39, 52, 0)']}
-        locations={[0, 0.33]}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 3 }}
-      />
-
-      <Header variant="back" title="Profile" />
-
-      <PaddedContent>
-        <AvatarContainer>
-          <CircleContainer>
-            <AvatarCircle>
-              <Avatar source={imageSource} />
-            </AvatarCircle>
-          </CircleContainer>
-
-          <EditButtonContainer onPress={handleEditProfile}>
-            <EditIconCircle>
-              <EditImage source={EditIcon} />
-            </EditIconCircle>
-          </EditButtonContainer>
-        </AvatarContainer>
-
-        <Name>{user.name}</Name>
-        <Username>@{user.username}</Username>
-
-        <LinkButton>
-          <LinkButtonText>Link my ticket</LinkButtonText>
-        </LinkButton>
-
-        <SectionHeader>
-          <SectionTitle>Past Events</SectionTitle>
-          <SeeMore>See more</SeeMore>
-        </SectionHeader>
-      </PaddedContent>
-
-      <EventsContainer>
-        <FlatList
-          horizontal
-          data={userPastEvents}
-          renderItem={({ item }) => (
-            <EventWrapper>
-              <EventCard event={item} />
-            </EventWrapper>
-          )}
-          keyExtractor={item => item.id}
-          showsHorizontalScrollIndicator={false}
-        />
-      </EventsContainer>
-
-      <PaddedContent>
-        <SectionTitle>Settings</SectionTitle>
-
-        <SettingsRow onPress={handleNotifications}>
-          <SettingsText>Notifications</SettingsText>
-          <SettingsIcon>›</SettingsIcon>
-        </SettingsRow>
-
-        <SettingsRow onPress={handleSecurity}>
-          <SettingsText>Password and Security</SettingsText>
-          <SettingsIcon>›</SettingsIcon>
-        </SettingsRow>
-        <SettingsRow>
-          <SettingsText>Terms and Conditions</SettingsText>
-          <SettingsIcon>›</SettingsIcon>
-        </SettingsRow>
-
-        <LogoutButton>
-          <LogoutText>Log out</LogoutText>
-        </LogoutButton>
-      </PaddedContent>
-    </Container>
-  );
-}
-
-const Container = styled(ScrollView)`
+// --- Perfil Components ---
+const Container = styled(ScrollView).attrs({
+  showsVerticalScrollIndicator: false,
+})`
   flex: 1;
   background-color: ${({ theme }) => theme.colors.background};
 `;
@@ -143,21 +46,17 @@ const TopGradient = styled(LinearGradient)`
   top: 0;
   left: 0;
   right: 0;
-  height: 33%; /* 1/3 da página */
+  height: 33%;
   z-index: 0;
 `;
 
 const AvatarContainer = styled.View`
   align-items: center;
-  margin-top: ${({ theme }) => theme.spacing.xxl}px;
+  margin-top: 20px;
   margin-bottom: 20px;
   position: relative;
   width: 160px;
   align-self: center;
-  z-index: 1;
-`;
-
-const CircleContainer = styled.View`
   z-index: 1;
 `;
 
@@ -200,7 +99,6 @@ const EditImage = styled.Image`
 const PaddedContent = styled.View`
   padding: 0 ${({ theme }) => theme.spacing.margemLateral}px;
   z-index: 1;
-  position: relative;
 `;
 
 const Name = styled.Text`
@@ -209,7 +107,6 @@ const Name = styled.Text`
   align-self: center;
   margin-top: 10px;
   font-weight: 600;
-  z-index: 1;
 `;
 
 const Username = styled.Text`
@@ -217,7 +114,6 @@ const Username = styled.Text`
   color: #ccc;
   align-self: center;
   margin-top: 4px;
-  z-index: 1;
 `;
 
 const LinkButton = styled.TouchableOpacity`
@@ -230,7 +126,6 @@ const LinkButton = styled.TouchableOpacity`
   padding: 10px 20px;
   margin: 24px 0;
   align-self: center;
-  z-index: 1;
 `;
 
 const LinkButtonText = styled.Text`
@@ -238,35 +133,27 @@ const LinkButtonText = styled.Text`
   font-family: ${Fonts.weights.medium};
 `;
 
+// --- IGUAL À HOME PAGE ---
 const SectionHeader = styled.View`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
-  z-index: 1;
+  margin-top: 20px; /* Ajustado para o perfil */
+  margin-bottom: ${({ theme }) => theme.spacing.md}px;
 `;
 
 const SectionTitle = styled.Text`
-  font-size: 18px;
-  color: white;
-  font-weight: 600;
+  color: ${({ theme }) => theme.colors.white};
+  font-family: ${({ theme }) => theme.text.titulo.h1.fontFamily};
+  font-size: ${({ theme }) => theme.text.titulo.h1.fontSize}px;
 `;
 
 const SeeMore = styled.Text`
-  color: ${({ theme }) => theme.colors.palette.primary.light50};
-  font-size: 14px;
-`;
-
-const EventsContainer = styled.View`
-  margin-bottom: 32px;
-  margin-left: ${({ theme }) => theme.spacing.margemLateral}px;
-  z-index: 1;
-  position: relative;
-`;
-
-const EventWrapper = styled.View`
-  width: 280px;
-  margin-right: 16px;
+  font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
+  font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
+  line-height: ${({ theme }) => theme.text.corpo.corpoTexto.lineHeight}px;
+  color: ${({ theme }) => theme.colors.primary_50};
+  padding: 5px;
 `;
 
 const SettingsRow = styled.TouchableOpacity`
@@ -276,8 +163,6 @@ const SettingsRow = styled.TouchableOpacity`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  z-index: 1;
-  position: relative;
 `;
 
 const SettingsText = styled.Text`
@@ -289,7 +174,6 @@ const SettingsText = styled.Text`
 const SettingsIcon = styled.Text`
   color: ${({ theme }) => theme.colors.white};
   font-size: 24px;
-  font-family: ${Fonts.weights.medium};
 `;
 
 const LogoutButton = styled.TouchableOpacity`
@@ -299,8 +183,6 @@ const LogoutButton = styled.TouchableOpacity`
   margin-top: 24px;
   margin-bottom: 110px;
   align-self: center;
-  z-index: 1;
-  position: relative;
 `;
 
 const LogoutText = styled.Text`
@@ -308,3 +190,108 @@ const LogoutText = styled.Text`
   font-family: ${Fonts.weights.medium};
   font-size: 16px;
 `;
+
+export default function Profile() {
+  const [user, setUser] = useState<any>(null);
+  const [imageSource, setImageSource] = useState<any>(null);
+
+  useEffect(() => {
+    const currentId = auth.currentUserId;
+    const foundUser = users.find(u => u.id === currentId);
+    setUser(foundUser);
+
+    if (foundUser) {
+      const imageFileName = foundUser.image;
+      const userImage = userImages[imageFileName] || userImages['default'];
+      setImageSource(userImage);
+    }
+  }, []);
+
+  if (!user || !imageSource) return null;
+
+  const userPastEvents = eventsData.events.filter(event => user.pastEvents.includes(event.id));
+
+  return (
+    <Container>
+      <TopGradient
+        colors={['rgba(190, 142, 224)', 'rgba(34, 39, 52, 0)']}
+        locations={[0, 0.33]}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 3 }}
+      />
+
+      <HeaderContainer>
+        <BackButton onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={28} color="white" />
+        </BackButton>
+        <Title>Profile</Title>
+      </HeaderContainer>
+
+      <PaddedContent>
+        <AvatarContainer>
+          <AvatarCircle>
+            <Avatar source={imageSource} />
+          </AvatarCircle>
+          <EditButtonContainer onPress={() => router.push('/perfil/edit-profile')}>
+            <EditIconCircle>
+              <EditImage source={EditIcon} />
+            </EditIconCircle>
+          </EditButtonContainer>
+        </AvatarContainer>
+
+        <Name>{user.name}</Name>
+        <Username>@{user.username}</Username>
+
+        <LinkButton>
+          <LinkButtonText>Link my ticket</LinkButtonText>
+        </LinkButton>
+
+        {/* ESTRUTURA IGUAL À HOME */}
+        <SectionHeader>
+          <SectionTitle>Past Events</SectionTitle>
+          <Pressable onPress={() => router.push('/events-list')}>
+            <SeeMore>See more</SeeMore>
+          </Pressable>
+        </SectionHeader>
+      </PaddedContent>
+
+      <FlatList
+        horizontal
+        data={userPastEvents}
+        renderItem={({ item }) => (
+          <View style={{ width: 280, marginRight: 16 }}>
+            <EventCard event={item} />
+          </View>
+        )}
+        keyExtractor={item => item.id}
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingLeft: 40, paddingRight: 40 }}
+      />
+
+      <PaddedContent>
+        <View style={{ marginTop: 40 }}>
+          <SectionTitle>Settings</SectionTitle>
+        </View>
+
+        <SettingsRow onPress={() => router.push('/perfil/notifications-settings')}>
+          <SettingsText>Notifications</SettingsText>
+          <SettingsIcon>›</SettingsIcon>
+        </SettingsRow>
+
+        <SettingsRow onPress={() => router.push('/perfil/security')}>
+          <SettingsText>Password and Security</SettingsText>
+          <SettingsIcon>›</SettingsIcon>
+        </SettingsRow>
+
+        <SettingsRow>
+          <SettingsText>Terms and Conditions</SettingsText>
+          <SettingsIcon>›</SettingsIcon>
+        </SettingsRow>
+
+        <LogoutButton>
+          <LogoutText>Log out</LogoutText>
+        </LogoutButton>
+      </PaddedContent>
+    </Container>
+  );
+}

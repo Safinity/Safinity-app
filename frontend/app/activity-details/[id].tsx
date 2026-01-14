@@ -112,7 +112,8 @@ export default function ActivityDetailsScreen() {
           <SectionTitle>Description</SectionTitle>
           <DescriptionText>{activity.description || 'No description available.'}</DescriptionText>
 
-          <RouteCard activeOpacity={0.8}>
+          {/* LIGAÇÃO AO MAPA ADICIONADA AQUI */}
+          <RouteCard activeOpacity={0.8} onPress={() => router.push('/(tabs)/map')}>
             <View
               style={{ backgroundColor: 'rgba(255,255,255,0.1)', padding: 10, borderRadius: 12 }}
             >

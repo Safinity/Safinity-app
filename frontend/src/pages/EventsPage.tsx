@@ -8,7 +8,6 @@ import Navbar from '../components/Navbar';
 const EventsPage: React.FC = () => {
   return (
     <>
-      <Navbar userName="Jorge" avatarUrl="/Ellipse.png" />
       <PageWrapper>
         <Header>
           <Title>Events List</Title>

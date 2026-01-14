@@ -4,13 +4,10 @@ import '../theme/theme.ts';
 
 import alerts from '../data/alerts.json';
 import { AlertsBar } from '../components/AlertBar';
-import Navbar from '../components/Navbar';
 
 export const Alerts: React.FC = () => {
   return (
     <Container>
-      <Navbar userName="Jorge" avatarUrl="/Ellipse.png"></Navbar>
-
       <Content>
         <Title>Alerts</Title>
         <Subtitle>Web Summit 2025</Subtitle>

@@ -1,9 +1,12 @@
 import styled from 'styled-components';
 import logoNavbar from '../assets/logo-navbar.png';
 
+
+
 interface NavbarProps {
   userName: string;
   avatarUrl?: string;
+  onMenuClick?: () => void;
 }
 
 const Container = styled.div`
@@ -41,9 +44,20 @@ const Avatar = styled.img`
   object-fit: cover;
 `;
 
-export default function Navbar({ userName, avatarUrl }: NavbarProps) {
+const Hamburger = styled.button`
+  background: none;
+  border: none;
+  color: ${({ theme }) => theme.colors.white};
+  font-size: 26px;
+  cursor: pointer;
+`;
+
+
+export default function Navbar({ userName, avatarUrl, onMenuClick }: NavbarProps) {
   return (
     <Container>
+      <Hamburger onClick={onMenuClick}>☰</Hamburger>
+
       <LogoImage src={logoNavbar} alt="Safinity logo" />
 
       <UserArea>

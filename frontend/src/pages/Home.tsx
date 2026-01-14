@@ -19,8 +19,6 @@ const Content = styled.div`
 export default function Home() {
   return (
     <Page>
-      <Navbar userName="Jorge" avatarUrl="/Ellipse.png" />
-
       <Content>
         <HomeCard
           title="Current events"

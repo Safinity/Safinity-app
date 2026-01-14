@@ -11,14 +11,7 @@ type Props = {
   submittedby: string;
 };
 
-export const AlertsBar: React.FC<Props> = ({
-  type,
-  dotColor,
-  title,
-  message,
-  time,
-  submittedby,
-}) => {
+export const AlertsBar: React.FC<Props> = ({ dotColor, title, message, time, submittedby }) => {
   return (
     <Container>
       <Left>
@@ -28,7 +21,6 @@ export const AlertsBar: React.FC<Props> = ({
           <Message>{message}</Message>
 
           <Meta>
-            <Type>{type}</Type>
             <SubmittedBy>
               Submitted by <b>{submittedby}</b>
             </SubmittedBy>
@@ -41,7 +33,7 @@ export const AlertsBar: React.FC<Props> = ({
   );
 };
 
-// ===== styled-components =====
+// ----------------------------- styled-components --------------------------------
 
 const Container = styled.div`
   display: flex;
@@ -49,8 +41,8 @@ const Container = styled.div`
   align-items: flex-start;
   padding: 16px 25px;
   border-radius: 16px;
-  background: #303b49;
-  color: #ffffff;
+  background: ${({ theme }) => theme.colors.grayNavbar};
+  color: ${({ theme }) => theme.colors.white};
 `;
 
 const Left = styled.div`
@@ -73,28 +65,29 @@ const TextBlock = styled.div`
 `;
 
 const Title = styled.div`
-  font-size: 18px;
-  font-weight: 600;
+  font-family: ${({ theme }) => theme.text.titulo.h3.fontFamily};
+  font-size: ${({ theme }) => theme.text.titulo.h3.fontSize}px;
 `;
 
 const Message = styled.div`
-  font-size: 14px;
-  opacity: 0.85;
+  font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
+  font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
+  color: ${({ theme }) => theme.colors.white};
 `;
 
 const Meta = styled.div`
   font-size: 12px;
-  opacity: 0.6;
   display: flex;
   gap: 12px;
 `;
 
-const Type = styled.div``;
-
-const SubmittedBy = styled.div``;
+const SubmittedBy = styled.div`
+  color: ${({ theme }) => theme.colors.palette.primary.light60};
+`;
 
 const Time = styled.div`
-  font-size: 14px;
+  font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
+  font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
+  color: ${({ theme }) => theme.colors.white};
   margin-left: 16px;
-  white-space: nowrap;
 `;

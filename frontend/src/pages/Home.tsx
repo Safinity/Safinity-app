@@ -29,7 +29,7 @@ export default function Home() {
           description="See here the list of events you are associated with."
           image={imgCard}
           buttonLabel="See events"
-          onClick={() => console.log('See events')}
+          onClick={() => (window.location.href = '/events')}
         />
 
         <HomeCard

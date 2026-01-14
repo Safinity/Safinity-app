@@ -11,14 +11,7 @@ type Props = {
   submittedby: string;
 };
 
-export const AlertsBar: React.FC<Props> = ({
-  type,
-  dotColor,
-  title,
-  message,
-  time,
-  submittedby,
-}) => {
+export const AlertsBar: React.FC<Props> = ({ dotColor, title, message, time, submittedby }) => {
   return (
     <Container>
       <Left>
@@ -89,7 +82,8 @@ const Meta = styled.div`
 `;
 
 const SubmittedBy = styled.div`
-color: ${({ theme }) => theme.colors.palette.primary.light60};`;
+  color: ${({ theme }) => theme.colors.palette.primary.light60};
+`;
 
 const Time = styled.div`
   font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};

@@ -119,6 +119,7 @@ const ScrollArea = styled.ScrollView.attrs({
   bounces: false,
   contentContainerStyle: {
     paddingTop: 80,
+    paddingBottom: 100, // Aumentado para dar espaço extra no final (ajuste conforme necessário)
   },
 })`
   flex: 1;

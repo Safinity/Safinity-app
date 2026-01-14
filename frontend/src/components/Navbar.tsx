@@ -17,13 +17,22 @@ const Container = styled.div`
   padding: 0 100px;
 `;
 
+const Left = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 20px;
+`;
+
 const LogoImage = styled.img`
   height: 20px;
   width: auto;
   object-fit: contain;
+  align-items: left;
+  justify-content: left;
+  text-align: left;
 `;
 
-const UserArea = styled.div`
+const Right = styled.div`
   display: flex;
   align-items: center;
 `;
@@ -53,14 +62,15 @@ const Hamburger = styled.button`
 export default function Navbar({ userName, avatarUrl, onMenuClick }: NavbarProps) {
   return (
     <Container>
-      <Hamburger onClick={onMenuClick}>☰</Hamburger>
+      <Left>
+        <Hamburger onClick={onMenuClick}>☰</Hamburger>
+        <LogoImage src={logoNavbar} alt="Safinity logo" />
+      </Left>
 
-      <LogoImage src={logoNavbar} alt="Safinity logo" />
-
-      <UserArea>
+      <Right>
         <HelloText>Hi, {userName}!</HelloText>
         {avatarUrl && <Avatar src={avatarUrl} alt="avatar" />}
-      </UserArea>
+      </Right>
     </Container>
   );
 }

@@ -14,8 +14,6 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/alerts" element={<Alerts />} />
-
-            {/* 2. ADICIONA A ROTA AQUI */}
             <Route path="/notifications" element={<NotificationsPage />} />
           </Routes>
         </Layout>

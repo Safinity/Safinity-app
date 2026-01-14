@@ -16,8 +16,26 @@ export const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
           <MenuItem to="/" onClick={onClose}>
             Home
           </MenuItem>
+          <MenuItem to="/dashboards" onClick={onClose}>
+            Dashboards
+          </MenuItem>
+          <MenuItem to="/mupis" onClick={onClose}>
+            Mupis
+          </MenuItem>
+          <MenuItem to="/flowofpeople" onClick={onClose}>
+            Flow of People
+          </MenuItem>
+          <MenuItem to="/areasofinterest" onClick={onClose}>
+            Areas of Interest
+          </MenuItem>
+          <MenuItem to="/eventschedule" onClick={onClose}>
+            Event Schedule
+          </MenuItem>
           <MenuItem to="/alerts" onClick={onClose}>
             Alerts
+          </MenuItem>
+          <MenuItem to="/notifications" onClick={onClose}>
+            Notifications
           </MenuItem>
           <MenuItem to="/settings" onClick={onClose}>
             Settings
@@ -48,7 +66,7 @@ const Wrapper = styled.div<{ $open: boolean }>`
 const CloseButton = styled.button`
   background: none;
   border: none;
-  color: ${({ theme }) => theme.colors.white};
+  color: ${({ theme }) => theme.colors.palette.primary.light80};
   font-size: 32px;
   cursor: pointer;
   align-self: flex-end;
@@ -58,7 +76,8 @@ const CloseButton = styled.button`
 const Menu = styled.nav`
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.md}px;
+  gap: 20px;
+  margin-top: 20px;
 `;
 
 const MenuItem = styled(Link)`
@@ -66,7 +85,6 @@ const MenuItem = styled(Link)`
   font-size: 18px;
   text-decoration: none;
   font-family: ${({ theme }) => theme.text.textoFiltros.fontFamily};
-
   &:hover {
     color: ${({ theme }) => theme.colors.primary_50};
   }

@@ -1,14 +1,18 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
-import EventsPage from './pages/EventsPage';
+import Alerts from './pages/Alerts';
+import { ThemeProvider } from 'styled-components';
+import { theme } from './theme/theme';
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/events" element={<EventsPage />} />
-      </Routes>
-    </BrowserRouter>
+    <ThemeProvider theme={theme}>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/alerts" element={<Alerts />} />
+        </Routes>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }

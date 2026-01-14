@@ -9,13 +9,11 @@ interface NavbarProps {
 const Container = styled.div`
   width: 100%;
   height: 64px;
-  background-color: var(--gray-navbar);
-
+  background-color: ${({ theme }) => theme.colors.grayNavbar};
   display: flex;
   align-items: center;
   justify-content: space-between;
-
-  padding: 0 var(--spacing-margem-lateral);
+  padding: 0;
 `;
 
 const LogoImage = styled.img`
@@ -30,18 +28,16 @@ const UserArea = styled.div`
 `;
 
 const HelloText = styled.span`
-  margin-right: var(--spacing-sm);
-  color: var(--white);
-
-  font-family: var(--text-pequeno-font);
-  font-size: var(--text-pequeno-size);
-  line-height: var(--text-pequeno-line-height);
+  margin-right: 8px;
+  color: #ffffff;
+  font-family: ${({ theme }) => theme.text.textoPequeno.fontFamily};
+  font-size: ${({ theme }) => theme.text.textoPequeno.fontSize}px;
 `;
 
 const Avatar = styled.img`
   width: 36px;
   height: 36px;
-  border-radius: var(--radius-round);
+  border-radius: 999px;
   object-fit: cover;
 `;
 

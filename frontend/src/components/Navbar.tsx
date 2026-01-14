@@ -9,11 +9,11 @@ interface NavbarProps {
 const Container = styled.div`
   width: 100%;
   height: 64px;
-  background-color: ${({ theme }) => theme.colors.grayNavbar};
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0;
+  background-color: ${({ theme }) => theme.colors.grayNavbar};
+  padding: 0 100px;
 `;
 
 const LogoImage = styled.img`
@@ -47,7 +47,7 @@ export default function Navbar({ userName, avatarUrl }: NavbarProps) {
       <LogoImage src={logoNavbar} alt="Safinity logo" />
 
       <UserArea>
-        <HelloText>Hello! {userName}</HelloText>
+        <HelloText>Hi, {userName}!</HelloText>
         {avatarUrl && <Avatar src={avatarUrl} alt="avatar" />}
       </UserArea>
     </Container>

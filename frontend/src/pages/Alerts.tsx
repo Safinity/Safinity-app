@@ -5,55 +5,61 @@ import '../theme/theme.ts';
 import alerts from '../data/alerts.json';
 import { AlertsBar } from '../components/AlertBar';
 import Navbar from '../components/Navbar';
-import { theme } from '../theme/theme.ts';
 
 export const Alerts: React.FC = () => {
   return (
     <Container>
       <Navbar userName="Jorge" avatarUrl="/Ellipse.png"></Navbar>
 
-      <Title>Web Summit 2025</Title>
-      <Subtitle>Alerts</Subtitle>
+      <Content>
+        <Title>Alerts</Title>
+        <Subtitle>Web Summit 2025</Subtitle>
 
-      <List>
-        {alerts.map(alert => (
-          <AlertsBar
-            key={alert.id}
-            type={alert.type}
-            dotColor={alert.dotColor}
-            title={alert.title}
-            message={alert.message}
-            time={alert.time}
-            submittedby={alert.submittedby}
-          />
-        ))}
-      </List>
+        <List>
+          {alerts.map(alert => (
+            <AlertsBar
+              key={alert.id}
+              type={alert.type}
+              dotColor={alert.dotColor}
+              title={alert.title}
+              message={alert.message}
+              time={alert.time}
+              submittedby={alert.submittedby}
+            />
+          ))}
+        </List>
+      </Content>
     </Container>
   );
 };
 
 const Container = styled.div`
   background-color: ${({ theme }) => theme.colors.background};
-  height: 100%;
+  padding-bottom: 40px;
+`;
+
+const Content = styled.div`
+  margin: 40px 100px;
 `;
 
 const Title = styled.h1`
-  font-size: 30px;
-  font-family: ${({ theme }) => theme.text.titulo.h1.fontFamily};  
-  font-weight: 700;
-  margin-bottom: 24px;
-  color: #ffffff;
+  font-size: ${({ theme }) => theme.text.titulo.h1.fontSize};
+  font-family: ${({ theme }) => theme.text.titulo.h1.fontFamily};
+  margin-bottom: 0;
+  color: ${({ theme }) => theme.colors.white};
 `;
 
-const Subtitle = styled.h2`
-  font-size: 18px;
+const Subtitle = styled.h3`
+  font-size: ${({ theme }) => theme.text.titulo.h3.fontSize};
+  font-family: ${({ theme }) => theme.text.titulo.h3.fontFamily};
+  color: ${({ theme }) => theme.colors.primary_50};
+  margin-top: 0;
 `;
 
 const List = styled.div`
   display: flex;
   flex-direction: column;
   gap: 16px;
-  margin: 0 150px 0 150px;
 `;
 
 export default Alerts;

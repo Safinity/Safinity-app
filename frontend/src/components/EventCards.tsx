@@ -4,12 +4,18 @@ import { useNavigate } from 'react-router-dom';
 
 interface Event {
   id: string;
-  name: string;
+  name: string; 
   category: string;
-  status: 'live' | 'upcoming' | 'finished';
   time_left?: string;
   start_date?: string;
   end_date?: string;
+  status: 'live' | 'upcoming' | 'finished' | string; // adiciona string extra
+  image: string;
+  start_time: string;
+  end_time: string;
+  duration: string;
+  location: string;
+  description: string;
 }
 
 interface EventCardProps {

@@ -12,8 +12,8 @@ All this at SAFINITY"
       total={3}
       image={require('@/assets/images/onboarding/onboarding-img3.png')}
       onPrev={() => router.back()}
-      onNext={() => router.replace('../map')}
-      onSkip={() => router.push('../map')}
+      onNext={() => router.replace('/(tabs)')}
+      onSkip={() => router.replace('/(tabs)')}
     />
   );
 }

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ScrollView, StatusBar, View, Modal } from 'react-native';
+import React, { useState, useMemo } from 'react';
+import { ScrollView, StatusBar, View, Modal, Text } from 'react-native';
 import { useLocalSearchParams, useRouter, useNavigation } from 'expo-router';
 import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,6 +7,10 @@ import { Ionicons } from '@expo/vector-icons';
 // Componentes e Dados
 import { HeroBanner } from '../../components/HeroBanner';
 import eventsData from '../../data/events.json';
+import usersData from '../../data/users.json';
+import { userImages } from '../../assets/images/Users/userImages';
+
+// --- Styled Components ---
 
 const Container = styled.View`
   flex: 1;
@@ -89,7 +93,6 @@ const ButtonText = styled.Text`
   font-weight: bold;
 `;
 
-// Estilos para a secção de Amigos
 const FriendsSection = styled.View`
   flex-direction: row;
   align-items: center;
@@ -107,10 +110,8 @@ const Avatar = styled.Image`
   border-radius: 20px;
   border-width: 2px;
   border-color: ${({ theme }) => theme.colors.background};
-  margin-left: -15px;
 `;
 
-// --- ESTILOS DO POPUP (MODAL) ---
 const ModalOverlay = styled.View`
   flex: 1;
   background-color: rgba(256, 256, 256, 0.6);
@@ -120,7 +121,7 @@ const ModalOverlay = styled.View`
 `;
 
 const ModalContent = styled.View`
-  background-color: #303b49; /* Cor aproximada da imagem */
+  background-color: #303b49;
   width: 95%;
   border-radius: 30px;
   padding: 30px;
@@ -162,7 +163,6 @@ const ModalButtons = styled.View`
   flex-direction: row;
   justify-content: space-between;
   width: 100%;
-  font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
 `;
 
 const ModalBtn = styled.TouchableOpacity<{ isPrimary?: boolean }>`
@@ -187,44 +187,34 @@ export default function EventDetailsScreen() {
 
   const event = eventsData.events.find(e => e.id === id);
 
+  const randomFriends = useMemo(() => {
+    return [...usersData].sort(() => 0.5 - Math.random()).slice(0, 3);
+  }, []);
+
   if (!event) return null;
 
   const handleBack = () => {
-    if (navigation.canGoBack()) {
-      navigation.goBack();
-    } else {
-      router.replace('/');
-    }
+    if (navigation.canGoBack()) navigation.goBack();
+    else router.replace('/');
   };
 
   return (
     <Container>
       <StatusBar barStyle="light-content" />
 
-      {/* POPUP MODAL */}
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
+      <Modal animationType="fade" transparent visible={modalVisible}>
         <ModalOverlay>
           <ModalContent>
             <ModalTitle>Link my ticket</ModalTitle>
             <ModalDescription>
-              Your ticket, whether physical or digital, has a{' '}
-              <ModalDescription style={{ color: '#E5D9F2', fontWeight: 'bold' }}>
-                6-digit validation code
-              </ModalDescription>
-              . Now is the time to confirm your entry to the event by entering that code below.
+              Your ticket has a{' '}
+              <Text style={{ color: '#E5D9F2', fontWeight: 'bold' }}>6-digit validation code</Text>.
             </ModalDescription>
-
             <CodeRow>
               {[1, 2, 3, 4, 5, 6].map(i => (
                 <CodeBox key={i} />
               ))}
             </CodeRow>
-
             <ModalButtons>
               <ModalBtn onPress={() => setModalVisible(false)}>
                 <ModalBtnText>Cancel</ModalBtnText>
@@ -249,11 +239,14 @@ export default function EventDetailsScreen() {
           <DescriptionText>{event.description}</DescriptionText>
 
           <ActionGrid>
-            <ActionButton>
+            {/* LIGAÇÃO PARA O MAPA */}
+            <ActionButton onPress={() => router.push('/(tabs)/map')}>
               <Ionicons name="map-outline" size={26} color="white" />
               <ActionLabel>Map</ActionLabel>
             </ActionButton>
-            <ActionButton>
+
+            {/* LIGAÇÃO PARA O CALENDÁRIO */}
+            <ActionButton onPress={() => router.push('/(tabs)/calendar')}>
               <Ionicons name="calendar-outline" size={26} color="white" />
               <ActionLabel>Calendar</ActionLabel>
             </ActionButton>
@@ -262,9 +255,13 @@ export default function EventDetailsScreen() {
           <SectionTitle>Friends going</SectionTitle>
           <FriendsSection>
             <AvatarStack>
-              <Avatar source={{ uri: 'https://i.pravatar.cc/100?u=1' }} style={{ marginLeft: 0 }} />
-              <Avatar source={{ uri: 'https://i.pravatar.cc/100?u=2' }} />
-              <Avatar source={{ uri: 'https://i.pravatar.cc/100?u=3' }} />
+              {randomFriends.map((friend, index) => (
+                <Avatar
+                  key={friend.id}
+                  source={userImages[friend.image]}
+                  style={{ marginLeft: index === 0 ? 0 : -15 }}
+                />
+              ))}
             </AvatarStack>
             <DescriptionText>+ 2 friends going</DescriptionText>
           </FriendsSection>

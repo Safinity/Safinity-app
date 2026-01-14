@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router'; // 1. Importa o useRouter
+import { useRouter } from 'expo-router';
 import { Colors, Spacing } from '../constants/theme';
 import { eventImages } from '../assets/images/Events';
 import { calendarImages } from '../assets/images/Calendar/index';
@@ -101,7 +101,7 @@ export const HeroBanner = ({
   hideMap = false,
   isDetail = false,
 }: any) => {
-  const router = useRouter(); // 2. Inicializa o router
+  const router = useRouter();
 
   const getSource = () => {
     if (!event) return null;
@@ -129,7 +129,6 @@ export const HeroBanner = ({
               <EventName style={{ flex: 1, marginRight: 15 }} numberOfLines={2}>
                 {event.title}
               </EventName>
-              {/* 3. Adiciona o onPress aqui para navegar para o my-calendar */}
               <AddCalendarButton
                 activeOpacity={0.8}
                 onPress={() => router.push('/(tabs)/my-calendar')}
@@ -152,7 +151,6 @@ export const HeroBanner = ({
           </>
         )}
 
-        {/* ... Restante do código (isEventDetail, isList, isHome) mantém-se igual ... */}
         {isEventDetail && (
           <>
             <EventName>{event.name}</EventName>
@@ -178,13 +176,14 @@ export const HeroBanner = ({
           </>
         )}
 
+        {/* ALTERAÇÃO AQUI: Link para o mapa adicionado ao isHome */}
         {isHome && (
           <>
             <EventName>
               {event.name}, <StatusTag>now</StatusTag>
             </EventName>
             {!hideMap && (
-              <ViewMapLink>
+              <ViewMapLink onPress={() => router.push('/(tabs)/map')}>
                 <MapText>View the map</MapText>
               </ViewMapLink>
             )}

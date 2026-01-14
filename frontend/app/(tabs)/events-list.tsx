@@ -36,9 +36,10 @@ const SectionHeader = styled.View`
 `;
 
 const SectionTitle = styled.Text`
-  font-size: 22px;
-  font-weight: bold;
   color: ${({ theme }) => theme.colors.white};
+  /* Token: h */
+  font-family: ${({ theme }) => theme.text.titulo.h.fontFamily};
+  font-size: ${({ theme }) => theme.text.titulo.h.fontSize}px;
 `;
 
 const SearchWrapper = styled.View`

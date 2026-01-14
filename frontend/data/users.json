@@ -87,7 +87,8 @@
     "createdAt": "2024-01-05",
     "password": "123safinityIsTheBest!",
     "friends": ["u1"],
-    "currentEventId": "web-summit-2025"
+    "currentEventId": "web-summit-2025",
+    "pastEvents": ["nos-alive-2025", "superbock-superrock-2025"]
   },
   {
     "id": "u9",

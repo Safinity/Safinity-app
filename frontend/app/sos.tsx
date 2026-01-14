@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components/native';
+import { useRouter } from 'expo-router';
 import tags from '../data/tags.json';
 
 /* ---------------------- STYLES ---------------------- */
@@ -108,7 +109,11 @@ const ButtonTextConfirm = styled.Text`
   text-align: center;
 `;
 
+/* ---------------------- COMPONENT ---------------------- */
+
 export default function SOSForm() {
+  const router = useRouter();
+
   const [selected, setSelected] = useState<number[]>([]);
   const [notes, setNotes] = useState('');
 
@@ -121,9 +126,13 @@ export default function SOSForm() {
       tags: selected,
       notes: notes.trim(),
     };
+
     try {
       console.log('Payload pronto para enviar:', payload);
-      // Aqui adiciona-se a lógica para enviar o payload ao backend
+      // enviar para backend aqui
+
+      // opcional: voltar ao mapa depois de confirmar
+      // router.back();
     } catch (error) {
       console.error(error);
     }
@@ -132,6 +141,7 @@ export default function SOSForm() {
   const handleCancel = () => {
     setSelected([]);
     setNotes('');
+    router.back(); // 👈 VOLTA PARA O MAPA
   };
 
   return (

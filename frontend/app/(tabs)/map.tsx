@@ -1,83 +1,68 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
+import { ScrollView, Dimensions, Platform, Pressable } from 'react-native';
 import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
-import { Platform, Dimensions } from 'react-native';
+import Svg, { Polyline } from 'react-native-svg';
+
+// --- Imports for Association ---
+import users from '@/data/users.json';
+import { userImages } from '../../assets/images/Users/userImages';
 
 import Header from '../../components/ui/header';
 import SearchInput from '../../components/ui/SearchInput';
 import FilterTags from '../../components/ui/FilterTags';
-
+import { StaticMapPreview } from '../../components/maps/StaticMapPreview';
+import { MapPin } from '../../components/maps/MapPin';
+import { UserMarker } from '../../components/maps/UserMarker';
+import { MapCallout } from '../../components/maps/MapCallout';
 import { Colors, Spacing } from '../../constants/theme';
+import mapData from '../../data/mapdata.json';
+import { latLngToPixelFromBounds } from '../../utils/coordinates';
+import { MapStage } from '../../components/maps/MapStage';
+import { router, useLocalSearchParams } from 'expo-router';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const IMAGE_WIDTH = screenWidth * 2.5;
+const IMAGE_HEIGHT = screenHeight * 1.6;
+const CURRENT_LOCATION = mapData.currentLocation;
 
-const IMAGE_WIDTH = screenWidth * 6;
-const IMAGE_HEIGHT = screenHeight * 2;
-
-// Containers principais
 const Container = styled.View`
   flex: 1;
   background-color: ${Colors.background};
 `;
 
-const MainContent = styled.View`
-  flex: 1;
-  position: relative;
-`;
-
-const MapContainer = styled.View`
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: ${Colors.background};
-  overflow: hidden;
-`;
-
 const MapScrollView = styled.ScrollView.attrs({
-  maximumZoomScale: 3,
-  minimumZoomScale: 0.7,
+  horizontal: true,
+  vertical: true,
+  maximumZoomScale: 1.5,
+  minimumZoomScale: 0.3,
   showsHorizontalScrollIndicator: false,
   showsVerticalScrollIndicator: false,
-  bounces: false,
-  bouncesZoom: false,
-  overScrollMode: 'never',
-  alwaysBounceHorizontal: false,
-  alwaysBounceVertical: false,
   pinchGestureEnabled: true,
+  contentContainerStyle: { width: IMAGE_WIDTH, height: IMAGE_HEIGHT },
 })`
   flex: 1;
 `;
 
-const MapImage = styled.Image.attrs({
-  source: require('../../assets/images/map.png'),
-})`
-  width: ${IMAGE_WIDTH}px;
-  height: ${IMAGE_HEIGHT}px;
-  resize-mode: cover;
-`;
-
-// Overlay (header + search + tags)
 const OverlayContent = styled.View`
   position: absolute;
   top: ${Platform.OS === 'ios' ? 90 : 70}px;
   left: 0;
   right: 0;
   z-index: 100;
+  padding-top: 20px;
 `;
 
-// Novo PaddedContent igual à HomePage
-const PaddedContent = styled.View`
+const PaddingSearchInput = styled.View`
   padding: 0 ${Spacing.margemLateral}px;
 `;
 
 const PageHeader = styled.View`
-  margin-top: ${Spacing.md}px;
-  margin-bottom: ${Spacing.md}px;
+  margin-bottom: ${Spacing.sm}px;
   flex-direction: row;
   align-items: center;
   gap: ${Spacing.sm}px;
+  padding-left: ${Spacing.xl}px;
 `;
 
 const PageTitle = styled.Text`
@@ -96,92 +81,288 @@ const SosButton = styled.Pressable`
   background-color: ${Colors.error};
   justify-content: center;
   align-items: center;
-  elevation: 4;
-  shadow-color: #000;
-  shadow-offset: 0px 2px;
-  shadow-opacity: 0.25;
-  shadow-radius: 3.84px;
   z-index: 90;
+  elevation: 5;
+  shadow-opacity: 0.3;
+  shadow-offset: 0px 0px;
+  shadow-color: ${Colors.white};
+  shadow-radius: 10px;
 `;
 
 const SOSButtonText = styled.Text`
   color: ${Colors.white};
   font-size: 18px;
-  letter-spacing: 1px;
+  font-weight: bold;
 `;
 
+const NavigationFooter = styled.View`
+  position: absolute;
+  bottom: ${Spacing.xxl}px;
+  left: ${Spacing.margemLateral}px;
+  right: 100px;
+  z-index: 1000;
+`;
+
+const LongCancelButton = styled.Pressable`
+  background-color: ${Colors.background};
+  height: 50px;
+  border-radius: 30px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 20px;
+  elevation: 10;
+  shadow-opacity: 0.3;
+  shadow-offset: 0px 4px;
+`;
+
+const CancelText = styled.Text`
+  color: ${Colors.error};
+  font-size: 16px;
+  font-weight: bold;
+`;
+
+const DestinationText = styled.Text`
+  color: #aaaaaa;
+  font-size: 14px;
+`;
+
+const TAG_TO_PIN_TYPE: Record<string, string[]> = {
+  Friends: ['friend'],
+  Food: ['food'],
+  WC: ['wc'],
+  Exits: ['exit'],
+  Stages: ['stage'],
+  Entrance: ['entrance'],
+};
+
+// --- RESTORED & IMPROVED SEARCH LOGIC ---
+const getDisplayName = (item: any) => {
+  if (item.type === 'friend' && item.friendId) {
+    const user = users.find(u => u.id === item.friendId);
+    return user ? user.name : item.name;
+  }
+  return item.name;
+};
+
+const matchesSearch = (item: any, query: string) => {
+  if (!query) return true;
+  const q = query.toLowerCase();
+  const name = getDisplayName(item).toLowerCase();
+  return name.includes(q) || item.type?.toLowerCase().includes(q);
+};
+
 export default function MapScreen() {
+  const scrollRef = useRef<ScrollView>(null);
+  const zoomScaleRef = useRef(1);
+
   const [searchValue, setSearchValue] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const scrollViewRef = useRef<any>(null);
+  const [selectedPin, setSelectedPin] = useState<any>(null);
+  const [activeRoute, setActiveRoute] = useState<{ x: number; y: number }[] | null>(null);
+  const [destinationName, setDestinationName] = useState('');
 
-  const tags = ['Exits', 'Friends', 'Stages', 'Food', 'Emergency'];
+  const { universityCoords, pins, stages, bounds } = mapData;
+  const tags = ['Exits', 'Friends', 'Stages', 'Food', 'Entrance'];
 
   useEffect(() => {
-    if (scrollViewRef.current) {
-      const centerX = (IMAGE_WIDTH - screenWidth) / 2;
-      const centerY = (IMAGE_HEIGHT - screenHeight) / 2;
-
-      setTimeout(() => {
-        scrollViewRef.current.scrollTo({
-          x: centerX,
-          y: centerY,
-          animated: false,
-        });
-      }, 100);
-    }
+    const centerX = (IMAGE_WIDTH - screenWidth) / 2;
+    const centerY = (IMAGE_HEIGHT - screenHeight) / 2;
+    setTimeout(() => {
+      scrollRef.current?.scrollTo({ x: centerX, y: centerY, animated: false });
+    }, 50);
   }, []);
 
-  const handleTagPress = (tag: string) => {
-    setSelectedTags(prev => (prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]));
+  const handlePinPress = useCallback(
+    (pin: any) => {
+      const pos = latLngToPixelFromBounds(pin.lat, pin.lng, bounds, IMAGE_WIDTH, IMAGE_HEIGHT);
+      const scale = zoomScaleRef.current;
+
+      // Set selected pin with the dynamic name from user data
+      setSelectedPin({ ...pin, name: getDisplayName(pin), px: pos.x, py: pos.y });
+
+      scrollRef.current?.scrollTo({
+        x: pos.x * scale - screenWidth / 2,
+        y: pos.y * scale - screenHeight / 2,
+        animated: true,
+      });
+    },
+    [bounds],
+  );
+
+  const handleShowRoute = () => {
+    if (!selectedPin) return;
+    setDestinationName(selectedPin.name || 'Destino');
+    const start = latLngToPixelFromBounds(
+      CURRENT_LOCATION.lat,
+      CURRENT_LOCATION.lng,
+      bounds,
+      IMAGE_WIDTH,
+      IMAGE_HEIGHT,
+    );
+    const end = { x: selectedPin.px, y: selectedPin.py };
+    setActiveRoute([start, end]);
+    setSelectedPin(null);
   };
 
-  const handleSOSPress = () => {
-    alert('SOS activated! Emergency services have been notified.');
+  const handleCancelRoute = () => {
+    setActiveRoute(null);
+    setDestinationName('');
   };
 
+  // --- RESTORED ORIGINAL FILTERING FLOW ---
+  const visiblePins =
+    selectedTags.length === 0
+      ? pins.filter(pin => matchesSearch(pin, searchValue))
+      : pins.filter(
+          pin =>
+            selectedTags.some(tag => TAG_TO_PIN_TYPE[tag]?.includes(pin.type)) &&
+            matchesSearch(pin, searchValue),
+        );
+
+  const visibleStages =
+    selectedTags.length === 0 || selectedTags.includes('Stages')
+      ? stages.filter(stage => matchesSearch(stage, searchValue))
+      : [];
+
+  const { focusId } = useLocalSearchParams();
+
+  useEffect(() => {
+    if (focusId && pins) {
+      // Find the pin that matches the ID we sent
+      const targetPin = pins.find(p => p.friendId === focusId);
+
+      if (targetPin) {
+        // Wait a split second for the map image to render
+        const timer = setTimeout(() => {
+          handlePinPress(targetPin);
+        }, 300);
+
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [focusId, pins, handlePinPress]);
   return (
     <Container>
-      <MainContent>
-        {/* MAPA */}
-        <MapContainer>
-          <MapScrollView
-            ref={scrollViewRef}
-            contentContainerStyle={{
-              width: IMAGE_WIDTH,
-              height: IMAGE_HEIGHT,
-            }}
-          >
-            <MapImage />
-          </MapScrollView>
-        </MapContainer>
-
-        {/* HEADER */}
-        <Header showTime />
-
-        {/* OVERLAY */}
-        <OverlayContent>
-          <PaddedContent>
-            <PageHeader>
-              <Ionicons name="location" size={32} color={Colors.primary} />
-              <PageTitle>Web Summit</PageTitle>
-            </PageHeader>
-
-            <SearchInput value={searchValue} onChangeText={setSearchValue} variant="mapa" />
-          </PaddedContent>
-          <FilterTags
-            tags={tags}
-            selectedTags={selectedTags}
-            onTagPress={handleTagPress}
-            variant="mapa"
+      <MapScrollView
+        ref={scrollRef}
+        scrollEventThrottle={16}
+        onScroll={e => {
+          zoomScaleRef.current = e.nativeEvent.zoomScale ?? 1;
+        }}
+      >
+        <Pressable onPress={() => setSelectedPin(null)}>
+          <StaticMapPreview
+            center={universityCoords}
+            width={IMAGE_WIDTH}
+            height={IMAGE_HEIGHT}
+            theme="dark"
           />
-        </OverlayContent>
+        </Pressable>
 
-        {/* SOS */}
-        <SosButton onPress={handleSOSPress}>
-          <SOSButtonText>SOS</SOSButtonText>
-        </SosButton>
-      </MainContent>
+        <Svg
+          width={IMAGE_WIDTH}
+          height={IMAGE_HEIGHT}
+          style={{ position: 'absolute' }}
+          pointerEvents="none"
+        >
+          {activeRoute && (
+            <Polyline
+              points={activeRoute.map(p => `${p.x},${p.y}`).join(' ')}
+              stroke={Colors.primary}
+              strokeWidth={4}
+              fill="none"
+              strokeDasharray="10, 5"
+            />
+          )}
+        </Svg>
+
+        {visiblePins.map(pin => {
+          // Association for the pin image
+          const friendData = pin.type === 'friend' ? users.find(u => u.id === pin.friendId) : null;
+          return (
+            <MapPin
+              key={pin.id}
+              pin={pin}
+              avatar={friendData ? userImages[friendData.image] : null}
+              bounds={bounds}
+              width={IMAGE_WIDTH}
+              height={IMAGE_HEIGHT}
+              onPress={() => handlePinPress(pin)}
+            />
+          );
+        })}
+
+        {visibleStages.map(stage => (
+          <MapStage
+            key={stage.id}
+            stage={stage}
+            bounds={bounds}
+            width={IMAGE_WIDTH}
+            height={IMAGE_HEIGHT}
+            onPress={() => handlePinPress(stage)}
+          />
+        ))}
+
+        {selectedPin && (
+          <MapCallout
+            x={selectedPin.px}
+            y={selectedPin.py}
+            title={selectedPin.name}
+            onPressRoute={handleShowRoute}
+          />
+        )}
+
+        <UserMarker
+          location={CURRENT_LOCATION}
+          bounds={bounds}
+          width={IMAGE_WIDTH}
+          height={IMAGE_HEIGHT}
+        />
+      </MapScrollView>
+
+      <Header />
+
+      <OverlayContent pointerEvents="box-none">
+        <PageHeader>
+          <Ionicons name="location" size={28} color={Colors.primary} />
+          <PageTitle>University of Aveiro</PageTitle>
+        </PageHeader>
+        <PaddingSearchInput>
+          <SearchInput
+            variant="mapa"
+            placeholder="Search..."
+            value={searchValue}
+            onChangeText={setSearchValue}
+          />
+        </PaddingSearchInput>
+        <FilterTags
+          tags={tags}
+          selectedTags={selectedTags}
+          onTagPress={tag =>
+            setSelectedTags(prev =>
+              prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag],
+            )
+          }
+          variant="mapa"
+          style={{ marginTop: Spacing.md }}
+        />
+      </OverlayContent>
+
+      {activeRoute && (
+        <NavigationFooter>
+          <LongCancelButton onPress={handleCancelRoute}>
+            <Ionicons name="close-circle" size={20} color={Colors.error} />
+            <CancelText>Cancel Route</CancelText>
+            <DestinationText>| {destinationName}</DestinationText>
+          </LongCancelButton>
+        </NavigationFooter>
+      )}
+
+      <SosButton onPress={() => router.push('/sos')}>
+        <SOSButtonText>SOS</SOSButtonText>
+      </SosButton>
     </Container>
   );
 }

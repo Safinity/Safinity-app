@@ -1,0 +1,88 @@
+{
+  "universityCoords": { "lat": 40.6318789933224, "lng": -8.657438480443284 },
+  "bounds": {
+    "north": 40.636518813001416,
+    "south": 40.62765243975095,
+    "west": -8.661433677235607,
+    "east": -8.653372348681057
+  },
+  "currentLocation": { "lat": 40.6315, "lng": -8.656 },
+  "pins": [
+    {
+      "id": 0,
+      "name": "Main Exit",
+      "lat": 40.632945,
+      "lng": -8.6582,
+      "type": "exit"
+    },
+    {
+      "id": 1,
+      "friendId": "u5",
+      "lat": 40.628839261866396,
+      "lng": -8.656657637412769,
+      "type": "friend"
+    },
+    {
+      "id": 2,
+      "name": "Food Court",
+      "lat": 40.6307,
+      "lng": -8.6591,
+      "type": "food"
+    },
+    {
+      "id": 3,
+      "name": "Restroom",
+      "lat": 40.6333,
+      "lng": -8.6595,
+      "type": "wc"
+    },
+    {
+      "id": 4,
+      "name": "Main Entrance",
+      "lat": 40.6315,
+      "lng": -8.6555,
+      "type": "entrance"
+    },
+    {
+      "id": 5,
+      "friendId": "u8",
+      "lat": 40.631,
+      "lng": -8.657,
+      "type": "friend"
+    },
+    {
+      "id": 6,
+      "friendId": "u1",
+      "lat": 40.6295,
+      "lng": -8.655,
+      "type": "friend"
+    },
+    {
+      "id": 7,
+      "friendId": "u9",
+      "lat": 40.63137772570192,
+      "lng": -8.659995788860291,
+      "type": "friend"
+    }
+  ],
+  "stages": [
+    {
+      "id": "s1",
+      "name": "Stage 1",
+      "lat": 40.62960009304603,
+      "lng": -8.656417176781993,
+      "rotation": 45,
+      "width": 80,
+      "height": 70
+    },
+    {
+      "id": "s2",
+      "name": "Stage 2",
+      "lat": 40.631300263964465,
+      "lng": -8.657428110804572,
+      "rotation": -45,
+      "width": 110,
+      "height": 60
+    }
+  ]
+}

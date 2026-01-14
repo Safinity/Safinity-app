@@ -34,17 +34,10 @@ export default function FriendsScreen() {
 
   // IDs dos amigos do utilizador atual
   const friendIds = currentUser.friends;
+  const friends = users.filter(u => friendIds.includes(u.id));
+  const onSameEvent = friends.filter(f => f.currentEventId === currentUser.currentEventId);
+  const otherFriends = friends.filter(f => f.currentEventId !== currentUser.currentEventId);
 
-  // Lista completa dos amigos (objetos completos)
-  const friends = users.filter((u: any) => friendIds.includes(u.id));
-
-  // Amigos que estão no mesmo evento que o utilizador
-  const onSameEvent = friends.filter((f: any) => f.currentEventId === currentUser.currentEventId);
-
-  // Amigos que NÃO estão no mesmo evento
-  const otherFriends = friends.filter((f: any) => f.currentEventId !== currentUser.currentEventId);
-
-  // Função que remove um amigo do estado (não remove do JSON, apenas da memória)
   const removeFriend = (friendId: string) => {
     setCurrentUser((prev: any) => ({
       ...prev,
@@ -52,9 +45,7 @@ export default function FriendsScreen() {
     }));
   };
 
-  const handleAddFriend = () => {
-    router.push('/addfriend');
-  };
+  const handleAddFriend = () => router.push('/addfriend');
 
   return (
     <Container>
@@ -63,32 +54,44 @@ export default function FriendsScreen() {
       <ScrollArea>
         <SectionTitle>
           <Title>Friends</Title>
-          <TouchableOpacity onPress={() => handleAddFriend()}>
+          <TouchableOpacity onPress={handleAddFriend}>
             <Ionicons name="person-add-outline" size={24} color="white" />
           </TouchableOpacity>
         </SectionTitle>
 
         <SectionSubtitle>On the same event</SectionSubtitle>
-        {onSameEvent.map((friend: any) => (
-          <TouchableOpacity key={friend.id} onPress={() => router.push(`/${friend.id}`)}>
+        {onSameEvent.map(friend => (
+          <TouchableOpacity
+            key={friend.id}
+            onPress={() => router.push(`/friends/${friend.id}`)} // Navigate to friend profile
+          >
             <FriendRow>
               <Avatar source={userImages[friend.image]} />
               <Info>
                 <Name>{friend.name}</Name>
                 <Username>@{friend.username}</Username>
               </Info>
-
               <Buttons>
                 <PingFriend onPress={() => console.log('Vibrar amigo')} />
-                <FindFriendButton onPress={() => console.log('Localizar amigo')} />
+                <FindFriendButton
+                  onPress={() =>
+                    router.push({
+                      pathname: '/map',
+                      params: { focusId: friend.id },
+                    })
+                  }
+                />
               </Buttons>
             </FriendRow>
           </TouchableOpacity>
         ))}
 
         <SectionSubtitle>Other Friends</SectionSubtitle>
-        {otherFriends.map((friend: any) => (
-          <TouchableOpacity key={friend.id} onPress={() => router.push(`/${friend.id}`)}>
+        {otherFriends.map(friend => (
+          <TouchableOpacity
+            key={friend.id}
+            onPress={() => router.push(`/friends/${friend.id}`)} // Navigate to friend profile
+          >
             <FriendRow>
               <Avatar source={userImages[friend.image]} />
               <Info>
@@ -153,7 +156,8 @@ const SectionSubtitle = styled.Text`
 const FriendRow = styled.View`
   flex-direction: row;
   align-items: center;
-  margin-bottom: 16px;
+  margin-top: 10px;
+  margin-bottom: 10px;
 `;
 
 const Avatar = styled.Image`
@@ -178,10 +182,12 @@ const Username = styled.Text`
   font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
   font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
   color: ${({ theme }) => theme.colors.white};
+  padding-right: 4px;
 `;
 
 const Buttons = styled.View`
   flex-direction: row;
   justify-content: space-between;
   gap: 6px;
+  padding-left: 2px;
 `;

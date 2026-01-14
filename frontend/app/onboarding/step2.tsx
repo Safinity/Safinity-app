@@ -11,7 +11,7 @@ export default function Onboarding2() {
       image={require('@/assets/images/onboarding/onboarding-img2.png')}
       onNext={() => router.push('/onboarding/step3')}
       onPrev={() => router.back()}
-      onSkip={() => router.push('../map')}
+      onSkip={() => router.replace('/(tabs)')}
     />
   );
 }

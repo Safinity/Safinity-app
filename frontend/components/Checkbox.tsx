@@ -8,13 +8,13 @@ const Row = styled.View`
 `;
 
 const Label = styled.Text`
-  color: #cfd3e0;
+  color: ${({ theme }) => theme.colors.inactive};
   flex: 1;
   flex-wrap: wrap;
 `;
 
 const Link = styled.Text`
-  color: #9f6bff;
+  color: ${({ theme }) => theme.colors.palette.primary.light80};
   text-decoration: underline;
 `;
 
@@ -22,7 +22,7 @@ export default function Checkbox({ checked, onToggle }: any) {
   return (
     <Row>
       <TouchableOpacity onPress={onToggle} style={{ marginRight: 8 }}>
-        <Ionicons name={checked ? 'checkbox' : 'square-outline'} size={22} color="#9f6bff" />
+        <Ionicons name={checked ? 'checkbox' : 'square-outline'} size={22} color="#E9D9F5" />
       </TouchableOpacity>
 
       <Label>

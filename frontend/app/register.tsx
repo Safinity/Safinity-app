@@ -13,10 +13,13 @@ const Screen = styled.SafeAreaView`
   background-color: ${({ theme }) => theme.colors.background};
 `;
 
-const Container = styled(ScrollView)`
-  flex: 1;
-  padding: 40px;
-`;
+const Container = styled.ScrollView.attrs(({ theme }) => ({
+  contentContainerStyle: {
+    padding: theme.spacing.xl,
+    flexGrow: 1,
+  },
+  showsVerticalScrollIndicator: false,
+}))``;
 
 const Title = styled.Text`
   font-size: 26px;
@@ -24,6 +27,18 @@ const Title = styled.Text`
   margin-top: ${({ theme }) => theme.spacing.sm}px;
   margin-bottom: ${({ theme }) => theme.spacing.lg}px;
   color: ${({ theme }) => theme.colors.white};
+`;
+
+const Form = styled.View`
+  gap: ${({ theme }) => theme.spacing.md}px;
+`;
+
+const Actions = styled.View`
+  margin-top: ${({ theme }) => theme.spacing.lg}px;
+`;
+
+const CheckboxWrapper = styled.View`
+  margin-bottom: ${({ theme }) => theme.spacing.lg}px;
 `;
 
 export default function Register() {
@@ -37,26 +52,30 @@ export default function Register() {
         </TouchableOpacity>
 
         <Title>Create account</Title>
+        <Form>
+          <InputField label="First Name" placeholder="First Name" />
+          <InputField label="Last Name" placeholder="Last Name" />
+          <InputField label="Username" placeholder="Username" />
+          <InputField
+            label="Email"
+            placeholder="example@email.com"
+            icon="mail-outline"
+            keyboardType="email-address"
+          />
+          <InputField label="Password" password />
+          <InputField label="Confirm password" password />
+        </Form>
 
-        <InputField label="First Name" placeholder="First Name" />
-        <InputField label="Last Name" placeholder="Last Name" />
-        <InputField label="Username" placeholder="Username" />
-        <InputField
-          label="Email"
-          placeholder="example@email.com"
-          icon="mail-outline"
-          keyboardType="email-address"
-        />
-        <InputField label="Password" password />
-        <InputField label="Confirm password" password />
-
-        <Checkbox checked={checked} onToggle={() => setChecked(!checked)} />
-
-        <PrimaryButton
-          title="Create account"
-          disabled={!checked}
-          onPress={() => router.push('/onboarding')}
-        />
+        <Actions>
+          <CheckboxWrapper>
+            <Checkbox checked={checked} onToggle={() => setChecked(!checked)} />
+          </CheckboxWrapper>
+          <PrimaryButton
+            title="Create account"
+            disabled={!checked}
+            onPress={() => router.push('/onboarding')}
+          />
+        </Actions>
       </Container>
     </Screen>
   );

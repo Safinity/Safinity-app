@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 interface Event {
   id: string;
-  name: string; 
+  name: string;
   category: string;
   time_left?: string;
   start_date?: string;

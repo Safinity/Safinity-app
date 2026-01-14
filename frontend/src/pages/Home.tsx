@@ -10,8 +10,7 @@ const Page = styled.div`
 `;
 
 const Content = styled.div`
-  padding: 64px;
-
+  padding: 64px ;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 64px;

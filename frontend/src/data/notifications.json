@@ -1,62 +1,62 @@
 [
-    {
-      "id": "1",
-      "type": "emergency",
-      "category": "Segurança",
-      "title": "Alerta Meteorológico",
-      "message": "Previsão de chuva forte em 15 min. Por favor, desloquem-se para as áreas cobertas junto à Praça da Alimentação.",
-      "sentAt": "2024-05-20T14:30:00Z",
-      "target": "Todos os Participantes",
-      "reach": 12450
-    },
-    {
-      "id": "2",
-      "type": "crowd",
-      "category": "Lotação",
-      "title": "Aviso de Multidão - Palco Principal",
-      "message": "O Palco 1 está a 90% da capacidade. Recomendamos o Palco 3 para uma experiência mais confortável.",
-      "sentAt": "2024-05-20T12:00:00Z",
-      "target": "Zona Norte",
-      "reach": 3200
-    },
-    {
-      "id": "3",
-      "type": "hydrate",
-      "category": "Saúde",
-      "title": "Hidratação",
-      "message": "Estão 28°C. Não te esqueças de beber água. Existem pontos de água gratuita a 50m de ti.",
-      "sentAt": "2024-05-20T10:00:00Z",
-      "target": "Todos os Participantes",
-      "reach": 12450
-    },
-    {
-      "id": "4",
-      "type": "event",
-      "category": "Programação",
-      "title": "Alteração de Horário",
-      "message": "O concerto de 'The Midnight' no Palco Sunset foi adiado para as 21:30.",
-      "sentAt": "2024-05-19T18:00:00Z",
-      "target": "Favoritos de 'The Midnight'",
-      "reach": 1540
-    },
-    {
-      "id": "5",
-      "type": "activity",
-      "category": "Logística",
-      "title": "Objetos Perdidos",
-      "message": "Encontrado um molho de chaves perto do WC 4. Levantar no Ponto de Informações.",
-      "sentAt": "2024-05-19T15:20:00Z",
-      "target": "Todos os Participantes",
-      "reach": 12450
-    },
-    {
-      "id": "6",
-      "type": "promo",
-      "category": "Comercial",
-      "title": "Happy Hour!",
-      "message": "50% de desconto em bebidas brancas no Bar do Lago durante a próxima hora.",
-      "sentAt": "2024-05-19T14:00:00Z",
-      "target": "Utilizadores Premium",
-      "reach": 850
-    }
-  ]
+  {
+    "id": "1",
+    "type": "emergency",
+    "category": "Segurança",
+    "title": "Alerta Meteorológico",
+    "message": "Previsão de chuva forte em 15 min. Por favor, desloquem-se para as áreas cobertas junto à Praça da Alimentação.",
+    "sentAt": "2024-05-20T14:30:00Z",
+    "target": "Todos os Participantes",
+    "reach": 12450
+  },
+  {
+    "id": "2",
+    "type": "crowd",
+    "category": "Lotação",
+    "title": "Aviso de Multidão - Palco Principal",
+    "message": "O Palco 1 está a 90% da capacidade. Recomendamos o Palco 3 para uma experiência mais confortável.",
+    "sentAt": "2024-05-20T12:00:00Z",
+    "target": "Zona Norte",
+    "reach": 3200
+  },
+  {
+    "id": "3",
+    "type": "hydrate",
+    "category": "Saúde",
+    "title": "Hidratação",
+    "message": "Estão 28°C. Não te esqueças de beber água. Existem pontos de água gratuita a 50m de ti.",
+    "sentAt": "2024-05-20T10:00:00Z",
+    "target": "Todos os Participantes",
+    "reach": 12450
+  },
+  {
+    "id": "4",
+    "type": "event",
+    "category": "Programação",
+    "title": "Alteração de Horário",
+    "message": "O concerto de 'The Midnight' no Palco Sunset foi adiado para as 21:30.",
+    "sentAt": "2024-05-19T18:00:00Z",
+    "target": "Favoritos de 'The Midnight'",
+    "reach": 1540
+  },
+  {
+    "id": "5",
+    "type": "activity",
+    "category": "Logística",
+    "title": "Objetos Perdidos",
+    "message": "Encontrado um molho de chaves perto do WC 4. Levantar no Ponto de Informações.",
+    "sentAt": "2024-05-19T15:20:00Z",
+    "target": "Todos os Participantes",
+    "reach": 12450
+  },
+  {
+    "id": "6",
+    "type": "promo",
+    "category": "Comercial",
+    "title": "Happy Hour!",
+    "message": "50% de desconto em bebidas brancas no Bar do Lago durante a próxima hora.",
+    "sentAt": "2024-05-19T14:00:00Z",
+    "target": "Utilizadores Premium",
+    "reach": 850
+  }
+]

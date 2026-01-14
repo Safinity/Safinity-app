@@ -30,7 +30,9 @@ const AddButton = styled.button`
   font-size: ${({ theme }) => `${theme.text.botao.fontSize}px`};
   border: none;
   cursor: pointer;
-  transition: transform 0.2s, opacity 0.2s;
+  transition:
+    transform 0.2s,
+    opacity 0.2s;
 
   &:hover {
     opacity: 0.9;
@@ -62,12 +64,14 @@ const Td = styled.td`
   padding: ${({ theme }) => `${theme.spacing.md}px`};
   color: ${({ theme }) => theme.colors.white};
   font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
-  
+
   &:first-child {
-    border-radius: ${({ theme }) => `${theme.borderRadius.small}px 0 0 ${theme.borderRadius.small}px`};
+    border-radius: ${({ theme }) =>
+      `${theme.borderRadius.small}px 0 0 ${theme.borderRadius.small}px`};
   }
   &:last-child {
-    border-radius: ${({ theme }) => `0 ${theme.borderRadius.small}px ${theme.borderRadius.small}px 0`};
+    border-radius: ${({ theme }) =>
+      `0 ${theme.borderRadius.small}px ${theme.borderRadius.small}px 0`};
   }
 `;
 
@@ -77,10 +81,8 @@ const Badge = styled.span<{ type: string }>`
   font-size: 11px;
   font-weight: 700;
   color: ${({ theme }) => theme.colors.white};
-  background-color: ${({ type, theme }) => 
-    type === 'emergency' 
-      ? theme.colors.error 
-      : theme.colors.palette.primary.dark40};
+  background-color: ${({ type, theme }) =>
+    type === 'emergency' ? theme.colors.error : theme.colors.palette.primary.dark40};
 `;
 
 export const NotificationsPage = () => {
@@ -102,15 +104,13 @@ export const NotificationsPage = () => {
           </tr>
         </thead>
         <tbody>
-          {notificationsData.map((notif) => (
+          {notificationsData.map(notif => (
             <Tr key={notif.id}>
               <Td>
                 <Badge type={notif.type}>{notif.category}</Badge>
               </Td>
               <Td style={{ fontWeight: 600 }}>{notif.title}</Td>
-              <Td style={{ opacity: 0.8, maxWidth: '400px' }}>
-                {notif.message}
-              </Td>
+              <Td style={{ opacity: 0.8, maxWidth: '400px' }}>{notif.message}</Td>
               <Td>{notif.target}</Td>
               <Td>{new Date(notif.sentAt).toLocaleDateString('pt-PT')}</Td>
             </Tr>

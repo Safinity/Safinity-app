@@ -10,14 +10,14 @@ export default function App() {
   return (
     <ThemeProvider theme={theme}>
       <BrowserRouter>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/alerts" element={<Alerts />} />
+        <Layout>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/alerts" element={<Alerts />} />
 
-          {/* 2. ADICIONA A ROTA AQUI */}
-          <Route path="/notifications" element={<NotificationsPage />} />
-        </Routes>
+            {/* 2. ADICIONA A ROTA AQUI */}
+            <Route path="/notifications" element={<NotificationsPage />} />
+          </Routes>
         </Layout>
       </BrowserRouter>
     </ThemeProvider>

@@ -13,9 +13,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
         <CloseButton onClick={onClose}>×</CloseButton>
 
         <Menu>
-          <MenuItem to="/" onClick={onClose}>Home</MenuItem>
-          <MenuItem to="/alerts" onClick={onClose}>Alerts</MenuItem>
-          <MenuItem to="/settings" onClick={onClose}>Settings</MenuItem>
+          <MenuItem to="/" onClick={onClose}>
+            Home
+          </MenuItem>
+          <MenuItem to="/alerts" onClick={onClose}>
+            Alerts
+          </MenuItem>
+          <MenuItem to="/settings" onClick={onClose}>
+            Settings
+          </MenuItem>
         </Menu>
       </Wrapper>
 
@@ -72,6 +78,6 @@ const Overlay = styled.div`
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0,0,0,0.4);
+  background: rgba(0, 0, 0, 0.4);
   z-index: 900;
 `;

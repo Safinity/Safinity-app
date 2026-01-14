@@ -1,8 +1,6 @@
 import styled from 'styled-components';
 import logoNavbar from '../assets/logo-navbar.png';
 
-
-
 interface NavbarProps {
   userName: string;
   avatarUrl?: string;
@@ -51,7 +49,6 @@ const Hamburger = styled.button`
   font-size: 26px;
   cursor: pointer;
 `;
-
 
 export default function Navbar({ userName, avatarUrl, onMenuClick }: NavbarProps) {
   return (

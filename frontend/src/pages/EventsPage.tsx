@@ -3,7 +3,6 @@ import React from 'react';
 import styled from 'styled-components';
 import { EventCard } from '../components/EventCards';
 import eventData from '../data/events.json';
-import Navbar from '../components/Navbar';
 
 const EventsPage: React.FC = () => {
   return (

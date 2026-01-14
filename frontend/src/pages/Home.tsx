@@ -1,7 +1,5 @@
 import '../theme/theme.ts';
 import styled from 'styled-components';
-
-import Navbar from '../components/Navbar';
 import HomeCard from '../components/HomeCard';
 import imgCard from '../assets/image-home-card.png';
 

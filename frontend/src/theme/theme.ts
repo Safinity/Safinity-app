@@ -1,4 +1,3 @@
-
 export const Colors = {
   grayNavbar: '#303B49',
   background: '#222734',
@@ -154,4 +153,3 @@ export const theme = {
   fonts: Fonts,
   text: TextStyles,
 };
-

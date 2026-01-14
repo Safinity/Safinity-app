@@ -1,22 +1,20 @@
-import React from "react";
-import styled from "styled-components";
+import React from 'react';
+import styled from 'styled-components';
 import '../theme/theme.ts';
 
-import alerts from "../data/alerts.json";
-import { AlertsBar } from "../components/AlertBar";
-import Navbar from "../components/Navbar";
-
+import alerts from '../data/alerts.json';
+import { AlertsBar } from '../components/AlertBar';
+import Navbar from '../components/Navbar';
 
 export const Alerts: React.FC = () => {
   return (
     <Container>
-
       <Navbar userName="Jorge" avatarUrl="/Ellipse.png"></Navbar>
 
       <Title>Alerts</Title>
 
       <List>
-        {alerts.map((alert) => (
+        {alerts.map(alert => (
           <AlertsBar
             key={alert.id}
             type={alert.type}

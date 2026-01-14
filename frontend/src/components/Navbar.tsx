@@ -29,7 +29,7 @@ const UserArea = styled.div`
 
 const HelloText = styled.span`
   margin-right: 8px;
-  color: #FFFFFF;
+  color: #ffffff;
   font-family: ${({ theme }) => theme.text.textoPequeno.fontFamily};
   font-size: ${({ theme }) => theme.text.textoPequeno.fontSize}px;
 `;

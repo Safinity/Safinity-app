@@ -1,5 +1,5 @@
-import React from "react";
-import styled from "styled-components";
+import React from 'react';
+import styled from 'styled-components';
 import '../theme/theme.ts';
 
 type Props = {
@@ -21,9 +21,7 @@ export const AlertsBar: React.FC<Props> = ({
 }) => {
   return (
     <Container>
-
       <Left>
-
         <Dot $color={dotColor} />
         <TextBlock>
           <Title>{title}</Title>
@@ -31,14 +29,14 @@ export const AlertsBar: React.FC<Props> = ({
 
           <Meta>
             <Type>{type}</Type>
-            <SubmittedBy>Submitted by <b>{submittedby}</b></SubmittedBy>
+            <SubmittedBy>
+              Submitted by <b>{submittedby}</b>
+            </SubmittedBy>
           </Meta>
         </TextBlock>
-
       </Left>
 
-        <Time>{time}</Time>
-
+      <Time>{time}</Time>
     </Container>
   );
 };

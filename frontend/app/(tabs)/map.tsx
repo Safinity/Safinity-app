@@ -33,12 +33,8 @@ const Container = styled.View`
 
 const MapScrollView = styled.ScrollView.attrs({
   horizontal: true,
-  vertical: true,
-  maximumZoomScale: 1.5,
-  minimumZoomScale: 0.3,
   showsHorizontalScrollIndicator: false,
   showsVerticalScrollIndicator: false,
-  pinchGestureEnabled: true,
   contentContainerStyle: { width: IMAGE_WIDTH, height: IMAGE_HEIGHT },
 })`
   flex: 1;
@@ -51,6 +47,11 @@ const OverlayContent = styled.View`
   right: 0;
   z-index: 100;
   padding-top: 20px;
+
+  ${Platform.OS === 'web' &&
+  `
+    pointer-events: none;
+  `}
 `;
 
 const PaddingSearchInput = styled.View`
@@ -63,6 +64,11 @@ const PageHeader = styled.View`
   align-items: center;
   gap: ${Spacing.sm}px;
   padding-left: ${Spacing.xl}px;
+
+  ${Platform.OS === 'web' &&
+  `
+    pointer-events: auto;
+  `}
 `;
 
 const PageTitle = styled.Text`
@@ -137,7 +143,6 @@ const TAG_TO_PIN_TYPE: Record<string, string[]> = {
   Entrance: ['entrance'],
 };
 
-// --- RESTORED & IMPROVED SEARCH LOGIC ---
 const getDisplayName = (item: any) => {
   if (item.type === 'friend' && item.friendId) {
     const user = users.find(u => u.id === item.friendId);
@@ -179,7 +184,6 @@ export default function MapScreen() {
       const pos = latLngToPixelFromBounds(pin.lat, pin.lng, bounds, IMAGE_WIDTH, IMAGE_HEIGHT);
       const scale = zoomScaleRef.current;
 
-      // Set selected pin with the dynamic name from user data
       setSelectedPin({ ...pin, name: getDisplayName(pin), px: pos.x, py: pos.y });
 
       scrollRef.current?.scrollTo({
@@ -211,7 +215,6 @@ export default function MapScreen() {
     setDestinationName('');
   };
 
-  // --- RESTORED ORIGINAL FILTERING FLOW ---
   const visiblePins =
     selectedTags.length === 0
       ? pins.filter(pin => matchesSearch(pin, searchValue))
@@ -230,11 +233,9 @@ export default function MapScreen() {
 
   useEffect(() => {
     if (focusId && pins) {
-      // Find the pin that matches the ID we sent
       const targetPin = pins.find(p => p.friendId === focusId);
 
       if (targetPin) {
-        // Wait a split second for the map image to render
         const timer = setTimeout(() => {
           handlePinPress(targetPin);
         }, 300);
@@ -243,88 +244,170 @@ export default function MapScreen() {
       }
     }
   }, [focusId, pins, handlePinPress]);
+
   return (
     <Container>
-      <MapScrollView
-        ref={scrollRef}
-        scrollEventThrottle={16}
-        onScroll={e => {
-          zoomScaleRef.current = e.nativeEvent.zoomScale ?? 1;
-        }}
-      >
-        <Pressable onPress={() => setSelectedPin(null)}>
+      {Platform.OS === 'web' ? (
+        <div
+          style={{
+            width: '100vw',
+            height: '100vh',
+            overflow: 'auto', // BOTH horizontal and vertical
+            position: 'relative',
+            cursor: 'grab',
+            minWidth: IMAGE_WIDTH,
+            minHeight: IMAGE_HEIGHT,
+          }}
+        >
           <StaticMapPreview
             center={universityCoords}
             width={IMAGE_WIDTH}
             height={IMAGE_HEIGHT}
             theme="dark"
           />
-        </Pressable>
 
-        <Svg
-          width={IMAGE_WIDTH}
-          height={IMAGE_HEIGHT}
-          style={{ position: 'absolute' }}
-          pointerEvents="none"
-        >
-          {activeRoute && (
-            <Polyline
-              points={activeRoute.map(p => `${p.x},${p.y}`).join(' ')}
-              stroke={Colors.primary}
-              strokeWidth={4}
-              fill="none"
-              strokeDasharray="10, 5"
-            />
-          )}
-        </Svg>
+          <Svg
+            width={IMAGE_WIDTH}
+            height={IMAGE_HEIGHT}
+            style={{ position: 'absolute', top: 0, left: 0 }}
+            pointerEvents="none"
+          >
+            {activeRoute && (
+              <Polyline
+                points={activeRoute.map(p => `${p.x},${p.y}`).join(' ')}
+                stroke={Colors.primary}
+                strokeWidth={4}
+                fill="none"
+                strokeDasharray="10, 5"
+              />
+            )}
+          </Svg>
 
-        {visiblePins.map(pin => {
-          // Association for the pin image
-          const friendData = pin.type === 'friend' ? users.find(u => u.id === pin.friendId) : null;
-          return (
-            <MapPin
-              key={pin.id}
-              pin={pin}
-              avatar={friendData ? userImages[friendData.image] : null}
+          {visiblePins.map(pin => {
+            const friendData =
+              pin.type === 'friend' ? users.find(u => u.id === pin.friendId) : null;
+            return (
+              <MapPin
+                key={pin.id}
+                pin={pin}
+                avatar={friendData ? userImages[friendData.image] : null}
+                bounds={bounds}
+                width={IMAGE_WIDTH}
+                height={IMAGE_HEIGHT}
+                onPress={() => handlePinPress(pin)}
+              />
+            );
+          })}
+
+          {visibleStages.map(stage => (
+            <MapStage
+              key={stage.id}
+              stage={stage}
               bounds={bounds}
               width={IMAGE_WIDTH}
               height={IMAGE_HEIGHT}
-              onPress={() => handlePinPress(pin)}
+              onPress={() => handlePinPress(stage)}
             />
-          );
-        })}
+          ))}
 
-        {visibleStages.map(stage => (
-          <MapStage
-            key={stage.id}
-            stage={stage}
+          {selectedPin && (
+            <MapCallout
+              x={selectedPin.px}
+              y={selectedPin.py}
+              title={selectedPin.name}
+              onPressRoute={handleShowRoute}
+            />
+          )}
+
+          <UserMarker
+            location={CURRENT_LOCATION}
             bounds={bounds}
             width={IMAGE_WIDTH}
             height={IMAGE_HEIGHT}
-            onPress={() => handlePinPress(stage)}
           />
-        ))}
+        </div>
+      ) : (
+        <MapScrollView
+          ref={scrollRef}
+          scrollEventThrottle={16}
+          onScroll={e => {
+            zoomScaleRef.current = e.nativeEvent.zoomScale ?? 1;
+          }}
+        >
+          <Pressable onPress={() => setSelectedPin(null)}>
+            <StaticMapPreview
+              center={universityCoords}
+              width={IMAGE_WIDTH}
+              height={IMAGE_HEIGHT}
+              theme="dark"
+            />
+          </Pressable>
 
-        {selectedPin && (
-          <MapCallout
-            x={selectedPin.px}
-            y={selectedPin.py}
-            title={selectedPin.name}
-            onPressRoute={handleShowRoute}
+          <Svg
+            width={IMAGE_WIDTH}
+            height={IMAGE_HEIGHT}
+            style={{ position: 'absolute' }}
+            pointerEvents="none"
+          >
+            {activeRoute && (
+              <Polyline
+                points={activeRoute.map(p => `${p.x},${p.y}`).join(' ')}
+                stroke={Colors.primary}
+                strokeWidth={4}
+                fill="none"
+                strokeDasharray="10, 5"
+              />
+            )}
+          </Svg>
+
+          {visiblePins.map(pin => {
+            const friendData =
+              pin.type === 'friend' ? users.find(u => u.id === pin.friendId) : null;
+            return (
+              <MapPin
+                key={pin.id}
+                pin={pin}
+                avatar={friendData ? userImages[friendData.image] : null}
+                bounds={bounds}
+                width={IMAGE_WIDTH}
+                height={IMAGE_HEIGHT}
+                onPress={() => handlePinPress(pin)}
+              />
+            );
+          })}
+
+          {visibleStages.map(stage => (
+            <MapStage
+              key={stage.id}
+              stage={stage}
+              bounds={bounds}
+              width={IMAGE_WIDTH}
+              height={IMAGE_HEIGHT}
+              onPress={() => handlePinPress(stage)}
+            />
+          ))}
+
+          {selectedPin && (
+            <MapCallout
+              x={selectedPin.px}
+              y={selectedPin.py}
+              title={selectedPin.name}
+              onPressRoute={handleShowRoute}
+            />
+          )}
+
+          <UserMarker
+            location={CURRENT_LOCATION}
+            bounds={bounds}
+            width={IMAGE_WIDTH}
+            height={IMAGE_HEIGHT}
           />
-        )}
-
-        <UserMarker
-          location={CURRENT_LOCATION}
-          bounds={bounds}
-          width={IMAGE_WIDTH}
-          height={IMAGE_HEIGHT}
-        />
-      </MapScrollView>
+        </MapScrollView>
+      )}
 
       <Header />
 
-      <OverlayContent pointerEvents="box-none">
+      <OverlayContent>
         <PageHeader>
           <Ionicons name="location" size={28} color={Colors.primary} />
           <PageTitle>University of Aveiro</PageTitle>
@@ -346,7 +429,7 @@ export default function MapScreen() {
             )
           }
           variant="mapa"
-          style={{ marginTop: Spacing.md }}
+          style={{ marginTop: Spacing.md, pointerEvents: 'auto' }}
         />
       </OverlayContent>
 

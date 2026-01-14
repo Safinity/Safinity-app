@@ -1,14 +1,16 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Home from './pages/Home';
-import EventsPage from './pages/EventsPage';
+import { ThemeProvider } from 'styled-components';
+import { theme } from './theme/theme'; 
+// IMPORTANTE: O caminho tem de bater certo com a tua pasta 'pages'
+import { NotificationsPage } from './pages/NotificationsPage';
+import './index.css'; 
 
-export default function App() {
+function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/events" element={<EventsPage />} />
-      </Routes>
-    </BrowserRouter>
+    <ThemeProvider theme={theme}>
+      {/* Agora o componente abaixo já está definido pelo import acima */}
+      <NotificationsPage />
+    </ThemeProvider>
   );
 }
+
+export default App;

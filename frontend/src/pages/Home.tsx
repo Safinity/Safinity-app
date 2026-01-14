@@ -1,4 +1,4 @@
-import '../theme/theme.css';
+import '../theme/theme.ts';
 
 import Navbar from '../components/Navbar';
 

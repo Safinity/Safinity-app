@@ -4,70 +4,70 @@ import MupiCard from '../components/MupiCard';
 import mupisDataJson from '../data/mupis.json';
 import InputField from '../components/InputField';
 
+interface Mupi {
+  id: number;
+  title: string;
+  image: string;
+}
+
 const Page = styled.div`
-  padding: 2rem;
+  padding: ${({ theme }) => theme.spacing.xl}px;
+  background-color: ${({ theme }) => theme.colors.background};
+  min-height: 100vh;
 `;
 
 const Title = styled.h1`
-  color: var(--white);
-  margin-bottom: 1rem;
+  color: ${({ theme }) => theme.colors.white};
+  font-family: ${({ theme }) => theme.text.titulo.h.fontFamily};
+  font-size: ${({ theme }) => theme.text.titulo.h.fontSize}px;
+  margin-bottom: ${({ theme }) => theme.spacing.md}px;
 `;
 
 const SubtitleRow = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 3rem;
+  margin-bottom: ${({ theme }) => theme.spacing.xl}px;
 `;
 
 const Subtitle = styled.h2`
-  color: var(--white);
+  color: ${({ theme }) => theme.colors.white};
+  font-family: ${({ theme }) => theme.text.titulo.h2.fontFamily};
+  font-size: ${({ theme }) => theme.text.titulo.h2.fontSize}px;
+  line-height: ${({ theme }) => theme.text.titulo.h2.lineHeight}px;
   margin: 0;
 `;
 
 const AddButton = styled.button`
-  background-color: var(--primary-normal);
-  color: var(--white);
+  background-color: ${({ theme }) => theme.colors.palette.primary.normal};
+  color: ${({ theme }) => theme.colors.white};
   border: none;
-  border-radius: var(--radius-small);
-  padding: 0.5rem 1rem;
-  font-family: var(--text-botao-font);
-  font-size: 1rem;
+  border-radius: ${({ theme }) => theme.borderRadius.small}px;
+  padding: ${({ theme }) => `${theme.spacing.sm}px ${theme.spacing.md}px`};
+  font-family: ${({ theme }) => theme.text.botao.fontFamily};
+  font-size: ${({ theme }) => theme.text.botao.fontSize}px;
   cursor: pointer;
-  transition: filter 0.2s;
-  &:hover:enabled {
-    filter: brightness(1.1);
-  }
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
 `;
 
 const ListWrapper = styled.div`
   width: 100%;
   overflow-x: auto;
-  overflow-y: hidden;
-  -ms-overflow-style: none;
   scrollbar-width: none;
+
   &::-webkit-scrollbar {
     display: none;
   }
-  scroll-behavior: smooth;
 `;
 
 const ScrollableList = styled.div`
   display: inline-flex;
-  gap: 1.5rem;
-  padding-bottom: 1rem;
+  gap: ${({ theme }) => theme.spacing.lg}px;
+  padding-bottom: ${({ theme }) => theme.spacing.md}px;
 `;
 
 const ModalOverlay = styled.div`
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
@@ -75,24 +75,21 @@ const ModalOverlay = styled.div`
 `;
 
 const ModalContainer = styled.div`
-  background-color: var(--gray-navbar);
-  padding: 1.5rem;
-  border-radius: var(--radius-medium);
+  background-color: ${({ theme }) => theme.colors.grayNavbar};
+  padding: ${({ theme }) => theme.spacing.md}px;
+  border-radius: ${({ theme }) => theme.borderRadius.medium}px;
   display: flex;
-  flex-direction: row;
-  gap: 1.5rem;
+  gap: ${({ theme }) => theme.spacing.md}px;
   min-width: 500px;
-  max-width: 90%;
-  align-items: stretch;
 `;
 
 const PreviewCard = styled.div`
   width: 200px;
   height: 280px;
-  border-radius: var(--radius-small);
+  border-radius: ${({ theme }) => theme.borderRadius.small}px;
   overflow: hidden;
-  background-color: #444;
-  flex-shrink: 0;
+  background-color: ${({ theme }) => theme.colors.neutralGray};
+
   img {
     width: 100%;
     height: 100%;
@@ -104,226 +101,179 @@ const FormColumn = styled.div`
   display: flex;
   flex-direction: column;
   flex: 1;
-  gap: 0.5rem;
-  height: 100%;
+  gap: ${({ theme }) => theme.spacing.sm}px;
 `;
 
 const ButtonRow = styled.div`
   display: flex;
   justify-content: center;
-  gap: 0.5rem;
+  gap: ${({ theme }) => theme.spacing.sm}px;
   margin-top: auto;
 `;
 
-const ModalButton = styled.button<{ variant?: 'primary' | 'secondary' | 'danger' }>`
-  background-color: ${(props) =>
-        props.variant === 'primary'
-            ? 'var(--primary-normal)'
-            : props.variant === 'danger'
-                ? '#cc3333'
-                : '#666'};
-  color: var(--white);
+const ModalButton = styled.button<{ variant?: 'primary' | 'danger' }>`
+  background-color: ${({ theme, variant }) =>
+    variant === 'primary'
+      ? theme.colors.palette.primary.normal
+      : variant === 'danger'
+        ? theme.colors.palette.error.normal
+        : theme.colors.neutralGray};
+  color: ${({ theme }) => theme.colors.white};
   border: none;
-  border-radius: var(--radius-small);
-  padding: 0.5rem 1rem;
+  border-radius: ${({ theme }) => theme.borderRadius.small}px;
+  padding: ${({ theme }) => `${theme.spacing.sm}px ${theme.spacing.md}px`};
+  font-family: ${({ theme }) => theme.text.botao.fontFamily};
+  font-size: ${({ theme }) => theme.text.botao.fontSize}px;
   cursor: pointer;
-  &:hover:enabled {
-    filter: brightness(1.1);
-  }
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
+`;
+
+const FileInput = styled.input`
+  border-radius: ${({ theme }) => theme.borderRadius.small}px;
+  padding: ${({ theme }) => theme.spacing.sm}px;
+  background-color: ${({ theme }) => theme.colors.grayNavbar};
+  color: ${({ theme }) => theme.colors.white};
+  border: none;
 `;
 
 const ConfirmModalContainer = styled(ModalContainer)`
   flex-direction: column;
   align-items: center;
   min-width: 300px;
-  max-width: 90%;
 `;
 
 const ConfirmText = styled.p`
-  color: var(--white);
-  margin-bottom: 1rem;
+  color: ${({ theme }) => theme.colors.white};
+  font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
+  font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
   text-align: center;
 `;
 
-export default function Mupis() {
-    const [mupisData, setMupisData] = useState(mupisDataJson);
-    const [showModal, setShowModal] = useState(false);
-    const [editingMupiId, setEditingMupiId] = useState<number | null>(null);
-    const [newTitle, setNewTitle] = useState('');
-    const [newImage, setNewImage] = useState<File | null>(null);
-    const [previewUrl, setPreviewUrl] = useState<string | undefined>(undefined);
-    const [showConfirmModal, setShowConfirmModal] = useState(false);
+export default function MupisPage() {
+  const [mupisData, setMupisData] = useState<Mupi[]>(() => {
+    const stored = localStorage.getItem('mupisData');
+    return stored ? JSON.parse(stored) : mupisDataJson;
+  });
 
-    useEffect(() => {
-        const storedMupis = localStorage.getItem('mupisData');
-        if (storedMupis) setMupisData(JSON.parse(storedMupis));
-    }, []);
+  const [showModal, setShowModal] = useState(false);
+  const [editingMupiId, setEditingMupiId] = useState<number | null>(null);
+  const [newTitle, setNewTitle] = useState('');
+  const [newImage, setNewImage] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | undefined>();
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-    const openModalForNew = () => {
-        setEditingMupiId(null);
-        setNewTitle('');
-        setNewImage(null);
-        setPreviewUrl(undefined);
-        setShowModal(true);
-    };
+  useEffect(() => {
+    if (!newImage) return;
+    const reader = new FileReader();
+    reader.onload = () => setPreviewUrl(reader.result as string);
+    reader.readAsDataURL(newImage);
+  }, [newImage]);
 
-    const openModalForEdit = (mupi: { id: number; title: string; image: string }) => {
-        setEditingMupiId(mupi.id);
-        setNewTitle(mupi.title);
-        setPreviewUrl(mupi.image);
-        setNewImage(null);
-        setShowModal(true);
-    };
+  const openModalForNew = () => {
+    setEditingMupiId(null);
+    setNewTitle('');
+    setPreviewUrl(undefined);
+    setNewImage(null);
+    setShowModal(true);
+  };
 
-    const handleCancel = () => {
-        setShowModal(false);
-        setEditingMupiId(null);
-        setNewTitle('');
-        setNewImage(null);
-        setPreviewUrl(undefined);
-    };
+  const openModalForEdit = (mupi: Mupi) => {
+    setEditingMupiId(mupi.id);
+    setNewTitle(mupi.title);
+    setPreviewUrl(mupi.image);
+    setNewImage(null);
+    setShowModal(true);
+  };
 
-    useEffect(() => {
-        if (newImage) {
-            const reader = new FileReader();
-            reader.onload = () => setPreviewUrl(reader.result as string);
-            reader.readAsDataURL(newImage);
-        }
-    }, [newImage]);
+  const handleSave = () => {
+    if (!newTitle || !previewUrl) return;
 
-    const handleSaveMupi = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        if (!newTitle || (!previewUrl && !editingMupiId)) return;
+    const updated =
+      editingMupiId !== null
+        ? mupisData.map(m =>
+            m.id === editingMupiId ? { ...m, title: newTitle, image: previewUrl } : m,
+          )
+        : [...mupisData, { id: Date.now(), title: newTitle, image: previewUrl }];
 
-        let updatedMupis;
-        if (editingMupiId !== null) {
-            updatedMupis = mupisData.map((m) =>
-                m.id === editingMupiId ? { ...m, title: newTitle, image: previewUrl || m.image } : m
-            );
-        } else {
-            const newMupi = {
-                id: mupisData.length + 1,
-                title: newTitle,
-                image: previewUrl || 'https://picsum.photos/400/600?random=99',
-            };
-            updatedMupis = [...mupisData, newMupi];
-        }
-        setShowModal(false);
-        setMupisData(updatedMupis);
-        localStorage.setItem('mupisData', JSON.stringify(updatedMupis));
-    };
+    setMupisData(updated);
+    localStorage.setItem('mupisData', JSON.stringify(updated));
+    setShowModal(false);
+  };
 
-    const handleRemove = () => {
-        if (editingMupiId !== null) {
-            const updatedMupis = mupisData.filter((m) => m.id !== editingMupiId);
-            setMupisData(updatedMupis);
-            localStorage.setItem('mupisData', JSON.stringify(updatedMupis));
-            setShowConfirmModal(false);
-            setShowModal(false);
-        }
+  const handleRemove = () => {
+    if (editingMupiId === null) return;
+    const updated = mupisData.filter(m => m.id !== editingMupiId);
+    setMupisData(updated);
+    localStorage.setItem('mupisData', JSON.stringify(updated));
+    setShowConfirmModal(false);
+    setShowModal(false);
+  };
 
-    };
+  return (
+    <Page>
+      <Title>Web Summit</Title>
 
-    const isEditing = editingMupiId !== null;
-    const originalMupi = isEditing ? mupisData.find((m) => m.id === editingMupiId) : null;
-    const isChanged =
-        isEditing &&
-        (newTitle !== (originalMupi?.title || '') || previewUrl !== (originalMupi?.image || ''));
-    const canAdd = !isEditing && newTitle && previewUrl;
+      <SubtitleRow>
+        <Subtitle>Mupis</Subtitle>
+        <AddButton onClick={openModalForNew}>+ Add Mupi</AddButton>
+      </SubtitleRow>
 
-    return (
-        <Page>
-            <Title>Web Summit</Title>
+      <ListWrapper>
+        <ScrollableList>
+          {mupisData.map(mupi => (
+            <div key={mupi.id} onClick={() => openModalForEdit(mupi)}>
+              <MupiCard title={mupi.title} image={mupi.image} />
+            </div>
+          ))}
+        </ScrollableList>
+      </ListWrapper>
 
-            <SubtitleRow>
-                <Subtitle>Mupis</Subtitle>
-                <AddButton onClick={openModalForNew}>+ Add Mupi</AddButton>
-            </SubtitleRow>
+      {showModal && (
+        <ModalOverlay onClick={() => setShowModal(false)}>
+          <ModalContainer onClick={e => e.stopPropagation()}>
+            <PreviewCard>{previewUrl && <img src={previewUrl} />}</PreviewCard>
 
-            <ListWrapper>
-                <ScrollableList>
-                    {mupisData.map((mupi) => (
-                        <div key={mupi.id} onClick={() => openModalForEdit(mupi)}>
-                            <MupiCard title={mupi.title} image={mupi.image} />
-                        </div>
-                    ))}
-                </ScrollableList>
-            </ListWrapper>
+            <FormColumn>
+              <InputField
+                label="Title"
+                value={newTitle}
+                onChange={e => setNewTitle(e.target.value)}
+              />
 
-            {showModal && (
-                <ModalOverlay onClick={handleCancel}>
-                    <ModalContainer onClick={(e) => e.stopPropagation()}>
-                        <PreviewCard>
-                            {previewUrl && <img src={previewUrl} alt="Preview" />}
-                        </PreviewCard>
+              <FileInput
+                type="file"
+                accept="image/*"
+                onChange={e => setNewImage(e.target.files?.[0] ?? null)}
+              />
 
-                        <FormColumn>
-                            <InputField
-                                label="Title"
-                                placeholder="Enter title"
-                                value={newTitle}
-                                onChange={(e) => setNewTitle(e.target.value)}
-                            />
+              <ButtonRow>
+                {editingMupiId !== null && (
+                  <ModalButton variant="danger" onClick={() => setShowConfirmModal(true)}>
+                    Remove
+                  </ModalButton>
+                )}
+                <ModalButton onClick={() => setShowModal(false)}>Cancel</ModalButton>
+                <ModalButton variant="primary" onClick={handleSave}>
+                  {editingMupiId !== null ? 'Save' : 'Add'}
+                </ModalButton>
+              </ButtonRow>
+            </FormColumn>
+          </ModalContainer>
+        </ModalOverlay>
+      )}
 
-                            <label style={{ color: '#cfd3e0', marginTop: '8px', fontSize: '14px' }}>
-                                Upload Image
-                            </label>
-                            <input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => setNewImage(e.target.files ? e.target.files[0] : null)}
-                                style={{
-                                    borderRadius: '10px',
-                                    padding: '8px',
-                                    backgroundColor: '#2a303f',
-                                    border: 'none',
-                                    color: 'white',
-                                    cursor: 'pointer',
-                                    marginBottom: '5.4rem',
-                                }}
-                            />
-
-                            <ButtonRow>
-                                {isEditing && (
-                                    <ModalButton variant="danger" onClick={() => setShowConfirmModal(true)}>
-                                        Remove
-                                    </ModalButton>
-                                )}
-                                <ModalButton variant="secondary" onClick={handleCancel}>
-                                    Cancel
-                                </ModalButton>
-                                <ModalButton
-                                    variant="primary"
-                                    onClick={handleSaveMupi}
-                                    disabled={isEditing ? !isChanged : !canAdd}
-                                >
-                                    {isEditing ? 'Save' : 'Add'}
-                                </ModalButton>
-                            </ButtonRow>
-                        </FormColumn>
-                    </ModalContainer>
-                </ModalOverlay>
-            )}
-
-            {showConfirmModal && (
-                <ModalOverlay onClick={() => setShowConfirmModal(false)}>
-                    <ConfirmModalContainer onClick={(e) => e.stopPropagation()}>
-                        <ConfirmText>Are you sure you want to remove this mupi?</ConfirmText>
-                        <ButtonRow>
-                            <ModalButton variant="secondary" onClick={() => setShowConfirmModal(false)}>
-                                Cancel
-                            </ModalButton>
-                            <ModalButton variant="danger" onClick={handleRemove}>
-                                Remove
-                            </ModalButton>
-                        </ButtonRow>
-                    </ConfirmModalContainer>
-                </ModalOverlay>
-            )}
-        </Page>
-    );
+      {showConfirmModal && (
+        <ModalOverlay onClick={() => setShowConfirmModal(false)}>
+          <ConfirmModalContainer onClick={e => e.stopPropagation()}>
+            <ConfirmText>Are you sure you want to remove this mupi?</ConfirmText>
+            <ButtonRow>
+              <ModalButton onClick={() => setShowConfirmModal(false)}>Cancel</ModalButton>
+              <ModalButton variant="danger" onClick={handleRemove}>
+                Remove
+              </ModalButton>
+            </ButtonRow>
+          </ConfirmModalContainer>
+        </ModalOverlay>
+      )}
+    </Page>
+  );
 }

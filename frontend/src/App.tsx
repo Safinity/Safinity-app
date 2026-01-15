@@ -25,7 +25,6 @@ export default function App() {
   }
 
   return (
-
     <ThemeProvider theme={theme}>
       <BrowserRouter>
         <Routes>
@@ -49,7 +48,7 @@ export default function App() {
               </Layout>
             }
           />
-        <Route path="mupis" element={<MupisPage />} />
+          <Route path="mupis" element={<MupisPage />} />
 
           <Route
             path="/notifications"

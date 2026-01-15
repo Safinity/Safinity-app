@@ -1,35 +1,38 @@
 import { useState } from 'react';
 import styled from 'styled-components';
 
-const Wrapper = styled.div`
-`;
+const Wrapper = styled.div``;
 
 const Label = styled.label`
-  color: #cfd3e0;
-  font-size: 14px;
-  margin-bottom: 6px;
+  color: ${({ theme }) => theme.colors.palette.neutral.neutral80};
+  font-family: ${({ theme }) => theme.text.label.fontFamily};
+  font-size: ${({ theme }) => theme.text.label.fontSize}px;
+  line-height: ${({ theme }) => theme.text.label.lineHeight}px;
+  margin-bottom: ${({ theme }) => theme.spacing.sm}px;
   display: block;
 `;
 
 const Box = styled.div`
-  background-color: #2a303f;
-  border-radius: 10px;
-  padding: 12px 14px;
+  background-color: ${({ theme }) => theme.colors.background};
+  border-radius: ${({ theme }) => theme.borderRadius.medium}px;
+  padding: ${({ theme }) => `${theme.spacing.sm}px ${theme.spacing.md}px`};
   display: flex;
-  flex-direction: row;
   align-items: center;
 `;
 
-const Input = styled.input<{ type?: string }>`
+const Input = styled.input`
   flex: 1;
   background: transparent;
   border: none;
-  color: white;
-  font-size: 1rem;
   outline: none;
 
+  color: ${({ theme }) => theme.colors.white};
+  font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
+  font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
+  line-height: ${({ theme }) => theme.text.corpo.corpoTexto.lineHeight}px;
+
   &::placeholder {
-    color: #8a90a5;
+    color: ${({ theme }) => theme.colors.palette.neutral.neutral60};
   }
 `;
 
@@ -49,7 +52,7 @@ export default function InputField({
   value,
   onChange,
 }: InputFieldProps) {
-  const [show, setShow] = useState(false);
+  const [show] = useState(false);
 
   return (
     <Wrapper>

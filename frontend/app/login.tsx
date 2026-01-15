@@ -3,7 +3,6 @@ import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
 import { TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
-
 import users from '@/data/users.json';
 import PrimaryButton from '@/components/PrimaryButton';
 

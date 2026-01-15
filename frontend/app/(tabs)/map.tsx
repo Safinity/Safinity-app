@@ -1,35 +1,35 @@
 // MapScreen.tsx
-import React, { useState, useEffect, useCallback } from "react";
-import { Dimensions } from "react-native";
-import styled from "styled-components/native";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
-import Svg, { Polyline } from "react-native-svg";
-import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams } from "expo-router";
+import React, { useState, useEffect, useCallback } from 'react';
+import { Dimensions } from 'react-native';
+import styled from 'styled-components/native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import Svg, { Polyline } from 'react-native-svg';
+import { Ionicons } from '@expo/vector-icons';
+import { useLocalSearchParams } from 'expo-router';
 
-import users from "@/data/users.json";
-import { userImages } from "../../assets/images/Users/userImages";
-import Header from "../../components/ui/header";
-import SearchInput from "../../components/ui/SearchInput";
-import FilterTags from "../../components/ui/FilterTags";
-import { StaticMapPreview } from "../../components/maps/StaticMapPreview";
-import { MapPin } from "../../components/maps/MapPin";
-import { MapStage } from "../../components/maps/MapStage";
-import { MapCallout } from "../../components/maps/MapCallout";
-import { UserMarker } from "../../components/maps/UserMarker";
-import { Colors, Spacing } from "../../constants/theme";
-import mapData from "../../data/mapdata.json";
-import { latLngToPixelFromBounds } from "../../utils/coordinates";
-import { router } from "expo-router";
+import users from '@/data/users.json';
+import { userImages } from '../../assets/images/Users/userImages';
+import Header from '../../components/ui/header';
+import SearchInput from '../../components/ui/SearchInput';
+import FilterTags from '../../components/ui/FilterTags';
+import { StaticMapPreview } from '../../components/maps/StaticMapPreview';
+import { MapPin } from '../../components/maps/MapPin';
+import { MapStage } from '../../components/maps/MapStage';
+import { MapCallout } from '../../components/maps/MapCallout';
+import { UserMarker } from '../../components/maps/UserMarker';
+import { Colors, Spacing } from '../../constants/theme';
+import mapData from '../../data/mapdata.json';
+import { latLngToPixelFromBounds } from '../../utils/coordinates';
+import { router } from 'expo-router';
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const IMAGE_WIDTH = screenWidth * 2.5;
 const IMAGE_HEIGHT = screenHeight * 1.6;
 const CURRENT_LOCATION = mapData.currentLocation;
 
-const MIN_SCALE = 0.7; 
-const MAX_SCALE = 3;   
+const MIN_SCALE = 0.7;
+const MAX_SCALE = 3;
 
 const Container = styled.View`
   flex: 1;
@@ -115,17 +115,17 @@ const DestinationText = styled.Text`
 `;
 
 const TAG_TO_PIN_TYPE: Record<string, string[]> = {
-  Friends: ["friend"],
-  Food: ["food"],
-  WC: ["wc"],
-  Exits: ["exit"],
-  Stages: ["stage"],
-  Entrance: ["entrance"],
+  Friends: ['friend'],
+  Food: ['food'],
+  WC: ['wc'],
+  Exits: ['exit'],
+  Stages: ['stage'],
+  Entrance: ['entrance'],
 };
 
 const getDisplayName = (item: any) => {
-  if (item.type === "friend" && item.friendId) {
-    const user = users.find((u) => u.id === item.friendId);
+  if (item.type === 'friend' && item.friendId) {
+    const user = users.find(u => u.id === item.friendId);
     return user ? user.name : item.name;
   }
   return item.name;
@@ -143,24 +143,24 @@ export default function MapScreen() {
   const translateY = useSharedValue(0);
   const scale = useSharedValue(1);
 
-  const [searchValue, setSearchValue] = useState("");
+  const [searchValue, setSearchValue] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedPin, setSelectedPin] = useState<any>(null);
   const [activeRoute, setActiveRoute] = useState<{ x: number; y: number }[] | null>(null);
-  const [destinationName, setDestinationName] = useState("");
+  const [destinationName, setDestinationName] = useState('');
 
   const { universityCoords, pins, stages, bounds } = mapData;
-  const tags = ["Exits", "Friends", "Stages", "Food", "Entrance"];
+  const tags = ['Exits', 'Friends', 'Stages', 'Food', 'Entrance'];
 
   const { focusId } = useLocalSearchParams();
 
   // --- GESTURES ---
-  const panGesture = Gesture.Pan().onChange((e) => {
+  const panGesture = Gesture.Pan().onChange(e => {
     translateX.value += e.changeX;
     translateY.value += e.changeY;
   });
 
-  const pinchGesture = Gesture.Pinch().onChange((e) => {
+  const pinchGesture = Gesture.Pinch().onChange(e => {
     const newScale = scale.value * e.scaleChange;
     scale.value = Math.min(MAX_SCALE, Math.max(MIN_SCALE, newScale));
   });
@@ -192,7 +192,13 @@ export default function MapScreen() {
       translateY.value = withTiming(screenHeight / 2 - pos.y * scale.value);
 
       if (showRoute) {
-        const start = latLngToPixelFromBounds(CURRENT_LOCATION.lat, CURRENT_LOCATION.lng, bounds, IMAGE_WIDTH, IMAGE_HEIGHT);
+        const start = latLngToPixelFromBounds(
+          CURRENT_LOCATION.lat,
+          CURRENT_LOCATION.lng,
+          bounds,
+          IMAGE_WIDTH,
+          IMAGE_HEIGHT,
+        );
         const end = { x: pos.x, y: pos.y };
         setActiveRoute([start, end]);
         setDestinationName(getDisplayName(pin));
@@ -204,25 +210,27 @@ export default function MapScreen() {
 
   const handleCancelRoute = () => {
     setActiveRoute(null);
-    setDestinationName("");
+    setDestinationName('');
   };
 
   const visiblePins =
     selectedTags.length === 0
-      ? pins.filter((pin) => matchesSearch(pin, searchValue))
+      ? pins.filter(pin => matchesSearch(pin, searchValue))
       : pins.filter(
-          (pin) => selectedTags.some((tag) => TAG_TO_PIN_TYPE[tag]?.includes(pin.type)) && matchesSearch(pin, searchValue)
+          pin =>
+            selectedTags.some(tag => TAG_TO_PIN_TYPE[tag]?.includes(pin.type)) &&
+            matchesSearch(pin, searchValue),
         );
 
   const visibleStages =
-    selectedTags.length === 0 || selectedTags.includes("Stages")
-      ? stages.filter((stage) => matchesSearch(stage, searchValue))
+    selectedTags.length === 0 || selectedTags.includes('Stages')
+      ? stages.filter(stage => matchesSearch(stage, searchValue))
       : [];
 
   // --- FOCO AUTOMÁTICO NO AMIGO ---
   useEffect(() => {
     if (focusId) {
-      const targetPin = pins.find((p) => p.friendId === focusId);
+      const targetPin = pins.find(p => p.friendId === focusId);
       if (targetPin) {
         setTimeout(() => handlePinPress(targetPin, true), 300);
       }
@@ -233,12 +241,22 @@ export default function MapScreen() {
     <Container>
       <GestureDetector gesture={composedGesture}>
         <Animated.View style={[{ width: IMAGE_WIDTH, height: IMAGE_HEIGHT }, animatedStyle]}>
-          <StaticMapPreview center={universityCoords} width={IMAGE_WIDTH} height={IMAGE_HEIGHT} theme="dark" />
+          <StaticMapPreview
+            center={universityCoords}
+            width={IMAGE_WIDTH}
+            height={IMAGE_HEIGHT}
+            theme="dark"
+          />
 
-          <Svg width={IMAGE_WIDTH} height={IMAGE_HEIGHT} style={{ position: "absolute" }} pointerEvents="none">
+          <Svg
+            width={IMAGE_WIDTH}
+            height={IMAGE_HEIGHT}
+            style={{ position: 'absolute' }}
+            pointerEvents="none"
+          >
             {activeRoute && (
               <Polyline
-                points={activeRoute.map((p) => `${p.x},${p.y}`).join(" ")}
+                points={activeRoute.map(p => `${p.x},${p.y}`).join(' ')}
                 stroke={Colors.primary}
                 strokeWidth={4}
                 fill="none"
@@ -247,8 +265,9 @@ export default function MapScreen() {
             )}
           </Svg>
 
-          {visiblePins.map((pin) => {
-            const friendData = pin.type === "friend" ? users.find((u) => u.id === pin.friendId) : null;
+          {visiblePins.map(pin => {
+            const friendData =
+              pin.type === 'friend' ? users.find(u => u.id === pin.friendId) : null;
             return (
               <MapPin
                 key={pin.id}
@@ -262,13 +281,32 @@ export default function MapScreen() {
             );
           })}
 
-          {visibleStages.map((stage) => (
-            <MapStage key={stage.id} stage={stage} bounds={bounds} width={IMAGE_WIDTH} height={IMAGE_HEIGHT} onPress={() => handlePinPress(stage)} />
+          {visibleStages.map(stage => (
+            <MapStage
+              key={stage.id}
+              stage={stage}
+              bounds={bounds}
+              width={IMAGE_WIDTH}
+              height={IMAGE_HEIGHT}
+              onPress={() => handlePinPress(stage)}
+            />
           ))}
 
-          {selectedPin && <MapCallout x={selectedPin.px} y={selectedPin.py} title={selectedPin.name} onPressRoute={() => handlePinPress(selectedPin, true)} />}
+          {selectedPin && (
+            <MapCallout
+              x={selectedPin.px}
+              y={selectedPin.py}
+              title={selectedPin.name}
+              onPressRoute={() => handlePinPress(selectedPin, true)}
+            />
+          )}
 
-          <UserMarker location={CURRENT_LOCATION} bounds={bounds} width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
+          <UserMarker
+            location={CURRENT_LOCATION}
+            bounds={bounds}
+            width={IMAGE_WIDTH}
+            height={IMAGE_HEIGHT}
+          />
         </Animated.View>
       </GestureDetector>
 
@@ -281,14 +319,21 @@ export default function MapScreen() {
         </PageHeader>
 
         <PaddingSearchInput>
-          <SearchInput variant="mapa" placeholder="Search..." value={searchValue} onChangeText={setSearchValue} />
+          <SearchInput
+            variant="mapa"
+            placeholder="Search..."
+            value={searchValue}
+            onChangeText={setSearchValue}
+          />
         </PaddingSearchInput>
 
         <FilterTags
           tags={tags}
           selectedTags={selectedTags}
-          onTagPress={(tag) =>
-            setSelectedTags((prev) => (prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]))
+          onTagPress={tag =>
+            setSelectedTags(prev =>
+              prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag],
+            )
           }
           variant="mapa"
           style={{ marginTop: Spacing.md }}
@@ -305,7 +350,7 @@ export default function MapScreen() {
         </NavigationFooter>
       )}
 
-      <SosButton onPress={() => router.push("/sos")}>
+      <SosButton onPress={() => router.push('/sos')}>
         <SOSButtonText>SOS</SOSButtonText>
       </SosButton>
     </Container>

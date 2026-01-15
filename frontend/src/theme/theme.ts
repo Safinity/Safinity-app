@@ -140,7 +140,7 @@ export const TextStyles = {
   corpo: {
     corpoTexto: {
       fontFamily: 'PlusJakartaSans_300Light',
-      fontSize: 16,
+      fontSize: 14,
       lineHeight: 22,
     },
   },

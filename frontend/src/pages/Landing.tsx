@@ -13,6 +13,7 @@ const Page = styled.div`
   display: flex;
   align-items: center;
   padding: 0 80px;
+  background-color: ${({ theme }) => theme.colors.background};
 `;
 
 const Content = styled.div`

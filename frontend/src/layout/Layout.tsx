@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import Navbar from '../components/Navbar';
 import { Sidebar } from '../components/SideBar';
+import userImg from '../assets/user-pic.png';
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const user = { name: 'Jorge', avatar: '/Ellipse.png' };
+  const user = { name: 'There', avatar: userImg };
 
   return (
     <>

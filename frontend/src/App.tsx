@@ -6,6 +6,9 @@ import Home from './pages/Home';
 import Alerts from './pages/Alerts';
 import { NotificationsPage } from './pages/NotificationsPage';
 import Loading from './pages/Loading';
+import Landing from './pages/Landing';
+import Login from './pages/Login';
+import Register from './pages/Register';
 import { Layout } from './layout/Layout';
 import { theme } from './theme/theme';
 
@@ -23,13 +26,37 @@ export default function App() {
   return (
     <ThemeProvider theme={theme}>
       <BrowserRouter>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/alerts" element={<Alerts />} />
-            <Route path="/notifications" element={<NotificationsPage />} />
-          </Routes>
-        </Layout>
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route
+            path="/home"
+            element={
+              <Layout>
+                <Home />
+              </Layout>
+            }
+          />
+
+          <Route
+            path="/alerts"
+            element={
+              <Layout>
+                <Alerts />
+              </Layout>
+            }
+          />
+
+          <Route
+            path="/notifications"
+            element={
+              <Layout>
+                <NotificationsPage />
+              </Layout>
+            }
+          />
+        </Routes>
       </BrowserRouter>
     </ThemeProvider>
   );

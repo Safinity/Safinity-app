@@ -1,12 +1,12 @@
 import '../theme/theme.ts';
 import styled from 'styled-components';
+
 import HomeCard from '../components/HomeCard';
 import imgCard from '../assets/image-home-card.png';
 
 const Page = styled.div`
   min-height: 100vh;
 `;
-
 const Content = styled.div`
   padding: 64px;
   display: grid;

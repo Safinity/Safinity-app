@@ -3,6 +3,7 @@ import { ThemeProvider } from 'styled-components';
 import { useState } from 'react';
 
 import Home from './pages/Home';
+import MupisPage from './pages/MupisPage';
 import Alerts from './pages/Alerts';
 import { NotificationsPage } from './pages/NotificationsPage';
 import Loading from './pages/Loading';
@@ -47,6 +48,7 @@ export default function App() {
               </Layout>
             }
           />
+          <Route path="mupis" element={<MupisPage />} />
 
           <Route
             path="/notifications"

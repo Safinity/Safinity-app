@@ -53,7 +53,7 @@ npm install
 2. Iniciar o projeto:
 ```
 npx expo start
-
+```
 3. Executar no dispositivo:
 - Ler o QR Code com a app **Expo Go**
 - Usar simulador Android

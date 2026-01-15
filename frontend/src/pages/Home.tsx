@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import reactLogo from '../assets/react.svg';
 import viteLogo from '/vite.svg';
 import '../theme/theme.css';
+import { Link } from 'react-router-dom';
+
 
 const Container = styled.div`
   max-width: 1280px;
@@ -10,6 +12,23 @@ const Container = styled.div`
   padding: 2rem;
   text-align: center;
 `;
+const LinkButton = styled(Link)`
+  display: inline-block;
+  background-color: var(--secondary-icy-blue);
+  color: var(--white);
+  border-radius: var(--radius-small);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-family: var(--text-botao-font);
+  font-size: var(--text-botao-size);
+  line-height: var(--text-botao-line-height);
+  text-decoration: none;
+  margin-top: 1rem;
+
+  &:hover {
+    filter: brightness(1.1);
+  }
+`;
+
 
 const Logo = styled.img`
   height: 6em;
@@ -86,6 +105,10 @@ export default function Home() {
         <Text>
           Edit <code>src/App.tsx</code> and save to test HMR
         </Text>
+          <LinkButton to="/mupis">
+    Ir para Mupis
+  </LinkButton>
+
       </Card>
 
       <Text color="var(--neutral60)">

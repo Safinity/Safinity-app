@@ -4,7 +4,6 @@ import MupiCard from '../components/MupiCard';
 import mupisDataJson from '../data/mupis.json';
 import InputField from '../components/InputField';
 
-
 interface Mupi {
   id: number;
   title: string;

@@ -9,6 +9,9 @@ import ManageEventMap from './pages/ManageEvent';
 
 import { NotificationsPage } from './pages/NotificationsPage';
 import Loading from './pages/Loading';
+import Landing from './pages/Landing';
+import Login from './pages/Login';
+import Register from './pages/Register';
 import { Layout } from './layout/Layout';
 import { theme } from './theme/theme';
 
@@ -27,11 +30,51 @@ export default function App() {
     <ThemeProvider theme={theme}>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/events" element={<EventPage />} />
-          <Route path="/alerts" element={<Alerts />} />
-          <Route path="/events/:id" element={<ManageEventMap />} />
-          <Route path="/notifications" element={<NotificationsPage />} />
+          <Route path="/" element={<Landing />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route
+            path="/home"
+            element={
+              <Layout>
+                <Home />
+              </Layout>
+            }
+          />
+
+          <Route
+            path="/alerts"
+            element={
+              <Layout>
+                <Alerts />
+              </Layout>
+            }
+          />
+
+          <Route
+            path="/notifications"
+            element={
+              <Layout>
+                <NotificationsPage />
+              </Layout>
+            }
+          />
+          <Route
+            path="/events"
+            element={
+              <Layout>
+                <EventPage />
+              </Layout>
+            }
+          />
+          <Route
+            path="/events/:id"
+            element={
+              <Layout>
+                <ManageEventMap />
+              </Layout>
+            }
+          />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

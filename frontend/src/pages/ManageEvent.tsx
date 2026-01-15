@@ -10,7 +10,6 @@ import { StaticMapPreview } from '../components/StaticMapPreview';
 import { MapPin } from '../components/maps/MapPin';
 import { MapStage } from '../components/maps/MapStage';
 import { MapCallout } from '../components/maps/MapCallout';
-import Navbar from '../components/Navbar';
 
 /* ------------------------------------------------------------------ */
 /* TYPES                                                               */
@@ -84,8 +83,6 @@ const ManageEventPage: React.FC = () => {
 
   return (
     <Layout>
-      <Navbar userName="Jorge" avatarUrl="/Ellipse.png" />
-
       <MainContent>
         <HeaderSection>
           <Title>Web Summit</Title>
@@ -172,6 +169,8 @@ const Layout = styled.div`
   min-height: 100vh;
   color: ${theme.colors.white};
   font-family: ${theme.fonts.family};
+  margin-left: 150px;
+  margin-right: 150px;
 `;
 
 const MainContent = styled.div`

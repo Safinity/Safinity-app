@@ -17,28 +17,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
             Home
           </MenuItem>
           <MenuItem to="/dashboards" onClick={onClose}>
-            Dashboards
+            Manage event
           </MenuItem>
           <MenuItem to="/mupis" onClick={onClose}>
             Mupis
-          </MenuItem>
-          <MenuItem to="/flowofpeople" onClick={onClose}>
-            Flow of People
-          </MenuItem>
-          <MenuItem to="/areasofinterest" onClick={onClose}>
-            Areas of Interest
-          </MenuItem>
-          <MenuItem to="/eventschedule" onClick={onClose}>
-            Event Schedule
           </MenuItem>
           <MenuItem to="/alerts" onClick={onClose}>
             Alerts
           </MenuItem>
           <MenuItem to="/notifications" onClick={onClose}>
             Notifications
-          </MenuItem>
-          <MenuItem to="/settings" onClick={onClose}>
-            Settings
           </MenuItem>
         </Menu>
       </Wrapper>

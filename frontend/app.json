@@ -24,12 +24,7 @@
   "web": {
     "output": "static"
   },
-  "plugins": [
-    "expo-router",
-    "expo-font",
-    "expo-barcode-scanner", 
-    "expo-camera"
-  ],
+  "plugins": ["expo-router", "expo-font", "expo-barcode-scanner", "expo-camera"],
   "experiments": {
     "typedRoutes": true,
     "reactCompiler": true
@@ -42,9 +37,5 @@
   },
   "owner": "safinityapp",
   "sdkVersion": "54.0.0",
-  "platforms": [
-    "ios",
-    "android",
-    "web"
-  ]
+  "platforms": ["ios", "android", "web"]
 }

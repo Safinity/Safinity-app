@@ -14,7 +14,6 @@ import users from '../../../data/users.json';
 
 import EditIcon from '../../../assets/Icons/edit.png';
 
-// --- Styled Components do Header ---
 const HeaderContainer = styled.View`
   margin-bottom: 10px;
   padding: 60px 30px 0px;
@@ -33,7 +32,6 @@ const Title = styled.Text`
   font-weight: bold;
 `;
 
-// --- Perfil Components ---
 const Container = styled(ScrollView).attrs({
   showsVerticalScrollIndicator: false,
 })`
@@ -133,7 +131,6 @@ const LinkButtonText = styled.Text`
   font-family: ${Fonts.weights.medium};
 `;
 
-// --- IGUAL À HOME PAGE ---
 const SectionHeader = styled.View`
   flex-direction: row;
   justify-content: space-between;
@@ -246,7 +243,6 @@ export default function Profile() {
           <LinkButtonText>Link my ticket</LinkButtonText>
         </LinkButton>
 
-        {/* ESTRUTURA IGUAL À HOME */}
         <SectionHeader>
           <SectionTitle>Past Events</SectionTitle>
           <Pressable onPress={() => router.push('/events-list')}>
@@ -288,7 +284,7 @@ export default function Profile() {
           <SettingsIcon>›</SettingsIcon>
         </SettingsRow>
 
-        <LogoutButton>
+        <LogoutButton onPress={() => router.push('../../landing')}>
           <LogoutText>Log out</LogoutText>
         </LogoutButton>
       </PaddedContent>

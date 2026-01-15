@@ -7,14 +7,12 @@ const UserContext = createContext<any>(null);
 export function UserProvider({ children }: any) {
   const [currentUser, setCurrentUser] = useState<any>(null);
 
-  // Carrega o utilizador autenticado (mock)
   useEffect(() => {
     const currentId = auth.currentUserId;
     const foundUser = users.find(u => u.id === currentId);
     setCurrentUser(foundUser);
   }, []);
 
-  // Funções globais
   const addFriend = (friendId: string) => {
     setCurrentUser(prev => ({
       ...prev,

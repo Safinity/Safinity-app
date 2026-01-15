@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import styled, { ThemeProvider } from 'styled-components/native';
 import { theme } from '../constants/theme';
 import { UserProvider } from '@/context/UserContext';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import {
   useFonts,
@@ -33,13 +34,15 @@ export default function RootLayout() {
   if (!fontsLoaded) return null;
 
   return (
-    <UserProvider>
-      <ThemeProvider theme={theme}>
-        <Container>
-          <Slot />
-        </Container>
-        <StatusBar style="light" />
-      </ThemeProvider>
-    </UserProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <UserProvider>
+        <ThemeProvider theme={theme}>
+          <Container>
+            <Slot />
+          </Container>
+          <StatusBar style="light" />
+        </ThemeProvider>
+      </UserProvider>
+    </GestureHandlerRootView>
   );
 }

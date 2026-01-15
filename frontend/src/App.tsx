@@ -5,6 +5,9 @@ import { useState } from 'react';
 import Home from './pages/Home';
 import MupisPage from './pages/MupisPage';
 import Alerts from './pages/Alerts';
+import EventPage from './pages/EventsPage';
+import ManageEventMap from './pages/ManageEvent';
+
 import { NotificationsPage } from './pages/NotificationsPage';
 import Loading from './pages/Loading';
 import Landing from './pages/Landing';
@@ -56,6 +59,22 @@ export default function App() {
             element={
               <Layout>
                 <NotificationsPage />
+              </Layout>
+            }
+          />
+          <Route
+            path="/events"
+            element={
+              <Layout>
+                <EventPage />
+              </Layout>
+            }
+          />
+          <Route
+            path="/events/:id"
+            element={
+              <Layout>
+                <ManageEventMap />
               </Layout>
             }
           />

@@ -216,6 +216,7 @@ export const NotificationsPage = () => {
       message: formData.message,
       sentAt: new Date().toISOString(),
       target: formData.target,
+      reach: 0,
     };
 
     setNotifications([newNotification, ...notifications]);

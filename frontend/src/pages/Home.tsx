@@ -3,6 +3,7 @@ import styled from 'styled-components';
 
 import HomeCard from '../components/HomeCard';
 import imgCard from '../assets/image-home-card.png';
+import imgCard2 from '../assets/image-home-card2.png';
 import { useNavigate } from 'react-router-dom';
 
 const Page = styled.div`
@@ -32,7 +33,7 @@ export default function Home() {
         <HomeCard
           title="New event"
           description="Create a new event and manage all its information here."
-          image={imgCard}
+          image={imgCard2}
           buttonLabel="Add new event"
           onClick={() => console.log('Add new event')}
         />

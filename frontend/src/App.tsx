@@ -43,7 +43,16 @@ export default function App() {
               </Layout>
             }
           />
-          <Route path="/events" element={<EventsPage />} />
+
+          <Route
+            path="/events"
+            element={
+              <Layout>
+                <EventsPage />
+              </Layout>
+            }
+          />
+
           <Route
             path="/alerts"
             element={

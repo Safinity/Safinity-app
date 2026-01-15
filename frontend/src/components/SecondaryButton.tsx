@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import React from 'react';
 
 const Button = styled.button`
   padding: 16px;
@@ -20,6 +21,11 @@ const Button = styled.button`
   }
 `;
 
-export default function SecondaryButton({ children, onClick }: any) {
+interface SecondaryButtonProps {
+  children: React.ReactNode;
+  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
+}
+
+export default function SecondaryButton({ children, onClick }: SecondaryButtonProps) {
   return <Button onClick={onClick}>{children}</Button>;
 }

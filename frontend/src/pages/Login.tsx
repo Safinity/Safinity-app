@@ -6,6 +6,7 @@ import LogoImg from '../assets/images/landing/logo.png';
 import PhoneImg from '../assets/images/landing/phone.png';
 import PrimaryButton from '../components/PrimaryButton';
 import users from '../data/users.json';
+import { FiMail, FiEye, FiEyeOff } from 'react-icons/fi';
 
 const Page = styled.div`
   height: 100vh;
@@ -27,7 +28,8 @@ const RightContent = styled.div`
   flex: 1;
   display: flex;
   justify-content: flex-end;
-  align-items: center;
+  align-items: flex-start;
+  padding-top: 40px;
 `;
 
 const Phone = styled.img`
@@ -65,6 +67,9 @@ const InputBox = styled.div`
   background-color: #2a303f;
   border-radius: 8px;
   padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 `;
 
 const Input = styled.input`
@@ -74,6 +79,15 @@ const Input = styled.input`
   outline: none;
   color: white;
   font-size: 16px;
+`;
+
+const IconButton = styled.button`
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  color: #cfd3e0;
 `;
 
 const ErrorText = styled.p`
@@ -107,6 +121,7 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = () => {
     setError('');
@@ -145,6 +160,7 @@ export default function Login() {
               value={email}
               onChange={e => setEmail(e.target.value)}
             />
+            <FiMail size={20} color="#cfd3e0" />
           </InputBox>
         </InputGroup>
 
@@ -152,11 +168,15 @@ export default function Login() {
           <Label>Password</Label>
           <InputBox>
             <Input
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               placeholder="Password"
               value={password}
               onChange={e => setPassword(e.target.value)}
             />
+
+            <IconButton type="button" onClick={() => setShowPassword(prev => !prev)}>
+              {showPassword ? <FiEyeOff size={22} /> : <FiEye size={22} />}
+            </IconButton>
           </InputBox>
         </InputGroup>
 

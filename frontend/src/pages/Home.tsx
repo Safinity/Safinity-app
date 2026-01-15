@@ -3,6 +3,7 @@ import styled from 'styled-components';
 
 import HomeCard from '../components/HomeCard';
 import imgCard from '../assets/image-home-card.png';
+import { useNavigate } from 'react-router-dom';
 
 const Page = styled.div`
   min-height: 100vh;
@@ -15,6 +16,8 @@ const Content = styled.div`
 `;
 
 export default function Home() {
+  const navigate = useNavigate();
+
   return (
     <Page>
       <Content>
@@ -23,7 +26,7 @@ export default function Home() {
           description="See here the list of events you are associated with."
           image={imgCard}
           buttonLabel="See events"
-          onClick={() => (window.location.href = '/events')}
+          onClick={() => navigate('/events')}
         />
 
         <HomeCard

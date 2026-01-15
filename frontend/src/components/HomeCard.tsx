@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import PrimaryButton from './PrimaryButton';
 
 type HomeCardProps = {
   title: string;
@@ -45,21 +46,6 @@ const Description = styled.p`
   margin: 0;
 `;
 
-const Button = styled.button`
-  background-color: var(--primary);
-  color: var(--white);
-  border: none;
-  padding: 14px 32px;
-  border-radius: var(--radius-medium);
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-
-  &:hover {
-    opacity: 0.9;
-  }
-`;
-
 export default function HomeCard({
   title,
   description,
@@ -77,7 +63,7 @@ export default function HomeCard({
 
       <Description>{description}</Description>
 
-      <Button onClick={onClick}>{buttonLabel}</Button>
+      <PrimaryButton onClick={onClick}>{buttonLabel}</PrimaryButton>
     </Card>
   );
 }

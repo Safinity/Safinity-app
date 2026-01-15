@@ -83,7 +83,7 @@ export default function App() {
             }
           />
           <Route
-            path="/events/:id"
+            path="/manageevents"
             element={
               <Layout>
                 <ManageEventMap />

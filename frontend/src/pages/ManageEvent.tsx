@@ -170,8 +170,8 @@ const Layout = styled.div`
   min-height: 100vh;
   color: ${theme.colors.white};
   font-family: ${theme.fonts.family};
-  margin-left: 150px;
-  margin-right: 150px;
+  margin-left: 100px;
+  margin-right: 100px;
 `;
 
 const MainContent = styled.div`
@@ -210,7 +210,8 @@ const SectionLabel = styled.label`
 `;
 
 const MapViewport = styled.div`
-  height: 600px;
+  height: 625px;
+  width: 700px;
   background-color: #1a1d24;
   border-radius: ${theme.borderRadius.xlarge}px;
   overflow: hidden;

@@ -1,6 +1,21 @@
 {
-  "name": "frontend",
-  "slug": "frontend",
+  "expo": {
+    "android": {
+      "package": "com.safinityapp.frontend",
+      "compileSdkVersion": 35,
+      "targetSdkVersion": 35,
+      "minSdkVersion": 24,
+      "buildToolsVersion": "35.0.0",
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE"
+      },
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false
+    }
+  },
+
+  "name": "safinity-app",
+  "slug": "safinity-app",
   "version": "1.0.0",
   "orientation": "portrait",
   "scheme": "frontend",

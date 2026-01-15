@@ -64,7 +64,7 @@ const Label = styled.label`
 `;
 
 const InputBox = styled.div`
-  background-color: #2a303f;
+  background-color: ${({ theme }) => theme.colors.grayNavbar};
   border-radius: 8px;
   padding: 12px;
   display: flex;
@@ -79,6 +79,8 @@ const Input = styled.input`
   outline: none;
   color: white;
   font-size: 16px;
+  height: 24px;
+  line-height: 24px;
 `;
 
 const IconButton = styled.button`
@@ -87,7 +89,9 @@ const IconButton = styled.button`
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
   color: #cfd3e0;
+  padding: 0;
 `;
 
 const ErrorText = styled.p`
@@ -140,7 +144,6 @@ export default function Login() {
       return;
     }
 
-    // Login OK
     navigate('/home');
   };
 

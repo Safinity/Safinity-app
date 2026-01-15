@@ -9,6 +9,7 @@ import Loading from './pages/Loading';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import EventsPage from './pages/EventsPage';
 import { Layout } from './layout/Layout';
 import { theme } from './theme/theme';
 
@@ -38,7 +39,7 @@ export default function App() {
               </Layout>
             }
           />
-
+          <Route path="/events" element={<EventsPage />} />
           <Route
             path="/alerts"
             element={

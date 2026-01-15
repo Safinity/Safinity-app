@@ -3,6 +3,7 @@ import { ThemeProvider } from 'styled-components';
 import { useState } from 'react';
 
 import Home from './pages/Home';
+import MupisPage from './pages/MupisPage';
 import Alerts from './pages/Alerts';
 import EventPage from './pages/EventsPage';
 import ManageEventMap from './pages/ManageEvent';
@@ -12,6 +13,7 @@ import Loading from './pages/Loading';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import EventsPage from './pages/EventsPage';
 import { Layout } from './layout/Layout';
 import { theme } from './theme/theme';
 
@@ -41,7 +43,7 @@ export default function App() {
               </Layout>
             }
           />
-
+          <Route path="/events" element={<EventsPage />} />
           <Route
             path="/alerts"
             element={
@@ -50,6 +52,7 @@ export default function App() {
               </Layout>
             }
           />
+          <Route path="mupis" element={<MupisPage />} />
 
           <Route
             path="/notifications"

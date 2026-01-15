@@ -6,9 +6,10 @@ import { AiOutlineCheckSquare, AiOutlineBorder } from 'react-icons/ai';
 import LogoImg from '../assets/images/landing/logo.png';
 import PhoneImg from '../assets/images/landing/phone.png';
 import PrimaryButton from '../components/PrimaryButton';
+import { FiUser, FiMail, FiEye, FiEyeOff, FiAtSign } from 'react-icons/fi';
 
 const Page = styled.div`
-  height: 100vh;
+  min-height: 100vh;
   width: 100vw;
   display: flex;
   background-color: ${({ theme }) => theme.colors.background};
@@ -27,11 +28,14 @@ const RightContent = styled.div`
   flex: 1;
   display: flex;
   justify-content: flex-end;
-  align-items: center;
+  align-items: flex-start;
+  padding-top: 40px;
 `;
 
 const Phone = styled.img`
   height: 100%;
+  max-height: 100vh;
+  object-fit: contain;
 `;
 
 const Logo = styled.img`
@@ -68,6 +72,9 @@ const InputBox = styled.div`
   background-color: #2a303f;
   border-radius: 8px;
   padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 `;
 
 const Input = styled.input`
@@ -77,6 +84,15 @@ const Input = styled.input`
   outline: none;
   color: white;
   font-size: 16px;
+`;
+
+const IconButton = styled.button`
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  color: #cfd3e0;
 `;
 
 const CheckboxWrapper = styled.div`
@@ -102,6 +118,7 @@ const BottomText = styled.p`
   color: ${({ theme }) => theme.colors.inactive};
   text-align: center;
   margin-top: 24px;
+  margin-bottom: 38px;
 `;
 
 export default function Register() {
@@ -115,6 +132,8 @@ export default function Register() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [checked, setChecked] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleRegister = () => {
     setError('');
@@ -134,7 +153,6 @@ export default function Register() {
       return;
     }
 
-    // Aqui você poderia salvar o usuário no backend
     navigate('/home');
   };
 
@@ -149,35 +167,65 @@ export default function Register() {
           <InputGroup>
             <Label>First Name</Label>
             <InputBox>
-              <Input value={firstName} onChange={e => setFirstName(e.target.value)} />
+              <Input
+                placeholder="First name"
+                value={firstName}
+                onChange={e => setFirstName(e.target.value)}
+              />
+              <FiUser size={20} color="#cfd3e0" />
             </InputBox>
           </InputGroup>
 
           <InputGroup>
             <Label>Last Name</Label>
             <InputBox>
-              <Input value={lastName} onChange={e => setLastName(e.target.value)} />
+              <Input
+                placeholder="Last name"
+                value={lastName}
+                onChange={e => setLastName(e.target.value)}
+              />
+              <FiUser size={20} color="#cfd3e0" />
             </InputBox>
           </InputGroup>
 
           <InputGroup>
             <Label>Username</Label>
             <InputBox>
-              <Input value={username} onChange={e => setUsername(e.target.value)} />
+              <Input
+                placeholder="Username"
+                value={username}
+                onChange={e => setUsername(e.target.value)}
+              />
+              <FiAtSign size={20} color="#cfd3e0" />
             </InputBox>
           </InputGroup>
 
           <InputGroup>
             <Label>Email</Label>
             <InputBox>
-              <Input type="email" value={email} onChange={e => setEmail(e.target.value)} />
+              <Input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+              />
+              <FiMail size={20} color="#cfd3e0" />
             </InputBox>
           </InputGroup>
 
           <InputGroup>
             <Label>Password</Label>
             <InputBox>
-              <Input type="password" value={password} onChange={e => setPassword(e.target.value)} />
+              <Input
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+              />
+
+              <IconButton type="button" onClick={() => setShowPassword(prev => !prev)}>
+                {showPassword ? <FiEyeOff size={22} /> : <FiEye size={22} />}
+              </IconButton>
             </InputBox>
           </InputGroup>
 
@@ -185,10 +233,15 @@ export default function Register() {
             <Label>Confirm Password</Label>
             <InputBox>
               <Input
-                type="password"
+                type={showConfirmPassword ? 'text' : 'password'}
+                placeholder="Confirm password"
                 value={confirmPassword}
                 onChange={e => setConfirmPassword(e.target.value)}
               />
+
+              <IconButton type="button" onClick={() => setShowConfirmPassword(prev => !prev)}>
+                {showConfirmPassword ? <FiEyeOff size={22} /> : <FiEye size={22} />}
+              </IconButton>
             </InputBox>
           </InputGroup>
         </Form>

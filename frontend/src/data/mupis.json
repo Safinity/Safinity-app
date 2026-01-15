@@ -1,0 +1,7 @@
+[
+  { "id": 1, "title": "Saída Norte", "image": "/src/assets/saida_norte.png" },
+  { "id": 2, "title": "Event Anton Osika", "image": "/src/assets/evento_mupi.png" },
+  { "id": 3, "title": "Startup", "image": "/src/assets/startup_mupi.png" },
+  { "id": 4, "title": "Casas de Banho", "image": "https://picsum.photos/400/600?random=4" },
+  { "id": 5, "title": "Vazia", "image": "https://picsum.photos/400/600?random=5" }
+]

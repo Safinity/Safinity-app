@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "frontend",
-    "slug": "frontend",
+    "name": "Safinity",
+    "slug": "safinity",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "frontend",
+    "icon": "./assets/Icons/app_logo.png",
+    "scheme": "safinity",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {

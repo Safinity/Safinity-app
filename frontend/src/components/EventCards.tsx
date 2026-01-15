@@ -1,5 +1,6 @@
+import React from 'react';
 import styled from 'styled-components';
-import { eventImages } from '../assets/images/Events/index';
+import { eventImages } from '../assets/images/Events';
 import { useNavigate } from 'react-router-dom';
 
 interface Event {
@@ -9,7 +10,7 @@ interface Event {
   time_left?: string;
   start_date?: string;
   end_date?: string;
-  status: 'live' | 'upcoming' | 'finished' | string; // adiciona string extra
+  status: 'live' | 'upcoming' | 'finished' | string;
   image: string;
   start_time: string;
   end_time: string;
@@ -23,9 +24,9 @@ interface EventCardProps {
   variant?: 'compact' | 'default';
 }
 
-export const EventCard = ({ event, variant }: EventCardProps) => {
+export const EventCard: React.FC<EventCardProps> = ({ event, variant }) => {
   const navigate = useNavigate();
-  const isCompact = variant === 'compact';
+  const $isCompact = variant === 'compact';
   const isLive = event.status === 'live';
 
   const imageSource = eventImages[event.id] || '/placeholder.png';
@@ -38,6 +39,7 @@ export const EventCard = ({ event, variant }: EventCardProps) => {
     const endDay = endDate.getDate();
     const month = startDate.toLocaleString('en-GB', { month: 'long' });
     const year = startDate.getFullYear();
+
     return startDate.getMonth() === endDate.getMonth()
       ? `${startDay}-${endDay} ${month} ${year}`
       : `${startDay} ${startDate.toLocaleString('en-GB', { month: 'short' })} - ${endDay} ${endDate.toLocaleString('en-GB', { month: 'short' })} ${year}`;
@@ -48,11 +50,11 @@ export const EventCard = ({ event, variant }: EventCardProps) => {
   };
 
   return (
-    <CardContainer isCompact={isCompact} onClick={handleClick}>
+    <CardContainer $isCompact={$isCompact} onClick={handleClick}>
       <BackgroundImage src={imageSource} alt={event.name} />
-      <GradientLayer isCompact={isCompact}>
+      <GradientLayer $isCompact={$isCompact}>
         {isLive && <LiveBadge>Live Now</LiveBadge>}
-        {event.time_left && <TimeBadge isCompact={isCompact}>{event.time_left}</TimeBadge>}
+        {event.time_left && <TimeBadge $isCompact={$isCompact}>{event.time_left}</TimeBadge>}
 
         <CardFooter>
           <DateText>{formatEventDate(event.start_date, event.end_date)}</DateText>
@@ -65,12 +67,12 @@ export const EventCard = ({ event, variant }: EventCardProps) => {
 
 /* --- Styled Components --- */
 
-const CardContainer = styled.div<{ isCompact?: boolean }>`
+const CardContainer = styled.div<{ $isCompact?: boolean }>`
   position: relative;
   width: 280px;
-  height: ${({ isCompact }) => (isCompact ? '240px' : '380px')};
+  height: ${({ $isCompact }) => ($isCompact ? '240px' : '380px')};
   margin-right: 16px;
-  border-radius: var(--radius-large);
+  border-radius: ${({ theme }) => theme.borderRadius.large}px;
   overflow: hidden;
   cursor: pointer;
   transition:
@@ -89,36 +91,40 @@ const BackgroundImage = styled.img`
   object-fit: cover;
 `;
 
-const GradientLayer = styled.div<{ isCompact?: boolean }>`
+const GradientLayer = styled.div<{ $isCompact?: boolean }>`
   position: absolute;
   inset: 0;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: ${({ isCompact }) => (isCompact ? '12px' : '20px')};
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent 60%);
+  padding: ${({ $isCompact }) => ($isCompact ? '12px' : '20px')};
+  background: linear-gradient(
+    to top,
+    ${({ theme }) => theme.colors.palette.neutral.neutral0}cc,
+    transparent 60%
+  );
 `;
 
 const LiveBadge = styled.div`
   align-self: flex-start;
-  background-color: var(--primary);
+  background-color: ${({ theme }) => theme.colors.primary};
   padding: 4px 12px;
-  border-radius: var(--radius-round);
-  color: var(--white);
-  font-weight: var(--weight-semibold);
+  border-radius: ${({ theme }) => theme.borderRadius.round}px;
+  color: ${({ theme }) => theme.colors.white};
+  font-weight: ${({ theme }) => theme.fonts.weights.semibold};
   font-size: 12px;
   text-transform: uppercase;
   margin-bottom: 8px;
 `;
 
-const TimeBadge = styled.div<{ isCompact?: boolean }>`
+const TimeBadge = styled.div<{ $isCompact?: boolean }>`
   align-self: flex-end;
   background-color: rgba(123, 73, 242, 0.5);
-  padding: ${({ isCompact }) => (isCompact ? '4px 10px' : '8px 14px')};
-  border-radius: var(--radius-round);
-  color: var(--white);
+  padding: ${({ $isCompact }) => ($isCompact ? '4px 10px' : '8px 14px')};
+  border-radius: ${({ theme }) => theme.borderRadius.round}px;
+  color: ${({ theme }) => theme.colors.white};
   font-weight: 500;
-  font-size: ${({ isCompact }) => (isCompact ? '12px' : '14px')};
+  font-size: ${({ $isCompact }) => ($isCompact ? '12px' : '14px')};
 `;
 
 const CardFooter = styled.div`
@@ -126,14 +132,14 @@ const CardFooter = styled.div`
 `;
 
 const DateText = styled.div`
-  color: var(--white);
+  color: ${({ theme }) => theme.colors.white};
   font-size: 12px;
   opacity: 0.9;
   margin-bottom: 4px;
 `;
 
 const TitleText = styled.div`
-  color: var(--white);
+  color: ${({ theme }) => theme.colors.white};
   font-size: 20px;
-  font-weight: var(--weight-bold);
+  font-weight: ${({ theme }) => theme.fonts.weights.bold};
 `;

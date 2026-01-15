@@ -136,6 +136,7 @@ export default function SOSForm() {
     } catch (error) {
       console.error(error);
     }
+    router.back();
   };
 
   const handleCancel = () => {

@@ -64,7 +64,7 @@ export const MapCallout = ({ x, y, title, onPressRoute }: MapCalloutProps) => (
   <Container x={x} y={y}>
     <Title numberOfLines={1}>{title}</Title>
     <RotaButton onPress={onPressRoute}>
-      <RotaText>Ver Rota</RotaText>
+      <RotaText>Directions</RotaText>
     </RotaButton>
     <Triangle />
   </Container>

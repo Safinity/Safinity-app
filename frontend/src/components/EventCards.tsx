@@ -46,7 +46,7 @@ export const EventCard: React.FC<EventCardProps> = ({ event, variant }) => {
   };
 
   const handleClick = () => {
-    navigate(`/events/${event.id}`);
+    navigate(`/manageevents`);
   };
 
   return (

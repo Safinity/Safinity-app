@@ -16,7 +16,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
           <MenuItem to="/home" onClick={onClose}>
             Home
           </MenuItem>
-          <MenuItem to="/dashboards" onClick={onClose}>
+          <MenuItem to="/manageevents" onClick={onClose}>
             Manage event
           </MenuItem>
           <MenuItem to="/mupis" onClick={onClose}>

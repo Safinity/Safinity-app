@@ -13,7 +13,7 @@ import Loading from './pages/Loading';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import EventsPage from './pages/EventsPage';
+// Removido o import duplicado de EventsPage
 import { Layout } from './layout/Layout';
 import { theme } from './theme/theme';
 
@@ -32,23 +32,17 @@ export default function App() {
     <ThemeProvider theme={theme}>
       <BrowserRouter>
         <Routes>
+          {/* Rotas sem Layout (Landing/Login/Register) */}
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+
+          {/* Rotas COM Layout (Menu Lateral e Superior) */}
           <Route
             path="/home"
             element={
               <Layout>
                 <Home />
-              </Layout>
-            }
-          />
-
-          <Route
-            path="/events"
-            element={
-              <Layout>
-                <EventsPage />
               </Layout>
             }
           />
@@ -61,7 +55,16 @@ export default function App() {
               </Layout>
             }
           />
-          <Route path="mupis" element={<MupisPage />} />
+
+          {/* CORRIGIDO: Mupis agora tem / e está dentro do Layout */}
+          <Route
+            path="/mupis"
+            element={
+              <Layout>
+                <MupisPage />
+              </Layout>
+            }
+          />
 
           <Route
             path="/notifications"

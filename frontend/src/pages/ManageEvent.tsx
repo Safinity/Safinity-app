@@ -10,7 +10,8 @@ import { StaticMapPreview } from '../components/StaticMapPreview';
 import { MapPin } from '../components/maps/MapPin';
 import { MapStage } from '../components/maps/MapStage';
 import { MapCallout } from '../components/maps/MapCallout';
-
+import camerawebsummit from '../assets/images/web-summit.png';
+import aicaamerawebsummit from '../assets/images/Events/tech/web-summit.png';
 /* ------------------------------------------------------------------ */
 /* TYPES                                                               */
 /* ------------------------------------------------------------------ */
@@ -144,12 +145,12 @@ const ManageEventPage: React.FC = () => {
           <CamerasColumn>
             <SectionContainer>
               <SectionLabel>Cameras - video</SectionLabel>
-              <CameraPlaceholder />
+              <CameraImage src={camerawebsummit} alt="Camera feed" />
             </SectionContainer>
 
             <SectionContainer>
               <SectionLabel>Cameras - AI-powered analysis</SectionLabel>
-              <CameraPlaceholder />
+              <CameraImage src={aicaamerawebsummit} alt="AI Camera feed" />
             </SectionContainer>
           </CamerasColumn>
         </DashboardGrid>
@@ -227,9 +228,9 @@ const CamerasColumn = styled.div`
   flex-direction: column;
   gap: ${theme.spacing.xl}px;
 `;
-
-const CameraPlaceholder = styled.div`
+const CameraImage = styled.img`
+  width: 100%;
   height: 280px;
-  background-color: #c4c4c4;
+  object-fit: cover;
   border-radius: ${theme.borderRadius.xlarge}px;
 `;

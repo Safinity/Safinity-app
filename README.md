@@ -1,6 +1,15 @@
 # Safinity-app
-
+![Páginas](readme/mockups2.png)
 Aplicação mobile nativa desenvolvida em React Native com Expo para garantir a segurança em eventos públicos de grande escala
+
+
+# Páginas principais:
+- Home: Encontra todos os teus eventos favoritos
+- Map: Explora o evento da forma mais segura
+- Calendar: Organiza as atividades mais interessantes de eventos
+- Friends: Encontra os teus amigos de forma rápida e confiante
+
+![Páginas](readme/mockups.png)
 
 ---
 
@@ -19,7 +28,7 @@ Aplicação mobile nativa desenvolvida em React Native com Expo para garantir a 
 
 ```text
 
-src/
+frontend/
 ├── components/ # Componentes reutilizáveis
 ├── api/        # comunicação a MapBox
 ├── context/    # user context

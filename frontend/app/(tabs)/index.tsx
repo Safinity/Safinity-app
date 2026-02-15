@@ -30,7 +30,7 @@ const SectionHeader = styled.View`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  margin-top: 40px;
+  margin-top: ${({ theme }) => theme.spacing.xl}px;
   margin-bottom: ${({ theme }) => theme.spacing.md}px;
 `;
 
@@ -55,10 +55,11 @@ const SeeMore = styled.Text`
 
 const SearchWrapper = styled.View`
   margin-top: ${({ theme }) => theme.spacing.lg}px;
+  
 `;
 
 export default function HomeScreen() {
-  const router = useRouter(); // 3. Inicializar o router
+  const router = useRouter(); 
   const [searchValue, setSearchValue] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Musical');
 
@@ -93,8 +94,6 @@ export default function HomeScreen() {
         <PaddedContent>
           <SectionHeader>
             <SectionTitle>{selectedCategory} events</SectionTitle>
-
-            {/* 4. Envolver o texto num Pressable para capturar o clique */}
             <Pressable onPress={() => router.push('/events-list')}>
               <SeeMore>See more</SeeMore>
             </Pressable>

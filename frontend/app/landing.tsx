@@ -7,10 +7,10 @@ import PrimaryButton from '../components/PrimaryButton';
 import SecondaryButton from '../components/SecondaryButton';
 import TertiaryButton from '../components/TertiaryButton';
 
+
 const Background = styled(ImageBackground).attrs({
   imageStyle: {
-    objectFit: 'cover',
-    objectPosition: 'center',
+    resizeMode: 'cover',
   },
 })`
   flex: 1;
@@ -19,22 +19,32 @@ const Background = styled(ImageBackground).attrs({
   background-color: ${({ theme }) => theme.colors.background};
 `;
 
+
 const Content = styled.View`
-  padding: 40px;
-  /* Garantir que não existem parênteses extra aqui */
+  padding: ${({ theme }) => theme.spacing.margemLateral}px;
   gap: ${({ theme }) => theme.spacing.lg}px;
   margin-bottom: ${({ theme }) => theme.spacing.md}px;
 `;
+
 
 export default function Landing() {
   return (
     <Background source={StaticImages.landingBg}>
       <Content>
-        <PrimaryButton title="Log in" onPress={() => router.push('/login')} />
+        <PrimaryButton
+          title="Log in"
+          onPress={() => router.push('/login')}
+        />
 
-        <SecondaryButton title="Create account" onPress={() => router.push('/register')} />
+        <SecondaryButton
+          title="Create account"
+          onPress={() => router.push('/register')}
+        />
 
-        <TertiaryButton title="Other options" onPress={() => console.log('Other options')} />
+        <TertiaryButton
+          title="Other options"
+          onPress={() => console.log('Other options')}
+        />
       </Content>
     </Background>
   );

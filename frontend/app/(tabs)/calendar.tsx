@@ -11,6 +11,8 @@ import FilterTags from '../../components/ui/FilterTags';
 import { CalendarCard } from '../../components/CalendarCard';
 import calendarData from '../../data/calendar.json';
 
+/* ---------------------- STYLES ---------------------- */
+
 const Container = styled.View`
   flex: 1;
   background-color: ${({ theme }) => theme.colors.background};
@@ -23,34 +25,33 @@ const ScrollContent = styled.ScrollView.attrs({
   padding-horizontal: ${({ theme }) => theme.spacing.margemLateral}px;
 `;
 
-// Criei este espaço para empurrar o conteúdo para baixo do Header de forma controlada
 const Spacer = styled.View`
-  height: 60px;
+  height: ${({ theme }) => theme.spacing.xl}px;
 `;
 
 const EventSelector = styled.TouchableOpacity`
   background-color: ${({ theme }) => theme.colors.grayNavbar};
-  padding: 15px;
+  padding-vertical: ${({ theme }) => theme.spacing.md}px;
+  padding-horizontal: ${({ theme }) => theme.spacing.md}px;
   border-radius: ${({ theme }) => theme.borderRadius.medium}px;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  margin-top: 0px;
-  margin-bottom: 25px;
+  margin-bottom: ${({ theme }) => theme.spacing.lg}px;
 `;
 
 const SelectorLabel = styled.Text`
   color: ${({ theme }) => theme.colors.white};
   font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
-  font-size: 16px;
+  font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
 `;
 
 const DateHeader = styled.Text`
   color: ${({ theme }) => theme.colors.inactive};
   font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
-  font-size: 14px;
-  margin-top: 30px;
-  margin-bottom: 15px;
+  font-size: ${({ theme }) => theme.text.textoPequeno.fontSize}px;
+  margin-top: ${({ theme }) => theme.spacing.lg}px;
+  margin-bottom: ${({ theme }) => theme.spacing.sm}px;
   text-transform: capitalize;
 `;
 
@@ -59,16 +60,18 @@ const MyCalendarButton = styled.TouchableOpacity`
   bottom: 110px;
   align-self: center;
   background-color: ${({ theme }) => theme.colors.primary};
-  padding: 14px 30px;
+  padding-vertical: ${({ theme }) => theme.spacing.sm}px;
+  padding-horizontal: ${({ theme }) => theme.spacing.xl}px;
   border-radius: ${({ theme }) => theme.borderRadius.round}px;
   elevation: 5;
   z-index: 10;
 `;
 
 const ButtonText = styled.Text`
-  color: white;
-  font-weight: bold;
+  color: ${({ theme }) => theme.colors.white};
   font-family: ${({ theme }) => theme.text.botao.fontFamily};
+  font-size: ${({ theme }) => theme.text.botao.fontSize}px;
+  line-height: ${({ theme }) => theme.text.botao.lineHeight}px;
 `;
 
 const HeaderWrapper = styled.View<{ topInset: number }>`
@@ -76,16 +79,21 @@ const HeaderWrapper = styled.View<{ topInset: number }>`
   background-color: ${({ theme }) => theme.colors.background};
 `;
 
+/* ---------------------- COMPONENT ---------------------- */
+
 export default function CalendarScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [searchValue, setSearchValue] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Stages');
+
   const categories = ['Stages', 'Workshops', 'Podcasts', 'Business'];
 
   const filteredActivities = calendarData.activities.filter(activity => {
     const matchesCategory = activity.category === selectedCategory;
-    const matchesSearch = activity.title.toLowerCase().includes(searchValue.toLowerCase());
+    const matchesSearch = activity.title
+      .toLowerCase()
+      .includes(searchValue.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
@@ -98,7 +106,6 @@ export default function CalendarScreen() {
       </HeaderWrapper>
 
       <ScrollContent>
-        {/* Adicionei este Spacer para o conteúdo não ficar colado ao Header */}
         <Spacer />
 
         <EventSelector activeOpacity={0.7}>
@@ -113,8 +120,12 @@ export default function CalendarScreen() {
           placeholder="Find your next activity"
         />
 
-        {/* Revertido para o teu estilo original: marginHorizontal -40 */}
-        <View style={{ marginTop: 0, marginHorizontal: -40 }}>
+        <View
+          style={{
+            marginTop: 0,
+            marginHorizontal: -40,
+          }}
+        >
           <FilterTags
             tags={categories}
             selectedTags={[selectedCategory]}
@@ -126,20 +137,26 @@ export default function CalendarScreen() {
         {filteredActivities.length > 0 ? (
           filteredActivities.map((item, index) => (
             <View key={item.id}>
-              {(index === 0 || filteredActivities[index - 1].date !== item.date) && (
+              {(index === 0 ||
+                filteredActivities[index - 1].date !== item.date) && (
                 <DateHeader>{item.date}</DateHeader>
               )}
               <CalendarCard item={item} />
             </View>
           ))
         ) : (
-          <DateHeader style={{ textAlign: 'center', marginTop: 50 }}>No events found</DateHeader>
+          <DateHeader style={{ textAlign: 'center', marginTop: 50 }}>
+            No events found
+          </DateHeader>
         )}
 
         <View style={{ height: 180 }} />
       </ScrollContent>
 
-      <MyCalendarButton activeOpacity={0.8} onPress={() => router.push('/(tabs)/my-calendar')}>
+      <MyCalendarButton
+        activeOpacity={0.8}
+        onPress={() => router.push('/(tabs)/my-calendar')}
+      >
         <ButtonText>My calendar</ButtonText>
       </MyCalendarButton>
     </Container>

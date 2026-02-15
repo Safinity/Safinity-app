@@ -37,7 +37,6 @@ const SectionHeader = styled.View`
 
 const SectionTitle = styled.Text`
   color: ${({ theme }) => theme.colors.white};
-  /* Token: h */
   font-family: ${({ theme }) => theme.text.titulo.h.fontFamily};
   font-size: ${({ theme }) => theme.text.titulo.h.fontSize}px;
 `;

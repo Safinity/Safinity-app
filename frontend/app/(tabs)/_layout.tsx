@@ -6,8 +6,8 @@ import styled from 'styled-components/native';
 const NavbarContainer = styled.View`
   background-color: ${({ theme }) => theme.colors.grayNavbar};
   border-radius: ${({ theme }) => theme.borderRadius.xlarge}px;
-  height: 73px;
-  margin-bottom: ${Platform.OS === 'ios' ? 20 : 16}px;
+  height: ${({ theme }) => theme.height.md}px;
+  margin-bottom: ${({ theme }) => theme.spacing.margemLateral}px;
   elevation: 8;
   position: absolute;
   bottom: 0;
@@ -28,17 +28,24 @@ const TabButton = styled.TouchableOpacity`
   justify-content: center;
 `;
 
+const TabIcon = styled(Ionicons).attrs(({ theme }) => ({
+  size: theme.height.xs,
+})) <{ $active: boolean }>`
+  color: ${({ $active, theme }) =>
+    $active ? theme.colors.white : theme.colors.inactive};
+`;
+
+
 const IconBox = styled.View`
-  height: 24px;
-  margin-bottom: 2px;
+  height: ${({ theme }) => theme.height.xs}px;
+  margin-bottom: ${({ theme }) => theme.spacing.xxs}px;
   align-items: center;
   justify-content: center;
 `;
 
 const TabText = styled.Text<{ $active: boolean }>`
-  font-size: 11px;
-  font-weight: 600;
-  margin-top: 2px;
+  ${({ theme }) => theme.text.textoPequeno};
+  margin-top: ${({ theme }) => theme.spacing.xxs}px;
   color: ${({ $active, theme }) => ($active ? theme.colors.white : theme.colors.inactive)};
 `;
 
@@ -68,11 +75,11 @@ function CustomTabBar({ state, navigation }: any) {
           return (
             <TabButton key={tab.name} onPress={onPress}>
               <IconBox>
-                <Ionicons
+                <TabIcon
                   name={isFocused ? tab.icon : `${tab.icon}-outline`}
-                  size={22}
-                  color={isFocused ? '#FFFFFF' : '#A0A0A5'}
+                  $active={isFocused}
                 />
+
               </IconBox>
               <TabText $active={isFocused}>{tab.title}</TabText>
             </TabButton>

@@ -7,7 +7,6 @@ import { useRouter } from 'expo-router';
 import { eventImages } from '../assets/images/Events';
 import { calendarImages } from '../assets/images/Calendar';
 
-
 const BannerContainer = styled.ImageBackground.attrs({
   resizeMode: 'cover',
 })`
@@ -23,12 +22,9 @@ const HeroGradient = styled(LinearGradient).attrs(({ theme }) => ({
 }))`
   width: 100%;
   height: 100%;
-  padding: ${({ theme }) => theme.spacing.lg}px
-    ${({ theme }) => theme.spacing.margemLateral}px;
+  padding: ${({ theme }) => theme.spacing.lg}px ${({ theme }) => theme.spacing.margemLateral}px;
   justify-content: flex-end;
 `;
-
-
 
 const TitleRow = styled.View`
   flex-direction: row;
@@ -60,8 +56,6 @@ const InfoText = styled.Text`
   ${({ theme }) => theme.text.textoPequeno};
   opacity: 0.9;
 `;
-
-
 
 const AddCalendarButton = styled.TouchableOpacity`
   background-color: ${({ theme }) => theme.colors.palette.primary.light90};
@@ -95,7 +89,6 @@ const DescriptionText = styled.Text`
   ${({ theme }) => theme.text.textoPequeno};
   opacity: 0.9;
 `;
-
 
 export const HeroBanner = ({
   event,
@@ -137,11 +130,7 @@ export const HeroBanner = ({
                 activeOpacity={0.8}
                 onPress={() => router.push('/(tabs)/my-calendar')}
               >
-                <Ionicons
-                  name="calendar-outline"
-                  size={26}
-                  color="#9333EA"
-                />
+                <Ionicons name="calendar-outline" size={26} color="#9333EA" />
               </AddCalendarButton>
             </TitleRow>
 
@@ -184,9 +173,7 @@ export const HeroBanner = ({
         {isList && (
           <>
             <EventName>{title}</EventName>
-            {description && (
-              <DescriptionText>{description}</DescriptionText>
-            )}
+            {description && <DescriptionText>{description}</DescriptionText>}
           </>
         )}
 

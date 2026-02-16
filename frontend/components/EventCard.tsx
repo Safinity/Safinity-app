@@ -7,7 +7,8 @@ import { useRouter } from 'expo-router';
 
 const CardContainer = styled.TouchableOpacity<{ isCompact?: boolean }>`
   width: ${({ theme }) => theme.height.lg}px;
-  height: ${({ isCompact, theme }) => (isCompact ? theme.height.card.compact : theme.height.card.default)}px;
+  height: ${({ isCompact, theme }) =>
+    isCompact ? theme.height.card.compact : theme.height.card.default}px;
   margin-right: ${({ theme }) => theme.spacing.md}px;
   border-radius: ${({ theme }) => theme.borderRadius.large}px;
   overflow: hidden;
@@ -35,7 +36,9 @@ const TimeBadge = styled.View<{ isCompact?: boolean }>`
   background-color: ${({ theme }) => theme.colors.primary}80;
   align-self: flex-end;
   padding: ${({ isCompact, theme }) =>
-    isCompact ? `${theme.spacing.xs}px ${theme.spacing.md}px` : `${theme.spacing.sm}px ${theme.spacing.lg}px`};
+    isCompact
+      ? `${theme.spacing.xs}px ${theme.spacing.md}px`
+      : `${theme.spacing.sm}px ${theme.spacing.lg}px`};
   border-radius: ${({ theme }) => theme.borderRadius.round}px;
 `;
 

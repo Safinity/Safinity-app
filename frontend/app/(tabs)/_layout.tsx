@@ -30,11 +30,9 @@ const TabButton = styled.TouchableOpacity`
 
 const TabIcon = styled(Ionicons).attrs(({ theme }) => ({
   size: theme.height.xs,
-})) <{ $active: boolean }>`
-  color: ${({ $active, theme }) =>
-    $active ? theme.colors.white : theme.colors.inactive};
+}))<{ $active: boolean }>`
+  color: ${({ $active, theme }) => ($active ? theme.colors.white : theme.colors.inactive)};
 `;
-
 
 const IconBox = styled.View`
   height: ${({ theme }) => theme.height.xs}px;
@@ -75,11 +73,7 @@ function CustomTabBar({ state, navigation }: any) {
           return (
             <TabButton key={tab.name} onPress={onPress}>
               <IconBox>
-                <TabIcon
-                  name={isFocused ? tab.icon : `${tab.icon}-outline`}
-                  $active={isFocused}
-                />
-
+                <TabIcon name={isFocused ? tab.icon : `${tab.icon}-outline`} $active={isFocused} />
               </IconBox>
               <TabText $active={isFocused}>{tab.title}</TabText>
             </TabButton>

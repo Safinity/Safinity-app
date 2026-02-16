@@ -11,8 +11,6 @@ import FilterTags from '../../components/ui/FilterTags';
 import { CalendarCard } from '../../components/CalendarCard';
 import calendarData from '../../data/calendar.json';
 
-/* ---------------------- STYLES ---------------------- */
-
 const Container = styled.View`
   flex: 1;
   background-color: ${({ theme }) => theme.colors.background};
@@ -23,6 +21,8 @@ const ScrollContent = styled.ScrollView.attrs({
 })`
   flex: 1;
   padding-horizontal: ${({ theme }) => theme.spacing.margemLateral}px;
+  padding-top: ${({ theme }) => theme.spacing.md}px;
+  padding-bottom: ${({ theme }) => theme.spacing.xxl}px;
 `;
 
 const Spacer = styled.View`
@@ -57,7 +57,7 @@ const DateHeader = styled.Text`
 
 const MyCalendarButton = styled.TouchableOpacity`
   position: absolute;
-  bottom: 110px;
+  bottom: ${({ theme }) => theme.spacing.xxl}px;
   align-self: center;
   background-color: ${({ theme }) => theme.colors.primary};
   padding-vertical: ${({ theme }) => theme.spacing.sm}px;
@@ -79,7 +79,9 @@ const HeaderWrapper = styled.View<{ topInset: number }>`
   background-color: ${({ theme }) => theme.colors.background};
 `;
 
-/* ---------------------- COMPONENT ---------------------- */
+const SpaceBottom = styled.View<{ topInset: number }>`
+  height: ${({ theme }) => theme.height.bottomMargem}px;
+`;
 
 export default function CalendarScreen() {
   const insets = useSafeAreaInsets();
@@ -91,9 +93,7 @@ export default function CalendarScreen() {
 
   const filteredActivities = calendarData.activities.filter(activity => {
     const matchesCategory = activity.category === selectedCategory;
-    const matchesSearch = activity.title
-      .toLowerCase()
-      .includes(searchValue.toLowerCase());
+    const matchesSearch = activity.title.toLowerCase().includes(searchValue.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
@@ -137,26 +137,20 @@ export default function CalendarScreen() {
         {filteredActivities.length > 0 ? (
           filteredActivities.map((item, index) => (
             <View key={item.id}>
-              {(index === 0 ||
-                filteredActivities[index - 1].date !== item.date) && (
+              {(index === 0 || filteredActivities[index - 1].date !== item.date) && (
                 <DateHeader>{item.date}</DateHeader>
               )}
               <CalendarCard item={item} />
             </View>
           ))
         ) : (
-          <DateHeader style={{ textAlign: 'center', marginTop: 50 }}>
-            No events found
-          </DateHeader>
+          <DateHeader style={{ textAlign: 'center', marginTop: 50 }}>No events found</DateHeader>
         )}
 
-        <View style={{ height: 180 }} />
+        <SpaceBottom />
       </ScrollContent>
 
-      <MyCalendarButton
-        activeOpacity={0.8}
-        onPress={() => router.push('/(tabs)/my-calendar')}
-      >
+      <MyCalendarButton activeOpacity={0.8} onPress={() => router.push('/(tabs)/my-calendar')}>
         <ButtonText>My calendar</ButtonText>
       </MyCalendarButton>
     </Container>

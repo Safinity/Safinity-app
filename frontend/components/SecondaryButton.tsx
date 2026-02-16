@@ -4,9 +4,8 @@ const Button = styled.TouchableOpacity`
   padding: ${({ theme }) => theme.spacing.md}px;
   border-radius: ${({ theme }) => theme.borderRadius.medium}px;
   background-color: ${({ theme }) => theme.colors.white};
-  width:100%;
-    include-font-padding: false;
-
+  width: 100%;
+  include-font-padding: false;
 `;
 
 const Label = styled.Text`

@@ -10,8 +10,7 @@ const BASE_HEIGHT = 932; // altura em dp do iPhone 15 Pro Max
 // Funções de escala
 const scale = (size: number) => (SCREEN_WIDTH / BASE_WIDTH) * size;
 const verticalScale = (size: number) => (SCREEN_HEIGHT / BASE_HEIGHT) * size;
-const moderateScale = (size: number, factor = 0.7) =>
-  size + (scale(size) - size) * factor;
+const moderateScale = (size: number, factor = 0.7) => size + (scale(size) - size) * factor;
 
 // --- Cores ---
 export const Colors = {
@@ -82,7 +81,9 @@ export const Spacing = {
   lg: scale(20),
   xl: scale(32),
   xxl: scale(130),
+  xxxl: scale(170),
   margemLateral: scale(40),
+  margemTop: scale(68),
 };
 
 export const Height = {
@@ -90,6 +91,8 @@ export const Height = {
   tam_42: scale(42),
   sm: scale(58),
   md: scale(73),
+  profileAvatar: scale(160),
+  bottomMargem: scale(170),
   lg: scale(280),
   xl: scale(330),
   card: {
@@ -104,6 +107,11 @@ export const Height = {
     default: { vertical: scale(8), horizontal: scale(14) },
     compact: { vertical: scale(4), horizontal: scale(10) },
   },
+};
+
+export const Width = {
+  logoHeader: scale(124),
+  iconHeader: scale(28),
 };
 
 // --- Fonts ---
@@ -196,4 +204,5 @@ export const theme = {
   fonts: Fonts,
   text: TextStyles,
   height: Height,
+  width: Width,
 };

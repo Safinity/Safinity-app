@@ -43,7 +43,7 @@ const TagsScrollView = styled.ScrollView.attrs<{ variant: FilterTagsVariant }>(
         paddingRight: tagTheme.paddingRight,
       },
     };
-  }
+  },
 )`
   flex-grow: 0;
   margin-top: ${({ theme }) => theme.spacing.md}px;
@@ -100,12 +100,7 @@ const FilterTags: React.FC<FilterTagsProps> = ({
           const isSelected = selectedTags.includes(tag);
 
           return (
-            <Tag
-              key={tag}
-              selected={isSelected}
-              variant={variant}
-              onPress={() => onTagPress(tag)}
-            >
+            <Tag key={tag} selected={isSelected} variant={variant} onPress={() => onTagPress(tag)}>
               <TagText selected={isSelected} variant={variant}>
                 {tag}
               </TagText>

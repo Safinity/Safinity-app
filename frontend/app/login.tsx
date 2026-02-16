@@ -6,15 +6,12 @@ import { router } from 'expo-router';
 import users from '@/data/users.json';
 import PrimaryButton from '@/components/PrimaryButton';
 
-
-
 const Container = styled.View`
   flex: 1;
   margin-top: ${({ theme }) => theme.spacing.xl}px;
   background-color: ${({ theme }) => theme.colors.background};
   padding: ${({ theme }) => theme.spacing.margemLateral}px;
 `;
-
 
 const BackButton = styled.TouchableOpacity`
   margin-bottom: ${({ theme }) => theme.spacing.md}px;
@@ -31,8 +28,6 @@ const Subtitle = styled.Text`
   margin-bottom: ${({ theme }) => theme.spacing.xl}px;
   ${({ theme }) => theme.text.corpo.corpoTexto};
 `;
-
-
 
 const InputGroup = styled.View`
   margin-bottom: ${({ theme }) => theme.spacing.lg}px;
@@ -112,9 +107,7 @@ export default function Login() {
     }
 
     const user = users.find(
-      (u: any) =>
-        u.email.toLowerCase() === email.toLowerCase() &&
-        u.password === password,
+      (u: any) => u.email.toLowerCase() === email.toLowerCase() && u.password === password,
     );
 
     if (!user) {
@@ -126,79 +119,68 @@ export default function Login() {
   }
 
   return (
-      <Container>
-        {/* Back */}
-        <BackButton onPress={() => router.back()}>
-          <Ionicons
-            name="arrow-back"
-            size={26}
-            color="white"
+    <Container>
+      {/* Back */}
+      <BackButton onPress={() => router.back()}>
+        <Ionicons name="arrow-back" size={26} color="white" />
+      </BackButton>
+
+      <Title>Log in</Title>
+      <Subtitle>Welcome back!</Subtitle>
+
+      {/* Email */}
+      <InputGroup>
+        <Label>Email</Label>
+        <InputBox>
+          <Input
+            placeholder="Email"
+            placeholderTextColor="#8a90a5"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            value={email}
+            onChangeText={setEmail}
           />
-        </BackButton>
+          <Ionicons name="mail-outline" size={20} color="#cfd3e0" />
+        </InputBox>
+      </InputGroup>
 
-        <Title>Log in</Title>
-        <Subtitle>Welcome back!</Subtitle>
-
-        {/* Email */}
-        <InputGroup>
-          <Label>Email</Label>
-          <InputBox>
-            <Input
-              placeholder="Email"
-              placeholderTextColor="#8a90a5"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              value={email}
-              onChangeText={setEmail}
-            />
+      {/* Password */}
+      <InputGroup>
+        <Label>Password</Label>
+        <InputBox>
+          <Input
+            placeholder="Password"
+            placeholderTextColor="#8a90a5"
+            secureTextEntry={!showPass}
+            value={password}
+            onChangeText={setPassword}
+          />
+          <TouchableOpacity onPress={() => setShowPass(!showPass)}>
             <Ionicons
-              name="mail-outline"
-              size={20}
+              name={showPass ? 'eye-off-outline' : 'eye-outline'}
+              size={22}
               color="#cfd3e0"
             />
-          </InputBox>
-        </InputGroup>
+          </TouchableOpacity>
+        </InputBox>
+      </InputGroup>
 
-        {/* Password */}
-        <InputGroup>
-          <Label>Password</Label>
-          <InputBox>
-            <Input
-              placeholder="Password"
-              placeholderTextColor="#8a90a5"
-              secureTextEntry={!showPass}
-              value={password}
-              onChangeText={setPassword}
-            />
-            <TouchableOpacity onPress={() => setShowPass(!showPass)}>
-              <Ionicons
-                name={showPass ? 'eye-off-outline' : 'eye-outline'}
-                size={22}
-                color="#cfd3e0"
-              />
-            </TouchableOpacity>
-          </InputBox>
-        </InputGroup>
+      <ForgotRow>
+        <SmallText>
+          Forgot your password? <LinkText>Recover password</LinkText>
+        </SmallText>
+      </ForgotRow>
 
-        <ForgotRow>
-          <SmallText>
-            Forgot your password?{' '}
-            <LinkText>Recover password</LinkText>
-          </SmallText>
-        </ForgotRow>
+      {error ? <ErrorText>{error}</ErrorText> : null}
 
-        {error ? <ErrorText>{error}</ErrorText> : null}
+      <PrimaryButton title="Log in" onPress={handleLogin} />
 
-        <PrimaryButton title="Log in" onPress={handleLogin} />
-
-        <BottomRow>
-          <SmallText>
-            Don’t have an account?{' '}
-            <LinkText onPress={() => router.push('/register')}>
-              Create Account
-            </LinkText>
-          </SmallText>
-        </BottomRow>
-      </Container>
+      <BottomRow>
+        <SmallText>
+          Don’t have an account?{' '}
+          <LinkText onPress={() => router.push('/register')}>Create Account</LinkText>
+        </SmallText>
+      </BottomRow>
+    </Container>
   );
 }

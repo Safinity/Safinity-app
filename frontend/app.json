@@ -42,11 +42,7 @@
       }
     },
 
-    "plugins": [
-      "expo-router",
-      "expo-font",
-      "expo-camera"
-    ],
+    "plugins": ["expo-router", "expo-font", "expo-camera"],
 
     "owner": "safinityapp",
     "platforms": ["ios", "android", "web"]

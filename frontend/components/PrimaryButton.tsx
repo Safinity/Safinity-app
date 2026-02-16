@@ -6,10 +6,9 @@ const Button = styled.TouchableOpacity<{ disabled?: boolean }>`
   background-color: ${({ disabled, theme }) =>
     disabled ? theme.colors.palette.primary.dark60 : theme.colors.palette.primary.normal};
   opacity: ${({ disabled }) => (disabled ? 0.8 : 1)};
-    width:100%;
+  width: 100%;
   include-font-padding: false;
   padding-vertical: 0px;
-
 `;
 
 const Label = styled.Text`

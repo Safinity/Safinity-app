@@ -3,7 +3,6 @@ import styled from 'styled-components/native';
 import { useRouter } from 'expo-router';
 import tags from '../data/tags.json';
 
-
 /* ---------------------- STYLES ---------------------- */
 
 const Container = styled.View`
@@ -18,8 +17,7 @@ const ContentWrapper = styled.View`
   flex: 1;
   justify-content: center;
   width: 100%;
-    padding-horizontal: ${({ theme }) => theme.spacing.md}px;
-
+  padding-horizontal: ${({ theme }) => theme.spacing.md}px;
 `;
 
 const Title = styled.Text`
@@ -57,12 +55,10 @@ const TagButton = styled.TouchableOpacity<{ selected: boolean }>`
 `;
 
 const TagLabel = styled.Text<{ selected: boolean }>`
-
   font-size: ${({ theme }) => theme.text.botao.fontSize}px;
   line-height: ${({ theme }) => theme.text.botao.lineHeight}px;
   font-family: ${({ theme }) => theme.fonts.weights.light};
-  color: ${({ selected, theme }) =>
-    selected ? theme.colors.white : theme.colors.black};
+  color: ${({ selected, theme }) => (selected ? theme.colors.white : theme.colors.black)};
 `;
 
 const NotesInput = styled.TextInput`
@@ -128,9 +124,7 @@ export default function SOSForm() {
   const [notes, setNotes] = useState('');
 
   const toggleTag = (id: number) => {
-    setSelected(prev =>
-      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
-    );
+    setSelected(prev => (prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]));
   };
 
   const handleSubmit = async () => {
@@ -154,9 +148,7 @@ export default function SOSForm() {
     <Container>
       <ContentWrapper>
         <Title>Help us help you!</Title>
-        <TextStyled>
-          Add more information to your request for help.
-        </TextStyled>
+        <TextStyled>Add more information to your request for help.</TextStyled>
 
         <TagsContainer>
           {tags.tags.map(tag => (
@@ -165,9 +157,7 @@ export default function SOSForm() {
               selected={selected.includes(tag.id)}
               onPress={() => toggleTag(tag.id)}
             >
-              <TagLabel selected={selected.includes(tag.id)}>
-                {tag.label}
-              </TagLabel>
+              <TagLabel selected={selected.includes(tag.id)}>{tag.label}</TagLabel>
             </TagButton>
           ))}
         </TagsContainer>

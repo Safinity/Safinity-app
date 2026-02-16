@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { FlatList, StatusBar, Pressable } from 'react-native'; // Adicionado Pressable
+import { FlatList, StatusBar, Pressable } from 'react-native';
 import styled from 'styled-components/native';
-import { useRouter } from 'expo-router'; // 1. Importar o hook de navegação
+import { useRouter } from 'expo-router';
 
 import Header from '../../components/ui/header';
 import SearchInput from '../../components/ui/SearchInput';
@@ -55,11 +55,10 @@ const SeeMore = styled.Text`
 
 const SearchWrapper = styled.View`
   margin-top: ${({ theme }) => theme.spacing.lg}px;
-  
 `;
 
 export default function HomeScreen() {
-  const router = useRouter(); 
+  const router = useRouter();
   const [searchValue, setSearchValue] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Musical');
 

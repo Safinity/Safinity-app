@@ -102,7 +102,8 @@ export default function FriendsScreen() {
 const Container = styled.View`
   flex: 1;
   background-color: ${({ theme }) => theme.colors.background};
-  padding: ${({ theme }) => theme.spacing.margemLateral}px;
+  padding-horizontal: ${({ theme }) => theme.spacing.margemLateral}px;
+  padding-top: ${({ theme }) => theme.spacing.xl}px;
 `;
 
 const ScrollArea = styled.ScrollView.attrs(({ theme }) => ({

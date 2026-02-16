@@ -91,7 +91,9 @@ export const Height = {
   tam_42: scale(42),
   sm: scale(58),
   md: scale(73),
+  actionbutton: scale(120),
   profileAvatar: scale(160),
+  friendProfileAvatar: scale(100),
   bottomMargem: scale(170),
   lg: scale(280),
   xl: scale(330),
@@ -112,6 +114,7 @@ export const Height = {
 export const Width = {
   logoHeader: scale(124),
   iconHeader: scale(28),
+  linkTicket: scale(50),
 };
 
 // --- Fonts ---

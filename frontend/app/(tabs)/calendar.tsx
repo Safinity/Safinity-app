@@ -10,6 +10,7 @@ import SearchInput from '../../components/ui/SearchInput';
 import FilterTags from '../../components/ui/FilterTags';
 import { CalendarCard } from '../../components/CalendarCard';
 import calendarData from '../../data/calendar.json';
+import { useTheme } from 'styled-components/native';
 
 const Container = styled.View`
   flex: 1;
@@ -84,6 +85,8 @@ const SpaceBottom = styled.View<{ topInset: number }>`
 `;
 
 export default function CalendarScreen() {
+  const theme = useTheme();
+
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [searchValue, setSearchValue] = useState('');
@@ -123,7 +126,7 @@ export default function CalendarScreen() {
         <View
           style={{
             marginTop: 0,
-            marginHorizontal: -40,
+            marginHorizontal: -theme.spacing.margemLateral,
           }}
         >
           <FilterTags

@@ -6,19 +6,18 @@ const Container = styled.View`
   background-color: ${({ theme }) => theme.colors.background};
 `;
 
-
 export default function PerfilLayout() {
   return (
     <Container>
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        animation: 'slide_from_right',
-      }}
-    >
-      <Stack.Screen name="profile" />
-      <Stack.Screen name="edit-profile" />
-    </Stack>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          animation: 'slide_from_right',
+        }}
+      >
+        <Stack.Screen name="profile" />
+        <Stack.Screen name="edit-profile" />
+      </Stack>
     </Container>
   );
 }

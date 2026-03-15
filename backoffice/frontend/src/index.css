@@ -1,0 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700&display=swap');
+
+* {
+  box-sizing: border-box;
+  /* 2. Aplicamos a fonte a tudo aqui com o nome exato do Google Fonts */
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #222734;
+  color: white;
+  /* 3. Deixa a letra mais nítida no browser */
+  -webkit-font-smoothing: antialiased;
+}

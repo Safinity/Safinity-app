@@ -1,4 +1,4 @@
-# Safinity-app
+# Safinity-backoffice
 Backoffice, para a app mobile, desenvolvido em React para garantir a segurança em eventos públicos de grande escala.
 
 

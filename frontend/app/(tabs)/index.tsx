@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { FlatList, StatusBar, Pressable } from 'react-native'; // Adicionado Pressable
+import { FlatList, StatusBar, Pressable } from 'react-native';
 import styled from 'styled-components/native';
-import { useRouter } from 'expo-router'; // 1. Importar o hook de navegação
+import { useRouter } from 'expo-router';
 
 import Header from '../../components/ui/header';
 import SearchInput from '../../components/ui/SearchInput';
@@ -30,7 +30,7 @@ const SectionHeader = styled.View`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  margin-top: 40px;
+  margin-top: ${({ theme }) => theme.spacing.xl}px;
   margin-bottom: ${({ theme }) => theme.spacing.md}px;
 `;
 
@@ -58,7 +58,7 @@ const SearchWrapper = styled.View`
 `;
 
 export default function HomeScreen() {
-  const router = useRouter(); // 3. Inicializar o router
+  const router = useRouter();
   const [searchValue, setSearchValue] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Musical');
 
@@ -93,8 +93,6 @@ export default function HomeScreen() {
         <PaddedContent>
           <SectionHeader>
             <SectionTitle>{selectedCategory} events</SectionTitle>
-
-            {/* 4. Envolver o texto num Pressable para capturar o clique */}
             <Pressable onPress={() => router.push('/events-list')}>
               <SeeMore>See more</SeeMore>
             </Pressable>

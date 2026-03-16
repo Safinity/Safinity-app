@@ -8,7 +8,8 @@ import tags from '../data/tags.json';
 const Container = styled.View`
   flex: 1;
   background-color: ${({ theme }) => theme.colors.background};
-  padding: ${({ theme }) => theme.spacing.xl}px ${({ theme }) => theme.spacing.md}px;
+  padding-vertical: ${({ theme }) => theme.spacing.xl}px;
+  padding-horizontal: ${({ theme }) => theme.spacing.md}px;
   align-items: center;
 `;
 
@@ -16,19 +17,20 @@ const ContentWrapper = styled.View`
   flex: 1;
   justify-content: center;
   width: 100%;
+  padding-horizontal: ${({ theme }) => theme.spacing.md}px;
 `;
 
 const Title = styled.Text`
-  font-size: 24px;
-  font-weight: 600;
+  font-family: ${({ theme }) => theme.fonts.weights.semibold};
+  font-size: ${({ theme }) => theme.text.titulo.h.fontSize}px;
   color: ${({ theme }) => theme.colors.white};
   margin-bottom: ${({ theme }) => theme.spacing.sm}px;
   text-align: center;
 `;
 
-const Text = styled.Text`
-  font-size: 16px;
-  font-weight: 300;
+const TextStyled = styled.Text`
+  font-family: ${({ theme }) => theme.fonts.weights.light};
+  font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
   color: ${({ theme }) => theme.colors.white};
   margin-bottom: ${({ theme }) => theme.spacing.xl}px;
   text-align: center;
@@ -40,28 +42,31 @@ const TagsContainer = styled.View`
   justify-content: center;
   width: 100%;
   margin-bottom: ${({ theme }) => theme.spacing.xl}px;
+  margin-top: ${({ theme }) => theme.spacing.xl}px;
 `;
 
 const TagButton = styled.TouchableOpacity<{ selected: boolean }>`
-  padding: 6px 14px;
+  padding-vertical: ${({ theme }) => theme.spacing.sm}px;
+  padding-horizontal: ${({ theme }) => theme.spacing.md}px;
   margin: ${({ theme }) => theme.spacing.xs}px;
-  border-radius: 30px;
+  border-radius: ${({ theme }) => theme.borderRadius.round}px;
   background-color: ${({ selected, theme }) =>
     selected ? theme.colors.primary : theme.colors.white};
 `;
 
 const TagLabel = styled.Text<{ selected: boolean }>`
+  font-size: ${({ theme }) => theme.text.botao.fontSize}px;
+  line-height: ${({ theme }) => theme.text.botao.lineHeight}px;
+  font-family: ${({ theme }) => theme.fonts.weights.light};
   color: ${({ selected, theme }) => (selected ? theme.colors.white : theme.colors.black)};
-  font-size: 16px;
-  font-weight: 300;
 `;
 
 const NotesInput = styled.TextInput`
   background-color: ${({ theme }) => theme.colors.white};
   color: ${({ theme }) => theme.colors.neutralGray};
-  font-size: 16px;
-  font-weight: 300;
-  border-radius: 30px;
+  font-family: ${({ theme }) => theme.fonts.weights.light};
+  font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
+  border-radius: ${({ theme }) => theme.borderRadius.xlarge}px;
   padding: ${({ theme }) => theme.spacing.md}px;
   margin-bottom: ${({ theme }) => theme.spacing.xl}px;
   min-height: 120px;
@@ -71,16 +76,17 @@ const NotesInput = styled.TextInput`
 const ButtonRow = styled.View`
   flex-direction: row;
   width: 100%;
-  margin-top: ${({ theme }) => theme.spacing.sm}px;
+  margin-top: ${({ theme }) => theme.spacing.xl}px;
   gap: ${({ theme }) => theme.spacing.sm}px;
 `;
 
 const CancelButton = styled.TouchableOpacity`
   flex: 1;
   background-color: ${({ theme }) => theme.colors.white};
-  padding: ${({ theme }) => theme.spacing.sm}px ${({ theme }) => theme.spacing.lg}px;
+  padding-vertical: ${({ theme }) => theme.spacing.sm}px;
+  padding-horizontal: ${({ theme }) => theme.spacing.lg}px;
   height: 52px;
-  border-radius: 20px;
+  border-radius: ${({ theme }) => theme.borderRadius.medium}px;
   justify-content: center;
   align-items: center;
 `;
@@ -88,24 +94,25 @@ const CancelButton = styled.TouchableOpacity`
 const ConfirmButton = styled.TouchableOpacity`
   flex: 1;
   background-color: ${({ theme }) => theme.colors.primary};
-  padding: ${({ theme }) => theme.spacing.sm}px ${({ theme }) => theme.spacing.lg}px;
+  padding-vertical: ${({ theme }) => theme.spacing.sm}px;
+  padding-horizontal: ${({ theme }) => theme.spacing.lg}px;
   height: 52px;
-  border-radius: 20px;
+  border-radius: ${({ theme }) => theme.borderRadius.medium}px;
   justify-content: center;
   align-items: center;
 `;
 
 const ButtonTextCancel = styled.Text`
+  font-family: ${({ theme }) => theme.fonts.weights.medium};
   color: ${({ theme }) => theme.colors.primary};
-  font-size: 16px;
-  font-weight: 500;
+  font-size: ${({ theme }) => theme.text.botao.fontSize}px;
   text-align: center;
 `;
 
 const ButtonTextConfirm = styled.Text`
+  font-family: ${({ theme }) => theme.fonts.weights.medium};
   color: ${({ theme }) => theme.colors.white};
-  font-size: 16px;
-  font-weight: 500;
+  font-size: ${({ theme }) => theme.text.botao.fontSize}px;
   text-align: center;
 `;
 
@@ -113,7 +120,6 @@ const ButtonTextConfirm = styled.Text`
 
 export default function SOSForm() {
   const router = useRouter();
-
   const [selected, setSelected] = useState<number[]>([]);
   const [notes, setNotes] = useState('');
 
@@ -122,17 +128,10 @@ export default function SOSForm() {
   };
 
   const handleSubmit = async () => {
-    const payload = {
-      tags: selected,
-      notes: notes.trim(),
-    };
-
+    const payload = { tags: selected, notes: notes.trim() };
     try {
       console.log('Payload pronto para enviar:', payload);
       // enviar para backend aqui
-
-      // opcional: voltar ao mapa depois de confirmar
-      // router.back();
     } catch (error) {
       console.error(error);
     }
@@ -142,14 +141,14 @@ export default function SOSForm() {
   const handleCancel = () => {
     setSelected([]);
     setNotes('');
-    router.back(); // 👈 VOLTA PARA O MAPA
+    router.back();
   };
 
   return (
     <Container>
       <ContentWrapper>
         <Title>Help us help you!</Title>
-        <Text>Add more information to your request for help.</Text>
+        <TextStyled>Add more information to your request for help.</TextStyled>
 
         <TagsContainer>
           {tags.tags.map(tag => (

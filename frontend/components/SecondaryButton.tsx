@@ -1,9 +1,11 @@
 import styled from 'styled-components/native';
 
 const Button = styled.TouchableOpacity`
-  padding: 16px;
+  padding: ${({ theme }) => theme.spacing.md}px;
   border-radius: ${({ theme }) => theme.borderRadius.medium}px;
-  background-color: ${({ theme }) => theme.colors.palette.primary.light80};
+  background-color: ${({ theme }) => theme.colors.white};
+  width: 100%;
+  include-font-padding: false;
 `;
 
 const Label = styled.Text`

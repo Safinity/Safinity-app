@@ -5,116 +5,114 @@ import { Ionicons } from '@expo/vector-icons';
 
 import Header from '@/components/ui/header';
 import { userImages } from '../../assets/images/Users/userImages';
-import { Colors, Spacing, TextStyles, BorderRadius } from '../../constants/theme';
 import initialData from '../../data/notifications.json';
-
-// --- Styled Components ---
 
 const Container = styled.View`
   flex: 1;
-  background-color: ${Colors.background};
+  background-color: ${({ theme }) => theme.colors.background};
 `;
 
 const PageHeaderContent = styled.View`
-  padding: ${Spacing.xxl}px ${Spacing.margemLateral}px ${Spacing.lg}px;
+  padding: ${({ theme }) => theme.spacing.xxl}px ${({ theme }) => theme.spacing.margemLateral}px
+    ${({ theme }) => theme.spacing.lg}px;
 `;
 
 const Title = styled.Text`
-  font-family: ${TextStyles.titulo.h.fontFamily};
-  font-size: 24px;
-  color: ${Colors.white};
-  margin-bottom: 8px;
+  font-family: ${({ theme }) => theme.text.titulo.h.fontFamily};
+  font-size: ${({ theme }) => theme.text.titulo.h.fontSize}px;
+  color: ${({ theme }) => theme.colors.white};
+  margin-bottom: ${({ theme }) => theme.spacing.sm}px;
 `;
 
 const CountText = styled.Text`
-  font-family: ${TextStyles.corpo.corpoTexto.fontFamily};
-  font-size: ${TextStyles.corpo.corpoTexto.fontSize}px;
-  color: ${Colors.white};
+  font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
+  font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
+  color: ${({ theme }) => theme.colors.white};
 `;
 
 const BoldCount = styled.Text`
-  font-family: ${TextStyles.titulo.h3.fontFamily};
-  font-weight: bold;
+  font-family: ${({ theme }) => theme.text.titulo.h3.fontFamily};
 `;
 
 const MarkReadButton = styled.Pressable`
-  background-color: ${Colors.primary};
-  padding: 10px 20px;
-  border-radius: ${BorderRadius.medium}px;
+  background-color: ${({ theme }) => theme.colors.primary};
+  padding: ${({ theme }) => theme.spacing.sm}px ${({ theme }) => theme.spacing.lg}px;
+  border-radius: ${({ theme }) => theme.borderRadius.small}px;
   align-self: flex-end;
-  margin-top: 16px;
+  margin-top: ${({ theme }) => theme.spacing.md}px;
 `;
 
 const MarkReadText = styled.Text`
-  font-family: ${TextStyles.botao.fontFamily};
-  font-size: ${TextStyles.botao.fontSize}px;
-  color: ${Colors.white};
+  font-family: ${({ theme }) => theme.text.botao.fontFamily};
+  font-size: ${({ theme }) => theme.text.botao.fontSize}px;
+  color: ${({ theme }) => theme.colors.white};
 `;
 
 const NotificationCard = styled.View<{ $isNew: boolean }>`
   flex-direction: row;
-  padding: 18px ${Spacing.margemLateral}px;
-  margin-bottom: 8px;
-  background-color: ${props => (props.$isNew ? 'rgba(255, 255, 255, 0.08)' : 'transparent')};
+  padding: ${({ theme }) => theme.spacing.lg}px ${({ theme }) => theme.spacing.margemLateral}px;
+  margin-bottom: ${({ theme }) => theme.spacing.sm}px;
+  background-color: ${({ $isNew }) => ($isNew ? 'rgba(255, 255, 255, 0.08)' : 'transparent')};
+  align-items: center;
 `;
 
 const Avatar = styled.Image`
-  width: 70px;
-  height: 70px;
-  border-radius: ${BorderRadius.round}px;
-  background-color: #ccc;
+  width: ${({ theme }) => theme.height.sm}px;
+  height: ${({ theme }) => theme.height.sm}px;
+  border-radius: ${({ theme }) => theme.borderRadius.round}px;
+  background-color: ${({ theme }) => theme.colors.neutralGray};
 `;
 
 const IconCircle = styled.View`
-  width: 70px;
-  height: 70px;
-  border-radius: ${BorderRadius.round}px;
-  background-color: ${Colors.white};
+  width: ${({ theme }) => theme.height.sm}px;
+  height: ${({ theme }) => theme.height.sm}px;
+  border-radius: ${({ theme }) => theme.borderRadius.round}px;
+  background-color: ${({ theme }) => theme.colors.white};
   justify-content: center;
   align-items: center;
 `;
 
 const CardContent = styled.View`
   flex: 1;
-  margin-left: 12px;
+  margin-left: ${({ theme }) => theme.spacing.md}px;
 `;
 
 const CardHeader = styled.View`
   flex-direction: row;
   justify-content: space-between;
-  margin-bottom: 4px;
+  margin-bottom: ${({ theme }) => theme.spacing.xs}px;
 `;
 
 const CardTitle = styled.Text`
-  font-family: ${TextStyles.titulo.h3.fontFamily};
-  font-size: ${TextStyles.titulo.h3.fontSize}px;
-  color: ${Colors.white};
+  font-family: ${({ theme }) => theme.text.titulo.h3.fontFamily};
+  font-size: ${({ theme }) => theme.text.titulo.h3.fontSize}px;
+  color: ${({ theme }) => theme.colors.white};
 `;
 
 const CardTime = styled.Text`
-  font-family: ${TextStyles.label.fontFamily};
-  font-size: ${TextStyles.label.fontSize}px;
-  color: ${Colors.inactive};
+  font-family: ${({ theme }) => theme.text.label.fontFamily};
+  font-size: ${({ theme }) => theme.text.label.fontSize}px;
+  color: ${({ theme }) => theme.colors.inactive};
 `;
 
 const CardMessage = styled.Text`
-  font-family: ${TextStyles.corpo.corpoTexto.fontFamily};
-  font-size: 14px;
-  line-height: 20px;
-  color: ${Colors.palette.neutral.neutral80};
+  font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
+  font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
+  line-height: ${({ theme }) => theme.text.corpo.corpoTexto.lineHeight}px;
+  color: ${({ theme }) => theme.colors.palette.neutral.neutral80};
 `;
 
 const ActionRow = styled.View`
   flex-direction: row;
-  margin-top: 12px;
-  gap: 12px;
+  margin-top: ${({ theme }) => theme.spacing.md}px;
+  gap: ${({ theme }) => theme.spacing.md}px;
 `;
 
 const AcceptButton = styled.TouchableOpacity`
-  background-color: ${Colors.primary};
+  background-color: ${({ theme }) => theme.colors.primary};
   flex: 1;
-  height: 40px;
-  border-radius: ${BorderRadius.small}px;
+  height: ${({ theme }) => theme.height.tam_42}px;
+  border-radius: ${({ theme }) => theme.borderRadius.small}px;
   justify-content: center;
   align-items: center;
 `;
@@ -122,17 +120,18 @@ const AcceptButton = styled.TouchableOpacity`
 const RemoveButton = styled.TouchableOpacity`
   background-color: rgba(146, 66, 204, 0.15);
   flex: 1;
-  height: 40px;
-  border-radius: ${BorderRadius.small}px;
+  height: ${({ theme }) => theme.height.tam_42}px;
+  border-radius: ${({ theme }) => theme.borderRadius.small}px;
   justify-content: center;
   align-items: center;
 `;
 
 const SectionLabel = styled.Text`
-  color: ${Colors.palette.primary.light50};
-  font-size: ${TextStyles.titulo.h3.fontSize}px;
-  font-family: ${TextStyles.titulo.h3.fontFamily};
-  margin: 20px ${Spacing.margemLateral}px 10px;
+  color: ${({ theme }) => theme.colors.palette.primary.light50};
+  font-size: ${({ theme }) => theme.text.titulo.h3.fontSize}px;
+  font-family: ${({ theme }) => theme.text.titulo.h3.fontFamily};
+  margin: ${({ theme }) => theme.spacing.lg}px ${({ theme }) => theme.spacing.margemLateral}px
+    ${({ theme }) => theme.spacing.sm}px;
 `;
 
 export default function NotificationsPage() {
@@ -150,17 +149,17 @@ export default function NotificationsPage() {
   const getIcon = (type: string) => {
     switch (type) {
       case 'emergency':
-        return <Ionicons name="alert-circle" size={32} color={Colors.palette.error.normal} />;
+        return <Ionicons name="alert-circle" size={32} color="#D34A4A" />;
       case 'activity':
-        return <Ionicons name="notifications" size={30} color={Colors.primary} />;
+        return <Ionicons name="notifications" size={30} color="#9242CC" />;
       case 'crowd':
-        return <Ionicons name="people" size={30} color={Colors.primary} />;
+        return <Ionicons name="people" size={30} color="#9242CC" />;
       case 'hydrate':
-        return <Ionicons name="water" size={30} color={Colors.primary} />;
+        return <Ionicons name="water" size={30} color="#9242CC" />;
       case 'security':
-        return <Ionicons name="shield-checkmark" size={30} color={Colors.primary} />;
+        return <Ionicons name="shield-checkmark" size={30} color="#9242CC" />;
       default:
-        return <Ionicons name="mail" size={30} color={Colors.primary} />;
+        return <Ionicons name="mail" size={30} color="#9242CC" />;
     }
   };
 
@@ -181,9 +180,7 @@ export default function NotificationsPage() {
 
         <CardContent>
           <CardHeader>
-            <CardTitle
-              style={item.type === 'emergency' ? { color: Colors.palette.error.normal } : null}
-            >
+            <CardTitle style={item.type === 'emergency' ? { color: '#D34A4A' } : undefined}>
               {item.title}
             </CardTitle>
             <CardTime>{item.time}</CardTime>
@@ -193,7 +190,7 @@ export default function NotificationsPage() {
           {item.type === 'friend' && (
             <ActionRow>
               <RemoveButton>
-                <MarkReadText style={{ color: Colors.primary_50 }}>Remove</MarkReadText>
+                <MarkReadText style={{ color: '#C9A0E5' }}>Remove</MarkReadText>
               </RemoveButton>
               <AcceptButton>
                 <MarkReadText>Accept</MarkReadText>

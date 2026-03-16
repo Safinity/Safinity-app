@@ -19,17 +19,17 @@ const Container = styled.View`
 
 const BackButton = styled.Pressable`
   position: absolute;
-  top: 50px;
-  left: 20px;
+  top: ${({ theme }) => theme.spacing.xl}px;
+  left: ${({ theme }) => theme.spacing.margemLateral}px;
   z-index: 99;
   background-color: rgba(0, 0, 0, 0.4);
-  padding: 8px;
+  padding: ${({ theme }) => theme.spacing.sm}px;
   border-radius: ${({ theme }) => theme.borderRadius.round}px;
 `;
 
 const ContentCard = styled.View`
   background-color: ${({ theme }) => theme.colors.background};
-  padding: 40px;
+  padding-horizontal: ${({ theme }) => theme.spacing.margemLateral}px;
   padding-top: 0px;
   min-height: 500px;
 `;
@@ -44,20 +44,18 @@ const SectionTitle = styled.Text`
 
 const DescriptionText = styled.Text`
   color: ${({ theme }) => theme.colors.inactive};
-  font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
-  font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
-  line-height: ${({ theme }) => theme.text.corpo.corpoTexto.lineHeight}px;
+  ${({ theme }) => theme.text.corpo.corpoTexto};
 `;
 
 const ActionGrid = styled.View`
   flex-direction: row;
   justify-content: space-between;
-  margin-top: 25px;
+  margin-top: ${({ theme }) => theme.spacing.lg}px;
 `;
 
 const ActionButton = styled.TouchableOpacity`
   width: 48%;
-  height: 100px;
+  height: ${({ theme }) => theme.height.actionbutton}px;
   background-color: ${({ theme }) => theme.colors.grayNavbar};
   border-radius: ${({ theme }) => theme.borderRadius.large}px;
   justify-content: center;
@@ -66,7 +64,7 @@ const ActionButton = styled.TouchableOpacity`
 
 const ActionLabel = styled.Text`
   color: ${({ theme }) => theme.colors.white};
-  margin-top: 8px;
+  margin-top: ${({ theme }) => theme.spacing.sm}px;
   font-family: ${({ theme }) => theme.text.label.fontFamily};
   font-size: ${({ theme }) => theme.text.label.fontSize + 2}px;
 `;
@@ -74,16 +72,16 @@ const ActionLabel = styled.Text`
 const LinkButton = styled.TouchableOpacity`
   background-color: ${({ theme }) => theme.colors.primary};
   width: 220px;
-  padding: 18px;
+  padding: ${({ theme }) => theme.spacing.md}px;
   border-radius: ${({ theme }) => theme.borderRadius.round}px;
   align-items: center;
-  margin-top: 40px;
+  margin-top: ${({ theme }) => theme.spacing.xl}px;
   align-self: center;
   shadow-color: white;
   shadow-offset: 0px 0px;
   shadow-opacity: 0.15;
-  shadow-radius: 10px;
-  elevation: 4;
+  shadow-radius: ${({ theme }) => theme.spacing.xl}px;
+  elevation: 2;
 `;
 
 const ButtonText = styled.Text`
@@ -96,67 +94,64 @@ const ButtonText = styled.Text`
 const FriendsSection = styled.View`
   flex-direction: row;
   align-items: center;
-  margin-top: 10px;
+  margin-top: ${({ theme }) => theme.spacing.sm}px;
 `;
 
 const AvatarStack = styled.View`
   flex-direction: row;
-  margin-right: 15px;
+  margin-right: ${({ theme }) => theme.spacing.sm}px;
 `;
 
 const Avatar = styled.Image`
-  width: 40px;
-  height: 40px;
-  border-radius: 20px;
-  border-width: 2px;
+  width: ${({ theme }) => theme.spacing.margemLateral}px;
+  height: ${({ theme }) => theme.spacing.margemLateral}px;
+  border-radius: ${({ theme }) => theme.borderRadius.round}px;
+  border-width: ${({ theme }) => theme.spacing.xxs}px;
   border-color: ${({ theme }) => theme.colors.background};
 `;
 
 const ModalOverlay = styled.View`
   flex: 1;
-  background-color: rgba(256, 256, 256, 0.6);
+  background-color: rgba(255, 255, 255, 0.6);
   justify-content: center;
   align-items: center;
-  padding: 25px;
+  padding: ${({ theme }) => theme.spacing.lg}px;
 `;
 
 const ModalContent = styled.View`
-  background-color: #303b49;
+  background-color: ${({ theme }) => theme.colors.grayNavbar};
   width: 95%;
-  border-radius: 30px;
-  padding: 30px;
+  border-radius: ${({ theme }) => theme.borderRadius.xlarge}px;
+  padding: ${({ theme }) => theme.spacing.xl}px;
   align-items: center;
 `;
 
 const ModalTitle = styled.Text`
   color: ${({ theme }) => theme.colors.white};
-  font-family: ${({ theme }) => theme.text.titulo.h.fontFamily};
-  font-size: 24px;
-  margin-bottom: 20px;
+  ${({ theme }) => theme.text.titulo.h};
+  margin-bottom: ${({ theme }) => theme.spacing.md}px;
 `;
 
 const ModalDescription = styled.Text`
   color: ${({ theme }) => theme.colors.white};
   text-align: center;
-  font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
-  font-size: 16px;
-  line-height: 22px;
-  margin-bottom: 30px;
+  ${({ theme }) => theme.text.corpo.corpoTexto};
+  margin-bottom: ${({ theme }) => theme.spacing.lg}px;
 `;
 
 const CodeRow = styled.View`
   flex-direction: row;
   justify-content: space-between;
   width: 100%;
-  margin-bottom: 30px;
+  margin-bottom: ${({ theme }) => theme.spacing.lg}px;
 `;
 
 const CodeBox = styled.View`
-  width: 42px;
-  height: 50px;
+  width: ${({ theme }) => theme.width.linkTicket}px;
+  height: ${({ theme }) => theme.height.md}px;
   border-width: 1px;
   border-color: rgba(255, 255, 255, 0.5);
-  border-radius: 8px;
+  border-radius: ${({ theme }) => theme.borderRadius.small}px;
 `;
 
 const ModalButtons = styled.View`
@@ -168,16 +163,17 @@ const ModalButtons = styled.View`
 const ModalBtn = styled.TouchableOpacity<{ isPrimary?: boolean }>`
   flex: 0.48;
   background-color: ${({ isPrimary, theme }) => (isPrimary ? theme.colors.primary : '#E5D9F2')};
-  padding: 16px;
-  border-radius: 25px;
+  padding: ${({ theme }) => theme.spacing.md}px;
+  border-radius: ${({ theme }) => theme.borderRadius.round}px;
   align-items: center;
 `;
 
 const ModalBtnText = styled.Text<{ isPrimary?: boolean }>`
-  font-weight: bold;
-  font-size: 16px;
+  ${({ theme }) => theme.text.botao};
   color: ${({ isPrimary, theme }) => (isPrimary ? theme.colors.white : theme.colors.primary)};
 `;
+
+// --- Screen ---
 
 export default function EventDetailsScreen() {
   const { id } = useLocalSearchParams();
@@ -187,9 +183,10 @@ export default function EventDetailsScreen() {
 
   const event = eventsData.events.find(e => e.id === id);
 
-  const randomFriends = useMemo(() => {
-    return [...usersData].sort(() => 0.5 - Math.random()).slice(0, 3);
-  }, []);
+  const randomFriends = useMemo(
+    () => [...usersData].sort(() => 0.5 - Math.random()).slice(0, 3),
+    [],
+  );
 
   if (!event) return null;
 
@@ -209,12 +206,15 @@ export default function EventDetailsScreen() {
             <ModalDescription>
               Your ticket has a{' '}
               <Text style={{ color: '#E5D9F2', fontWeight: 'bold' }}>6-digit validation code</Text>.
+              Enter that code bellow!
             </ModalDescription>
+
             <CodeRow>
               {[1, 2, 3, 4, 5, 6].map(i => (
                 <CodeBox key={i} />
               ))}
             </CodeRow>
+
             <ModalButtons>
               <ModalBtn onPress={() => setModalVisible(false)}>
                 <ModalBtnText>Cancel</ModalBtnText>
@@ -232,20 +232,18 @@ export default function EventDetailsScreen() {
       </BackButton>
 
       <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
-        <HeroBanner event={event} isDetail={true} />
+        <HeroBanner event={event} isDetail />
 
         <ContentCard>
           <SectionTitle>Description</SectionTitle>
           <DescriptionText>{event.description}</DescriptionText>
 
           <ActionGrid>
-            {/* LIGAÇÃO PARA O MAPA */}
             <ActionButton onPress={() => router.push('/(tabs)/map')}>
               <Ionicons name="map-outline" size={26} color="white" />
               <ActionLabel>Map</ActionLabel>
             </ActionButton>
 
-            {/* LIGAÇÃO PARA O CALENDÁRIO */}
             <ActionButton onPress={() => router.push('/(tabs)/calendar')}>
               <Ionicons name="calendar-outline" size={26} color="white" />
               <ActionLabel>Calendar</ActionLabel>

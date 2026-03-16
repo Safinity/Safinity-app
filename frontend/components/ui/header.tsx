@@ -4,7 +4,7 @@ import React from 'react';
 import { Platform, StatusBar } from 'react-native';
 import styled from 'styled-components/native';
 
-import { Colors, Fonts, Spacing } from '../../constants/theme';
+import { Colors, Fonts, Spacing, Height, Width } from '../../constants/theme';
 
 export type HeaderVariant = 'default' | 'back';
 
@@ -20,8 +20,7 @@ const Header: React.FC<HeaderProps> = ({
   title,
 }) => {
   const statusBarHeight = Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 24;
-
-  const headerHeight = statusBarHeight + 60;
+  const headerHeight = statusBarHeight + Height.sm;
 
   return (
     <HeaderFixedContainer height={headerHeight}>
@@ -39,11 +38,15 @@ const Header: React.FC<HeaderProps> = ({
 
             <IconRow>
               <IconButton onPress={() => router.push('/notifications')}>
-                <Ionicons name="notifications-outline" size={24} color={Colors.white} />
+                <Ionicons
+                  name="notifications-outline"
+                  size={Width.iconHeader}
+                  color={Colors.white}
+                />
               </IconButton>
 
               <IconButton onPress={() => router.push('/perfil/profile')}>
-                <Ionicons name="person-circle" size={30} color={Colors.white} />
+                <Ionicons name="person-circle" size={Width.iconHeader} color={Colors.white} />
               </IconButton>
             </IconRow>
           </HeaderRow>
@@ -53,7 +56,7 @@ const Header: React.FC<HeaderProps> = ({
           <BackContainer>
             <BackButtonRow>
               <IconButton onPress={() => router.back()}>
-                <Ionicons name="arrow-back" size={23} color={Colors.white} />
+                <Ionicons name="arrow-back" size={Width.iconHeader} color={Colors.white} />
               </IconButton>
             </BackButtonRow>
 
@@ -73,13 +76,14 @@ const Header: React.FC<HeaderProps> = ({
 
 export default Header;
 
+/* ---------------- styled components ---------------- */
+
 const HeaderFixedContainer = styled.View<{ height: number }>`
   position: absolute;
   top: 0;
   left: ${Spacing.margemLateral}px;
   right: ${Spacing.margemLateral}px;
   z-index: 1000;
-  height: ${({ height }) => height}px;
   background-color: transparent;
 `;
 
@@ -90,6 +94,7 @@ const SafeArea = styled.View<{ height: number }>`
 const HeaderContent = styled.View`
   flex: 1;
   justify-content: center;
+  height: auto;
 `;
 
 const HeaderRow = styled.View`
@@ -100,24 +105,21 @@ const HeaderRow = styled.View`
 
 const BackContainer = styled.View`
   flex-direction: column;
+  margin-top: ${Spacing.xl}px;
 `;
 
 const BackButtonRow = styled.View`
   flex-direction: row;
   align-items: center;
-  margin-top: 25px;
-  margin-bottom: ${Spacing.md}px;
 `;
 
-const TitleContainer = styled.View`
-  font-size: 24px;
-`;
+const TitleContainer = styled.View``;
 
 const LogoContainer = styled.View``;
 
 const LogoImage = styled.Image`
-  width: 124px;
-  height: 24px;
+  width: ${Width.logoHeader}px;
+  height: ${Height.xs}px;
 `;
 
 const IconRow = styled.View`
@@ -130,12 +132,11 @@ const IconButton = styled.Pressable``;
 
 const Title = styled.Text`
   color: ${Colors.white};
-  font-family: ${Fonts.weights.semibold};
-  font-size: 18px;
+  ${({ theme }) => theme.text.titulo.h};
   include-font-padding: false;
-  font-variant-ligatures: none;
-  font-variant: none;
+  margin-top: ${Spacing.md}px;
 `;
+
 const Divider = styled.View`
   position: absolute;
   bottom: 0;

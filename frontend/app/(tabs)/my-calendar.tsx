@@ -6,49 +6,49 @@ import { useRouter } from 'expo-router';
 import calendarData from '../../data/calendar.json';
 
 // --- Styled Components ---
+
 const Container = styled.View`
   flex: 1;
   background-color: ${({ theme }) => theme.colors.background};
-  padding-top: 50px;
+  padding-top: ${({ theme }) => theme.spacing.margemTop}px;
 `;
 
-// Criamos um wrapper para aplicar os 30px de margem lateral a todos os blocos
 const ContentWrapper = styled.View`
-  padding: 0 30px;
+  padding: 0 ${({ theme }) => theme.spacing.margemLateral}px;
 `;
 
 const BackButton = styled.TouchableOpacity`
-  margin-bottom: 20px;
+  margin-bottom: ${({ theme }) => theme.spacing.md}px;
 `;
 
 const Title = styled.Text`
   color: ${({ theme }) => theme.colors.white};
-  font-family: ${({ theme }) => theme.text.titulo.h1.fontFamily};
-  font-size: 32px;
+  ${({ theme }) => theme.text.titulo.h};
   font-weight: bold;
-  margin-bottom: 25px;
+  margin-bottom: ${({ theme }) => theme.spacing.lg}px;
 `;
 
 const DropdownContainer = styled.View`
   background-color: ${({ theme }) => theme.colors.white};
-  border-radius: 12px;
-  padding: 12px 16px;
+  border-radius: ${({ theme }) => theme.borderRadius.medium}px;
+  padding: ${({ theme }) => theme.spacing.sm}px ${({ theme }) => theme.spacing.md}px;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
+  margin-bottom: ${({ theme }) => theme.spacing.xl}px;
+  height: ${({ theme }) => theme.height.sm}px;
 `;
 
 const DropdownText = styled.Text`
   color: ${({ theme }) => theme.colors.background};
-  font-size: 16px;
-  font-weight: 600;
+  font-size: ${({ theme }) => theme.fonts.sizes.base}px;
+  font-family: ${({ theme }) => theme.fonts.weights.semibold};
 `;
 
 const DateSelector = styled.View`
   flex-direction: row;
   justify-content: space-between;
-  margin-bottom: 40px;
+  margin-bottom: ${({ theme }) => theme.spacing.xxl}px;
 `;
 
 const DateItem = styled.TouchableOpacity`
@@ -57,45 +57,44 @@ const DateItem = styled.TouchableOpacity`
 
 const DateMonth = styled.Text`
   color: ${({ theme }) => theme.colors.white};
-  font-size: 14px;
-  margin-bottom: 8px;
+  font-size: ${({ theme }) => theme.fonts.sizes.sm}px;
+  margin-bottom: ${({ theme }) => theme.spacing.xs}px;
   opacity: 0.6;
 `;
 
 const DateCircle = styled.View<{ active?: boolean }>`
-  width: 38px;
-  height: 38px;
-  border-radius: 19px;
-  background-color: ${({ active, theme }) => (active ? theme.colors.white : 'transparent')};
+  width: ${({ theme }) => theme.height.tam_42}px;
+  height: ${({ theme }) => theme.height.tam_42}px;
+  border-radius: ${({ theme }) => theme.height.tam_42 / 2}px;
+  background-color: ${({ active, theme }) => (active ? theme.colors.white : 'rgba(255,255,255,0)')};
   justify-content: center;
   align-items: center;
+  overflow: hidden;
 `;
 
 const DateDay = styled.Text<{ active?: boolean }>`
   color: ${({ active, theme }) => (active ? theme.colors.background : theme.colors.white)};
-  font-weight: bold;
-  font-size: 16px;
+  font-size: ${({ theme }) => theme.fonts.sizes.base}px;
+  ${({ theme }) => theme.text.textoPequeno};
 `;
 
 const TimelineContainer = styled.View`
   flex: 1;
-  /* Garantimos que a timeline também respeite os 30px */
-  padding: 0 30px;
+  padding: 0 ${({ theme }) => theme.spacing.margemLateral}px;
 `;
 
 const TimeRow = styled.View`
   flex-direction: row;
   align-items: flex-start;
-  margin-bottom: 10px;
-  height: 100px;
+  margin-bottom: ${({ theme }) => theme.spacing.sm}px;
+  height: ${({ theme }) => theme.height.md}px;
 `;
 
 const TimeLabel = styled.Text`
   color: ${({ theme }) => theme.colors.white};
-  font-size: 12px;
-  width: 50px;
+  width: ${({ theme }) => theme.height.tam_42}px;
+  ${({ theme }) => theme.text.label};
   opacity: 0.8;
-  padding-top: -5px;
 `;
 
 const TimelineContent = styled.View`
@@ -105,7 +104,7 @@ const TimelineContent = styled.View`
 
 const GridLine = styled.View`
   position: absolute;
-  top: 8px;
+  top: ${({ theme }) => theme.spacing.xs}px;
   left: 0;
   right: 0;
   height: 1px;
@@ -113,21 +112,20 @@ const GridLine = styled.View`
 `;
 
 const EventCard = styled.TouchableOpacity`
-  background-color: #e9d9f5;
-  border-radius: 20px;
-  padding: 15px;
-  margin-top: 15px;
-  min-height: 80px;
+  background-color: ${({ theme }) => theme.colors.palette.primary.light80};
+  border-radius: ${({ theme }) => theme.borderRadius.large}px;
+  padding: ${({ theme }) => theme.spacing.md}px;
+  margin-top: ${({ theme }) => theme.spacing.sm}px;
+  min-height: ${({ theme }) => theme.height.sm}px;
   justify-content: center;
   align-items: center;
 `;
 
 const EventTitle = styled.Text`
   color: ${({ theme }) => theme.colors.background};
-  font-size: 14px;
-  font-weight: 600;
   text-align: center;
-  margin-bottom: 6px;
+  margin-bottom: ${({ theme }) => theme.spacing.xs}px;
+  ${({ theme }) => theme.text.cardsCalendar};
 `;
 
 const LocationRow = styled.View`
@@ -137,9 +135,11 @@ const LocationRow = styled.View`
 
 const LocationText = styled.Text`
   color: ${({ theme }) => theme.colors.background};
-  font-size: 12px;
-  margin-left: 4px;
+  font-size: ${({ theme }) => theme.fonts.sizes.xs}px;
+  margin-left: ${({ theme }) => theme.spacing.xxs}px;
 `;
+
+// --- Screen ---
 
 export default function MyCalendarScreen() {
   const theme = useTheme();
@@ -187,7 +187,9 @@ export default function MyCalendarScreen() {
             <TimeRow key={event.id}>
               <View>
                 <TimeLabel>{event.startTime}</TimeLabel>
-                <TimeLabel style={{ marginTop: 55, opacity: 0.4 }}>{event.endTime}</TimeLabel>
+                <TimeLabel style={{ marginTop: theme.spacing.xl, opacity: 0.4 }}>
+                  {event.endTime}
+                </TimeLabel>
               </View>
 
               <TimelineContent>

@@ -1,8 +1,18 @@
-/**
- * Design tokens da aplicação
- * Podem ser usados em styled-components via theme
- */
+// app/constants/theme.ts
+import { Dimensions } from 'react-native';
 
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+
+// Base do design: iPhone 15 Pro Max
+const BASE_WIDTH = 430; // largura em dp do iPhone 15 Pro Max
+const BASE_HEIGHT = 932; // altura em dp do iPhone 15 Pro Max
+
+// Funções de escala
+const scale = (size: number) => (SCREEN_WIDTH / BASE_WIDTH) * size;
+const verticalScale = (size: number) => (SCREEN_HEIGHT / BASE_HEIGHT) * size;
+const moderateScale = (size: number, factor = 0.7) => size + (scale(size) - size) * factor;
+
+// --- Cores ---
 export const Colors = {
   grayNavbar: '#303B49',
   background: '#222734',
@@ -53,24 +63,61 @@ export const Colors = {
   },
 };
 
+// --- Border radius ---
 export const BorderRadius = {
-  small: 8,
-  medium: 16,
-  large: 24,
-  xlarge: 32,
-  round: 999,
+  small: scale(8),
+  medium: scale(16),
+  large: scale(24),
+  xlarge: scale(32),
+  round: scale(999),
 };
 
+// --- Spacing ---
 export const Spacing = {
-  xs: 4,
-  sm: 8,
-  md: 16,
-  lg: 20,
-  xl: 32,
-  xxl: 130,
-  margemLateral: 40,
+  xxs: scale(2),
+  xs: scale(4),
+  sm: scale(8),
+  md: scale(16),
+  lg: scale(20),
+  xl: scale(32),
+  xxl: scale(130),
+  xxxl: scale(170),
+  margemLateral: scale(40),
+  margemTop: scale(68),
 };
 
+export const Height = {
+  xs: scale(24),
+  tam_42: scale(42),
+  sm: scale(58),
+  md: scale(73),
+  actionbutton: scale(120),
+  profileAvatar: scale(160),
+  friendProfileAvatar: scale(100),
+  bottomMargem: scale(170),
+  lg: scale(280),
+  xl: scale(330),
+  card: {
+    compact: scale(240),
+    default: scale(380),
+  },
+  gradientPadding: {
+    compact: scale(15),
+    default: scale(20),
+  },
+  timeBadge: {
+    default: { vertical: scale(8), horizontal: scale(14) },
+    compact: { vertical: scale(4), horizontal: scale(10) },
+  },
+};
+
+export const Width = {
+  logoHeader: scale(124),
+  iconHeader: scale(28),
+  linkTicket: scale(50),
+};
+
+// --- Fonts ---
 export const Fonts = {
   family: 'PlusJakartaSans',
   weights: {
@@ -82,79 +129,83 @@ export const Fonts = {
     bold: 'PlusJakartaSans_700Bold',
   },
   sizes: {
-    xs: 11,
-    sm: 13,
-    base: 15,
-    lg: 17,
-    xl: 19,
+    xs: moderateScale(11),
+    sm: moderateScale(13),
+    base: moderateScale(15),
+    lg: moderateScale(17),
+    xl: moderateScale(19),
   },
 };
 
+// --- Text styles ---
 export const TextStyles = {
   botao: {
     fontFamily: 'PlusJakartaSans_500Medium',
-    fontSize: 16,
+    fontSize: moderateScale(16),
     lineHeight: 22,
   },
   iconesNavbar: {
     fontFamily: 'PlusJakartaSans_200ExtraLight',
-    fontSize: 12,
+    fontSize: moderateScale(12),
     lineHeight: 22,
   },
   textoPequeno: {
     fontFamily: 'PlusJakartaSans_200ExtraLight',
-    fontSize: 14,
+    fontSize: moderateScale(14),
     lineHeight: 18,
   },
   label: {
     fontFamily: 'PlusJakartaSans_300Light',
-    fontSize: 10,
+    fontSize: moderateScale(10),
     lineHeight: 20,
   },
   textoFiltros: {
     fontFamily: 'PlusJakartaSans_400Regular',
-    fontSize: 14,
+    fontSize: moderateScale(14),
     lineHeight: 22,
   },
   cardsCalendar: {
     fontFamily: 'PlusJakartaSans_500Medium',
-    fontSize: 11,
+    fontSize: moderateScale(11),
     lineHeight: 14,
   },
   titulo: {
     h: {
       fontFamily: 'PlusJakartaSans_600SemiBold',
-      fontSize: 24,
+      fontSize: moderateScale(24),
     },
     h1: {
       fontFamily: 'PlusJakartaSans_600SemiBold',
-      fontSize: 22,
+      fontSize: moderateScale(22),
       lineHeight: 28,
     },
     h2: {
       fontFamily: 'PlusJakartaSans_600SemiBold',
-      fontSize: 18,
+      fontSize: moderateScale(18),
       lineHeight: 22,
     },
     h3: {
       fontFamily: 'PlusJakartaSans_600SemiBold',
-      fontSize: 16,
+      fontSize: moderateScale(16),
       lineHeight: 20,
     },
   },
   corpo: {
     corpoTexto: {
       fontFamily: 'PlusJakartaSans_300Light',
-      fontSize: 16,
+      fontSize: moderateScale(16),
       lineHeight: 22,
     },
   },
 };
 
+// --- Theme completo ---
 export const theme = {
   colors: Colors,
   borderRadius: BorderRadius,
   spacing: Spacing,
   fonts: Fonts,
   text: TextStyles,
+  height: Height,
+  width: Width,
 };

@@ -15,20 +15,19 @@ interface SearchInputProps {
 const SearchBox = styled.View<{ bgColor: string }>`
   flex-direction: row;
   align-items: center;
-  height: 58px;
+  height: ${({ theme }) => theme.height.sm}px;
   background-color: ${({ bgColor }) => bgColor};
   border-radius: ${({ theme }) => theme.borderRadius.large}px;
-  padding: ${({ theme }) => theme.spacing.sm}px ${({ theme }) => theme.spacing.md}px;
+  padding: 0 ${({ theme }) => theme.spacing.md}px;
 `;
 
 const StyledInput = styled.TextInput<{ textColor: string }>`
   flex: 1;
-  color: ${({ textColor }) => textColor};
-  margin-left: ${({ theme }) => theme.spacing.sm}px;
-
-  /* Token: corpo.corpoTexto */
-  font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
-  font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
+  color: ${({ theme }) => theme.colors.white};
+  ${({ theme }) => theme.text.corpo.corpoTexto};
+  include-font-padding: false;
+  padding-vertical: 0px;
+  line-height: ${({ theme }) => theme.text.corpo.corpoTexto.lineHeight}px;
 `;
 
 const SearchInput: React.FC<SearchInputProps> = ({

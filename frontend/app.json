@@ -1,5 +1,11 @@
 {
   "expo": {
+    "name": "Safinity",
+    "slug": "frontend",
+    "version": "1.0.0",
+
+    "icon": "./assets/icons/app_logo.png",
+
     "android": {
       "package": "com.safinityapp.frontend",
       "compileSdkVersion": 35,
@@ -7,50 +13,38 @@
       "minSdkVersion": 24,
       "buildToolsVersion": "35.0.0",
       "adaptiveIcon": {
+        "foregroundImage": "./assets/icons/app_logo.png",
         "backgroundColor": "#E6F4FE"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
-    }
-  },
-
-  "name": "safinity-app",
-  "slug": "safinity-app",
-  "version": "1.0.0",
-  "orientation": "portrait",
-  "scheme": "frontend",
-  "userInterfaceStyle": "automatic",
-  "newArchEnabled": true,
-  "ios": {
-    "supportsTablet": true,
-    "bundleIdentifier": "com.safinityapp.frontend",
-    "infoPlist": {
-      "ITSAppUsesNonExemptEncryption": false
-    }
-  },
-  "android": {
-    "adaptiveIcon": {
-      "backgroundColor": "#E6F4FE"
     },
-    "edgeToEdgeEnabled": true,
-    "predictiveBackGestureEnabled": false,
-    "package": "com.safinityapp.frontend"
-  },
-  "web": {
-    "output": "static"
-  },
-  "plugins": ["expo-router", "expo-font", "expo-barcode-scanner", "expo-camera"],
-  "experiments": {
-    "typedRoutes": true,
-    "reactCompiler": true
-  },
-  "extra": {
-    "router": {},
-    "eas": {
-      "projectId": "29b2c487-32ee-4824-950b-00c95e98b88f"
-    }
-  },
-  "owner": "safinityapp",
-  "sdkVersion": "54.0.0",
-  "platforms": ["ios", "android", "web"]
+
+    "ios": {
+      "bundleIdentifier": "com.safinityapp.frontend",
+      "infoPlist": {
+        "CFBundleDisplayName": "Safinity",
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+
+    "updates": {
+      "url": "https://u.expo.dev/29b2c487-32ee-4824-950b-00c95e98b88f"
+    },
+
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+
+    "extra": {
+      "eas": {
+        "projectId": "29b2c487-32ee-4824-950b-00c95e98b88f"
+      }
+    },
+
+    "plugins": ["expo-router", "expo-font", "expo-camera"],
+
+    "owner": "safinityapp",
+    "platforms": ["ios", "android", "web"]
+  }
 }

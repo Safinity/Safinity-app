@@ -1,0 +1,62 @@
+[
+  {
+    "id": "1",
+    "type": "emergency",
+    "category": "Security",
+    "title": "Weather Alert",
+    "message": "Heavy rain forecast in 15 min. Please move to the covered areas near the Food Court.",
+    "sentAt": "2024-05-20T14:30:00Z",
+    "target": "All Attendees",
+    "reach": 12450
+  },
+  {
+    "id": "2",
+    "type": "crowd",
+    "category": "Capacity",
+    "title": "Crowd Warning - Main Stage",
+    "message": "Stage 1 is at 90% capacity. We recommend Stage 3 for a more comfortable experience.",
+    "sentAt": "2024-05-20T12:00:00Z",
+    "target": "North Zone",
+    "reach": 3200
+  },
+  {
+    "id": "3",
+    "type": "hydrate",
+    "category": "Health",
+    "title": "Hydration",
+    "message": "It's 28°C. Don't forget to drink water. Free water stations are available 50m from you.",
+    "sentAt": "2024-05-20T10:00:00Z",
+    "target": "All Attendees",
+    "reach": 12450
+  },
+  {
+    "id": "4",
+    "type": "event",
+    "category": "Schedule",
+    "title": "Schedule Change",
+    "message": "The 'The Midnight' concert at the Sunset Stage has been postponed to 9:30 PM.",
+    "sentAt": "2024-05-19T18:00:00Z",
+    "target": "'The Midnight' Favorites",
+    "reach": 1540
+  },
+  {
+    "id": "5",
+    "type": "activity",
+    "category": "Logistics",
+    "title": "Lost & Found",
+    "message": "A set of keys was found near Restroom 4. Please pick them up at the Information Point.",
+    "sentAt": "2024-05-19T15:20:00Z",
+    "target": "All Attendees",
+    "reach": 12450
+  },
+  {
+    "id": "6",
+    "type": "promo",
+    "category": "Commercial",
+    "title": "Happy Hour!",
+    "message": "50% off spirits at the Lake Bar for the next hour.",
+    "sentAt": "2024-05-19T14:00:00Z",
+    "target": "Premium Users",
+    "reach": 850
+  }
+]

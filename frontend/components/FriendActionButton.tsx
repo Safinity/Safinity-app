@@ -3,7 +3,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/constants/theme';
 
 const Button = styled.TouchableOpacity<{ variant: 'add' | 'remove' }>`
-  padding: 12px;
+  width: ${({ theme }) => theme.height.sm}px;
+  height: ${({ theme }) => theme.height.sm}px;
   border-radius: ${({ theme }) => theme.borderRadius.medium}px;
 
   background-color: ${({ variant, theme }) =>
@@ -28,7 +29,7 @@ export default function FriendActionButton({
 
   return (
     <Button variant={variant} disabled={disabled} onPress={onPress}>
-      <Ionicons name={iconName} size={24} color={iconColor} />
+      <Ionicons name={iconName} size={theme.width.iconHeader} color={iconColor} />
     </Button>
   );
 }

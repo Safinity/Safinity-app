@@ -24,8 +24,7 @@ CREATE TABLE Event (
   image bytea,
   start_date timestamp,
   end_date timestamp,
-  latitude numeric(9,6),
-  longitude numeric(9,6),
+  location geography(Point, 4326), -- Alterado para PostGIS
   others jsonb
 );
 
@@ -41,8 +40,7 @@ CREATE TABLE users (
   role varchar(24) NOT NULL,
   email varchar(255) UNIQUE,
   image bytea,
-  latitude numeric(9,6),
-  longitude numeric(9,6),
+  location geography(Point, 4326), -- Alterado para PostGIS
   emergency_contact varchar(20)
 );
 
@@ -56,8 +54,7 @@ CREATE TABLE Staff_Details (
 CREATE TABLE User_locations (
   id bigint PRIMARY KEY,
   user_id uuid REFERENCES users(id),
-  latitude numeric(9,6) NOT NULL,
-  longitude numeric(9,6) NOT NULL,
+  location geography(Point, 4326) NOT NULL, -- Alterado para PostGIS
   timestamp timestamp NOT NULL DEFAULT now()
 );
 
@@ -74,9 +71,7 @@ CREATE TABLE Points_interest (
 CREATE TABLE Coordinates (
   id bigint PRIMARY KEY,
   point_id bigint REFERENCES Points_interest(id),
-  latitude numeric(9,6) NOT NULL,
-  longitude numeric(9,6) NOT NULL,
-  position int
+  location geography(Point, 4326) NOT NULL -- Alterado para PostGIS
 );
 
 CREATE TABLE Event_activities (
@@ -97,7 +92,6 @@ CREATE TABLE Event_activities (
 -- 4. SEGURANÇA E ALERTAS
 -- ======================================================
 
--- SOS usa geography para calcular proximidade de ajuda
 CREATE TABLE SOS (
   id bigint PRIMARY KEY,
   user_id uuid NOT NULL REFERENCES users(id),
@@ -117,11 +111,11 @@ CREATE TABLE Alerts (
   title varchar(32),
   description varchar(255),
   category varchar(32),
-  latitude numeric(9,6),
-  longitude numeric(9,6),
+  location geography(Point, 4326), -- Alterado para PostGIS
   time timestamp DEFAULT now(),
   status varchar(32)
 );
+
 
 -- ======================================================
 -- 5. SOCIAL E BILHETEIRA
@@ -186,7 +180,7 @@ CREATE TABLE Sensor (
   last_reading_time timestamp
 );
 CREATE INDEX sensor_location_idx ON Sensor USING GIST (location);
-
+-- ... (Resto das tabelas 5 e 6 mantêm-se iguais) ...
 -- ======================================================
 -- 7. SEED DATA (Valores Iniciais)
 -- ======================================================
@@ -197,17 +191,16 @@ INSERT INTO Organizations (id, name, email, website) VALUES
 (2, 'Tech Events Inc', 'contact@techevents.pt', 'https://techevents.pt');
 
 -- Eventos
-INSERT INTO Event (id, organization_id, name, venue_name, status, category, start_date, end_date, latitude, longitude) VALUES 
-(1, 1, 'Web Summit 2026', 'Altice Arena', 'active', 'Tech', '2026-11-02 09:00:00', '2026-11-05 18:00:00', 38.767, -9.093),
-(2, 2, 'Music Festival', 'Parque das Nações', 'planned', 'Music', '2026-07-20 14:00:00', '2026-07-22 23:00:00', 38.765, -9.092);
+INSERT INTO Event (id, organization_id, name, venue_name, status, category, start_date, end_date, location) VALUES 
+(1, 1, 'Web Summit 2026', 'Altice Arena', 'active', 'Tech', '2026-11-02 09:00:00', '2026-11-05 18:00:00', ST_GeogFromText('SRID=4326;POINT(-9.093 38.767)')),
+(2, 2, 'Music Festival', 'Parque das Nações', 'planned', 'Music', '2026-07-20 14:00:00', '2026-07-22 23:00:00', ST_GeogFromText('SRID=4326;POINT(-9.092 38.765)'));
 
 -- Utilizadores
-INSERT INTO users (id, name, username, password_hash, role, email, latitude, longitude) VALUES 
-(gen_random_uuid(), 'João Silva', 'jsilva', '$2b$12$HqISlK5K7y5J8v9W4z6X6u4Xuwu', 'user', 'joao@mail.com', 38.767, -9.093),
-(gen_random_uuid(), 'Maria Costa', 'mcosta', '$2b$12$HqISlK5K7y5J8v9W4z6X6u4X4Hello', 'staff', 'maria@staff.pt', 38.766, -9.091);
+INSERT INTO users (id, name, username, password_hash, role, email, location) VALUES 
+(gen_random_uuid(), 'João Silva', 'jsilva', '$2b$12$HqISlK5K7y5J8v9W4z6X6u4Xuwu', 'user', 'joao@mail.com', ST_GeogFromText('SRID=4326;POINT(-9.093 38.767)')),
+(gen_random_uuid(), 'Maria Costa', 'mcosta', '$2b$12$HqISlK5K7y5J8v9W4z6X6u4X4Hello', 'staff', 'maria@staff.pt', ST_GeogFromText('SRID=4326;POINT(-9.091 38.766)'));
 
--- Sensores (Exemplo de densidade para Heatmap - PostGIS)
--- Nota: A localização é definida por ST_GeogFromText
+-- Sensores
 INSERT INTO Sensor (id, event_id, location, sensor_type, last_reading_value, last_reading_time) VALUES 
 (1, 1, ST_GeogFromText('SRID=4326;POINT(-9.093 38.767)'), 'crowd_counter', 85.5, now()),
 (2, 1, ST_GeogFromText('SRID=4326;POINT(-9.094 38.768)'), 'crowd_counter', 42.0, now()),
@@ -220,7 +213,12 @@ INSERT INTO Event_activities (id, event_id, name, start_time, end_time, descript
 (1, 1, 'Keynote Principal', '2026-11-02 10:00:00', '2026-11-02 11:00:00', 'Abertura do evento', 1),
 (2, 1, 'Workshop IA', '2026-11-02 14:00:00', '2026-11-02 16:00:00', 'Hands-on com IA', 1);
 
--- Bilhetes (Master + Link)
+-- SOS e Alertas
+INSERT INTO SOS (id, user_id, location, description, tag_selected, time) 
+VALUES (1, (SELECT id FROM users LIMIT 1), ST_GeogFromText('SRID=4326;POINT(-9.093 38.767)'), 'Queda de utente na zona da entrada', 'Medical', now());
+
+INSERT INTO Alerts (id, sos_id, event_id, title, description, category, location, status) 
+VALUES (1, 1, 1, 'Emergência Médica', 'Assistência solicitada', 'Medical', ST_GeogFromText('SRID=4326;POINT(-9.093 38.767)'), 'pending');
 INSERT INTO Event_Tickets_Master (id, event_id, ticket_code, is_already_linked) VALUES 
 (1, 1, 'TICKET-ABC-123', false),
 (2, 1, 'TICKET-XYZ-789', false);
@@ -229,12 +227,7 @@ INSERT INTO Friendship (id, user1_id, user2_id, state)
 VALUES 
 (1, (SELECT id FROM users LIMIT 1), (SELECT id FROM users OFFSET 1 LIMIT 1), 'accepted');
 
--- Simulação de SOS (Testando PostGIS para detetar zonas de perigo)
-INSERT INTO SOS (id, user_id, location, description, tag_selected, time) 
+INSERT INTO User_Favorites (id, user_id, activity_id) 
 VALUES 
-(1, (SELECT id FROM users LIMIT 1), ST_GeogFromText('SRID=4326;POINT(-9.093 38.767)'), 'Queda de utente na zona da entrada', 'Medical', now());
-
--- Simulação de Alerta ligado ao SOS
-INSERT INTO Alerts (id, sos_id, event_id, title, description, category, latitude, longitude, status) 
-VALUES 
-(1, 1, 1, 'Emergência Médica', 'Assistência solicitada no Palco Principal', 'Medical', 38.767, -9.093, 'pending');
+(1, (SELECT id FROM users LIMIT 1), 1),
+(2, (SELECT id FROM users LIMIT 1), 2);

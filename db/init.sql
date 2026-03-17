@@ -180,7 +180,29 @@ CREATE TABLE Sensor (
   last_reading_time timestamp
 );
 CREATE INDEX sensor_location_idx ON Sensor USING GIST (location);
--- ... (Resto das tabelas 5 e 6 mantêm-se iguais) ...
+
+-- ======================================================
+-- Indexes Foreign Keys para joins mais rápidos
+CREATE INDEX idx_event_organization_id ON Event(organization_id);
+CREATE INDEX idx_staff_user_id ON Staff_Details(user_id);
+CREATE INDEX idx_user_locations_user_id ON User_locations(user_id);
+CREATE INDEX idx_points_event_id ON Points_interest(event_id);
+CREATE INDEX idx_event_activities_event_id ON Event_activities(event_id);
+CREATE INDEX idx_sos_user_id ON SOS(user_id);
+CREATE INDEX idx_alerts_sos_id ON Alerts(sos_id);
+
+--Indexes geoespaciais PostGIS
+CREATE INDEX idx_event_location ON Event USING GIST(location);
+CREATE INDEX idx_users_location ON users USING GIST(location);
+CREATE INDEX idx_user_locations_location ON User_locations USING GIST(location);
+CREATE INDEX idx_alerts_location ON Alerts USING GIST(location);
+CREATE INDEX idx_sensor_location ON Sensor USING GIST(location);
+
+--Indexes para Join de amizades
+CREATE INDEX idx_friendship_user1 ON Friendship(user1_id);
+CREATE INDEX idx_friendship_user2 ON Friendship(user2_id);
+-- ======================================================
+
 -- ======================================================
 -- 7. SEED DATA (Valores Iniciais)
 -- ======================================================

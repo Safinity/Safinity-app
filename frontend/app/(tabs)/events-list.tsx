@@ -31,13 +31,12 @@ const SectionHeader = styled.View`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  margin-top: 40px;
+  margin-top: ${({ theme }) => theme.spacing.lg}px;
   margin-bottom: ${({ theme }) => theme.spacing.md}px;
 `;
 
 const SectionTitle = styled.Text`
   color: ${({ theme }) => theme.colors.white};
-  /* Token: h */
   font-family: ${({ theme }) => theme.text.titulo.h.fontFamily};
   font-size: ${({ theme }) => theme.text.titulo.h.fontSize}px;
 `;

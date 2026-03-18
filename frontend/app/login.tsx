@@ -3,18 +3,14 @@ import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
 import { TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
-
 import users from '@/data/users.json';
 import PrimaryButton from '@/components/PrimaryButton';
 
-const Screen = styled.SafeAreaView`
-  flex: 1;
-  background-color: ${({ theme }) => theme.colors.background};
-`;
-
 const Container = styled.View`
-  padding: ${({ theme }) => theme.spacing.xl}px;
   flex: 1;
+  margin-top: ${({ theme }) => theme.spacing.xl}px;
+  background-color: ${({ theme }) => theme.colors.background};
+  padding: ${({ theme }) => theme.spacing.margemLateral}px;
 `;
 
 const BackButton = styled.TouchableOpacity`
@@ -22,59 +18,68 @@ const BackButton = styled.TouchableOpacity`
 `;
 
 const Title = styled.Text`
-  color: white;
-  margin-bottom: 4px;
+  color: ${({ theme }) => theme.colors.white};
+  margin-bottom: ${({ theme }) => theme.spacing.xs}px;
   ${({ theme }) => theme.text.titulo.h1};
 `;
 
 const Subtitle = styled.Text`
   color: ${({ theme }) => theme.colors.inactive};
-  margin-bottom: 32px;
+  margin-bottom: ${({ theme }) => theme.spacing.xl}px;
   ${({ theme }) => theme.text.corpo.corpoTexto};
 `;
 
 const InputGroup = styled.View`
-  margin-bottom: 18px;
+  margin-bottom: ${({ theme }) => theme.spacing.lg}px;
 `;
 
 const Label = styled.Text`
   color: ${({ theme }) => theme.colors.inactive};
-  margin-bottom: 6px;
+  margin-bottom: ${({ theme }) => theme.spacing.xs}px;
   ${({ theme }) => theme.text.corpo.corpoTexto};
 `;
 
 const InputBox = styled.View`
-  background-color: #2a303f;
+  background-color: ${({ theme }) => theme.colors.palette.neutral.neutral20};
   border-radius: ${({ theme }) => theme.borderRadius.medium}px;
-  padding: 14px;
+  padding: ${({ theme }) => theme.spacing.md}px;
   flex-direction: row;
   align-items: center;
 `;
 
 const Input = styled.TextInput`
   flex: 1;
-  color: white;
+  color: ${({ theme }) => theme.colors.white};
   ${({ theme }) => theme.text.corpo.corpoTexto};
+
+  include-font-padding: false;
+  padding-vertical: 0px;
+  line-height: ${({ theme }) => theme.text.corpo.corpoTexto.lineHeight}px;
 `;
+
+/* =======================
+   Auxiliares
+======================= */
 
 const ErrorText = styled.Text`
   color: ${({ theme }) => theme.colors.error};
-  margin-top: 12px;
+  margin-top: ${({ theme }) => theme.spacing.md}px;
   text-align: center;
+  ${({ theme }) => theme.text.corpo.corpoTexto};
 `;
 
 const ForgotRow = styled.View`
   align-items: flex-end;
-  margin-bottom: 32px;
+  margin-bottom: ${({ theme }) => theme.spacing.xl}px;
 `;
 
 const LinkText = styled.Text`
   color: ${({ theme }) => theme.colors.palette.primary.light80};
-  text-decoration: underline;
+  ${({ theme }) => theme.text.corpo.corpoTexto};
 `;
 
 const BottomRow = styled.View`
-  margin-top: 24px;
+  margin-top: ${({ theme }) => theme.spacing.lg}px;
   align-items: center;
 `;
 
@@ -82,6 +87,10 @@ const SmallText = styled.Text`
   color: ${({ theme }) => theme.colors.inactive};
   ${({ theme }) => theme.text.textoPequeno};
 `;
+
+/* =======================
+   Componente
+======================= */
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -106,75 +115,72 @@ export default function Login() {
       return;
     }
 
-    // Login OK (mock)
     router.replace('/(tabs)');
   }
 
   return (
-    <Screen>
-      <Container>
-        {/* Back */}
-        <BackButton onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={26} color="white" />
-        </BackButton>
+    <Container>
+      {/* Back */}
+      <BackButton onPress={() => router.back()}>
+        <Ionicons name="arrow-back" size={26} color="white" />
+      </BackButton>
 
-        <Title>Log in</Title>
-        <Subtitle>Welcome back!</Subtitle>
+      <Title>Log in</Title>
+      <Subtitle>Welcome back!</Subtitle>
 
-        {/* Email */}
-        <InputGroup>
-          <Label>Email</Label>
-          <InputBox>
-            <Input
-              placeholder="Email"
-              placeholderTextColor="#8a90a5"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              value={email}
-              onChangeText={setEmail}
+      {/* Email */}
+      <InputGroup>
+        <Label>Email</Label>
+        <InputBox>
+          <Input
+            placeholder="Email"
+            placeholderTextColor="#8a90a5"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            value={email}
+            onChangeText={setEmail}
+          />
+          <Ionicons name="mail-outline" size={20} color="#cfd3e0" />
+        </InputBox>
+      </InputGroup>
+
+      {/* Password */}
+      <InputGroup>
+        <Label>Password</Label>
+        <InputBox>
+          <Input
+            placeholder="Password"
+            placeholderTextColor="#8a90a5"
+            secureTextEntry={!showPass}
+            value={password}
+            onChangeText={setPassword}
+          />
+          <TouchableOpacity onPress={() => setShowPass(!showPass)}>
+            <Ionicons
+              name={showPass ? 'eye-off-outline' : 'eye-outline'}
+              size={22}
+              color="#cfd3e0"
             />
-            <Ionicons name="mail-outline" size={20} color="#cfd3e0" />
-          </InputBox>
-        </InputGroup>
+          </TouchableOpacity>
+        </InputBox>
+      </InputGroup>
 
-        {/* Password */}
-        <InputGroup>
-          <Label>Password</Label>
-          <InputBox>
-            <Input
-              placeholder="Password"
-              placeholderTextColor="#8a90a5"
-              secureTextEntry={!showPass}
-              value={password}
-              onChangeText={setPassword}
-            />
-            <TouchableOpacity onPress={() => setShowPass(!showPass)}>
-              <Ionicons
-                name={showPass ? 'eye-off-outline' : 'eye-outline'}
-                size={22}
-                color="#cfd3e0"
-              />
-            </TouchableOpacity>
-          </InputBox>
-        </InputGroup>
+      <ForgotRow>
+        <SmallText>
+          Forgot your password? <LinkText>Recover password</LinkText>
+        </SmallText>
+      </ForgotRow>
 
-        <ForgotRow>
-          <SmallText>
-            Forgot your password? <LinkText>Recover password</LinkText>
-          </SmallText>
-        </ForgotRow>
+      {error ? <ErrorText>{error}</ErrorText> : null}
 
-        {error ? <ErrorText>{error}</ErrorText> : null}
+      <PrimaryButton title="Log in" onPress={handleLogin} />
 
-        <PrimaryButton title="Log in" onPress={handleLogin} />
-
-        <BottomRow>
-          <SmallText>
-            Don’t have an account?{' '}
-            <LinkText onPress={() => router.push('/register')}>Create Account</LinkText>
-          </SmallText>
-        </BottomRow>
-      </Container>
-    </Screen>
+      <BottomRow>
+        <SmallText>
+          Don’t have an account?{' '}
+          <LinkText onPress={() => router.push('/register')}>Create Account</LinkText>
+        </SmallText>
+      </BottomRow>
+    </Container>
   );
 }

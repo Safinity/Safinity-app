@@ -1,142 +1,136 @@
 import React, { useMemo } from 'react';
 import { Dimensions, FlatList, Platform, ScrollView } from 'react-native';
-import styled from 'styled-components/native';
+import styled, { useTheme } from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 
-// --- Imports de Dados e Assets ---
+// --- Dados e Assets ---
 import users from '@/data/users.json';
 import allEvents from '@/data/events.json';
 import { userImages } from '../../../assets/images/Users/userImages';
 import { eventImages } from '../../../assets/images/Events';
-import { Colors, Spacing } from '../../../constants/theme';
 
 const { width } = Dimensions.get('window');
 
 // --- Styled Components ---
+
 const Container = styled.View`
   flex: 1;
-  background-color: ${Colors.background};
+  background-color: ${({ theme }) => theme.colors.background};
 `;
 
 const HeaderNav = styled.View`
   flex-direction: row;
   align-items: center;
-  padding: ${Platform.OS === 'ios' ? '60px' : '40px'} ${Spacing.margemLateral}px 20px;
+  padding: ${({ theme }) =>
+      Platform.OS === 'ios'
+        ? theme.spacing.margemTop + theme.spacing.lg
+        : theme.spacing.margemTop}px
+    ${({ theme }) => theme.spacing.margemLateral}px ${({ theme }) => theme.spacing.md}px;
 `;
 
 const BackButton = styled.Pressable`
-  padding: 8px;
+  padding: ${({ theme }) => theme.spacing.sm}px;
 `;
 
 const UsernameText = styled.Text`
-  color: ${Colors.white};
-  font-size: 24px;
-  font-weight: bold;
-  margin-left: 8px;
+  color: ${({ theme }) => theme.colors.white};
+  ${({ theme }) => theme.text.titulo.h};
+  margin-left: ${({ theme }) => theme.spacing.sm}px;
 `;
 
 const ProfileHeader = styled.View`
   flex-direction: row;
   align-items: center;
-  padding: 0 ${Spacing.margemLateral}px;
-  margin-bottom: 30px;
+  padding: 0 ${({ theme }) => theme.spacing.margemLateral}px;
+  margin-bottom: ${({ theme }) => theme.spacing.xl}px;
 `;
 
 const AvatarImage = styled.Image`
-  width: 110px;
-  height: 110px;
-  border-radius: 55px;
+  width: ${({ theme }) => theme.height.md}px;
+  height: ${({ theme }) => theme.height.md}px;
+  border-radius: ${({ theme }) => theme.borderRadius.round}px;
   border-width: 2px;
-  border-color: ${Colors.primary};
+  border-color: ${({ theme }) => theme.colors.primary};
 `;
 
 const InfoSection = styled.View`
-  margin-left: 20px;
+  margin-left: ${({ theme }) => theme.spacing.md}px;
   flex: 1;
 `;
 
 const DisplayName = styled.Text`
-  color: ${Colors.white};
-  font-size: 20px;
-  font-weight: 600;
+  color: ${({ theme }) => theme.colors.white};
+  ${({ theme }) => theme.text.titulo.h2};
 `;
 
 const StatsText = styled.Text`
-  color: #a1a1a1;
-  font-size: 14px;
-  margin-top: 4px;
+  color: ${({ theme }) => theme.colors.inactive};
+  ${({ theme }) => theme.text.textoPequeno};
+  margin-top: ${({ theme }) => theme.spacing.xs}px;
 `;
 
 const ActionButton = styled.Pressable`
-  background-color: #7b49f2;
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
+  width: ${({ theme }) => theme.height.tam_42}px;
+  height: ${({ theme }) => theme.height.tam_42}px;
+  border-radius: ${({ theme }) => theme.borderRadius.medium}px;
+  background-color: ${({ theme }) => theme.colors.primary};
   justify-content: center;
   align-items: center;
 `;
 
 const SectionTitle = styled.Text`
-  color: #a78bfa;
-  font-size: 18px;
-  font-weight: 600;
-  padding: 0 ${Spacing.margemLateral}px;
-  margin-bottom: 20px;
-  margin-top: 10px;
+  color: ${({ theme }) => theme.colors.palette.primary.light50};
+  ${({ theme }) => theme.text.titulo.h3};
+  padding: 0 ${({ theme }) => theme.spacing.margemLateral}px;
+  margin-bottom: ${({ theme }) => theme.spacing.lg}px;
 `;
 
 const EventCard = styled.View`
   width: ${width * 0.75}px;
-  height: 280px;
-  margin-left: ${Spacing.margemLateral}px;
-  border-radius: 30px;
+  height: ${({ theme }) => theme.height.card.default}px;
+  margin-left: ${({ theme }) => theme.spacing.margemLateral}px;
+  border-radius: ${({ theme }) => theme.borderRadius.xlarge}px;
   overflow: hidden;
-  margin-bottom: 40px;
+  margin-bottom: ${({ theme }) => theme.spacing.xl}px;
 `;
 
 const EventImageOverlay = styled.ImageBackground`
   flex: 1;
   justify-content: flex-end;
-  padding: 20px;
+  padding: ${({ theme }) => theme.spacing.lg}px;
 `;
 
 const GradientOverlay = styled.View`
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   background-color: rgba(0, 0, 0, 0.35);
 `;
 
 const EventDate = styled.Text`
-  color: #ddd;
-  font-size: 12px;
-  margin-bottom: 4px;
+  color: ${({ theme }) => theme.colors.neutralGray};
+  ${({ theme }) => theme.text.label};
+  margin-bottom: ${({ theme }) => theme.spacing.xs}px;
 `;
 
 const EventTitle = styled.Text`
-  color: ${Colors.white};
-  font-size: 22px;
-  font-weight: bold;
+  color: ${({ theme }) => theme.colors.white};
+  ${({ theme }) => theme.text.titulo.h2};
 `;
 
-// --- Componente Principal ---
+// --- Screen ---
+
 export default function FriendProfileScreen() {
+  const theme = useTheme();
   const { friendId } = useLocalSearchParams();
 
-  // 1. Encontrar o amigo no JSON (Fallback para a Carlota u6 se não houver ID)
   const friendData = useMemo(
     () => users.find(u => u.id === friendId) || users.find(u => u.id === 'u6'),
     [friendId],
   );
 
-  // 2. Filtrar eventos do JSON de eventos com base no array 'pastEvents' do utilizador
   const userPastEvents = useMemo(() => {
-    if (!friendData || !friendData.pastEvents) return [];
-
-    // Retorna apenas os eventos que estão na lista do amigo
+    if (!friendData?.pastEvents) return [];
     return allEvents.filter(event => friendData.pastEvents.includes(event.id));
   }, [friendData]);
 
@@ -145,15 +139,15 @@ export default function FriendProfileScreen() {
   return (
     <Container>
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Navegação Superior */}
+        {/* Header */}
         <HeaderNav>
           <BackButton onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={28} color={Colors.white} />
+            <Ionicons name="arrow-back" size={theme.width.iconHeader} color={theme.colors.white} />
           </BackButton>
           <UsernameText>@{friendData.username}</UsernameText>
         </HeaderNav>
 
-        {/* Informação do Perfil */}
+        {/* Perfil */}
         <ProfileHeader>
           <AvatarImage source={userImages[friendData.image]} />
 
@@ -162,12 +156,12 @@ export default function FriendProfileScreen() {
             <StatsText>Been in {friendData.pastEvents?.length || 0} events</StatsText>
           </InfoSection>
 
-          <ActionButton onPress={() => console.log('Adicionar amigo')}>
-            <Ionicons name="person-add" size={24} color="white" />
+          <ActionButton>
+            <Ionicons name="person-add" size={theme.width.iconHeader} color={theme.colors.white} />
           </ActionButton>
         </ProfileHeader>
 
-        {/* Lista de Eventos Dinâmica */}
+        {/* Eventos */}
         <SectionTitle>{userPastEvents.length} Events in common</SectionTitle>
 
         <FlatList
@@ -175,8 +169,11 @@ export default function FriendProfileScreen() {
           horizontal
           showsHorizontalScrollIndicator={false}
           keyExtractor={item => item.id}
-          snapToInterval={width * 0.75 + Spacing.margemLateral}
+          snapToInterval={width * 0.75 + theme.spacing.margemLateral}
           decelerationRate="fast"
+          contentContainerStyle={{
+            paddingRight: theme.spacing.margemLateral,
+          }}
           renderItem={({ item }) => (
             <EventCard>
               <EventImageOverlay source={eventImages[item.image]}>
@@ -186,7 +183,6 @@ export default function FriendProfileScreen() {
               </EventImageOverlay>
             </EventCard>
           )}
-          contentContainerStyle={{ paddingRight: Spacing.margemLateral }}
         />
       </ScrollView>
     </Container>

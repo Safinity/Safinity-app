@@ -9,8 +9,7 @@ import TertiaryButton from '../components/TertiaryButton';
 
 const Background = styled(ImageBackground).attrs({
   imageStyle: {
-    objectFit: 'cover',
-    objectPosition: 'center',
+    resizeMode: 'cover',
   },
 })`
   flex: 1;
@@ -20,8 +19,7 @@ const Background = styled(ImageBackground).attrs({
 `;
 
 const Content = styled.View`
-  padding: 40px;
-  /* Garantir que não existem parênteses extra aqui */
+  padding: ${({ theme }) => theme.spacing.margemLateral}px;
   gap: ${({ theme }) => theme.spacing.lg}px;
   margin-bottom: ${({ theme }) => theme.spacing.md}px;
 `;

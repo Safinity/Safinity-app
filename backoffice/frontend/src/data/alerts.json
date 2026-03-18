@@ -1,0 +1,56 @@
+[
+  {
+    "id": 1,
+    "type": "Critical",
+    "dotColor": "#D34A4A",
+    "title": "Critical density detected",
+    "message": "Crowd concentration has exceeded the safe limit (92%).",
+    "time": "18:30",
+    "submittedby": "System"
+  },
+  {
+    "id": 2,
+    "type": "Attention",
+    "dotColor": "#D39E4A",
+    "title": "User feedback",
+    "message": "Long queue at the north entrance, public growing impatient.",
+    "time": "16:18",
+    "submittedby": "System"
+  },
+  {
+    "id": 3,
+    "type": "Critical",
+    "dotColor": "#D34A4A",
+    "title": "Thermal alert",
+    "message": "Temperature above 36°C, risk of overheating in tents.",
+    "time": "15:03",
+    "submittedby": "System"
+  },
+  {
+    "id": 4,
+    "type": "Informative",
+    "dotColor": "#51D34A",
+    "title": "Main Stage",
+    "message": "Version 1.2.3 of the sensor module has been installed successfully.",
+    "time": "13:12",
+    "submittedby": "System"
+  },
+  {
+    "id": 5,
+    "type": "Attention",
+    "dotColor": "#D39E4A",
+    "title": "Weather condition",
+    "message": "Probability of rain in the next 2 hours.",
+    "time": "15:10",
+    "submittedby": "System"
+  },
+  {
+    "id": 6,
+    "type": "Informative",
+    "dotColor": "#51D34A",
+    "title": "Automatic message sent",
+    "message": "Notification 'Stay hydrated and rest' sent to VIP zone users.",
+    "time": "14:55",
+    "submittedby": "System"
+  }
+]

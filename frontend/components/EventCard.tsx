@@ -6,8 +6,9 @@ import { eventImages } from '../assets/images/Events';
 import { useRouter } from 'expo-router';
 
 const CardContainer = styled.TouchableOpacity<{ isCompact?: boolean }>`
-  width: 280px;
-  height: ${({ isCompact }) => (isCompact ? '240px' : '380px')};
+  width: ${({ theme }) => theme.height.lg}px;
+  height: ${({ isCompact, theme }) =>
+    isCompact ? theme.height.card.compact : theme.height.card.default}px;
   margin-right: ${({ theme }) => theme.spacing.md}px;
   border-radius: ${({ theme }) => theme.borderRadius.large}px;
   overflow: hidden;
@@ -26,21 +27,23 @@ const GradientLayer = styled(LinearGradient).attrs({
   locations: [0.4, 1.0],
 })<{ isCompact?: boolean }>`
   flex: 1;
-  padding: ${({ isCompact }) => (isCompact ? 15 : 20)}px;
+  padding: ${({ isCompact, theme }) =>
+    isCompact ? `${theme.spacing.sm}px` : `${theme.spacing.md}px`};
   justify-content: space-between;
 `;
 
 const TimeBadge = styled.View<{ isCompact?: boolean }>`
-  /* Usamos a cor primária com 50% de opacidade conforme o teu design */
   background-color: ${({ theme }) => theme.colors.primary}80;
   align-self: flex-end;
-  padding: ${({ isCompact }) => (isCompact ? '4px 10px' : '8px 14px')};
+  padding: ${({ isCompact, theme }) =>
+    isCompact
+      ? `${theme.spacing.xs}px ${theme.spacing.md}px`
+      : `${theme.spacing.sm}px ${theme.spacing.lg}px`};
   border-radius: ${({ theme }) => theme.borderRadius.round}px;
 `;
 
 const TimeText = styled.Text`
   color: ${({ theme }) => theme.colors.white};
-  /* Token: label */
   font-family: ${({ theme }) => theme.text.label.fontFamily};
   font-size: ${({ theme }) => theme.text.label.fontSize}px;
   line-height: ${({ theme }) => theme.text.label.lineHeight}px;
@@ -48,22 +51,20 @@ const TimeText = styled.Text`
 
 const CardFooter = styled.View`
   margin-top: auto;
-  margin-bottom: 5px;
+  margin-bottom: ${({ theme }) => theme.spacing.xs}px;
 `;
 
 const DateText = styled.Text`
   color: ${({ theme }) => theme.colors.white};
-  /* Token: textoPequeno */
   font-family: ${({ theme }) => theme.text.textoPequeno.fontFamily};
   font-size: ${({ theme }) => theme.text.textoPequeno.fontSize}px;
   line-height: ${({ theme }) => theme.text.textoPequeno.lineHeight}px;
-  margin-bottom: 4px;
+  margin-bottom: ${({ theme }) => theme.spacing.xs}px;
   opacity: 0.9;
 `;
 
 const TitleText = styled.Text`
   color: ${({ theme }) => theme.colors.white};
-  /* Token: h1 */
   font-family: ${({ theme }) => theme.text.titulo.h1.fontFamily};
   font-size: ${({ theme }) => theme.text.titulo.h1.fontSize}px;
   line-height: ${({ theme }) => theme.text.titulo.h1.lineHeight}px;

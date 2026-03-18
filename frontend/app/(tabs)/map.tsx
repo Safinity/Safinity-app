@@ -1,36 +1,42 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { ScrollView, Dimensions, Platform, Pressable } from 'react-native';
+// MapScreen.tsx
+import React, { useState, useEffect, useCallback } from 'react';
+import { Dimensions } from 'react-native';
 import styled from 'styled-components/native';
-import { Ionicons } from '@expo/vector-icons';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import Svg, { Polyline } from 'react-native-svg';
+import { Ionicons } from '@expo/vector-icons';
+import { useLocalSearchParams } from 'expo-router';
 
-// --- Imports for Association ---
 import users from '@/data/users.json';
 import { userImages } from '../../assets/images/Users/userImages';
-
 import Header from '../../components/ui/header';
 import SearchInput from '../../components/ui/SearchInput';
 import FilterTags from '../../components/ui/FilterTags';
 import { StaticMapPreview } from '../../components/maps/StaticMapPreview';
 import { MapPin } from '../../components/maps/MapPin';
-import { UserMarker } from '../../components/maps/UserMarker';
+import { MapStage } from '../../components/maps/MapStage';
 import { MapCallout } from '../../components/maps/MapCallout';
+import { UserMarker } from '../../components/maps/UserMarker';
 import { Colors, Spacing } from '../../constants/theme';
 import mapData from '../../data/mapdata.json';
 import { latLngToPixelFromBounds } from '../../utils/coordinates';
-import { MapStage } from '../../components/maps/MapStage';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router } from 'expo-router';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const IMAGE_WIDTH = screenWidth * 2.5;
 const IMAGE_HEIGHT = screenHeight * 1.6;
 const CURRENT_LOCATION = mapData.currentLocation;
 
+const MIN_SCALE = 0.7;
+const MAX_SCALE = 3;
+
 const Container = styled.View`
   flex: 1;
   background-color: ${Colors.background};
 `;
 
+<<<<<<< HEAD
 const MapScrollView = styled.ScrollView.attrs({
   horizontal: true,
   showsHorizontalScrollIndicator: false,
@@ -40,9 +46,11 @@ const MapScrollView = styled.ScrollView.attrs({
   flex: 1;
 `;
 
+=======
+>>>>>>> e9a52d37481d2341b00a3ceccfc8e7c9ad5e0e39
 const OverlayContent = styled.View`
   position: absolute;
-  top: ${Platform.OS === 'ios' ? 90 : 70}px;
+  top: 70px;
   left: 0;
   right: 0;
   z-index: 100;
@@ -89,10 +97,6 @@ const SosButton = styled.Pressable`
   align-items: center;
   z-index: 90;
   elevation: 5;
-  shadow-opacity: 0.3;
-  shadow-offset: 0px 0px;
-  shadow-color: ${Colors.white};
-  shadow-radius: 10px;
 `;
 
 const SOSButtonText = styled.Text`
@@ -119,8 +123,6 @@ const LongCancelButton = styled.Pressable`
   gap: 6px;
   padding: 0 20px;
   elevation: 10;
-  shadow-opacity: 0.3;
-  shadow-offset: 0px 4px;
 `;
 
 const CancelText = styled.Text`
@@ -159,8 +161,9 @@ const matchesSearch = (item: any, query: string) => {
 };
 
 export default function MapScreen() {
-  const scrollRef = useRef<ScrollView>(null);
-  const zoomScaleRef = useRef(1);
+  const translateX = useSharedValue(0);
+  const translateY = useSharedValue(0);
+  const scale = useSharedValue(1);
 
   const [searchValue, setSearchValue] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -171,44 +174,70 @@ export default function MapScreen() {
   const { universityCoords, pins, stages, bounds } = mapData;
   const tags = ['Exits', 'Friends', 'Stages', 'Food', 'Entrance'];
 
-  useEffect(() => {
-    const centerX = (IMAGE_WIDTH - screenWidth) / 2;
-    const centerY = (IMAGE_HEIGHT - screenHeight) / 2;
-    setTimeout(() => {
-      scrollRef.current?.scrollTo({ x: centerX, y: centerY, animated: false });
-    }, 50);
-  }, []);
+  const { focusId } = useLocalSearchParams();
 
+  // --- GESTURES ---
+  const panGesture = Gesture.Pan().onChange(e => {
+    translateX.value += e.changeX;
+    translateY.value += e.changeY;
+  });
+
+  const pinchGesture = Gesture.Pinch().onChange(e => {
+    const newScale = scale.value * e.scaleChange;
+    scale.value = Math.min(MAX_SCALE, Math.max(MIN_SCALE, newScale));
+  });
+
+  const composedGesture = Gesture.Simultaneous(panGesture, pinchGesture);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: translateX.value },
+      { translateY: translateY.value },
+      { scale: scale.value },
+    ],
+  }));
+
+  // --- FUNÇÕES ---
   const handlePinPress = useCallback(
-    (pin: any) => {
+    (pin: any, showRoute = false) => {
       const pos = latLngToPixelFromBounds(pin.lat, pin.lng, bounds, IMAGE_WIDTH, IMAGE_HEIGHT);
-      const scale = zoomScaleRef.current;
 
+<<<<<<< HEAD
       setSelectedPin({ ...pin, name: getDisplayName(pin), px: pos.x, py: pos.y });
 
       scrollRef.current?.scrollTo({
         x: pos.x * scale - screenWidth / 2,
         y: pos.y * scale - screenHeight / 2,
         animated: true,
+=======
+      setSelectedPin({
+        ...pin,
+        name: getDisplayName(pin),
+        px: pos.x,
+        py: pos.y,
+>>>>>>> e9a52d37481d2341b00a3ceccfc8e7c9ad5e0e39
       });
+
+      // Centraliza o mapa no pin
+      translateX.value = withTiming(screenWidth / 2 - pos.x * scale.value);
+      translateY.value = withTiming(screenHeight / 2 - pos.y * scale.value);
+
+      if (showRoute) {
+        const start = latLngToPixelFromBounds(
+          CURRENT_LOCATION.lat,
+          CURRENT_LOCATION.lng,
+          bounds,
+          IMAGE_WIDTH,
+          IMAGE_HEIGHT,
+        );
+        const end = { x: pos.x, y: pos.y };
+        setActiveRoute([start, end]);
+        setDestinationName(getDisplayName(pin));
+        setSelectedPin(null);
+      }
     },
     [bounds],
   );
-
-  const handleShowRoute = () => {
-    if (!selectedPin) return;
-    setDestinationName(selectedPin.name || 'Destino');
-    const start = latLngToPixelFromBounds(
-      CURRENT_LOCATION.lat,
-      CURRENT_LOCATION.lng,
-      bounds,
-      IMAGE_WIDTH,
-      IMAGE_HEIGHT,
-    );
-    const end = { x: selectedPin.px, y: selectedPin.py };
-    setActiveRoute([start, end]);
-    setSelectedPin(null);
-  };
 
   const handleCancelRoute = () => {
     setActiveRoute(null);
@@ -229,24 +258,31 @@ export default function MapScreen() {
       ? stages.filter(stage => matchesSearch(stage, searchValue))
       : [];
 
-  const { focusId } = useLocalSearchParams();
-
+  // --- FOCO AUTOMÁTICO NO AMIGO ---
   useEffect(() => {
+<<<<<<< HEAD
     if (focusId && pins) {
+=======
+    if (focusId) {
+>>>>>>> e9a52d37481d2341b00a3ceccfc8e7c9ad5e0e39
       const targetPin = pins.find(p => p.friendId === focusId);
-
       if (targetPin) {
+<<<<<<< HEAD
         const timer = setTimeout(() => {
           handlePinPress(targetPin);
         }, 300);
 
         return () => clearTimeout(timer);
+=======
+        setTimeout(() => handlePinPress(targetPin, true), 300);
+>>>>>>> e9a52d37481d2341b00a3ceccfc8e7c9ad5e0e39
       }
     }
   }, [focusId, pins, handlePinPress]);
 
   return (
     <Container>
+<<<<<<< HEAD
       {Platform.OS === 'web' ? (
         <div
           style={{
@@ -259,6 +295,10 @@ export default function MapScreen() {
             minHeight: IMAGE_HEIGHT,
           }}
         >
+=======
+      <GestureDetector gesture={composedGesture}>
+        <Animated.View style={[{ width: IMAGE_WIDTH, height: IMAGE_HEIGHT }, animatedStyle]}>
+>>>>>>> e9a52d37481d2341b00a3ceccfc8e7c9ad5e0e39
           <StaticMapPreview
             center={universityCoords}
             width={IMAGE_WIDTH}
@@ -269,7 +309,11 @@ export default function MapScreen() {
           <Svg
             width={IMAGE_WIDTH}
             height={IMAGE_HEIGHT}
+<<<<<<< HEAD
             style={{ position: 'absolute', top: 0, left: 0 }}
+=======
+            style={{ position: 'absolute' }}
+>>>>>>> e9a52d37481d2341b00a3ceccfc8e7c9ad5e0e39
             pointerEvents="none"
           >
             {activeRoute && (
@@ -278,7 +322,11 @@ export default function MapScreen() {
                 stroke={Colors.primary}
                 strokeWidth={4}
                 fill="none"
+<<<<<<< HEAD
                 strokeDasharray="10, 5"
+=======
+                strokeDasharray="10,5"
+>>>>>>> e9a52d37481d2341b00a3ceccfc8e7c9ad5e0e39
               />
             )}
           </Svg>
@@ -315,7 +363,11 @@ export default function MapScreen() {
               x={selectedPin.px}
               y={selectedPin.py}
               title={selectedPin.name}
+<<<<<<< HEAD
               onPressRoute={handleShowRoute}
+=======
+              onPressRoute={() => handlePinPress(selectedPin, true)}
+>>>>>>> e9a52d37481d2341b00a3ceccfc8e7c9ad5e0e39
             />
           )}
 
@@ -325,6 +377,7 @@ export default function MapScreen() {
             width={IMAGE_WIDTH}
             height={IMAGE_HEIGHT}
           />
+<<<<<<< HEAD
         </div>
       ) : (
         <MapScrollView
@@ -404,6 +457,10 @@ export default function MapScreen() {
           />
         </MapScrollView>
       )}
+=======
+        </Animated.View>
+      </GestureDetector>
+>>>>>>> e9a52d37481d2341b00a3ceccfc8e7c9ad5e0e39
 
       <Header />
 
@@ -412,6 +469,7 @@ export default function MapScreen() {
           <Ionicons name="location" size={28} color={Colors.primary} />
           <PageTitle>University of Aveiro</PageTitle>
         </PageHeader>
+
         <PaddingSearchInput>
           <SearchInput
             variant="mapa"
@@ -420,6 +478,7 @@ export default function MapScreen() {
             onChangeText={setSearchValue}
           />
         </PaddingSearchInput>
+
         <FilterTags
           tags={tags}
           selectedTags={selectedTags}

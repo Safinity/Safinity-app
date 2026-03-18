@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, StatusBar } from 'react-native';
-import styled from 'styled-components/native';
+import styled, { useTheme } from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -10,7 +10,7 @@ import SearchInput from '../../components/ui/SearchInput';
 import FilterTags from '../../components/ui/FilterTags';
 import { CalendarCard } from '../../components/CalendarCard';
 import calendarData from '../../data/calendar.json';
-import { useTheme } from 'styled-components/native';
+
 
 const Container = styled.View`
   flex: 1;

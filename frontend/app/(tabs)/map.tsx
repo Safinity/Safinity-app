@@ -36,18 +36,6 @@ const Container = styled.View`
   background-color: ${Colors.background};
 `;
 
-<<<<<<< HEAD
-const MapScrollView = styled.ScrollView.attrs({
-  horizontal: true,
-  showsHorizontalScrollIndicator: false,
-  showsVerticalScrollIndicator: false,
-  contentContainerStyle: { width: IMAGE_WIDTH, height: IMAGE_HEIGHT },
-})`
-  flex: 1;
-`;
-
-=======
->>>>>>> e9a52d37481d2341b00a3ceccfc8e7c9ad5e0e39
 const OverlayContent = styled.View`
   position: absolute;
   top: 70px;
@@ -202,20 +190,11 @@ export default function MapScreen() {
     (pin: any, showRoute = false) => {
       const pos = latLngToPixelFromBounds(pin.lat, pin.lng, bounds, IMAGE_WIDTH, IMAGE_HEIGHT);
 
-<<<<<<< HEAD
-      setSelectedPin({ ...pin, name: getDisplayName(pin), px: pos.x, py: pos.y });
-
-      scrollRef.current?.scrollTo({
-        x: pos.x * scale - screenWidth / 2,
-        y: pos.y * scale - screenHeight / 2,
-        animated: true,
-=======
       setSelectedPin({
         ...pin,
         name: getDisplayName(pin),
         px: pos.x,
         py: pos.y,
->>>>>>> e9a52d37481d2341b00a3ceccfc8e7c9ad5e0e39
       });
 
       // Centraliza o mapa no pin
@@ -260,45 +239,18 @@ export default function MapScreen() {
 
   // --- FOCO AUTOMÁTICO NO AMIGO ---
   useEffect(() => {
-<<<<<<< HEAD
-    if (focusId && pins) {
-=======
     if (focusId) {
->>>>>>> e9a52d37481d2341b00a3ceccfc8e7c9ad5e0e39
       const targetPin = pins.find(p => p.friendId === focusId);
       if (targetPin) {
-<<<<<<< HEAD
-        const timer = setTimeout(() => {
-          handlePinPress(targetPin);
-        }, 300);
-
-        return () => clearTimeout(timer);
-=======
         setTimeout(() => handlePinPress(targetPin, true), 300);
->>>>>>> e9a52d37481d2341b00a3ceccfc8e7c9ad5e0e39
       }
     }
   }, [focusId, pins, handlePinPress]);
 
   return (
     <Container>
-<<<<<<< HEAD
-      {Platform.OS === 'web' ? (
-        <div
-          style={{
-            width: '100vw',
-            height: '100vh',
-            overflow: 'auto', // BOTH horizontal and vertical
-            position: 'relative',
-            cursor: 'grab',
-            minWidth: IMAGE_WIDTH,
-            minHeight: IMAGE_HEIGHT,
-          }}
-        >
-=======
       <GestureDetector gesture={composedGesture}>
         <Animated.View style={[{ width: IMAGE_WIDTH, height: IMAGE_HEIGHT }, animatedStyle]}>
->>>>>>> e9a52d37481d2341b00a3ceccfc8e7c9ad5e0e39
           <StaticMapPreview
             center={universityCoords}
             width={IMAGE_WIDTH}
@@ -309,11 +261,7 @@ export default function MapScreen() {
           <Svg
             width={IMAGE_WIDTH}
             height={IMAGE_HEIGHT}
-<<<<<<< HEAD
-            style={{ position: 'absolute', top: 0, left: 0 }}
-=======
             style={{ position: 'absolute' }}
->>>>>>> e9a52d37481d2341b00a3ceccfc8e7c9ad5e0e39
             pointerEvents="none"
           >
             {activeRoute && (
@@ -322,11 +270,7 @@ export default function MapScreen() {
                 stroke={Colors.primary}
                 strokeWidth={4}
                 fill="none"
-<<<<<<< HEAD
-                strokeDasharray="10, 5"
-=======
                 strokeDasharray="10,5"
->>>>>>> e9a52d37481d2341b00a3ceccfc8e7c9ad5e0e39
               />
             )}
           </Svg>
@@ -363,11 +307,7 @@ export default function MapScreen() {
               x={selectedPin.px}
               y={selectedPin.py}
               title={selectedPin.name}
-<<<<<<< HEAD
-              onPressRoute={handleShowRoute}
-=======
               onPressRoute={() => handlePinPress(selectedPin, true)}
->>>>>>> e9a52d37481d2341b00a3ceccfc8e7c9ad5e0e39
             />
           )}
 
@@ -377,90 +317,8 @@ export default function MapScreen() {
             width={IMAGE_WIDTH}
             height={IMAGE_HEIGHT}
           />
-<<<<<<< HEAD
-        </div>
-      ) : (
-        <MapScrollView
-          ref={scrollRef}
-          scrollEventThrottle={16}
-          onScroll={e => {
-            zoomScaleRef.current = e.nativeEvent.zoomScale ?? 1;
-          }}
-        >
-          <Pressable onPress={() => setSelectedPin(null)}>
-            <StaticMapPreview
-              center={universityCoords}
-              width={IMAGE_WIDTH}
-              height={IMAGE_HEIGHT}
-              theme="dark"
-            />
-          </Pressable>
-
-          <Svg
-            width={IMAGE_WIDTH}
-            height={IMAGE_HEIGHT}
-            style={{ position: 'absolute' }}
-            pointerEvents="none"
-          >
-            {activeRoute && (
-              <Polyline
-                points={activeRoute.map(p => `${p.x},${p.y}`).join(' ')}
-                stroke={Colors.primary}
-                strokeWidth={4}
-                fill="none"
-                strokeDasharray="10, 5"
-              />
-            )}
-          </Svg>
-
-          {visiblePins.map(pin => {
-            const friendData =
-              pin.type === 'friend' ? users.find(u => u.id === pin.friendId) : null;
-            return (
-              <MapPin
-                key={pin.id}
-                pin={pin}
-                avatar={friendData ? userImages[friendData.image] : null}
-                bounds={bounds}
-                width={IMAGE_WIDTH}
-                height={IMAGE_HEIGHT}
-                onPress={() => handlePinPress(pin)}
-              />
-            );
-          })}
-
-          {visibleStages.map(stage => (
-            <MapStage
-              key={stage.id}
-              stage={stage}
-              bounds={bounds}
-              width={IMAGE_WIDTH}
-              height={IMAGE_HEIGHT}
-              onPress={() => handlePinPress(stage)}
-            />
-          ))}
-
-          {selectedPin && (
-            <MapCallout
-              x={selectedPin.px}
-              y={selectedPin.py}
-              title={selectedPin.name}
-              onPressRoute={handleShowRoute}
-            />
-          )}
-
-          <UserMarker
-            location={CURRENT_LOCATION}
-            bounds={bounds}
-            width={IMAGE_WIDTH}
-            height={IMAGE_HEIGHT}
-          />
-        </MapScrollView>
-      )}
-=======
         </Animated.View>
       </GestureDetector>
->>>>>>> e9a52d37481d2341b00a3ceccfc8e7c9ad5e0e39
 
       <Header />
 

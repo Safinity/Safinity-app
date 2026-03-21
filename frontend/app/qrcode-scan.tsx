@@ -3,7 +3,8 @@ import { StyleSheet, View, Animated, TouchableOpacity } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, Stack } from 'expo-router';
+import Head from 'expo-router/head';
 import Header from '../components/ui/header';
 
 const Container = styled.View`
@@ -101,6 +102,11 @@ export default function QRCodeScreen() {
 
   return (
     <Container>
+      <Head>
+        <title>QR Code | Safinity</title>
+      </Head>
+      <Stack.Screen options={{ title: 'QR Code | Safinity', headerShown: false }} />
+
       <Header variant="back" title="Profile’s QR Code" />
 
       <ToggleContainer>

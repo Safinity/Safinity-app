@@ -17,6 +17,10 @@ const BackButton = styled.TouchableOpacity`
   margin-bottom: ${({ theme }) => theme.spacing.md}px;
 `;
 
+const LinkArea = styled.TouchableOpacity`
+  margin-left: ${({ theme }) => theme.spacing.xs}px;
+`;
+
 const Title = styled.Text`
   color: ${({ theme }) => theme.colors.white};
   margin-bottom: ${({ theme }) => theme.spacing.xs}px;
@@ -68,20 +72,18 @@ const ErrorText = styled.Text`
   ${({ theme }) => theme.text.corpo.corpoTexto};
 `;
 
-const ForgotRow = styled.View`
-  align-items: flex-end;
+const RowWithLink = styled.View`
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
   margin-bottom: ${({ theme }) => theme.spacing.xl}px;
 `;
 
 const LinkText = styled.Text`
   color: ${({ theme }) => theme.colors.palette.primary.light80};
-  ${({ theme }) => theme.text.corpo.corpoTexto};
+  ${({ theme }) => theme.text.textoPequeno};
 `;
 
-const BottomRow = styled.View`
-  margin-top: ${({ theme }) => theme.spacing.lg}px;
-  align-items: center;
-`;
 
 const SmallText = styled.Text`
   color: ${({ theme }) => theme.colors.inactive};
@@ -121,18 +123,18 @@ export default function Login() {
   return (
     <Container>
       {/* Back */}
-      <BackButton onPress={() => router.back()}>
+      <BackButton onPress={() => router.back()} accessibilityLabel="Return to the previous page" accessibilityRole="button">
         <Ionicons name="arrow-back" size={26} color="white" />
       </BackButton>
 
-      <Title>Log in</Title>
+      <Title accessibilityRole="header">Log in</Title>
       <Subtitle>Welcome back!</Subtitle>
 
-      {/* Email */}
       <InputGroup>
         <Label>Email</Label>
         <InputBox>
-          <Input
+          <Input 
+            accessibilityLabel="Email input field"
             placeholder="Email"
             placeholderTextColor="#8a90a5"
             keyboardType="email-address"
@@ -140,13 +142,19 @@ export default function Login() {
             value={email}
             onChangeText={setEmail}
           />
-          <Ionicons name="mail-outline" size={20} color="#cfd3e0" />
+          <Ionicons name="mail-outline" size={20} color="#cfd3e0" 
+            importantForAccessibility="no-hide-descendants" // Para Android
+            accessibilityElementsHidden={true} // Para iOS 
+          />
         </InputBox>
       </InputGroup>
 
-      {/* Password */}
-      <InputGroup>
+      <InputGroup 
+        accessible={true} 
+        accessibilityLabel="Password">
+      
         <Label>Password</Label>
+
         <InputBox>
           <Input
             placeholder="Password"
@@ -155,7 +163,10 @@ export default function Login() {
             value={password}
             onChangeText={setPassword}
           />
-          <TouchableOpacity onPress={() => setShowPass(!showPass)}>
+
+          <TouchableOpacity onPress={() => setShowPass(!showPass)} 
+            accessibilityRole="button" 
+            accessibilityLabel={showPass ? "Hide password" : "Show password"}>
             <Ionicons
               name={showPass ? 'eye-off-outline' : 'eye-outline'}
               size={22}
@@ -163,24 +174,27 @@ export default function Login() {
             />
           </TouchableOpacity>
         </InputBox>
+
       </InputGroup>
 
-      <ForgotRow>
-        <SmallText>
-          Forgot your password? <LinkText>Recover password</LinkText>
-        </SmallText>
-      </ForgotRow>
+      <RowWithLink>
+        <SmallText>Forgot your password?</SmallText>
+        <LinkArea accessibilityRole="link">
+          <LinkText>Recover password</LinkText>
+        </LinkArea>
+      </RowWithLink>
 
       {error ? <ErrorText>{error}</ErrorText> : null}
 
       <PrimaryButton title="Log in" onPress={handleLogin} />
 
-      <BottomRow>
-        <SmallText>
-          Don’t have an account?{' '}
-          <LinkText onPress={() => router.push('/register')}>Create Account</LinkText>
-        </SmallText>
-      </BottomRow>
+      <RowWithLink>
+        <SmallText>Don’t have an account?</SmallText>
+        <LinkArea accessibilityRole="link" onPress={() => router.push('/register')}>
+            <LinkText>Create Account</LinkText>
+        </LinkArea>
+      </RowWithLink>
+
     </Container>
   );
 }

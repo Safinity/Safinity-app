@@ -43,11 +43,6 @@ const OverlayContent = styled.View`
   right: 0;
   z-index: 100;
   padding-top: 20px;
-
-  ${Platform.OS === 'web' &&
-  `
-    pointer-events: none;
-  `}
 `;
 
 const PaddingSearchInput = styled.View`
@@ -60,11 +55,6 @@ const PageHeader = styled.View`
   align-items: center;
   gap: ${Spacing.sm}px;
   padding-left: ${Spacing.xl}px;
-
-  ${Platform.OS === 'web' &&
-  `
-    pointer-events: auto;
-  `}
 `;
 
 const PageTitle = styled.Text`
@@ -322,7 +312,7 @@ export default function MapScreen() {
 
       <Header />
 
-      <OverlayContent>
+      <OverlayContent pointerEvents="box-none">
         <PageHeader>
           <Ionicons name="location" size={28} color={Colors.primary} />
           <PageTitle>University of Aveiro</PageTitle>
@@ -346,7 +336,7 @@ export default function MapScreen() {
             )
           }
           variant="mapa"
-          style={{ marginTop: Spacing.md, pointerEvents: 'auto' }}
+          style={{ marginTop: Spacing.md }}
         />
       </OverlayContent>
 

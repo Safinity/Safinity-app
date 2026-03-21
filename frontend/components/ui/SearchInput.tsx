@@ -43,7 +43,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
   const SEARCH_THEME = {
     homepage: {
       backgroundColor: themeContext.colors.grayNavbar,
-      iconColor: themeContext.colors.inactive,
+      iconColor: themeContext.colors.white,
       textColor: themeContext.colors.white,
     },
     mapa: {

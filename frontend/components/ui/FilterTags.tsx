@@ -8,7 +8,7 @@ const getTagTheme = (theme: any) => ({
   homepage: {
     color: theme.colors.grayNavbar,
     selectedColor: theme.colors.primary,
-    textColor: theme.colors.inactive,
+    textColor: theme.colors.white,
     selectedTextColor: theme.colors.white,
     paddingLeft: theme.spacing.margemLateral,
     paddingRight: theme.spacing.lg,
@@ -16,7 +16,7 @@ const getTagTheme = (theme: any) => ({
   mapa: {
     color: theme.colors.background,
     selectedColor: theme.colors.primary,
-    textColor: theme.colors.inactive,
+    textColor: theme.colors.white,
     selectedTextColor: theme.colors.white,
     paddingLeft: theme.spacing.lg,
     paddingRight: theme.spacing.lg,

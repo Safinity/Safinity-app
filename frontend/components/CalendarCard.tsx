@@ -93,21 +93,21 @@ export const CalendarCard = ({ item }: any) => {
   const accessibleLabel = `Atividade: ${item.title} em ${item.location}. De ${item.startTime} até ${item.endTime}`;
 
   return (
-    <CardContainer 
-      activeOpacity={0.8} 
+    <CardContainer
+      activeOpacity={0.8}
       onPress={handlePress}
       accessible={true}
       accessibilityRole="button"
       accessibilityLabel={`Abrir detalhes de: ${item.title}`}
       accessibilityHint="Navega para a descrição completa desta atividade do calendário"
     >
-      <StyledImage 
-        source={getImageSource()} 
+      <StyledImage
+        source={getImageSource()}
         resizeMode="cover"
         accessible={false} // Esconde a imagem bruta para não duplicar a leitura
       />
 
-      <Overlay 
+      <Overlay
         colors={['rgba(0,0,0,0.1)', 'transparent', 'rgba(0,0,0,0.9)']}
         accessible={true}
         accessibilityLabel={accessibleLabel}

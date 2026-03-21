@@ -67,6 +67,8 @@ const TitleText = styled.Text`
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
 `;
 
+// Substitua o final do seu arquivo (o componente CalendarCard) por este:
+
 export const CalendarCard = ({ item }: any) => {
   const router = useRouter();
 
@@ -87,11 +89,31 @@ export const CalendarCard = ({ item }: any) => {
     return null;
   };
 
-  return (
-    <CardContainer activeOpacity={0.8} onPress={handlePress}>
-      <StyledImage source={getImageSource()} resizeMode="cover" />
+  // Texto descritivo para o Alt Text (Nome + Localização)
+  const accessibleLabel = `Atividade: ${item.title} em ${item.location}. De ${item.startTime} até ${item.endTime}`;
 
-      <Overlay colors={['rgba(0,0,0,0.1)', 'transparent', 'rgba(0,0,0,0.9)']}>
+  return (
+    <CardContainer 
+      activeOpacity={0.8} 
+      onPress={handlePress}
+      accessible={true}
+      accessibilityRole="button"
+      accessibilityLabel={`Abrir detalhes de: ${item.title}`}
+      accessibilityHint="Navega para a descrição completa desta atividade do calendário"
+    >
+      <StyledImage 
+        source={getImageSource()} 
+        resizeMode="cover"
+        accessible={false} // Esconde a imagem bruta para não duplicar a leitura
+      />
+
+      <Overlay 
+        colors={['rgba(0,0,0,0.1)', 'transparent', 'rgba(0,0,0,0.9)']}
+        accessible={true}
+        accessibilityLabel={accessibleLabel}
+        // @ts-ignore
+        aria-label={accessibleLabel}
+      >
         <Badge>Click to view more</Badge>
 
         <InfoSection>

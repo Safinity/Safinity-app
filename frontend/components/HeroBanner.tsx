@@ -116,9 +116,17 @@ export const HeroBanner = ({
   const isList = !isDetail && title;
   const isHome = !isDetail && !title && event;
 
+  const accessibleLabel = `Banner de destaque do evento: ${event?.name || event?.title || title || 'Evento'}`;
+
   return (
-    <BannerContainer source={imageSource}>
-      <HeroGradient>
+    <BannerContainer source={imageSource} accessible={false}>
+      <HeroGradient
+        accessible={true}
+        accessibilityLabel={accessibleLabel}
+        accessibilityRole="header"
+        // @ts-ignore
+        aria-label={accessibleLabel}
+      >
         {isCalendar && (
           <>
             <TitleRow>
@@ -129,6 +137,9 @@ export const HeroBanner = ({
               <AddCalendarButton
                 activeOpacity={0.8}
                 onPress={() => router.push('/(tabs)/my-calendar')}
+                accessible={true}
+                accessibilityLabel="Adicionar ao meu calendário"
+                accessibilityRole="button"
               >
                 <Ionicons name="calendar-outline" size={26} color="#9333EA" />
               </AddCalendarButton>

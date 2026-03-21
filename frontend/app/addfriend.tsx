@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, Stack } from 'expo-router';
 import { useUser } from '@/context/UserContext';
 import { userImages } from '../assets/images/Users/userImages';
 import users from '@/data/users.json';
 import SearchBarQR from '@/components/SearchBarQR';
 import FriendActionButton from '@/components/FriendActionButton';
 import { TouchableOpacity, View } from 'react-native';
+import Head from 'expo-router/head';
 
 export default function AddFriendScreen() {
   const { currentUser, addFriend, removeFriend } = useUser();
@@ -47,6 +48,10 @@ export default function AddFriendScreen() {
 
   return (
     <Container>
+      <Head>
+        <title>Add Friend | Safinity</title>
+      </Head>
+      <Stack.Screen options={{ title: 'Add Friend | Safinity', headerShown: false }} />
       <HeaderContainer>
         <BackButton
           onPress={handleBack}

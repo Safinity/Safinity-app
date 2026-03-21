@@ -2,9 +2,10 @@ import { useState } from 'react';
 import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
 import { TouchableOpacity } from 'react-native';
-import { router } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import users from '@/data/users.json';
 import PrimaryButton from '@/components/PrimaryButton';
+import Head from 'expo-router/head';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -34,6 +35,11 @@ export default function Login() {
 
   return (
     <Container>
+      <Stack.Screen options={{ title: 'Login | Safinity', headerShown: false }} />
+      <Head>
+        <title>Login | Safinity</title>
+      </Head>
+
       <BackButton
         onPress={() => router.back()}
         accessibilityLabel="Return to the previous page"
@@ -116,7 +122,7 @@ export default function Login() {
 
 const Container = styled.View`
   flex: 1;
-  margin-top: ${({ theme }) => theme.spacing.xl}px;
+  padding-top: ${({ theme }) => theme.spacing.xl}px;
   background-color: ${({ theme }) => theme.colors.background};
   padding: ${({ theme }) => theme.spacing.margemLateral}px;
 `;

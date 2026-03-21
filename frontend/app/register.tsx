@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import styled from 'styled-components/native';
-import { ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, Stack } from 'expo-router';
+import Head from 'expo-router/head';
 
 import InputField from '@/components/InputField';
 import Checkbox from '@/components/Checkbox';
@@ -14,6 +14,11 @@ export default function Register() {
   return (
     <Screen>
       <Container>
+        <Stack.Screen options={{ title: 'Register | Safinity', headerShown: false }} />
+        <Head>
+          <title>Register | Safinity</title>
+        </Head>
+
         <BackButton
           onPress={() => router.back()}
           accessibilityLabel="Return to the previous page"

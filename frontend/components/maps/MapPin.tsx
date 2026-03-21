@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image, ImageBackground } from 'react-native';
+import { View, Image, Platform, Pressable } from 'react-native';
 import { latLngToPixelFromBounds } from '../../utils/coordinates';
 import { PIN_ICONS } from './constants';
 
@@ -21,36 +21,45 @@ export const MapPin = ({
   const { x, y } = latLngToPixelFromBounds(pin.lat, pin.lng, bounds, width, height);
 
   return (
-    <ImageBackground
+    <Pressable
       key={pin.id}
-      source={PIN_ICONS[pin.type] || PIN_ICONS.friend}
-      // ImageBackground requires the style for the container
-      // and imageStyle for the actual image properties
+      onPress={() => onPress(pin)}
       style={{
         position: 'absolute',
-        width: 28,
-        height: 40,
         left: x - 14,
         top: y - 40,
-        alignItems: 'center', // Centers the avatar horizontally
+        width: 28,
+        height: 40,
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        ...(Platform.OS === 'web' ? { cursor: 'pointer' } : {}),
       }}
-      imageStyle={{
-        resizeMode: 'contain',
-      }}
-      onTouchEnd={() => onPress(pin)}
     >
-      {/* Now we can safely nest the avatar face inside */}
+      {/* Pin image */}
+      <Image
+        source={PIN_ICONS[pin.type] || PIN_ICONS.friend}
+        style={{
+          width: 28,
+          height: 40,
+          resizeMode: 'contain',
+        }}
+      />
+
+      {/* Avatar on top of pin */}
       {pin.type === 'friend' && avatar && (
         <Image
           source={avatar}
           style={{
+            position: 'absolute',
+            top: 3, // adjust to place avatar at the top of pin
             width: 22,
             height: 22,
             borderRadius: 11,
-            marginTop: 4, // Pushes face into the circular top of the pin
+            borderWidth: 1,
+            borderColor: 'white',
           }}
         />
       )}
-    </ImageBackground>
+    </Pressable>
   );
 };

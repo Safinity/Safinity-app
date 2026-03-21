@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { View, StatusBar } from 'react-native';
-import styled from 'styled-components/native';
+import styled, { useTheme } from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, Stack } from 'expo-router';
+import Head from 'expo-router/head';
 
 import Header from '../../components/ui/header';
 import SearchInput from '../../components/ui/SearchInput';
@@ -102,6 +103,11 @@ export default function CalendarScreen() {
 
   return (
     <Container>
+      <Head>
+        <title>Calendar | Safinity</title>
+      </Head>
+      <Stack.Screen options={{ title: 'Calendar | Safinity', headerShown: false }} />
+
       <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
 
       <HeaderWrapper topInset={insets.top}>

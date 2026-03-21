@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import styled from 'styled-components/native';
-import { useRouter } from 'expo-router';
+import { useRouter, Stack } from 'expo-router';
 import tags from '../data/tags.json';
+import Head from 'expo-router/head';
 
 /* ---------------------- STYLES ---------------------- */
 
@@ -146,6 +147,10 @@ export default function SOSForm() {
 
   return (
     <Container>
+      <Head>
+        <title>SOS | Safinity</title>
+      </Head>
+      <Stack.Screen options={{ title: 'SOS | Safinity', headerShown: false }} />
       <ContentWrapper>
         <Title>Help us help you!</Title>
         <TextStyled>Add more information to your request for help.</TextStyled>

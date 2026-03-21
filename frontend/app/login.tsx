@@ -2,19 +2,137 @@ import { useState } from 'react';
 import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
 import { TouchableOpacity } from 'react-native';
-import { router } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import users from '@/data/users.json';
 import PrimaryButton from '@/components/PrimaryButton';
+import Head from 'expo-router/head';
+
+export default function Login() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPass, setShowPass] = useState(false);
+  const [error, setError] = useState('');
+
+  function handleLogin() {
+    setError('');
+
+    if (!email || !password) {
+      setError('Please fill in all fields');
+      return;
+    }
+
+    const user = users.find(
+      (u: any) => u.email.toLowerCase() === email.toLowerCase() && u.password === password,
+    );
+
+    if (!user) {
+      setError('Invalid email or password');
+      return;
+    }
+
+    router.replace('/(tabs)');
+  }
+
+  return (
+    <Container>
+      <Stack.Screen options={{ title: 'Login | Safinity', headerShown: false }} />
+      <Head>
+        <title>Login | Safinity</title>
+      </Head>
+
+      <BackButton
+        onPress={() => router.back()}
+        accessibilityLabel="Return to the previous page"
+        accessibilityRole="button"
+      >
+        <Ionicons name="arrow-back" size={26} color="white" />
+      </BackButton>
+
+      <Title accessibilityRole="header">Log in</Title>
+      <Subtitle>Welcome back!</Subtitle>
+
+      <InputGroup>
+        <Label>Email</Label>
+        <InputBox>
+          <Input
+            accessibilityLabel="Email input field"
+            placeholder="Email"
+            placeholderTextColor="#8a90a5"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            value={email}
+            onChangeText={setEmail}
+          />
+          <Ionicons
+            name="mail-outline"
+            size={20}
+            color="#cfd3e0"
+            importantForAccessibility="no-hide-descendants" // Para Android
+            accessibilityElementsHidden={true} // Para iOS
+          />
+        </InputBox>
+      </InputGroup>
+
+      <InputGroup accessible={true} accessibilityLabel="Password">
+        <Label>Password</Label>
+
+        <InputBox>
+          <Input
+            placeholder="Password"
+            placeholderTextColor="#8a90a5"
+            secureTextEntry={!showPass}
+            value={password}
+            onChangeText={setPassword}
+          />
+
+          <TouchableOpacity
+            onPress={() => setShowPass(!showPass)}
+            accessibilityRole="button"
+            accessibilityLabel={showPass ? 'Hide password' : 'Show password'}
+          >
+            <Ionicons
+              name={showPass ? 'eye-off-outline' : 'eye-outline'}
+              size={22}
+              color="#cfd3e0"
+            />
+          </TouchableOpacity>
+        </InputBox>
+      </InputGroup>
+
+      <RowWithLink>
+        <SmallText>Forgot your password?</SmallText>
+        <LinkArea accessibilityRole="link">
+          <LinkText>Recover password</LinkText>
+        </LinkArea>
+      </RowWithLink>
+
+      {error ? <ErrorText>{error}</ErrorText> : null}
+
+      <PrimaryButton title="Log in" onPress={handleLogin} />
+
+      <RowWithLink>
+        <SmallText>Don’t have an account?</SmallText>
+        <LinkArea accessibilityRole="link" onPress={() => router.push('/register')}>
+          <LinkText>Create Account</LinkText>
+        </LinkArea>
+      </RowWithLink>
+    </Container>
+  );
+}
 
 const Container = styled.View`
   flex: 1;
-  margin-top: ${({ theme }) => theme.spacing.xl}px;
+  padding-top: ${({ theme }) => theme.spacing.xl}px;
   background-color: ${({ theme }) => theme.colors.background};
   padding: ${({ theme }) => theme.spacing.margemLateral}px;
 `;
 
 const BackButton = styled.TouchableOpacity`
   margin-bottom: ${({ theme }) => theme.spacing.md}px;
+`;
+
+const LinkArea = styled.TouchableOpacity`
+  margin-left: ${({ theme }) => theme.spacing.xs}px;
 `;
 
 const Title = styled.Text`
@@ -68,119 +186,19 @@ const ErrorText = styled.Text`
   ${({ theme }) => theme.text.corpo.corpoTexto};
 `;
 
-const ForgotRow = styled.View`
-  align-items: flex-end;
+const RowWithLink = styled.View`
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
   margin-bottom: ${({ theme }) => theme.spacing.xl}px;
 `;
 
 const LinkText = styled.Text`
   color: ${({ theme }) => theme.colors.palette.primary.light80};
-  ${({ theme }) => theme.text.corpo.corpoTexto};
-`;
-
-const BottomRow = styled.View`
-  margin-top: ${({ theme }) => theme.spacing.lg}px;
-  align-items: center;
+  ${({ theme }) => theme.text.textoPequeno};
 `;
 
 const SmallText = styled.Text`
   color: ${({ theme }) => theme.colors.inactive};
   ${({ theme }) => theme.text.textoPequeno};
 `;
-
-/* =======================
-   Componente
-======================= */
-
-export default function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPass, setShowPass] = useState(false);
-  const [error, setError] = useState('');
-
-  function handleLogin() {
-    setError('');
-
-    if (!email || !password) {
-      setError('Please fill in all fields');
-      return;
-    }
-
-    const user = users.find(
-      (u: any) => u.email.toLowerCase() === email.toLowerCase() && u.password === password,
-    );
-
-    if (!user) {
-      setError('Invalid email or password');
-      return;
-    }
-
-    router.replace('/(tabs)');
-  }
-
-  return (
-    <Container>
-      {/* Back */}
-      <BackButton onPress={() => router.back()}>
-        <Ionicons name="arrow-back" size={26} color="white" />
-      </BackButton>
-
-      <Title>Log in</Title>
-      <Subtitle>Welcome back!</Subtitle>
-
-      {/* Email */}
-      <InputGroup>
-        <Label>Email</Label>
-        <InputBox>
-          <Input
-            placeholder="Email"
-            placeholderTextColor="#8a90a5"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            value={email}
-            onChangeText={setEmail}
-          />
-          <Ionicons name="mail-outline" size={20} color="#cfd3e0" />
-        </InputBox>
-      </InputGroup>
-
-      {/* Password */}
-      <InputGroup>
-        <Label>Password</Label>
-        <InputBox>
-          <Input
-            placeholder="Password"
-            placeholderTextColor="#8a90a5"
-            secureTextEntry={!showPass}
-            value={password}
-            onChangeText={setPassword}
-          />
-          <TouchableOpacity onPress={() => setShowPass(!showPass)}>
-            <Ionicons
-              name={showPass ? 'eye-off-outline' : 'eye-outline'}
-              size={22}
-              color="#cfd3e0"
-            />
-          </TouchableOpacity>
-        </InputBox>
-      </InputGroup>
-
-      <ForgotRow>
-        <SmallText>
-          Forgot your password? <LinkText>Recover password</LinkText>
-        </SmallText>
-      </ForgotRow>
-
-      {error ? <ErrorText>{error}</ErrorText> : null}
-
-      <PrimaryButton title="Log in" onPress={handleLogin} />
-
-      <BottomRow>
-        <SmallText>
-          Don’t have an account?{' '}
-          <LinkText onPress={() => router.push('/register')}>Create Account</LinkText>
-        </SmallText>
-      </BottomRow>
-    </Container>
-  );
-}

@@ -102,12 +102,10 @@ export default function CalendarScreen() {
 
   return (
     <Container>
-
       <Head>
         <title>Calendar | Safinity</title>
       </Head>
       <Stack.Screen options={{ title: 'Calendar | Safinity', headerShown: false }} />
-
 
       <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
 

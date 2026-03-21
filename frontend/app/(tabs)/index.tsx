@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FlatList, StatusBar, Pressable } from 'react-native';
 import styled from 'styled-components/native';
-import { useRouter,Stack } from 'expo-router';
+import { useRouter, Stack } from 'expo-router';
 import Head from 'expo-router/head';
 
 import Header from '../../components/ui/header';

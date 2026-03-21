@@ -11,6 +11,7 @@ import SearchInput from '../../components/ui/SearchInput';
 import FilterTags from '../../components/ui/FilterTags';
 import { CalendarCard } from '../../components/CalendarCard';
 import calendarData from '../../data/calendar.json';
+import { useTheme } from 'styled-components/native';
 
 const Container = styled.View`
   flex: 1;

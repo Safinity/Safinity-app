@@ -59,9 +59,10 @@ export default function FriendsScreen() {
         {onSameEvent.map(friend => (
           <TouchableOpacity key={friend.id} onPress={() => router.push(`/friends/${friend.id}`)}>
             <FriendRow>
-              <Avatar 
-                source={userImages[friend.image]} 
-                accessibilityLabel={`Profile picture of ${friend.name}`}/>
+              <Avatar
+                source={userImages[friend.image]}
+                accessibilityLabel={`Profile picture of ${friend.name}`}
+              />
               <Info>
                 <Name>{friend.name}</Name>
                 <Username>@{friend.username}</Username>
@@ -85,9 +86,10 @@ export default function FriendsScreen() {
         {otherFriends.map(friend => (
           <TouchableOpacity key={friend.id} onPress={() => router.push(`/friends/${friend.id}`)}>
             <FriendRow>
-              <Avatar 
-                source={userImages[friend.image]} 
-                accessibilityLabel={`Profile picture of ${friend.name}`}/>
+              <Avatar
+                source={userImages[friend.image]}
+                accessibilityLabel={`Profile picture of ${friend.name}`}
+              />
               <Info>
                 <Name>{friend.name}</Name>
                 <Username>@{friend.username}</Username>

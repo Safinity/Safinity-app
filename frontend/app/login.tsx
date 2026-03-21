@@ -84,7 +84,6 @@ const LinkText = styled.Text`
   ${({ theme }) => theme.text.textoPequeno};
 `;
 
-
 const SmallText = styled.Text`
   color: ${({ theme }) => theme.colors.inactive};
   ${({ theme }) => theme.text.textoPequeno};
@@ -123,7 +122,11 @@ export default function Login() {
   return (
     <Container>
       {/* Back */}
-      <BackButton onPress={() => router.back()} accessibilityLabel="Return to the previous page" accessibilityRole="button">
+      <BackButton
+        onPress={() => router.back()}
+        accessibilityLabel="Return to the previous page"
+        accessibilityRole="button"
+      >
         <Ionicons name="arrow-back" size={26} color="white" />
       </BackButton>
 
@@ -133,7 +136,7 @@ export default function Login() {
       <InputGroup>
         <Label>Email</Label>
         <InputBox>
-          <Input 
+          <Input
             accessibilityLabel="Email input field"
             placeholder="Email"
             placeholderTextColor="#8a90a5"
@@ -142,17 +145,17 @@ export default function Login() {
             value={email}
             onChangeText={setEmail}
           />
-          <Ionicons name="mail-outline" size={20} color="#cfd3e0" 
+          <Ionicons
+            name="mail-outline"
+            size={20}
+            color="#cfd3e0"
             importantForAccessibility="no-hide-descendants" // Para Android
-            accessibilityElementsHidden={true} // Para iOS 
+            accessibilityElementsHidden={true} // Para iOS
           />
         </InputBox>
       </InputGroup>
 
-      <InputGroup 
-        accessible={true} 
-        accessibilityLabel="Password">
-      
+      <InputGroup accessible={true} accessibilityLabel="Password">
         <Label>Password</Label>
 
         <InputBox>
@@ -164,9 +167,11 @@ export default function Login() {
             onChangeText={setPassword}
           />
 
-          <TouchableOpacity onPress={() => setShowPass(!showPass)} 
-            accessibilityRole="button" 
-            accessibilityLabel={showPass ? "Hide password" : "Show password"}>
+          <TouchableOpacity
+            onPress={() => setShowPass(!showPass)}
+            accessibilityRole="button"
+            accessibilityLabel={showPass ? 'Hide password' : 'Show password'}
+          >
             <Ionicons
               name={showPass ? 'eye-off-outline' : 'eye-outline'}
               size={22}
@@ -174,7 +179,6 @@ export default function Login() {
             />
           </TouchableOpacity>
         </InputBox>
-
       </InputGroup>
 
       <RowWithLink>
@@ -191,10 +195,9 @@ export default function Login() {
       <RowWithLink>
         <SmallText>Don’t have an account?</SmallText>
         <LinkArea accessibilityRole="link" onPress={() => router.push('/register')}>
-            <LinkText>Create Account</LinkText>
+          <LinkText>Create Account</LinkText>
         </LinkArea>
       </RowWithLink>
-
     </Container>
   );
 }

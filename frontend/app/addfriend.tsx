@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,7 +8,6 @@ import users from '@/data/users.json';
 import SearchBarQR from '@/components/SearchBarQR';
 import FriendActionButton from '@/components/FriendActionButton';
 import { TouchableOpacity, View } from 'react-native';
-
 
 export default function AddFriendScreen() {
   const { currentUser, addFriend, removeFriend } = useUser();
@@ -50,7 +48,11 @@ export default function AddFriendScreen() {
   return (
     <Container>
       <HeaderContainer>
-        <BackButton onPress={handleBack} accessibilityLabel="Return to the previous page" accessibilityRole="button">
+        <BackButton
+          onPress={handleBack}
+          accessibilityLabel="Return to the previous page"
+          accessibilityRole="button"
+        >
           <Ionicons name="arrow-back" size={28} color="white" />
         </BackButton>
         <Title>Add friend</Title>
@@ -72,7 +74,12 @@ export default function AddFriendScreen() {
               <EmptyText>No recent searches</EmptyText>
             ) : (
               recentSearches.map(item => (
-                <RecentItem key={item} onPress={() => setSearch(item)} accessibilityRole="button" accessibilityLabel={`Search again for ${item}`}>
+                <RecentItem
+                  key={item}
+                  onPress={() => setSearch(item)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Search again for ${item}`}
+                >
                   <Ionicons name="time-outline" size={18} color="white" />
                   <RecentText>{item}</RecentText>
                 </RecentItem>
@@ -85,9 +92,10 @@ export default function AddFriendScreen() {
             {filteredUsers.map(user => (
               <TouchableOpacity key={user.id} onPress={() => router.push(`/${user.id}`)}>
                 <UserRow>
-                  <Avatar 
-                    source={userImages[user.image]} 
-                    accessibilityLabel={`Profile picture of ${user.name}`}/>
+                  <Avatar
+                    source={userImages[user.image]}
+                    accessibilityLabel={`Profile picture of ${user.name}`}
+                  />
                   <Info>
                     <Name>{user.name}</Name>
                     <Username>@{user.username}</Username>
@@ -106,7 +114,6 @@ export default function AddFriendScreen() {
     </Container>
   );
 }
-
 
 // ------------------------------------------------------ Styled Components ---------------------------------------------------
 

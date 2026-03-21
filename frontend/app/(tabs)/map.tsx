@@ -21,7 +21,8 @@ import { UserMarker } from '../../components/maps/UserMarker';
 import { Colors, Spacing } from '../../constants/theme';
 import mapData from '../../data/mapdata.json';
 import { latLngToPixelFromBounds } from '../../utils/coordinates';
-import { router } from 'expo-router';
+import { router, Stack } from 'expo-router';
+import Head from 'expo-router/head';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const IMAGE_WIDTH = screenWidth * 2.5;
@@ -239,6 +240,11 @@ export default function MapScreen() {
 
   return (
     <Container>
+      <Head>
+        <title>Map | Safinity</title>
+      </Head>
+      <Stack.Screen options={{ title: 'Map | Safinity', headerShown: false }} />
+
       <GestureDetector gesture={composedGesture}>
         <Animated.View style={[{ width: IMAGE_WIDTH, height: IMAGE_HEIGHT }, animatedStyle]}>
           <StaticMapPreview

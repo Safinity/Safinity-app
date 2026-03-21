@@ -1,7 +1,9 @@
 import { useEffect, useRef } from 'react';
 import styled from 'styled-components/native';
 import { Animated } from 'react-native';
-import { router } from 'expo-router';
+import { router, Stack } from 'expo-router';
+import Head from 'expo-router/head';
+
 import Logo from '../assets/logos/loading-logo.png';
 
 const Container = styled.View`
@@ -28,6 +30,11 @@ export default function LoadingScreen() {
 
   return (
     <Container>
+      <Head>
+        <title>Entering Safinity...</title>
+      </Head>
+      <Stack.Screen options={{ title: 'Entering Safinity...', headerShown: false }} />
+
       <Animated.Image
         source={Logo}
         style={{

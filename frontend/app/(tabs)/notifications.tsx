@@ -171,6 +171,7 @@ export default function NotificationsPage() {
     if (item.isDivider) return <SectionLabel>Oldest</SectionLabel>;
 
     return (
+      
       <NotificationCard $isNew={!item.read}>
         {item.type === 'friend' ? (
           <Avatar source={userImages[item.avatar]} />

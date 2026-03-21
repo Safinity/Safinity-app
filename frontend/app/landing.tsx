@@ -30,9 +30,9 @@ export default function Landing() {
     <Background source={StaticImages.landingBg}>
       <Content>
         <Head>
-          <title>Landing | Safinity</title>
+          <title>Welcome to Safinity!</title>
         </Head>
-        <Stack.Screen options={{ title: 'Landing | Safinity', headerShown: false }} />
+        <Stack.Screen options={{ title: 'Welcome to Safinity!', headerShown: false }} />
 
         <PrimaryButton title="Log in" onPress={() => router.push('/login')} />
 

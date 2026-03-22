@@ -3,6 +3,7 @@ import { Dimensions, FlatList, ScrollView, Platform, AccessibilityInfo } from 'r
 import styled, { useTheme } from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
+import Head from 'expo-router/head';
 
 // --- Dados e Assets ---
 import users from '@/data/users.json';
@@ -35,6 +36,9 @@ export default function FriendProfile() {
       accessibilityLabel="Friend profile screen"
       accessibilityRole="summary"
     >
+      <Head>
+        <title> {friendData.name} profile | Safinity</title>
+      </Head>
       <ScrollView
         showsVerticalScrollIndicator={false}
         accessibilityRole="scrollview"
@@ -125,9 +129,9 @@ const HeaderNav = styled.View`
   flex-direction: row;
   align-items: center;
   padding: ${({ theme }) =>
-      Platform.OS === 'ios'
-        ? theme.spacing.margemTop + theme.spacing.lg
-        : theme.spacing.margemTop}px
+    Platform.OS === 'ios'
+      ? theme.spacing.margemTop + theme.spacing.lg
+      : theme.spacing.margemTop}px
     ${({ theme }) => theme.spacing.margemLateral}px ${({ theme }) => theme.spacing.md}px;
 `;
 

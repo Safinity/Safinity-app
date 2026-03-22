@@ -35,12 +35,12 @@ export default function AddFriendScreen() {
     search.length === 0
       ? []
       : users.filter(u => {
-        const text = search.toLowerCase();
-        return (
-          u.id !== currentUser.id &&
-          (u.name.toLowerCase().includes(text) || u.username.toLowerCase().includes(text))
-        );
-      });
+          const text = search.toLowerCase();
+          return (
+            u.id !== currentUser.id &&
+            (u.name.toLowerCase().includes(text) || u.username.toLowerCase().includes(text))
+          );
+        });
 
   const isFriend = (id: string) => currentUser.friends.includes(id);
 
@@ -51,7 +51,7 @@ export default function AddFriendScreen() {
       </Head>
       <Stack.Screen options={{ title: 'Add Friend | Safinity', headerShown: false }} />
 
-      {/* Banner/Header region */}
+      {/* Banner/Header */}
       <HeaderContainer
         accessibilityRole="banner"
       >
@@ -62,14 +62,16 @@ export default function AddFriendScreen() {
         >
           <Ionicons name="arrow-back" size={28} color="white" />
         </BackButton>
-        <Title accessibilityRole="heading" accessibilityLevel={1}>Add friend</Title>
+        <Title
+          accessibilityRole="header"
+          accessibilityLevel={1}
+        >
+          Add Friend
+        </Title>
       </HeaderContainer>
 
-      {/* Main content region */}
-      <MainContent
-        accessibilityRole="main"
-      >
-        {/* Search Bar */}
+      {/* Main content */}
+      <MainContent accessibilityRole="main" accessibilityLabel="Search and add friends">
         <SearchBarQR
           value={search}
           onChangeText={setSearch}
@@ -81,7 +83,7 @@ export default function AddFriendScreen() {
 
         {search.length === 0 ? (
           <>
-            <Subtitle accessibilityRole="heading" accessibilityLevel={2}>Recent searches</Subtitle>
+            <Subtitle accessibilityRole="header" accessibilityLevel={2}>Recent searches</Subtitle>
             {recentSearches.length === 0 ? (
               <EmptyText>No recent searches</EmptyText>
             ) : (
@@ -100,39 +102,47 @@ export default function AddFriendScreen() {
           </>
         ) : (
           <>
-            <Subtitle accessibilityRole="heading" accessibilityLevel={2}>Results</Subtitle>
+            <Subtitle accessibilityRole="header" accessibilityLevel={2}>Results</Subtitle>
             {filteredUsers.map(user => (
               <TouchableOpacity
                 key={user.id}
-                onPress={() => router.push(`/${user.id}`)}
+                onPress={() => router.push(`/friends/${user.id}`)} // vai para o perfil do amigo
+                accessible={true}
                 accessibilityRole="button"
                 accessibilityLabel={`Open profile of ${user.name}`}
+                accessibilityHint="Tap to view this friend's profile"
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginBottom: 16,
+                }}
               >
-                <UserRow>
-                  <Avatar
-                    source={userImages[user.image]}
-                    accessibilityLabel={`Profile picture of ${user.name}`}
+                <Avatar
+                  source={userImages[user.image]}
+                  accessibilityRole="image"
+                  accessibilityLabel={`Profile picture of ${user.name}`}
+                />
+                <Info>
+                  <Name>{user.name}</Name>
+                  <Username>@{user.username}</Username>
+                </Info>
+                {isFriend(user.id) ? (
+                  <FriendActionButton
+                    variant="remove"
+                    onPress={() => removeFriend(user.id)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Remove ${user.name} from friends`}
+                    accessibilityHint="Removes this user from your friend list"
                   />
-                  <Info>
-                    <Name>{user.name}</Name>
-                    <Username>@{user.username}</Username>
-                  </Info>
-                  {isFriend(user.id) ? (
-                    <FriendActionButton
-                      variant="remove"
-                      onPress={() => removeFriend(user.id)}
-                      accessibilityRole="button"
-                      accessibilityLabel={`Remove ${user.name} from friends`}
-                    />
-                  ) : (
-                    <FriendActionButton
-                      variant="add"
-                      onPress={() => addFriend(user.id)}
-                      accessibilityRole="button"
-                      accessibilityLabel={`Add ${user.name} as a friend`}
-                    />
-                  )}
-                </UserRow>
+                ) : (
+                  <FriendActionButton
+                    variant="add"
+                    onPress={() => addFriend(user.id)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Add ${user.name} as a friend`}
+                    accessibilityHint="Adds this user to your friend list"
+                  />
+                )}
               </TouchableOpacity>
             ))}
           </>
@@ -186,7 +196,7 @@ const Subtitle = styled.Text`
 
 const EmptyText = styled.Text`
   color: ${({ theme }) => theme.colors.white};
-  opacity: 0.5;
+  opacity: 0.6;
   font-size: 14px;
   margin-bottom: 20px;
 `;
@@ -203,17 +213,17 @@ const RecentText = styled.Text`
   margin-left: 10px;
 `;
 
-const UserRow = styled.View`
-  flex-direction: row;
-  align-items: center;
-  margin-bottom: 16px;
-`;
-
 const Avatar = styled.Image`
   width: 70px;
   height: 70px;
   border-radius: 35px;
   background-color: #ccc;
+`;
+
+const UserRow = styled.View`
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 16px;
 `;
 
 const Info = styled.View`

@@ -33,7 +33,7 @@ const Slider = styled(Animated.View)`
   border-radius: ${({ theme }) => theme.borderRadius.large}px;
 `;
 
-const TabButton = styled(TouchableOpacity)<{ first: boolean; last: boolean }>`
+const TabButton = styled(TouchableOpacity)`
   flex: 1;
   justify-content: center;
   align-items: center;
@@ -67,7 +67,12 @@ const HelperText = styled.Text`
   text-align: center;
 `;
 
-// --- Componente Principal ---
+const SectionTitle = styled.Text`
+  color: ${({ theme }) => theme.colors.white};
+  ${({ theme }) => theme.text.titulo.h3};
+  margin-bottom: ${({ theme }) => theme.spacing.md}px;
+`;
+
 
 export default function QRCodeScreen() {
   const [mode, setMode] = useState<'scan' | 'my'>('scan');
@@ -105,39 +110,99 @@ export default function QRCodeScreen() {
       <Head>
         <title>QR Code | Safinity</title>
       </Head>
+
       <Stack.Screen options={{ title: 'QR Code | Safinity', headerShown: false }} />
 
-      <Header variant="back" title="Profile’s QR Code" />
+      <View accessibilityRole="banner">
+        <Header variant="back" title="Profile’s QR Code" />
+      </View>
 
-      <ToggleContainer>
-        <Slider style={{ transform: [{ translateX: sliderTranslate }] }} />
+      <View accessibilityRole="main">
 
-        <TabButton first onPress={() => handleToggle('scan')}>
-          <TabText active={mode === 'scan'}>Scan QR Code</TabText>
-        </TabButton>
+        <ToggleContainer
+          accessibilityRole="region"
+          accessibilityLabel="QR Code mode selector"
+        >
+          <Slider style={{ transform: [{ translateX: sliderTranslate }] }} />
 
-        <TabButton last onPress={() => handleToggle('my')}>
-          <TabText active={mode === 'my'}>My QR Code</TabText>
-        </TabButton>
-      </ToggleContainer>
+          <TabButton
+            onPress={() => handleToggle('scan')}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel="Scan QR Code"
+            accessibilityState={{ selected: mode === 'scan' }}
+          >
+            <TabText active={mode === 'scan'}>Scan QR Code</TabText>
+          </TabButton>
 
-      {mode === 'scan' ? (
-        <CameraWrapper>
-          <CameraView
-            style={StyleSheet.absoluteFillObject}
-            onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
-            barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
-          />
-          <View style={styles.overlay}>
-            <Ionicons name="scan-outline" size={300} color="white" style={{ opacity: 0.9 }} />
+          <TabButton
+            onPress={() => handleToggle('my')}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel="Show my QR Code"
+            accessibilityState={{ selected: mode === 'my' }}
+          >
+            <TabText active={mode === 'my'}>My QR Code</TabText>
+          </TabButton>
+        </ToggleContainer>
+
+        {mode === 'scan' ? (
+          <View
+            accessibilityRole="region"
+            accessibilityLabel="QR code scanner"
+          >
+            <SectionTitle
+              accessibilityRole="header"
+              accessibilityLevel={2}
+            >
+              Scan QR Code
+            </SectionTitle>
+
+            <CameraWrapper>
+              <CameraView
+                style={StyleSheet.absoluteFillObject}
+                onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
+                barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
+              />
+              <View style={styles.overlay}>
+                <Ionicons
+                  name="scan-outline"
+                  size={300}
+                  color="white"
+                  style={{ opacity: 0.9 }}
+                  accessibilityElementsHidden
+                  importantForAccessibility="no"
+                />
+              </View>
+            </CameraWrapper>
           </View>
-        </CameraWrapper>
-      ) : (
-        <QRCodeContainer>
-          <Ionicons name="qr-code-outline" size={260} color="white" />
-          <HelperText>Share your QR Code with friends</HelperText>
-        </QRCodeContainer>
-      )}
+        ) : (
+          <View
+            accessibilityRole="region"
+            accessibilityLabel="My QR code"
+          >
+            <SectionTitle
+              accessibilityRole="header"
+              accessibilityLevel={2}
+            >
+              My QR Code
+            </SectionTitle>
+
+            <QRCodeContainer>
+              <Ionicons
+                name="qr-code-outline"
+                size={260}
+                color="white"
+                accessibilityElementsHidden
+                importantForAccessibility="no"
+              />
+              <HelperText>
+                Share your QR Code with friends
+              </HelperText>
+            </QRCodeContainer>
+          </View>
+        )}
+      </View>
     </Container>
   );
 }

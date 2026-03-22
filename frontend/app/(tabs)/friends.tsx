@@ -3,7 +3,7 @@ import styled from 'styled-components/native';
 import { TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-
+import Head from 'expo-router/head';
 import users from '@/data/users.json';
 import { userImages } from '../../assets/images/Users/userImages';
 import auth from '@/data/auth.json';
@@ -45,6 +45,10 @@ export default function FriendsScreen() {
 
   return (
     <Container>
+      <Head>
+        <title>Friends | Safinity</title>
+      </Head>
+
       <Header variant="default" title="Friends" showBottomDivider={false} />
 
       <ScrollArea
@@ -55,7 +59,15 @@ export default function FriendsScreen() {
         <RegionContainer accessibilityRole="region" accessibilityLabel="Cabeçalho de amigos">
           <SectionTitle accessibilityRole="header" accessibilityLevel={1}>
             <Title>Friends</Title>
-            <TouchableOpacity onPress={handleAddFriend}> <Ionicons name="person-add-outline" size={24} color="white" /> </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleAddFriend}
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel="Add a new friend"
+              accessibilityHint="Go to the add friend screen"
+            >
+              <Ionicons name="person-add-outline" size={24} color="white" />
+            </TouchableOpacity>
           </SectionTitle>
         </RegionContainer>
 
@@ -186,6 +198,7 @@ const LoadingText = styled.Text`
 const SectionTitle = styled.View`
   flex-direction: row;
   justify-content: space-between;
+  align-items: center;
 `;
 
 const Title = styled.Text`

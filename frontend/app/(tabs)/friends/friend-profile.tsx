@@ -3,6 +3,7 @@ import { Dimensions, FlatList, Platform, ScrollView } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
+import Head from 'expo-router/head';
 
 // --- Dados e Assets ---
 import users from '@/data/users.json';
@@ -23,9 +24,9 @@ const HeaderNav = styled.View`
   flex-direction: row;
   align-items: center;
   padding: ${({ theme }) =>
-      Platform.OS === 'ios'
-        ? theme.spacing.margemTop + theme.spacing.lg
-        : theme.spacing.margemTop}px
+    Platform.OS === 'ios'
+      ? theme.spacing.margemTop + theme.spacing.lg
+      : theme.spacing.margemTop}px
     ${({ theme }) => theme.spacing.margemLateral}px ${({ theme }) => theme.spacing.md}px;
 `;
 
@@ -138,6 +139,9 @@ export default function FriendProfileScreen() {
 
   return (
     <Container>
+      <Head>
+        <title> {friendData.name} profile | Safinity</title>
+      </Head>
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header */}
         <HeaderNav>

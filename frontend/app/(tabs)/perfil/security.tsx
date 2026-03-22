@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components/native';
 import { ScrollView, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { Stack } from 'expo-router';
 import Header from '../../../components/ui/header';
 import { Colors, Spacing, Fonts } from '../../../constants/theme';
 import InputField from '../../../components/InputField';
@@ -16,6 +17,7 @@ const SecurityScreen = () => {
 
   return (
     <Container>
+      <Stack.Screen options={{ title: 'Password & Security' }} />
       <Header variant="back" title="Password & Security" showBottomDivider={false} />
 
       <KeyboardAvoidingView
@@ -35,11 +37,12 @@ const SecurityScreen = () => {
                 placeholder="Enter your email"
                 keyboardType="email-address"
                 icon="mail-outline"
+                accessibilityHint="Enter the email address associated with your account"
               />
             </Section>
 
             <Section>
-              <SectionTitle>Change Password</SectionTitle>
+              <SectionTitle accessibilityRole="header">Change Password</SectionTitle>
 
               <InputField
                 label="Current Password"
@@ -49,6 +52,7 @@ const SecurityScreen = () => {
                 password={true}
                 icon={showCurrentPassword ? 'eye-off-outline' : 'eye-outline'}
                 onIconPress={() => setShowCurrentPassword(!showCurrentPassword)}
+                accessibilityHint="Enter your current password to confirm your identity"
               />
 
               <InputField
@@ -59,6 +63,7 @@ const SecurityScreen = () => {
                 password={true}
                 icon={showNewPassword ? 'eye-off-outline' : 'eye-outline'}
                 onIconPress={() => setShowNewPassword(!showNewPassword)}
+                accessibilityHint="Password must be at least 8 characters"
               />
 
               <InputField
@@ -69,9 +74,10 @@ const SecurityScreen = () => {
                 password={true}
                 icon={showRepeatPassword ? 'eye-off-outline' : 'eye-outline'}
                 onIconPress={() => setShowRepeatPassword(!showRepeatPassword)}
+                accessibilityHint="Repeat the new password exactly as entered above"
               />
 
-              <SaveButton>
+              <SaveButton accessibilityRole="button" accessibilityLabel="Save password changes">
                 <SaveButtonText>Save changes</SaveButtonText>
               </SaveButton>
             </Section>

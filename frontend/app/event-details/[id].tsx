@@ -230,7 +230,13 @@ export default function EventDetailsScreen() {
               Enter that code below!
             </ModalDescription>
 
-            <CodeRow>
+            <CodeRow
+              accessible={true}
+              accessibilityRole="text"
+              accessibilityLabel="6-digit validation code. Required field."
+              // @ts-ignore
+              aria-required="true"
+            >
               {[1, 2, 3, 4, 5, 6].map(i => (
                 <CodeBox key={i} />
               ))}

@@ -51,7 +51,7 @@ const DateSelector = styled.View`
   justify-content: space-between;
   margin-bottom: ${({ theme }) => theme.spacing.xxl}px;
 `;
- 
+
 const DateItem = styled.TouchableOpacity`
   align-items: center;
 `;
@@ -182,13 +182,16 @@ export default function MyCalendarScreen() {
           accessibilityLabel="Event selection"
         >
           <DropdownText>Web Summit 2025</DropdownText>
-          <Ionicons name="chevron-down" size={22} color="black" accessibilityElementsHidden importantForAccessibility="no" />
+          <Ionicons
+            name="chevron-down"
+            size={22}
+            color="black"
+            accessibilityElementsHidden
+            importantForAccessibility="no"
+          />
         </DropdownContainer>
 
-        <DateSelector
-          accessibilityRole="group"
-          accessibilityLabel="Select date"
-        >
+        <DateSelector accessibilityRole="group" accessibilityLabel="Select date">
           {dates.map(item => (
             <DateItem
               key={item.day}
@@ -232,7 +235,13 @@ export default function MyCalendarScreen() {
                 >
                   <EventTitle>{event.title}</EventTitle>
                   <LocationRow>
-                    <Ionicons name="location" size={14} color={theme.colors.palette.primary.dark50} accessibilityElementsHidden importantForAccessibility="no"/>
+                    <Ionicons
+                      name="location"
+                      size={14}
+                      color={theme.colors.palette.primary.dark50}
+                      accessibilityElementsHidden
+                      importantForAccessibility="no"
+                    />
                     <LocationText>{event.location}</LocationText>
                   </LocationRow>
                 </EventCard>

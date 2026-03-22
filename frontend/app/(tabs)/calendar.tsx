@@ -132,10 +132,7 @@ export default function CalendarScreen() {
       </HeaderWrapper>
 
       {/* MAIN REGION */}
-      <ScrollContent
-        accessibilityRole="main"
-        accessibilityLabel="Calendar events"
-      >
+      <ScrollContent accessibilityRole="main" accessibilityLabel="Calendar events">
         <Spacer />
 
         {/* Activities selector */}
@@ -187,9 +184,7 @@ export default function CalendarScreen() {
           filteredActivities.map((item, index) => (
             <View key={item.id}>
               {(index === 0 || filteredActivities[index - 1].date !== item.date) && (
-                <DateHeader accessibilityRole="header">
-                  {item.date}
-                </DateHeader>
+                <DateHeader accessibilityRole="header">{item.date}</DateHeader>
               )}
 
               <View

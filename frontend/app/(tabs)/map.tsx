@@ -237,10 +237,17 @@ export default function MapScreen() {
       </Head>
       <Stack.Screen options={{ title: 'Map | Safinity', headerShown: false }} />
 
-      <GestureDetector gesture={composedGesture} accessibilityRole= "main" accessibilityLabel="Map interaction area" accessibilityHint="Use pinch to zoom and drag to pan the map">
-        <Animated.View style={[{ width: IMAGE_WIDTH, height: IMAGE_HEIGHT }, animatedStyle]} accessible ={false}>
+      <GestureDetector
+        gesture={composedGesture}
+        accessibilityRole="main"
+        accessibilityLabel="Map interaction area"
+        accessibilityHint="Use pinch to zoom and drag to pan the map"
+      >
+        <Animated.View
+          style={[{ width: IMAGE_WIDTH, height: IMAGE_HEIGHT }, animatedStyle]}
+          accessible={false}
+        >
           <StaticMapPreview
-            
             center={universityCoords}
             width={IMAGE_WIDTH}
             height={IMAGE_HEIGHT}
@@ -346,7 +353,10 @@ export default function MapScreen() {
       </OverlayContent>
 
       {activeRoute && (
-        <NavigationFooter accesibilityRole = "Contentinfo" accessibilityLabel="Active navigation route information">
+        <NavigationFooter
+          accesibilityRole="Contentinfo"
+          accessibilityLabel="Active navigation route information"
+        >
           <LongCancelButton
             onPress={handleCancelRoute}
             accessible

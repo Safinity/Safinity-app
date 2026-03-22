@@ -7,7 +7,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { HeroBanner } from '../../components/HeroBanner';
 import calendarData from '../../data/calendar.json';
 
-
 /*
 WCAG Level A Compliance Summary
 

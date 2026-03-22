@@ -7,7 +7,7 @@ import { userImages } from '../assets/images/Users/userImages';
 import users from '@/data/users.json';
 import SearchBarQR from '@/components/SearchBarQR';
 import FriendActionButton from '@/components/FriendActionButton';
-import { TouchableOpacity, View } from 'react-native';
+import { TouchableOpacity } from 'react-native';
 import Head from 'expo-router/head';
 
 export default function AddFriendScreen() {
@@ -17,8 +17,6 @@ export default function AddFriendScreen() {
   const router = useRouter();
 
   if (!currentUser) return null;
-
-  // ALTERAÇÃO: Função para garantir que volta para a página de amigos
 
   const handleBack = () => {
     router.push('/(tabs)/friends');
@@ -37,12 +35,12 @@ export default function AddFriendScreen() {
     search.length === 0
       ? []
       : users.filter(u => {
-          const text = search.toLowerCase();
-          return (
-            u.id !== currentUser.id &&
-            (u.name.toLowerCase().includes(text) || u.username.toLowerCase().includes(text))
-          );
-        });
+        const text = search.toLowerCase();
+        return (
+          u.id !== currentUser.id &&
+          (u.name.toLowerCase().includes(text) || u.username.toLowerCase().includes(text))
+        );
+      });
 
   const isFriend = (id: string) => currentUser.friends.includes(id);
 
@@ -52,29 +50,38 @@ export default function AddFriendScreen() {
         <title>Add Friend | Safinity</title>
       </Head>
       <Stack.Screen options={{ title: 'Add Friend | Safinity', headerShown: false }} />
-      <HeaderContainer>
+
+      {/* Banner/Header region */}
+      <HeaderContainer
+        accessibilityRole="banner"
+      >
         <BackButton
           onPress={handleBack}
-          accessibilityLabel="Return to the previous page"
           accessibilityRole="button"
+          accessibilityLabel="Return to the previous page"
         >
           <Ionicons name="arrow-back" size={28} color="white" />
         </BackButton>
-        <Title>Add friend</Title>
+        <Title accessibilityRole="heading" accessibilityLevel={1}>Add friend</Title>
       </HeaderContainer>
 
-      <ScrollArea>
+      {/* Main content region */}
+      <MainContent
+        accessibilityRole="main"
+      >
+        {/* Search Bar */}
         <SearchBarQR
           value={search}
           onChangeText={setSearch}
           onSubmitEditing={handleSubmitSearch}
           onPressQR={() => router.push('/qrcode-scan')}
           placeholder="Find friends"
+          accessibilityLabel="Search friends by name or username"
         />
 
         {search.length === 0 ? (
           <>
-            <Subtitle>Recent searches</Subtitle>
+            <Subtitle accessibilityRole="heading" accessibilityLevel={2}>Recent searches</Subtitle>
             {recentSearches.length === 0 ? (
               <EmptyText>No recent searches</EmptyText>
             ) : (
@@ -85,7 +92,7 @@ export default function AddFriendScreen() {
                   accessibilityRole="button"
                   accessibilityLabel={`Search again for ${item}`}
                 >
-                  <Ionicons name="time-outline" size={18} color="white" />
+                  <Ionicons name="time-outline" size={18} color="white" accessibilityElementsHidden importantForAccessibility="no" />
                   <RecentText>{item}</RecentText>
                 </RecentItem>
               ))
@@ -93,9 +100,14 @@ export default function AddFriendScreen() {
           </>
         ) : (
           <>
-            <Subtitle>Results</Subtitle>
+            <Subtitle accessibilityRole="heading" accessibilityLevel={2}>Results</Subtitle>
             {filteredUsers.map(user => (
-              <TouchableOpacity key={user.id} onPress={() => router.push(`/${user.id}`)}>
+              <TouchableOpacity
+                key={user.id}
+                onPress={() => router.push(`/${user.id}`)}
+                accessibilityRole="button"
+                accessibilityLabel={`Open profile of ${user.name}`}
+              >
                 <UserRow>
                   <Avatar
                     source={userImages[user.image]}
@@ -106,21 +118,37 @@ export default function AddFriendScreen() {
                     <Username>@{user.username}</Username>
                   </Info>
                   {isFriend(user.id) ? (
-                    <FriendActionButton variant="remove" onPress={() => removeFriend(user.id)} />
+                    <FriendActionButton
+                      variant="remove"
+                      onPress={() => removeFriend(user.id)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Remove ${user.name} from friends`}
+                    />
                   ) : (
-                    <FriendActionButton variant="add" onPress={() => addFriend(user.id)} />
+                    <FriendActionButton
+                      variant="add"
+                      onPress={() => addFriend(user.id)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Add ${user.name} as a friend`}
+                    />
                   )}
                 </UserRow>
               </TouchableOpacity>
             ))}
           </>
         )}
-      </ScrollArea>
+      </MainContent>
     </Container>
   );
 }
 
 // ------------------------------------------------------ Styled Components ---------------------------------------------------
+
+const Container = styled.View`
+  flex: 1;
+  background-color: ${({ theme }) => theme.colors.background};
+  padding: 60px 30px 20px;
+`;
 
 const HeaderContainer = styled.View`
   margin-bottom: 30px;
@@ -138,13 +166,7 @@ const Title = styled.Text`
   font-weight: bold;
 `;
 
-const Container = styled.View`
-  flex: 1;
-  background-color: ${({ theme }) => theme.colors.background};
-  padding: 60px 30px 20px;
-`;
-
-const ScrollArea = styled.ScrollView.attrs({
+const MainContent = styled.ScrollView.attrs({
   showsVerticalScrollIndicator: false,
   bounces: false,
   contentContainerStyle: {

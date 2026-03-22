@@ -33,19 +33,29 @@ const Header: React.FC<HeaderProps> = ({
               <LogoImage
                 source={require('../../assets/logos/logo-header.png')}
                 resizeMode="contain"
+                accessibilityLabel="Safinity logo"
               />
             </LogoContainer>
 
             <IconRow>
-              <IconButton onPress={() => router.push('/notifications')}>
+              <IconButton
+                onPress={() => router.push('/notifications')}
+                accessibilityRole="button"
+                accessibilityLabel="Notifications"
+              >
                 <Ionicons
                   name="notifications-outline"
                   size={Width.iconHeader}
                   color={Colors.white}
+                  accessible={false}
                 />
               </IconButton>
 
-              <IconButton onPress={() => router.push('/perfil/profile')}>
+              <IconButton
+                onPress={() => router.push('/perfil/profile')}
+                accessibilityRole="button"
+                accessibilityLabel="Profile"
+              >
                 <Ionicons name="person-circle" size={Width.iconHeader} color={Colors.white} />
               </IconButton>
             </IconRow>
@@ -55,14 +65,18 @@ const Header: React.FC<HeaderProps> = ({
         {variant === 'back' && (
           <BackContainer>
             <BackButtonRow>
-              <IconButton onPress={() => router.back()}>
+              <IconButton
+                onPress={() => router.back()}
+                accessibilityRole="button"
+                accessibilityLabel="Go back"
+              >
                 <Ionicons name="arrow-back" size={Width.iconHeader} color={Colors.white} />
               </IconButton>
             </BackButtonRow>
 
             {title && (
               <TitleContainer>
-                <Title>{title}</Title>
+                <Title accessibilityRole="header">{title}</Title>
               </TitleContainer>
             )}
           </BackContainer>

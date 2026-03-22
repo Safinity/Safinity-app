@@ -3,7 +3,6 @@ import styled from 'styled-components';
 import { Colors, Fonts } from '../../theme/theme';
 import { latLngToPixelFromBounds } from './coordinates';
 
-/* 1. Definir a interface do objeto Stage */
 interface StageItem {
   id: string | number;
   name: string;
@@ -14,7 +13,6 @@ interface StageItem {
   height?: number;
 }
 
-/* 2. Definir a interface dos Bounds */
 interface MapBounds {
   north: number;
   south: number;
@@ -22,7 +20,6 @@ interface MapBounds {
   east: number;
 }
 
-/* 3. Tipar as Props do componente */
 interface MapStageProps {
   stage: StageItem;
   bounds: MapBounds;
@@ -33,23 +30,30 @@ interface MapStageProps {
 
 export const MapStage: React.FC<MapStageProps> = ({ stage, bounds, width, height, onPress }) => {
   const pos = latLngToPixelFromBounds(stage.lat, stage.lng, bounds, width, height);
-
   const stageW = stage.width || 90;
   const stageH = stage.height || 60;
 
   return (
     <StageBox
+      role="button"
+      tabIndex={0}
+      aria-label={`Stage: ${stage.name}`}
       style={{
-        /* CORREÇÃO: Usar / 2 para garantir que o centro do palco bate no ponto GPS */
         left: pos.x - stageW / 2,
         top: pos.y - stageH / 2,
         width: stageW,
         height: stageH,
-        transform: `rotate(${stage.rotation}deg)`,
+        transform: `rotate(${stage.rotation || 0}deg)`,
       }}
       onClick={e => {
         e.stopPropagation();
         onPress();
+      }}
+      onKeyDown={e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onPress();
+        }
       }}
     >
       <StageText>{stage.name}</StageText>
@@ -71,9 +75,15 @@ const StageBox = styled.div`
   user-select: none;
   pointer-events: auto;
   z-index: 10;
+  outline: none;
 
   &:hover {
     background-color: rgba(146, 66, 204, 0.1);
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${Colors.palette.primary.main};
+    outline-offset: 2px;
   }
 `;
 

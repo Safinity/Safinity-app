@@ -117,7 +117,6 @@ const ManageEventPage: React.FC = () => {
                       height={MAP_SIZE}
                       onPress={() => handleItemClick(pin)}
                       ariaLabel={`${pin.type} pin: ${pin.name}`}
-                      onKeyDown={handlePinStageKeyDown} // <-- handle Esc
                     />
                   ))}
 
@@ -138,7 +137,6 @@ const ManageEventPage: React.FC = () => {
                       x={selectedItem.px}
                       y={selectedItem.py}
                       title={selectedItem.name}
-                      role="region"
                       aria-live="polite"
                     />
                   )}

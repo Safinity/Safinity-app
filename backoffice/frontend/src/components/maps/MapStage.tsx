@@ -26,9 +26,17 @@ interface MapStageProps {
   width: number;
   height: number;
   onPress: () => void;
+  onKeyDown?: React.KeyboardEventHandler<HTMLDivElement>;
 }
 
-export const MapStage: React.FC<MapStageProps> = ({ stage, bounds, width, height, onPress }) => {
+export const MapStage: React.FC<MapStageProps> = ({
+  stage,
+  bounds,
+  width,
+  height,
+  onPress,
+  onKeyDown,
+}) => {
   const pos = latLngToPixelFromBounds(stage.lat, stage.lng, bounds, width, height);
   const stageW = stage.width || 90;
   const stageH = stage.height || 60;
@@ -54,6 +62,7 @@ export const MapStage: React.FC<MapStageProps> = ({ stage, bounds, width, height
           e.preventDefault();
           onPress();
         }
+        onKeyDown?.(e); // ✅ call extra handler if provided
       }}
     >
       <StageText>{stage.name}</StageText>
@@ -82,7 +91,7 @@ const StageBox = styled.div`
   }
 
   &:focus-visible {
-    outline: 2px solid ${Colors.palette.primary.main};
+    outline: 2px solid ${Colors.palette.primary.light40};
     outline-offset: 2px;
   }
 `;

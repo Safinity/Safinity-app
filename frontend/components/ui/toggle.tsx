@@ -1,4 +1,3 @@
-// components/Toggle.tsx (com animação)
 import React, { useEffect, useRef } from 'react';
 import { Animated } from 'react-native';
 import styled from 'styled-components/native';
@@ -38,6 +37,12 @@ const Toggle: React.FC<ToggleProps> = ({
           onPress={disabled ? undefined : onToggle}
           active={isEnabled}
           disabled={disabled}
+          accessibilityRole="switch"
+          accessibilityLabel={label}
+          accessibilityState={{
+            checked: isEnabled,
+            disabled: disabled,
+          }}
         >
           <AnimatedKnob style={{ left: knobLeft }} active={isEnabled} disabled={disabled} />
         </ToggleSwitch>

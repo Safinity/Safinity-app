@@ -1,69 +1,73 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, TouchableOpacity, View, Text } from 'react-native';
+import { StyleSheet, View, Animated, TouchableOpacity } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, Stack } from 'expo-router';
+import Head from 'expo-router/head';
+import Header from '../components/ui/header';
 
-// --- Styled Components ---
 const Container = styled.View`
   flex: 1;
   background-color: ${({ theme }) => theme.colors.background};
-  padding: 60px 30px 20px;
-`;
-
-const Header = styled.View`
-  margin-bottom: 30px;
-`;
-
-const BackButton = styled.TouchableOpacity`
-  margin-bottom: 20px;
-  width: 40px;
-`;
-
-// Alterado para usar a tipografia 'h' do teu tema
-const Title = styled.Text`
-  color: ${({ theme }) => theme.colors.white};
-  font-family: ${({ theme }) => theme.text.titulo.h1.fontFamily};
-  font-size: ${({ theme }) => theme.text.titulo.h1.fontSize}px;
-  font-weight: bold;
+  padding: 0 ${({ theme }) => theme.spacing.margemLateral}px;
 `;
 
 const ToggleContainer = styled.View`
   flex-direction: row;
-  background-color: #ffffff;
-  border-radius: 14px;
-  padding: 6px;
-  margin-bottom: 40px;
+  background-color: ${({ theme }) => theme.colors.white};
+  border-radius: ${({ theme }) => theme.borderRadius.large}px;
+  height: ${({ theme }) => theme.height.sm}px;
+  margin-top: ${({ theme }) => theme.spacing.xxxl}px;
+  margin-bottom: ${({ theme }) => theme.spacing.xl}px;
+  position: relative;
+  overflow: hidden;
 `;
 
-const TabButton = styled.TouchableOpacity<{ active: boolean }>`
+const Slider = styled(Animated.View)`
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50.5%;
+  background-color: ${({ theme }) => theme.colors.primary};
+  border-radius: ${({ theme }) => theme.borderRadius.large}px;
+`;
+
+const TabButton = styled(TouchableOpacity)<{ first: boolean; last: boolean }>`
   flex: 1;
-  padding: 12px;
-  border-radius: 10px;
+  justify-content: center;
   align-items: center;
-  background-color: ${({ active, theme }) => (active ? theme.colors.primary : 'transparent')};
 `;
 
 const TabText = styled.Text<{ active: boolean }>`
-  color: ${({ active, theme }) => (active ? '#FFFFFF' : theme.colors.background)};
-  font-weight: 600;
-  font-size: 16px;
+  color: ${({ active, theme }) => (active ? theme.colors.white : theme.colors.background)};
+  ${({ theme }) => theme.text.botao};
 `;
 
 const CameraWrapper = styled.View`
   flex: 1;
-  border-radius: 30px;
+  border-radius: ${({ theme }) => theme.borderRadius.xlarge}px;
   overflow: hidden;
-  margin-bottom: 40px;
-  background-color: #000;
+  margin-bottom: ${({ theme }) => theme.spacing.xl}px;
+  background-color: ${({ theme }) => theme.colors.background};
 `;
 
 const QRCodeContainer = styled.View`
   flex: 1;
   justify-content: center;
   align-items: center;
+  margin-bottom: ${({ theme }) => theme.spacing.xxl}px;
 `;
+
+const HelperText = styled.Text`
+  color: ${({ theme }) => theme.colors.white};
+  margin-top: ${({ theme }) => theme.spacing.lg}px;
+  ${({ theme }) => theme.text.corpo.corpoTexto};
+  opacity: 0.8;
+  text-align: center;
+`;
+
+// --- Componente Principal ---
 
 export default function QRCodeScreen() {
   const [mode, setMode] = useState<'scan' | 'my'>('scan');
@@ -71,9 +75,24 @@ export default function QRCodeScreen() {
   const [scanned, setScanned] = useState(false);
   const router = useRouter();
 
+  const slideAnim = useState(new Animated.Value(0))[0];
+
   useEffect(() => {
     requestPermission();
   }, []);
+
+  const handleToggle = (newMode: 'scan' | 'my') => {
+    setMode(newMode);
+    Animated.spring(slideAnim, {
+      toValue: newMode === 'scan' ? 0 : 1,
+      useNativeDriver: false,
+    }).start();
+  };
+
+  const sliderTranslate = slideAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0%', '100%'],
+  });
 
   const handleBarCodeScanned = ({ data }: { data: string }) => {
     setScanned(true);
@@ -83,18 +102,21 @@ export default function QRCodeScreen() {
 
   return (
     <Container>
-      <Header>
-        <BackButton onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={28} color="white" />
-        </BackButton>
-        <Title>Profile&apos;s QR Code</Title>
-      </Header>
+      <Head>
+        <title>QR Code | Safinity</title>
+      </Head>
+      <Stack.Screen options={{ title: 'QR Code | Safinity', headerShown: false }} />
+
+      <Header variant="back" title="Profile’s QR Code" />
 
       <ToggleContainer>
-        <TabButton active={mode === 'scan'} onPress={() => setMode('scan')}>
+        <Slider style={{ transform: [{ translateX: sliderTranslate }] }} />
+
+        <TabButton first onPress={() => handleToggle('scan')}>
           <TabText active={mode === 'scan'}>Scan QR Code</TabText>
         </TabButton>
-        <TabButton active={mode === 'my'} onPress={() => setMode('my')}>
+
+        <TabButton last onPress={() => handleToggle('my')}>
           <TabText active={mode === 'my'}>My QR Code</TabText>
         </TabButton>
       </ToggleContainer>
@@ -107,24 +129,13 @@ export default function QRCodeScreen() {
             barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
           />
           <View style={styles.overlay}>
-            <Ionicons name="scan-outline" size={320} color="white" style={{ opacity: 0.9 }} />
+            <Ionicons name="scan-outline" size={300} color="white" style={{ opacity: 0.9 }} />
           </View>
         </CameraWrapper>
       ) : (
         <QRCodeContainer>
-          <Ionicons name="qr-code-outline" size={300} color="white" />
-
-          <Text
-            style={{
-              color: 'white',
-              marginTop: 30,
-              fontSize: 18,
-              opacity: 0.8,
-              textAlign: 'center',
-            }}
-          >
-            Share your QR Code with friends
-          </Text>
+          <Ionicons name="qr-code-outline" size={260} color="white" />
+          <HelperText>Share your QR Code with friends</HelperText>
         </QRCodeContainer>
       )}
     </Container>

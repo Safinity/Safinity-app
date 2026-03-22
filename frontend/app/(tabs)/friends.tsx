@@ -13,17 +13,14 @@ import PingFriend from '@/components/VibrateButton';
 import RemoveFriend from '@/components/FriendActionButton';
 
 export default function FriendsScreen() {
-  // Estado que guarda o utilizador autenticado
   const [currentUser, setCurrentUser] = useState<any>(null);
 
-  // Carrega o utilizador atual com base no ID guardado no auth.json
   useEffect(() => {
     const currentId = auth.currentUserId;
     const foundUser = users.find(u => u.id === currentId);
     setCurrentUser(foundUser);
   }, []);
 
-  // Enquanto os dados do utilizador não estiverem carregados, mostra um loading simples
   if (!currentUser) {
     return (
       <Container>
@@ -32,7 +29,6 @@ export default function FriendsScreen() {
     );
   }
 
-  // IDs dos amigos do utilizador atual
   const friendIds = currentUser.friends;
   const friends = users.filter(u => friendIds.includes(u.id));
   const onSameEvent = friends.filter(f => f.currentEventId === currentUser.currentEventId);
@@ -61,12 +57,12 @@ export default function FriendsScreen() {
 
         <SectionSubtitle>On the same event</SectionSubtitle>
         {onSameEvent.map(friend => (
-          <TouchableOpacity
-            key={friend.id}
-            onPress={() => router.push(`/friends/${friend.id}`)} // Navigate to friend profile
-          >
+          <TouchableOpacity key={friend.id} onPress={() => router.push(`/friends/${friend.id}`)}>
             <FriendRow>
-              <Avatar source={userImages[friend.image]} />
+              <Avatar
+                source={userImages[friend.image]}
+                accessibilityLabel={`Profile picture of ${friend.name}`}
+              />
               <Info>
                 <Name>{friend.name}</Name>
                 <Username>@{friend.username}</Username>
@@ -88,12 +84,12 @@ export default function FriendsScreen() {
 
         <SectionSubtitle>Other Friends</SectionSubtitle>
         {otherFriends.map(friend => (
-          <TouchableOpacity
-            key={friend.id}
-            onPress={() => router.push(`/friends/${friend.id}`)} // Navigate to friend profile
-          >
+          <TouchableOpacity key={friend.id} onPress={() => router.push(`/friends/${friend.id}`)}>
             <FriendRow>
-              <Avatar source={userImages[friend.image]} />
+              <Avatar
+                source={userImages[friend.image]}
+                accessibilityLabel={`Profile picture of ${friend.name}`}
+              />
               <Info>
                 <Name>{friend.name}</Name>
                 <Username>@{friend.username}</Username>
@@ -109,29 +105,29 @@ export default function FriendsScreen() {
   );
 }
 
-/* ----------------------------- styled components ----------------------------- */
-
 const Container = styled.View`
   flex: 1;
   background-color: ${({ theme }) => theme.colors.background};
-  padding: ${({ theme }) => theme.spacing.margemLateral}px;
+  padding-horizontal: ${({ theme }) => theme.spacing.margemLateral}px;
+  padding-top: ${({ theme }) => theme.spacing.xl}px;
 `;
 
-const ScrollArea = styled.ScrollView.attrs({
+const ScrollArea = styled.ScrollView.attrs(({ theme }) => ({
   showsVerticalScrollIndicator: false,
   bounces: false,
   contentContainerStyle: {
-    paddingTop: 80,
-    paddingBottom: 100, // Aumentado para dar espaço extra no final (ajuste conforme necessário)
+    paddingTop: theme.height.md,
+    paddingBottom: theme.height.md,
   },
-})`
+}))`
   flex: 1;
 `;
 
 const LoadingText = styled.Text`
-  margin-top: 50px;
+  margin-top: ${({ theme }) => theme.spacing.xl}px;
   text-align: center;
-  font-size: 16px;
+  font-size: ${({ theme }) => theme.fonts.sizes.base}px;
+  color: ${({ theme }) => theme.colors.white};
 `;
 
 const SectionTitle = styled.View`
@@ -143,33 +139,34 @@ const Title = styled.Text`
   font-size: ${({ theme }) => theme.text.titulo.h.fontSize}px;
   font-family: ${({ theme }) => theme.text.titulo.h.fontFamily};
   color: ${({ theme }) => theme.colors.white};
-  margin-bottom: 16px;
+  margin-bottom: ${({ theme }) => theme.spacing.md}px;
 `;
 
 const SectionSubtitle = styled.Text`
   color: ${({ theme }) => theme.colors.palette.primary.light50};
   font-size: ${({ theme }) => theme.text.titulo.h3.fontSize}px;
   font-family: ${({ theme }) => theme.text.titulo.h3.fontFamily};
-  margin-bottom: 16px;
+  margin-top: ${({ theme }) => theme.spacing.sm}px;
+  margin-bottom: ${({ theme }) => theme.spacing.sm}px;
 `;
 
 const FriendRow = styled.View`
   flex-direction: row;
   align-items: center;
-  margin-top: 10px;
-  margin-bottom: 10px;
+  margin-top: ${({ theme }) => theme.spacing.sm}px;
+  margin-bottom: ${({ theme }) => theme.spacing.md}px;
 `;
 
 const Avatar = styled.Image`
-  width: 70px;
-  height: 70px;
+  width: ${({ theme }) => theme.height.sm}px;
+  height: ${({ theme }) => theme.height.sm}px;
   border-radius: ${({ theme }) => theme.borderRadius.round}px;
-  background-color: #ccc;
+  background-color: ${({ theme }) => theme.colors.neutralGray};
 `;
 
 const Info = styled.View`
   flex: 1;
-  margin-left: 12px;
+  margin-left: ${({ theme }) => theme.spacing.sm}px;
 `;
 
 const Name = styled.Text`
@@ -182,12 +179,11 @@ const Username = styled.Text`
   font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
   font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
   color: ${({ theme }) => theme.colors.white};
-  padding-right: 4px;
+  padding-right: ${({ theme }) => theme.spacing.xs}px;
 `;
 
 const Buttons = styled.View`
   flex-direction: row;
-  justify-content: space-between;
-  gap: 6px;
-  padding-left: 2px;
+  gap: ${({ theme }) => theme.spacing.xs}px;
+  padding-left: ${({ theme }) => theme.spacing.xxs}px;
 `;

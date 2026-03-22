@@ -21,10 +21,12 @@ const Link = styled.Text`
 export default function Checkbox({ checked, onToggle }: any) {
   return (
     <Row>
-      <TouchableOpacity onPress={onToggle} style={{ marginRight: 8 }}>
-        <Ionicons name={checked ? 'checkbox' : 'square-outline'} size={22} color="#E9D9F5" />
-      </TouchableOpacity>
-
+      <Ionicons
+        name={checked ? 'checkbox' : 'square-outline'}
+        size={22}
+        color="#E9D9F5"
+        style={{ marginRight: 8 }}
+      />
       <Label>
         I agree to the <Link>Terms of use</Link> and <Link>Privacy Policy</Link>.
       </Label>

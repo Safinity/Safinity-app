@@ -1,0 +1,28 @@
+
+services:
+  database:
+    image: postgis/postgis:17-3.5-alpine
+    platform: linux/amd64
+    container_name: safinity-db
+    restart: always
+
+    environment:
+      POSTGRES_DB: safinity
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db:/docker-entrypoint-initdb.d
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d safinity"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:

@@ -1,27 +1,27 @@
 import React from 'react';
 import styled from 'styled-components/native';
-import { Colors, BorderRadius, Spacing } from '../../constants/theme';
+import { Height, BorderRadius, TextStyles } from '../../constants/theme';
 
 export type FilterTagsVariant = 'homepage' | 'mapa';
 
-const TAG_THEME = {
+const getTagTheme = (theme: any) => ({
   homepage: {
-    color: Colors.grayNavbar,
-    selectedColor: Colors.primary,
-    textColor: Colors.inactive,
-    selectedTextColor: Colors.white,
-    paddingLeft: 40,
-    paddingRight: 40,
+    color: theme.colors.grayNavbar,
+    selectedColor: theme.colors.primary,
+    textColor: theme.colors.white,
+    selectedTextColor: theme.colors.white,
+    paddingLeft: theme.spacing.margemLateral,
+    paddingRight: theme.spacing.lg,
   },
   mapa: {
-    color: Colors.background,
-    selectedColor: Colors.primary,
-    textColor: Colors.inactive,
-    selectedTextColor: Colors.white,
-    paddingLeft: 40,
-    paddingRight: 40,
+    color: theme.colors.background,
+    selectedColor: theme.colors.primary,
+    textColor: theme.colors.white,
+    selectedTextColor: theme.colors.white,
+    paddingLeft: theme.spacing.lg,
+    paddingRight: theme.spacing.lg,
   },
-} as const;
+});
 
 interface FilterTagsProps {
   tags: string[];
@@ -32,36 +32,53 @@ interface FilterTagsProps {
   showsHorizontalScrollIndicator?: boolean;
 }
 
-const TagsScrollView = styled.ScrollView.attrs(props => ({
-  horizontal: true,
-  showsHorizontalScrollIndicator: false,
-  contentContainerStyle: props.contentContainerStyle,
-}))`
+const TagsScrollView = styled.ScrollView.attrs<{ variant: FilterTagsVariant }>(
+  ({ theme, variant }) => {
+    const tagTheme = getTagTheme(theme)[variant];
+    return {
+      horizontal: true,
+      showsHorizontalScrollIndicator: false,
+      contentContainerStyle: {
+        paddingLeft: tagTheme.paddingLeft,
+        paddingRight: tagTheme.paddingRight,
+      },
+    };
+  },
+)`
   flex-grow: 0;
-  margin-top: ${Spacing.md}px;
+  margin-top: ${({ theme }) => theme.spacing.md}px;
 `;
 
 const TagsContainer = styled.View`
   flex-direction: row;
-  gap: ${Spacing.sm}px;
+  gap: ${({ theme }) => theme.spacing.sm}px;
 `;
 
-const Tag = styled.Pressable<{ selected: boolean; color: string; selectedColor: string }>`
-  background-color: ${({ selected, color, selectedColor }) => (selected ? selectedColor : color)};
-  padding: ${Spacing.sm}px 18px;
-  border-radius: ${BorderRadius.round}px;
+const Tag = styled.Pressable<{ selected: boolean; variant: FilterTagsVariant }>`
+  padding: ${({ theme }) => theme.spacing.sm}px ${({ theme }) => theme.spacing.md}px;
+  border-radius: ${({ theme }) => theme.borderRadius.round}px;
   border-width: 1px;
-  border-color: ${({ selected, selectedColor }) => (selected ? selectedColor : 'transparent')};
-  min-height: 42px;
+  min-height: ${({ theme }) => theme.height.tam_42}px;
   justify-content: center;
   align-items: center;
+
+  ${({ theme, selected, variant }) => {
+    const tagTheme = getTagTheme(theme)[variant];
+    return `
+      background-color: ${selected ? tagTheme.selectedColor : tagTheme.color};
+      border-color: ${selected ? tagTheme.selectedColor : 'transparent'};
+    `;
+  }}
 `;
 
-const TagText = styled.Text<{ selected: boolean; textColor: string; selectedTextColor: string }>`
-  color: ${({ selected, textColor, selectedTextColor }) =>
-    selected ? selectedTextColor : textColor};
-  font-weight: 500;
-  font-size: 14px;
+const TagText = styled.Text<{ selected: boolean; variant: FilterTagsVariant }>`
+  ${({ theme }) => TextStyles.textoFiltros};
+  ${({ theme, selected, variant }) => {
+    const tagTheme = getTagTheme(theme)[variant];
+    return `
+      color: ${selected ? tagTheme.selectedTextColor : tagTheme.textColor};
+    `;
+  }}
 `;
 
 const FilterTags: React.FC<FilterTagsProps> = ({
@@ -72,34 +89,19 @@ const FilterTags: React.FC<FilterTagsProps> = ({
   style,
   showsHorizontalScrollIndicator = false,
 }) => {
-  const theme = TAG_THEME[variant];
-
   return (
     <TagsScrollView
+      variant={variant}
       style={style}
       showsHorizontalScrollIndicator={showsHorizontalScrollIndicator}
-      contentContainerStyle={{
-        paddingLeft: theme.paddingLeft,
-        paddingRight: theme.paddingRight,
-      }}
     >
       <TagsContainer>
         {tags.map(tag => {
           const isSelected = selectedTags.includes(tag);
 
           return (
-            <Tag
-              key={tag}
-              selected={isSelected}
-              color={theme.color}
-              selectedColor={theme.selectedColor}
-              onPress={() => onTagPress(tag)}
-            >
-              <TagText
-                selected={isSelected}
-                textColor={theme.textColor}
-                selectedTextColor={theme.selectedTextColor}
-              >
+            <Tag key={tag} selected={isSelected} variant={variant} onPress={() => onTagPress(tag)}>
+              <TagText selected={isSelected} variant={variant}>
                 {tag}
               </TagText>
             </Tag>

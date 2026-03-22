@@ -3,15 +3,15 @@ import styled from 'styled-components/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { Colors, Spacing } from '../constants/theme';
+
 import { eventImages } from '../assets/images/Events';
-import { calendarImages } from '../assets/images/Calendar/index';
+import { calendarImages } from '../assets/images/Calendar';
 
 const BannerContainer = styled.ImageBackground.attrs({
   resizeMode: 'cover',
 })`
   width: 100%;
-  height: 330px;
+  height: ${({ theme }) => theme.height.xl}px;
   justify-content: flex-end;
 `;
 
@@ -22,7 +22,7 @@ const HeroGradient = styled(LinearGradient).attrs(({ theme }) => ({
 }))`
   width: 100%;
   height: 100%;
-  padding: 20px 25px 20px 40px;
+  padding: ${({ theme }) => theme.spacing.lg}px ${({ theme }) => theme.spacing.margemLateral}px;
   justify-content: flex-end;
 `;
 
@@ -35,62 +35,58 @@ const TitleRow = styled.View`
 
 const EventName = styled.Text`
   color: ${({ theme }) => theme.colors.white};
-  font-family: ${({ theme }) => theme.text.titulo.h.fontFamily};
-  font-size: 26px;
-  font-weight: bold;
+  ${({ theme }) => theme.text.titulo.h};
 `;
 
 const InfoRow = styled.View`
   flex-direction: row;
   align-items: center;
-  margin-top: 12px;
+  margin-top: ${({ theme }) => theme.spacing.sm}px;
 `;
 
 const InfoItem = styled.View`
   flex-direction: row;
   align-items: center;
-  margin-right: 25px;
+  margin-right: ${({ theme }) => theme.spacing.lg}px;
 `;
 
 const InfoText = styled.Text`
   color: ${({ theme }) => theme.colors.white};
-  font-family: ${({ theme }) => theme.text.textoPequeno.fontFamily};
-  font-size: 14px;
-  margin-left: 8px;
-  font-weight: 300;
+  margin-left: ${({ theme }) => theme.spacing.sm}px;
+  ${({ theme }) => theme.text.textoPequeno};
+  opacity: 0.9;
 `;
 
 const AddCalendarButton = styled.TouchableOpacity`
-  background-color: #f3e8ff;
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
+  background-color: ${({ theme }) => theme.colors.palette.primary.light90};
+  width: ${({ theme }) => theme.height.sm}px;
+  height: ${({ theme }) => theme.height.sm}px;
+  border-radius: ${({ theme }) => theme.borderRadius.medium}px;
   justify-content: center;
   align-items: center;
 `;
 
 const StatusTag = styled.Text`
-  color: ${Colors.white};
-  font-size: 24px;
-  font-weight: 300;
+  color: ${({ theme }) => theme.colors.white};
+  ${({ theme }) => theme.text.textoPequeno};
+  opacity: 0.8;
 `;
 
 const ViewMapLink = styled.TouchableOpacity`
-  margin-top: ${Spacing.sm}px;
+  margin-top: ${({ theme }) => theme.spacing.sm}px;
 `;
 
 const MapText = styled.Text`
-  color: ${Colors.white};
-  font-size: 16px;
+  color: ${({ theme }) => theme.colors.white};
+  ${({ theme }) => theme.text.corpo.corpoTexto};
   text-decoration-line: underline;
   opacity: 0.8;
 `;
 
 const DescriptionText = styled.Text`
   color: ${({ theme }) => theme.colors.white};
-  font-family: ${({ theme }) => theme.text.textoPequeno.fontFamily};
-  font-size: 14px;
-  margin-top: 4px;
+  margin-top: ${({ theme }) => theme.spacing.xs}px;
+  ${({ theme }) => theme.text.textoPequeno};
   opacity: 0.9;
 `;
 
@@ -120,22 +116,35 @@ export const HeroBanner = ({
   const isList = !isDetail && title;
   const isHome = !isDetail && !title && event;
 
+  const accessibleLabel = `Banner de destaque do evento: ${event?.name || event?.title || title || 'Evento'}`;
+
   return (
-    <BannerContainer source={imageSource} imageStyle={{ borderRadius: 0 }}>
-      <HeroGradient>
+    <BannerContainer source={imageSource} accessible={false}>
+      <HeroGradient
+        accessible={true}
+        accessibilityLabel={accessibleLabel}
+        accessibilityRole="header"
+        // @ts-ignore
+        aria-label={accessibleLabel}
+      >
         {isCalendar && (
           <>
             <TitleRow>
               <EventName style={{ flex: 1, marginRight: 15 }} numberOfLines={2}>
                 {event.title}
               </EventName>
+
               <AddCalendarButton
                 activeOpacity={0.8}
                 onPress={() => router.push('/(tabs)/my-calendar')}
+                accessible={true}
+                accessibilityLabel="Adicionar ao meu calendário"
+                accessibilityRole="button"
               >
                 <Ionicons name="calendar-outline" size={26} color="#9333EA" />
               </AddCalendarButton>
             </TitleRow>
+
             <InfoRow>
               <InfoItem>
                 <Ionicons name="time-outline" size={18} color="white" />
@@ -143,6 +152,7 @@ export const HeroBanner = ({
                   {event.date}, {event.startTime} - {event.endTime}
                 </InfoText>
               </InfoItem>
+
               <InfoItem>
                 <Ionicons name="location-outline" size={18} color="white" />
                 <InfoText>{event.location}</InfoText>
@@ -154,11 +164,13 @@ export const HeroBanner = ({
         {isEventDetail && (
           <>
             <EventName>{event.name}</EventName>
+
             <InfoRow>
               <InfoItem>
                 <Ionicons name="calendar-outline" size={20} color="white" />
                 <InfoText>{event.start_date}</InfoText>
               </InfoItem>
+
               <InfoItem>
                 <Ionicons name="time-outline" size={20} color="white" />
                 <InfoText>
@@ -176,12 +188,12 @@ export const HeroBanner = ({
           </>
         )}
 
-        {/* ALTERAÇÃO AQUI: Link para o mapa adicionado ao isHome */}
         {isHome && (
           <>
             <EventName>
               {event.name}, <StatusTag>now</StatusTag>
             </EventName>
+
             {!hideMap && (
               <ViewMapLink onPress={() => router.push('/(tabs)/map')}>
                 <MapText>View the map</MapText>

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { View, StatusBar } from 'react-native';
-import styled from 'styled-components/native';
+import styled, { useTheme } from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, Stack } from 'expo-router';
+import Head from 'expo-router/head';
 
 import Header from '../../components/ui/header';
 import SearchInput from '../../components/ui/SearchInput';
@@ -21,54 +22,57 @@ const ScrollContent = styled.ScrollView.attrs({
 })`
   flex: 1;
   padding-horizontal: ${({ theme }) => theme.spacing.margemLateral}px;
+  padding-top: ${({ theme }) => theme.spacing.md}px;
+  padding-bottom: ${({ theme }) => theme.spacing.xxl}px;
 `;
 
-// Criei este espaço para empurrar o conteúdo para baixo do Header de forma controlada
 const Spacer = styled.View`
-  height: 60px;
+  height: ${({ theme }) => theme.spacing.xl}px;
 `;
 
 const EventSelector = styled.TouchableOpacity`
   background-color: ${({ theme }) => theme.colors.grayNavbar};
-  padding: 15px;
+  padding-vertical: ${({ theme }) => theme.spacing.md}px;
+  padding-horizontal: ${({ theme }) => theme.spacing.md}px;
   border-radius: ${({ theme }) => theme.borderRadius.medium}px;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  margin-top: 0px;
-  margin-bottom: 25px;
+  margin-bottom: ${({ theme }) => theme.spacing.lg}px;
 `;
 
 const SelectorLabel = styled.Text`
   color: ${({ theme }) => theme.colors.white};
   font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
-  font-size: 16px;
+  font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
 `;
 
 const DateHeader = styled.Text`
   color: ${({ theme }) => theme.colors.inactive};
   font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
-  font-size: 14px;
-  margin-top: 30px;
-  margin-bottom: 15px;
+  font-size: ${({ theme }) => theme.text.textoPequeno.fontSize}px;
+  margin-top: ${({ theme }) => theme.spacing.lg}px;
+  margin-bottom: ${({ theme }) => theme.spacing.sm}px;
   text-transform: capitalize;
 `;
 
 const MyCalendarButton = styled.TouchableOpacity`
   position: absolute;
-  bottom: 110px;
+  bottom: ${({ theme }) => theme.spacing.xxl}px;
   align-self: center;
   background-color: ${({ theme }) => theme.colors.primary};
-  padding: 14px 30px;
+  padding-vertical: ${({ theme }) => theme.spacing.sm}px;
+  padding-horizontal: ${({ theme }) => theme.spacing.xl}px;
   border-radius: ${({ theme }) => theme.borderRadius.round}px;
   elevation: 5;
   z-index: 10;
 `;
 
 const ButtonText = styled.Text`
-  color: white;
-  font-weight: bold;
+  color: ${({ theme }) => theme.colors.white};
   font-family: ${({ theme }) => theme.text.botao.fontFamily};
+  font-size: ${({ theme }) => theme.text.botao.fontSize}px;
+  line-height: ${({ theme }) => theme.text.botao.lineHeight}px;
 `;
 
 const HeaderWrapper = styled.View<{ topInset: number }>`
@@ -76,11 +80,18 @@ const HeaderWrapper = styled.View<{ topInset: number }>`
   background-color: ${({ theme }) => theme.colors.background};
 `;
 
+const SpaceBottom = styled.View<{ topInset: number }>`
+  height: ${({ theme }) => theme.height.bottomMargem}px;
+`;
+
 export default function CalendarScreen() {
+  const theme = useTheme();
+
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [searchValue, setSearchValue] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Stages');
+
   const categories = ['Stages', 'Workshops', 'Podcasts', 'Business'];
 
   const filteredActivities = calendarData.activities.filter(activity => {
@@ -91,6 +102,11 @@ export default function CalendarScreen() {
 
   return (
     <Container>
+      <Head>
+        <title>Calendar | Safinity</title>
+      </Head>
+      <Stack.Screen options={{ title: 'Calendar | Safinity', headerShown: false }} />
+
       <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
 
       <HeaderWrapper topInset={insets.top}>
@@ -98,7 +114,6 @@ export default function CalendarScreen() {
       </HeaderWrapper>
 
       <ScrollContent>
-        {/* Adicionei este Spacer para o conteúdo não ficar colado ao Header */}
         <Spacer />
 
         <EventSelector activeOpacity={0.7}>
@@ -113,8 +128,12 @@ export default function CalendarScreen() {
           placeholder="Find your next activity"
         />
 
-        {/* Revertido para o teu estilo original: marginHorizontal -40 */}
-        <View style={{ marginTop: 0, marginHorizontal: -40 }}>
+        <View
+          style={{
+            marginTop: 0,
+            marginHorizontal: -theme.spacing.margemLateral,
+          }}
+        >
           <FilterTags
             tags={categories}
             selectedTags={[selectedCategory]}
@@ -136,7 +155,7 @@ export default function CalendarScreen() {
           <DateHeader style={{ textAlign: 'center', marginTop: 50 }}>No events found</DateHeader>
         )}
 
-        <View style={{ height: 180 }} />
+        <SpaceBottom />
       </ScrollContent>
 
       <MyCalendarButton activeOpacity={0.8} onPress={() => router.push('/(tabs)/my-calendar')}>

@@ -59,8 +59,8 @@ const AvatarContainer = styled.View`
 `;
 
 const AvatarCircle = styled.View`
-  width: 160px;
-  height: 160px;
+  width: ${({ theme }) => theme.height.profileAvatar}px;
+  height: ${({ theme }) => theme.height.profileAvatar}px;
   border-radius: 80px;
   background-color: ${({ theme }) => theme.colors.background};
   overflow: hidden;

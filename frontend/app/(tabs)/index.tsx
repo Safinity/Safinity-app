@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { FlatList, StatusBar, Pressable } from 'react-native'; // Adicionado Pressable
+import { FlatList, StatusBar, Pressable } from 'react-native';
 import styled from 'styled-components/native';
-import { useRouter } from 'expo-router'; // 1. Importar o hook de navegação
+import { useRouter, Stack } from 'expo-router';
+import Head from 'expo-router/head';
 
 import Header from '../../components/ui/header';
 import SearchInput from '../../components/ui/SearchInput';
@@ -10,55 +11,8 @@ import { HeroBanner } from '../../components/HeroBanner';
 import { EventCard } from '../../components/EventCard';
 import eventsData from '../../data/events.json';
 
-const Container = styled.View`
-  flex: 1;
-  background-color: ${({ theme }) => theme.colors.background};
-`;
-
-const Content = styled.ScrollView.attrs({
-  showsVerticalScrollIndicator: false,
-  bounces: false,
-})`
-  flex: 1;
-`;
-
-const PaddedContent = styled.View`
-  padding: 0 ${({ theme }) => theme.spacing.margemLateral}px;
-`;
-
-const SectionHeader = styled.View`
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 40px;
-  margin-bottom: ${({ theme }) => theme.spacing.md}px;
-`;
-
-const SectionTitle = styled.Text`
-  color: ${({ theme }) => theme.colors.white};
-  /* Token: h */
-  font-family: ${({ theme }) => theme.text.titulo.h.fontFamily};
-  font-size: ${({ theme }) => theme.text.titulo.h.fontSize}px;
-`;
-
-// 2. Ajustei o SeeMore para parecer um botão (adicionado padding para facilitar o toque)
-const SeeMore = styled.Text`
-  /* Token: corpo.corpoTexto */
-  font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
-  font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
-  line-height: ${({ theme }) => theme.text.corpo.corpoTexto.lineHeight}px;
-
-  /* Cor e espaçamento */
-  color: ${({ theme }) => theme.colors.primary_50};
-  padding: 5px;
-`;
-
-const SearchWrapper = styled.View`
-  margin-top: ${({ theme }) => theme.spacing.lg}px;
-`;
-
 export default function HomeScreen() {
-  const router = useRouter(); // 3. Inicializar o router
+  const router = useRouter();
   const [searchValue, setSearchValue] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Musical');
 
@@ -71,6 +25,11 @@ export default function HomeScreen() {
 
   return (
     <Container>
+      <Head>
+        <title>Home | Safinity</title>
+      </Head>
+      <Stack.Screen options={{ title: 'Home | Safinity', headerShown: false }} />
+
       <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
       <Header />
 
@@ -92,10 +51,20 @@ export default function HomeScreen() {
 
         <PaddedContent>
           <SectionHeader>
-            <SectionTitle>{selectedCategory} events</SectionTitle>
-
-            {/* 4. Envolver o texto num Pressable para capturar o clique */}
-            <Pressable onPress={() => router.push('/events-list')}>
+            <SectionTitle
+              accessible={true}
+              accessibilityRole="header"
+              // @ts-ignore - Indica ao browser que este é um título de nível 2
+              aria-level="2"
+            >
+              {selectedCategory} events
+            </SectionTitle>
+            <Pressable
+              onPress={() => router.push('/events-list')}
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel={`Ver mais eventos de ${selectedCategory}`}
+            >
               <SeeMore>See more</SeeMore>
             </Pressable>
           </SectionHeader>
@@ -119,3 +88,50 @@ export default function HomeScreen() {
     </Container>
   );
 }
+
+const Container = styled.View`
+  flex: 1;
+  background-color: ${({ theme }) => theme.colors.background};
+`;
+
+const Content = styled.ScrollView.attrs({
+  showsVerticalScrollIndicator: false,
+  bounces: false,
+})`
+  flex: 1;
+`;
+
+const PaddedContent = styled.View`
+  padding: 0 ${({ theme }) => theme.spacing.margemLateral}px;
+`;
+
+const SectionHeader = styled.View`
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: ${({ theme }) => theme.spacing.xl}px;
+  margin-bottom: ${({ theme }) => theme.spacing.md}px;
+`;
+
+const SectionTitle = styled.Text`
+  color: ${({ theme }) => theme.colors.white};
+  /* Token: h */
+  font-family: ${({ theme }) => theme.text.titulo.h.fontFamily};
+  font-size: ${({ theme }) => theme.text.titulo.h.fontSize}px;
+`;
+
+// Ajuste do SeeMore para parecer um botão (adicionado padding para facilitar o toque)
+const SeeMore = styled.Text`
+  /* Token: corpo.corpoTexto */
+  font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
+  font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
+  line-height: ${({ theme }) => theme.text.corpo.corpoTexto.lineHeight}px;
+
+  /* Cor e espaçamento */
+  color: ${({ theme }) => theme.colors.primary_50};
+  padding: 5px;
+`;
+
+const SearchWrapper = styled.View`
+  margin-top: ${({ theme }) => theme.spacing.lg}px;
+`;

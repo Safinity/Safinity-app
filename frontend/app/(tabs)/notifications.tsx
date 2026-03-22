@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { FlatList } from 'react-native';
 import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
-
 import Header from '@/components/ui/header';
 import { userImages } from '../../assets/images/Users/userImages';
 import initialData from '../../data/notifications.json';
+import { Stack } from 'expo-router';
 
 const Container = styled.View`
   flex: 1;
@@ -92,7 +92,7 @@ const CardTitle = styled.Text`
 const CardTime = styled.Text`
   font-family: ${({ theme }) => theme.text.label.fontFamily};
   font-size: ${({ theme }) => theme.text.label.fontSize}px;
-  color: ${({ theme }) => theme.colors.inactive};
+  color: #c4c4c8;
 `;
 
 const CardMessage = styled.Text`
@@ -163,24 +163,57 @@ export default function NotificationsPage() {
     }
   };
 
+  const getIconLabel = (type: string) => {
+    switch (type) {
+      case 'emergency':
+        return 'Emergency alert';
+      case 'activity':
+        return 'Activity notification';
+      case 'crowd':
+        return 'Crowd alert';
+      case 'hydrate':
+        return 'Hydration reminder';
+      case 'security':
+        return 'Security alert';
+      default:
+        return 'Notification';
+    }
+  };
+
   const handleMarkAllRead = () => {
     setNotifications(notifications.map(n => ({ ...n, read: true })));
   };
 
   const renderItem = ({ item }: { item: any }) => {
-    if (item.isDivider) return <SectionLabel>Oldest</SectionLabel>;
+    if (item.isDivider) return <SectionLabel accessibilityRole="header">Oldest</SectionLabel>;
+
+    const cardLabel = `${item.title}, ${item.time}. ${item.message}${item.read ? '' : ', new notification'}`;
 
     return (
-      <NotificationCard $isNew={!item.read}>
+      <NotificationCard
+        $isNew={!item.read}
+        accessible={true}
+        accessibilityRole="none"
+        accessibilityLabel={cardLabel}
+      >
         {item.type === 'friend' ? (
-          <Avatar source={userImages[item.avatar]} />
+          <Avatar
+            source={userImages[item.avatar]}
+            accessibilityLabel={`Profile picture of ${item.title}`}
+          />
         ) : (
-          <IconCircle>{getIcon(item.type)}</IconCircle>
+          <IconCircle
+            accessible={true}
+            accessibilityLabel={getIconLabel(item.type)}
+            importantForAccessibility="yes"
+          >
+            {getIcon(item.type)}
+          </IconCircle>
         )}
 
         <CardContent>
           <CardHeader>
-            <CardTitle style={item.type === 'emergency' ? { color: '#D34A4A' } : undefined}>
+            <CardTitle style={item.type === 'emergency' ? { color: '#f67f7f' } : undefined}>
               {item.title}
             </CardTitle>
             <CardTime>{item.time}</CardTime>
@@ -189,10 +222,16 @@ export default function NotificationsPage() {
 
           {item.type === 'friend' && (
             <ActionRow>
-              <RemoveButton>
-                <MarkReadText style={{ color: '#C9A0E5' }}>Remove</MarkReadText>
+              <RemoveButton
+                accessibilityRole="button"
+                accessibilityLabel={`Remove friend request from ${item.title}`}
+              >
+                <MarkReadText style={{ color: '#E8CAFF' }}>Remove</MarkReadText>{' '}
               </RemoveButton>
-              <AcceptButton>
+              <AcceptButton
+                accessibilityRole="button"
+                accessibilityLabel={`Accept friend request from ${item.title}`}
+              >
                 <MarkReadText>Accept</MarkReadText>
               </AcceptButton>
             </ActionRow>
@@ -204,18 +243,24 @@ export default function NotificationsPage() {
 
   return (
     <Container>
+      <Stack.Screen options={{ title: 'Notifications' }} />
       <Header variant="back" />
       <FlatList
         data={dataToRender}
         keyExtractor={item => item.id.toString()}
         renderItem={renderItem}
+        accessibilityRole="list"
         ListHeaderComponent={
           <PageHeaderContent>
-            <Title>Notifications</Title>
-            <CountText>
+            <Title accessibilityRole="header">Notifications</Title>
+            <CountText accessibilityLabel={`You have ${newNotifications.length} new notifications`}>
               You have <BoldCount>{newNotifications.length}</BoldCount> new notifications.
             </CountText>
-            <MarkReadButton onPress={handleMarkAllRead}>
+            <MarkReadButton
+              onPress={handleMarkAllRead}
+              accessibilityRole="button"
+              accessibilityLabel="Mark all notifications as read"
+            >
               <MarkReadText>Mark all as read</MarkReadText>
             </MarkReadButton>
           </PageHeaderContent>

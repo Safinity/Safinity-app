@@ -3,6 +3,7 @@ import { Pressable } from 'react-native';
 import { router } from 'expo-router';
 import styled from 'styled-components/native';
 import { GradientText } from '../components/ui/GradientText';
+import Head from 'expo-router/head';
 
 // Componentes estilizados com tema
 const Container = styled.View`
@@ -49,12 +50,25 @@ const ButtonText = styled.Text`
 export default function NotFound() {
   return (
     <Container>
-      <Content>
-        <Title>Opss!</Title>
-        <Message>Unable to find the location{'\n'}of this page</Message>
+      <Head>
+        <title>Not Found | Safinity</title>
+      </Head>
+
+      <Content accessibilityRole="region" accessibilityLabel="404 error content">
+        <Title accessibilityRole="header" accessibilityLevel={1}>
+          Opss!
+        </Title>
+        <Message accessibilityRole="text">Unable to find the location{'\n'}of this page</Message>
         <GradientText text="404" style={styles.errorCode} />
       </Content>
-      <Button onPress={() => router.replace('./map')}>
+
+      <Button
+        onPress={() => router.replace('./map')}
+        accessible={true}
+        accessibilityRole="button"
+        accessibilityLabel="Return to Home"
+        accessibilityHint="Navigates back to the home map page"
+      >
         <ButtonText>Return to Home</ButtonText>
       </Button>
     </Container>

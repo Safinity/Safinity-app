@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 type FindFriendButtonProps = {
   onPress?: () => void;
   disabled?: boolean;
-};
+} & React.ComponentProps<typeof styled.TouchableOpacity>; // aceita props extras
 
 const Button = styled.TouchableOpacity<{ disabled?: boolean }>`
   width: ${({ theme }) => theme.height.sm}px;
@@ -17,11 +17,15 @@ const Button = styled.TouchableOpacity<{ disabled?: boolean }>`
   opacity: ${({ disabled }) => (disabled ? 0.6 : 1)};
 `;
 
-export default function FindFriendButton({ onPress, disabled = false }: FindFriendButtonProps) {
+export default function FindFriendButton({
+  onPress,
+  disabled = false,
+  ...rest
+}: FindFriendButtonProps) {
   const theme = useTheme();
 
   return (
-    <Button disabled={disabled} onPress={onPress} activeOpacity={0.85}>
+    <Button disabled={disabled} onPress={onPress} {...rest} activeOpacity={0.85}>
       <Ionicons
         name="location-outline"
         size={theme.width.iconHeader}

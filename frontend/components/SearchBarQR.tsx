@@ -9,6 +9,7 @@ interface Props {
   onSubmitEditing?: () => void;
   onPressQR?: () => void;
   placeholder?: string;
+  accessibilityLabel?: string; // <- novo prop opcional
 }
 
 export default function SearchBarQR({
@@ -17,11 +18,18 @@ export default function SearchBarQR({
   onSubmitEditing,
   onPressQR,
   placeholder = 'Find friends',
+  accessibilityLabel = 'Search friends by name or username', // label padrão
 }: Props) {
   return (
     <Wrapper>
       <Bar>
-        <Ionicons name="search" size={24} color={Colors.white} />
+        <Ionicons
+          name="search"
+          size={24}
+          color={Colors.white}
+          accessibilityElementsHidden // ícone decorativo escondido do leitor de tela
+          importantForAccessibility="no"
+        />
         <Input
           value={value}
           onChangeText={onChangeText}
@@ -29,11 +37,23 @@ export default function SearchBarQR({
           placeholder={placeholder}
           placeholderTextColor={Colors.white}
           returnKeyType="search"
+          accessibilityLabel={accessibilityLabel} // <- rótulo acessível
+          accessible={true}
         />
       </Bar>
 
-      <QRButton onPress={onPressQR}>
-        <Ionicons name="qr-code-outline" size={34} color={Colors.white} />
+      <QRButton
+        onPress={onPressQR}
+        accessibilityRole="button"
+        accessibilityLabel="Scan QR code to find friends"
+      >
+        <Ionicons
+          name="qr-code-outline"
+          size={34}
+          color={Colors.white}
+          accessibilityElementsHidden
+          importantForAccessibility="no"
+        />
       </QRButton>
     </Wrapper>
   );

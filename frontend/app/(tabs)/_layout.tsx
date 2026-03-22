@@ -1,5 +1,4 @@
 import { Tabs } from 'expo-router';
-import { Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import styled from 'styled-components/native';
 
@@ -31,7 +30,8 @@ const TabButton = styled.TouchableOpacity`
 const TabIcon = styled(Ionicons).attrs(({ theme }) => ({
   size: theme.height.xs,
 }))<{ $active: boolean }>`
-  color: ${({ $active, theme }) => ($active ? theme.colors.white : theme.colors.inactive)};
+  color: ${({ $active, theme }) =>
+    $active ? theme.colors.white : theme.colors.palette.neutral.neutral70};
 `;
 
 const IconBox = styled.View`
@@ -44,7 +44,13 @@ const IconBox = styled.View`
 const TabText = styled.Text<{ $active: boolean }>`
   ${({ theme }) => theme.text.textoPequeno};
   margin-top: ${({ theme }) => theme.spacing.xxs}px;
-  color: ${({ $active, theme }) => ($active ? theme.colors.white : theme.colors.inactive)};
+  color: ${({ $active, theme }) =>
+    $active ? theme.colors.white : theme.colors.palette.neutral.neutral70};
+`;
+
+const HiddenHeader = styled.Text`
+  position: absolute;
+  opacity: 0;
 `;
 
 const tabConfigs = [
@@ -56,7 +62,10 @@ const tabConfigs = [
 
 function CustomTabBar({ state, navigation }: any) {
   return (
-    <NavbarContainer>
+    <NavbarContainer accessibilityRole="tablist">
+      {/* Heading invisível para acessibilidade web */}
+      <HiddenHeader accessibilityRole="header">Main Navigation</HiddenHeader>
+
       <TabBarContent>
         {tabConfigs.map(tab => {
           const routeIndex = state.routes.findIndex((r: any) => r.name === tab.name);
@@ -71,10 +80,22 @@ function CustomTabBar({ state, navigation }: any) {
           };
 
           return (
-            <TabButton key={tab.name} onPress={onPress}>
+            <TabButton
+              key={tab.name}
+              onPress={onPress}
+              accessibilityRole="tab"
+              accessibilityLabel={tab.title}
+              accessibilityState={{ selected: isFocused }}
+            >
               <IconBox>
-                <TabIcon name={isFocused ? tab.icon : `${tab.icon}-outline`} $active={isFocused} />
+                <TabIcon
+                  name={isFocused ? tab.icon : `${tab.icon}-outline`}
+                  $active={isFocused}
+                  accessibilityElementsHidden
+                  importantForAccessibility="no"
+                />
               </IconBox>
+
               <TabText $active={isFocused}>{tab.title}</TabText>
             </TabButton>
           );

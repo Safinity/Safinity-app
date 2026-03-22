@@ -75,6 +75,10 @@ export const EventCard = ({ event, variant }: any) => {
   const isCompact = variant === 'compact';
   const imageSource = eventImages[event.id] || { uri: 'https://via.placeholder.com/300' };
 
+  const handlePress = () => {
+    router.push(`/event-details/${event.id}`);
+  };
+
   const formatEventDate = (start: string, end: string) => {
     if (!start || !end) return '';
     const startDate = new Date(start);
@@ -90,13 +94,29 @@ export const EventCard = ({ event, variant }: any) => {
     return `${startDay} ${startDate.toLocaleString('en-GB', { month: 'short' })} - ${endDay} ${endDate.toLocaleString('en-GB', { month: 'short' })} ${year}`;
   };
 
-  const handlePress = () => {
-    router.push(`/event-details/${event.id}`);
-  };
-
   return (
-    <CardContainer isCompact={isCompact} onPress={handlePress}>
-      <BackgroundImage source={imageSource}>
+    <CardContainer
+      isCompact={isCompact}
+      onPress={handlePress}
+      // 1. O Expo Router permite passar o link diretamente aqui para Web
+      // @ts-ignore
+      href={`/event-details/${event.id}`}
+      accessible={true}
+      accessibilityRole="link"
+      accessibilityLabel={`Evento: ${event.name}. Data: ${formatEventDate(event.start_date, event.end_date)}`}
+      accessibilityHint="Clica para ver os detalhes deste evento"
+      focusable={true}
+      // 2. No Web, usamos estas props para garantir o evento de teclado
+      // @ts-ignore
+      onKeyDown={(e: any) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          // 3. Previne o comportamento default (como scroll no Espaço)
+          e.preventDefault();
+          handlePress();
+        }
+      }}
+    >
+      <BackgroundImage source={imageSource} accessible={false}>
         <GradientLayer isCompact={isCompact}>
           {event.time_left ? (
             <TimeBadge isCompact={isCompact}>
@@ -108,7 +128,14 @@ export const EventCard = ({ event, variant }: any) => {
 
           <CardFooter>
             <DateText>{formatEventDate(event.start_date, event.end_date)}</DateText>
-            <TitleText>{event.name}</TitleText>
+            <TitleText
+              accessible={true}
+              accessibilityRole="header"
+              // @ts-ignore
+              aria-level="3"
+            >
+              {event.name}
+            </TitleText>
           </CardFooter>
         </GradientLayer>
       </BackgroundImage>

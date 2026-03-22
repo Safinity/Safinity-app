@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { FlatList, StatusBar } from 'react-native';
 import styled from 'styled-components/native';
-import { useRouter } from 'expo-router';
+import { useRouter, Stack } from 'expo-router'; // Adicionado Stack
+import Head from 'expo-router/head'; // Adicionado Head
 
 // Imports de UI e Componentes
 import Header from '../../components/ui/header';
@@ -76,21 +77,31 @@ export default function EventsListScreen() {
 
   return (
     <Container>
-      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
-      <Header />
+      {/* Metadados para a aba do browser e navegação */}
+      <Head>
+        <title>Events List | Safinity</title>
+      </Head>
+      <Stack.Screen options={{ title: 'Events List | Safinity', headerShown: false }} />
 
-      <Content>
-        {/* 1. Hero Banner configurado com o ID que criaste no mapeamento */}
+      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
+
+      {/* Header com papel semântico */}
+      <Header accessibilityRole="banner" />
+
+      <Content accessibilityRole="main">
+        {/* Banner com Título Principal (H1) */}
         <HeroBanner
           event={{
-            id: 'banner-lista-eventos', // Chamada direta pelo ID do mapeamento
+            id: 'banner-lista-eventos',
           }}
           title="What's Coming Up"
           description="Discover events with safety you can trust"
           hideMap={true}
+          accessibilityRole="header"
+          // @ts-ignore
+          aria-level="1"
         />
 
-        {/* 2. Barra de Pesquisa */}
         <PaddedContent>
           <SearchWrapper>
             <SearchInput
@@ -102,15 +113,14 @@ export default function EventsListScreen() {
           </SearchWrapper>
         </PaddedContent>
 
-        {/* 3. Filtros de Categorias */}
         <FilterTags
           tags={allCategories}
           selectedTags={selectedCategories}
           onTagPress={handleTagPress}
           variant="homepage"
+          accessibilityRole="tablist"
         />
 
-        {/* 4. Mapeamento das listas horizontais por categoria */}
         {selectedCategories.map(category => {
           const sectionEvents = eventsData.events.filter(
             e => e.category.toLowerCase() === category.toLowerCase(),
@@ -122,7 +132,13 @@ export default function EventsListScreen() {
             <SectionContainer key={category}>
               <PaddedContent>
                 <SectionHeader>
-                  <SectionTitle>{category} events</SectionTitle>
+                  <SectionTitle
+                    accessibilityRole="header"
+                    // @ts-ignore
+                    aria-level="2"
+                  >
+                    {category} events
+                  </SectionTitle>
                 </SectionHeader>
               </PaddedContent>
 
@@ -131,6 +147,7 @@ export default function EventsListScreen() {
                 data={sectionEvents}
                 renderItem={({ item }) => <EventCard event={item} variant="compact" />}
                 keyExtractor={item => `${category}-${item.id}`}
+                accessibilityRole="list"
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={{
                   paddingLeft: 40,

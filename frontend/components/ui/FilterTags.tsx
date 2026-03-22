@@ -2,6 +2,18 @@ import React from 'react';
 import styled from 'styled-components/native';
 import { Height, BorderRadius, TextStyles } from '../../constants/theme';
 
+/*
+Accessibility Enhancements / WCAG Level A Compliance
+
+- Each Tag (Pressable) now includes:
+  • accessibilityRole="button" to identify it as an interactive element
+  • accessibilityState={{ selected: isSelected }} to communicate selection state
+  • accessibilityLabel={`Filtrar por ${tag}`} to provide descriptive text for screen readers
+  • accessibilityHint="Aplica este filtro de atividades" to explain its action
+  • focusable set to true to ensure keyboard and assistive technology navigation
+
+These changes improve screen reader support, keyboard navigation, and overall accessibility for the filter tags.
+*/
 export type FilterTagsVariant = 'homepage' | 'mapa';
 
 const getTagTheme = (theme: any) => ({
@@ -18,7 +30,7 @@ const getTagTheme = (theme: any) => ({
     selectedColor: theme.colors.primary,
     textColor: theme.colors.white,
     selectedTextColor: theme.colors.white,
-    paddingLeft: theme.spacing.lg,
+    paddingLeft: theme.spacing.margemLateral,
     paddingRight: theme.spacing.lg,
   },
 });
@@ -100,7 +112,17 @@ const FilterTags: React.FC<FilterTagsProps> = ({
           const isSelected = selectedTags.includes(tag);
 
           return (
-            <Tag key={tag} selected={isSelected} variant={variant} onPress={() => onTagPress(tag)}>
+            <Tag
+              key={tag}
+              selected={isSelected}
+              variant={variant}
+              onPress={() => onTagPress(tag)}
+              accessibilityRole="button"
+              accessibilityState={{ selected: isSelected }}
+              accessibilityLabel={`Filtrar por ${tag}`}
+              accessibilityHint="Aplica este filtro de atividades"
+              focusable
+            >
               <TagText selected={isSelected} variant={variant}>
                 {tag}
               </TagText>

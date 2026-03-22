@@ -35,90 +35,113 @@ export default function Login() {
 
   return (
     <Container>
-      <Stack.Screen options={{ title: 'Login | Safinity', headerShown: false }} />
       <Head>
-        <title>Login | Safinity</title>
+        <title>Log In | Safinity</title>
       </Head>
+      <Stack.Screen options={{ title: 'Log In | Safinity', headerShown: false }} />
 
-      <BackButton
-        onPress={() => router.back()}
-        accessibilityLabel="Return to the previous page"
-        accessibilityRole="button"
-      >
-        <Ionicons name="arrow-back" size={26} color="white" />
-      </BackButton>
+      <HeadingArea accessibilityRole="header">
+        <BackButton
+          onPress={() => router.back()}
+          accessibilityLabel="Return to the previous page"
+          accessibilityRole="button"
+        >
+          <Ionicons name="arrow-back" size={26} color="white" />
+        </BackButton>
+        <Title accessibilityHeadingLevel={1}>Log In</Title>
+        <Subtitle accessibilityHeadingLevel={2}>Welcome back!</Subtitle>
+      </HeadingArea>
 
-      <Title accessibilityRole="header">Log in</Title>
-      <Subtitle>Welcome back!</Subtitle>
+      <MainArea accessibilityRole="main">
 
-      <InputGroup>
-        <Label>Email</Label>
-        <InputBox>
-          <Input
-            accessibilityLabel="Email input field"
-            placeholder="Email"
-            placeholderTextColor="#8a90a5"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            value={email}
-            onChangeText={setEmail}
-          />
-          <Ionicons
-            name="mail-outline"
-            size={20}
-            color="#cfd3e0"
-            importantForAccessibility="no-hide-descendants" // Para Android
-            accessibilityElementsHidden={true} // Para iOS
-          />
-        </InputBox>
-      </InputGroup>
+        <InputGroup>
 
-      <InputGroup accessible={true} accessibilityLabel="Password">
-        <Label>Password</Label>
-
-        <InputBox>
-          <Input
-            placeholder="Password"
-            placeholderTextColor="#8a90a5"
-            secureTextEntry={!showPass}
-            value={password}
-            onChangeText={setPassword}
-          />
-
-          <TouchableOpacity
-            onPress={() => setShowPass(!showPass)}
-            accessibilityRole="button"
-            accessibilityLabel={showPass ? 'Hide password' : 'Show password'}
-          >
-            <Ionicons
-              name={showPass ? 'eye-off-outline' : 'eye-outline'}
-              size={22}
-              color="#cfd3e0"
+          <Label>Email *</Label>
+          <InputBox>
+            <Input
+              accessibilityLabel="Email input field"
+              accessibilityState={{ required: true }}
+              returnKeyType="next"
+              placeholder="Email"
+              placeholderTextColor="#8a90a5"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              value={email}
+              onChangeText={setEmail}
             />
-          </TouchableOpacity>
-        </InputBox>
-      </InputGroup>
+            <Ionicons
+              name="mail-outline"
+              size={20}
+              color="#cfd3e0"
+              importantForAccessibility="no-hide-descendants" // Para Android
+              accessibilityElementsHidden={true} // Para iOS
+            />
+          </InputBox>
+        </InputGroup>
 
-      <RowWithLink>
-        <SmallText>Forgot your password?</SmallText>
-        <LinkArea accessibilityRole="link">
-          <LinkText>Recover password</LinkText>
-        </LinkArea>
-      </RowWithLink>
+        <InputGroup>
 
-      {error ? <ErrorText>{error}</ErrorText> : null}
+          <Label>Password *</Label>
 
-      <PrimaryButton title="Log in" onPress={handleLogin} />
+          <InputBox>
+            <Input
+              placeholder="Password"
+              placeholderTextColor="#8a90a5"
+              secureTextEntry={!showPass}
+              value={password}
+              onChangeText={setPassword}
+              accessibilityLabel="Password input field"
+              accessibilityState={{ required: true }}
+              returnKeyType="done"
+            />
 
-      <RowWithLink>
-        <SmallText>Don’t have an account?</SmallText>
-        <LinkArea accessibilityRole="link" onPress={() => router.push('/register')}>
-          <LinkText>Create Account</LinkText>
-        </LinkArea>
-      </RowWithLink>
+            <TouchableOpacity
+              onPress={() => setShowPass(!showPass)}
+              accessibilityRole="button"
+              accessibilityLabel={showPass ? 'Hide password' : 'Show password'}
+            >
+              <Ionicons
+                name={showPass ? 'eye-off-outline' : 'eye-outline'}
+                size={22}
+                color="#cfd3e0"
+              />
+            </TouchableOpacity>
+          </InputBox>
+        </InputGroup>
+
+        <RowWithLink>
+          <SmallText>Forgot your password?</SmallText>
+          <LinkArea accessibilityRole="link">
+            <LinkText>Recover password</LinkText>
+          </LinkArea>
+        </RowWithLink>
+
+        {error ? (
+          <ErrorArea
+            accessible={true}
+            accessibilityLiveRegion="assertive"
+            accessibilityRole="alert"
+            accessibilityLabel={`Error: ${error}`}
+          >
+            <Ionicons name="alert-circle" size={18} color="#ff5252" style={{ marginRight: 8 }} />
+            <ErrorText>{error}</ErrorText>
+          </ErrorArea>
+        ) : null}
+
+        <PrimaryButton title="Log In" onPress={handleLogin} accessibilityLabel="Log In" />
+
+        <RowWithLink>
+          <SmallText>Don't have an account?</SmallText>
+          <LinkArea accessibilityRole="link" onPress={() => router.push('/register')}>
+            <LinkText>Create Account</LinkText>
+          </LinkArea>
+        </RowWithLink>
+      </MainArea>
     </Container>
   );
 }
+
+// ------------------------------------------------------Styled Components------------------------------------------------------
 
 const Container = styled.View`
   flex: 1;
@@ -131,8 +154,8 @@ const BackButton = styled.TouchableOpacity`
   margin-bottom: ${({ theme }) => theme.spacing.md}px;
 `;
 
-const LinkArea = styled.TouchableOpacity`
-  margin-left: ${({ theme }) => theme.spacing.xs}px;
+const HeadingArea = styled.View`
+  margin-bottom: ${({ theme }) => theme.spacing.xl}px;
 `;
 
 const Title = styled.Text`
@@ -143,8 +166,12 @@ const Title = styled.Text`
 
 const Subtitle = styled.Text`
   color: ${({ theme }) => theme.colors.inactive};
-  margin-bottom: ${({ theme }) => theme.spacing.xl}px;
   ${({ theme }) => theme.text.corpo.corpoTexto};
+`;
+
+
+const MainArea = styled.View`
+  flex: 1;
 `;
 
 const InputGroup = styled.View`
@@ -158,7 +185,7 @@ const Label = styled.Text`
 `;
 
 const InputBox = styled.View`
-  background-color: ${({ theme }) => theme.colors.palette.neutral.neutral20};
+  background-color: ${({ theme }) => theme.colors.grayNavbar};
   border-radius: ${({ theme }) => theme.borderRadius.medium}px;
   padding: ${({ theme }) => theme.spacing.md}px;
   flex-direction: row;
@@ -169,28 +196,26 @@ const Input = styled.TextInput`
   flex: 1;
   color: ${({ theme }) => theme.colors.white};
   ${({ theme }) => theme.text.corpo.corpoTexto};
-
   include-font-padding: false;
   padding-vertical: 0px;
   line-height: ${({ theme }) => theme.text.corpo.corpoTexto.lineHeight}px;
-`;
-
-/* =======================
-   Auxiliares
-======================= */
-
-const ErrorText = styled.Text`
-  color: ${({ theme }) => theme.colors.error};
-  margin-top: ${({ theme }) => theme.spacing.md}px;
-  text-align: center;
-  ${({ theme }) => theme.text.corpo.corpoTexto};
 `;
 
 const RowWithLink = styled.View`
   flex-direction: row;
   align-items: center;
   justify-content: flex-end;
-  margin-bottom: ${({ theme }) => theme.spacing.xl}px;
+  margin-top: ${({ theme }) => theme.spacing.md}px;
+  margin-bottom: ${({ theme }) => theme.spacing.md}px;
+`;
+
+const SmallText = styled.Text`
+  color: ${({ theme }) => theme.colors.inactive};
+  ${({ theme }) => theme.text.textoPequeno};
+`;
+
+const LinkArea = styled.TouchableOpacity`
+  margin-left: ${({ theme }) => theme.spacing.xs}px;
 `;
 
 const LinkText = styled.Text`
@@ -198,7 +223,16 @@ const LinkText = styled.Text`
   ${({ theme }) => theme.text.textoPequeno};
 `;
 
-const SmallText = styled.Text`
-  color: ${({ theme }) => theme.colors.inactive};
-  ${({ theme }) => theme.text.textoPequeno};
+const ErrorArea = styled.View`
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: ${({ theme }) => theme.spacing.sm}px;
+  margin-bottom: ${({ theme }) => theme.spacing.md}px;
+`;
+
+const ErrorText = styled.Text`
+  color: ${({ theme }) => theme.colors.error};
+  text-align: center;
+  ${({ theme }) => theme.text.corpo.corpoTexto};
 `;

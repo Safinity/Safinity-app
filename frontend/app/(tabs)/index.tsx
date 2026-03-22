@@ -51,8 +51,20 @@ export default function HomeScreen() {
 
         <PaddedContent>
           <SectionHeader>
-            <SectionTitle>{selectedCategory} events</SectionTitle>
-            <Pressable onPress={() => router.push('/events-list')}>
+            <SectionTitle
+              accessible={true}
+              accessibilityRole="header"
+              // @ts-ignore - Indica ao browser que este é um título de nível 2
+              aria-level="2"
+            >
+              {selectedCategory} events
+            </SectionTitle>
+            <Pressable
+              onPress={() => router.push('/events-list')}
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel={`Ver mais eventos de ${selectedCategory}`}
+            >
               <SeeMore>See more</SeeMore>
             </Pressable>
           </SectionHeader>
@@ -108,7 +120,7 @@ const SectionTitle = styled.Text`
   font-size: ${({ theme }) => theme.text.titulo.h.fontSize}px;
 `;
 
-// 2. Ajustei o SeeMore para parecer um botão (adicionado padding para facilitar o toque)
+// Ajuste do SeeMore para parecer um botão (adicionado padding para facilitar o toque)
 const SeeMore = styled.Text`
   /* Token: corpo.corpoTexto */
   font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};

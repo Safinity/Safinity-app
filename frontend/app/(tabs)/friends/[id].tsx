@@ -89,7 +89,6 @@ export default function FriendProfile() {
           snapToInterval={width * 0.75 + theme.spacing.margemLateral}
           decelerationRate="fast"
           contentContainerStyle={{ paddingRight: theme.spacing.margemLateral }}
-          accessibilityRole="list"
           renderItem={({ item }) => (
             <EventCard
               event={item}

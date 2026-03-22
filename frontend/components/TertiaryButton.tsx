@@ -1,4 +1,9 @@
 import styled from 'styled-components/native';
+import { TouchableOpacity } from 'react-native';
+
+const Button = styled(TouchableOpacity)`
+  align-items: center;
+`;
 
 const Label = styled.Text`
   text-align: center;
@@ -7,6 +12,19 @@ const Label = styled.Text`
   margin-top: ${({ theme }) => theme.spacing.sm}px;
 `;
 
-export default function TertiaryButton({ title, onPress }: any) {
-  return <Label onPress={onPress}>{title}</Label>;
+export default function TertiaryButton({
+  title,
+  onPress,
+  accessibilityRole,
+  accessibilityLabel,
+}: any) {
+  return (
+    <Button
+      onPress={onPress}
+      accessibilityRole={accessibilityRole ?? 'button '}
+      accessibilityLabel={accessibilityLabel ?? title}
+    >
+      <Label>{title}</Label>
+    </Button>
+  );
 }

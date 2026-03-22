@@ -118,6 +118,7 @@ type Props = {
   step: number;
   total: number;
   image?: ImageSourcePropType;
+  imageAlt?: string;
   onNext: () => void;
   onPrev?: () => void;
   onSkip: () => void;
@@ -129,6 +130,7 @@ export default function OnboardingScreen({
   step,
   total,
   image,
+  imageAlt,
   onNext,
   onPrev,
   onSkip,
@@ -149,36 +151,72 @@ export default function OnboardingScreen({
     transform: [{ translateX: translateX.value }],
   }));
 
+  const stepLabel = `Step ${step + 1} of ${total}`;
+
   return (
-    <Screen>
-      {image && <DecorativeImage source={image} step={step} resizeMode="contain" />}
+    <Screen accessible={false}>
+      {image && (
+        <DecorativeImage
+          source={image}
+          step={step}
+          resizeMode="contain"
+          accessible={imageAlt ? true : false}
+          accessibilityLabel={imageAlt}
+          importantForAccessibility={imageAlt ? 'yes' : 'no-hide-descendants'}
+        />
+      )}
 
       <AnimatedContent style={animatedStyle}>
-        <Title>{title}</Title>
+        <Title accessibilityRole="header">{title}</Title>
         <Description>{description}</Description>
       </AnimatedContent>
 
       <Bottom>
-        <NavigationRow>
+        <NavigationRow accessible={false}>
           {onPrev && (
-            <LeftButton onPress={onPrev}>
+            <LeftButton
+              onPress={onPrev}
+              accessibilityRole="button"
+              accessibilityLabel={`Return to step ${step} of ${total}`}
+            >
               <Ionicons name="chevron-back" size={26} color="white" />
             </LeftButton>
           )}
 
-          <Dots>
+          <Dots
+            accessible={true}
+            accessibilityRole="progressbar"
+            accessibilityLabel={stepLabel}
+            accessibilityValue={{ min: 1, max: total, now: step + 1 }}
+          >
             {Array.from({ length: total }).map((_, i) => (
-              <Dot key={i} active={i === step} />
+              <Dot
+                key={i}
+                active={i === step}
+                importantForAccessibility="no" // Android
+                accessible={false} // iOS
+              />
             ))}
           </Dots>
 
-          <RightButton onPress={onNext}>
+          <RightButton
+            onPress={onNext}
+            accessibilityRole="button"
+            accessibilityLabel={
+              step === total - 1 ? 'Start using the app' : `Advance to step ${step + 2} of ${total}`
+            }
+          >
             <Ionicons name="chevron-forward" size={26} color="white" />
           </RightButton>
         </NavigationRow>
 
         <SkipWrapper>
-          <TertiaryButton title="Skip" onPress={onSkip} />
+          <TertiaryButton
+            title="Skip"
+            onPress={onSkip}
+            accessibilityRole="button"
+            accessibilityLabel="Skip onboarding to enter the app"
+          />
         </SkipWrapper>
       </Bottom>
     </Screen>

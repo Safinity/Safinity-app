@@ -15,7 +15,6 @@ const Label = styled.Text`
 
 const Link = styled.Text`
   color: ${({ theme }) => theme.colors.palette.primary.light80};
-  text-decoration: underline;
 `;
 
 export default function Checkbox({ checked, onToggle }: any) {

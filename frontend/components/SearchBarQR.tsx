@@ -21,13 +21,13 @@ export default function SearchBarQR({
   return (
     <Wrapper>
       <Bar>
-        <Ionicons name="search" size={24} color={Colors.inactive} />
+        <Ionicons name="search" size={24} color={Colors.white} />
         <Input
           value={value}
           onChangeText={onChangeText}
           onSubmitEditing={onSubmitEditing}
           placeholder={placeholder}
-          placeholderTextColor={Colors.inactive}
+          placeholderTextColor={Colors.white}
           returnKeyType="search"
         />
       </Bar>

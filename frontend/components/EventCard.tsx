@@ -93,11 +93,30 @@ export const EventCard = ({ event, variant }: any) => {
   const handlePress = () => {
     router.push(`/event-details/${event.id}`);
   };
+  // Final substituido para ter alt text
+
+  const altText = `Cartaz do evento: ${event.name}. Data: ${formatEventDate(event.start_date, event.end_date)}`;
 
   return (
-    <CardContainer isCompact={isCompact} onPress={handlePress}>
-      <BackgroundImage source={imageSource}>
-        <GradientLayer isCompact={isCompact}>
+    <CardContainer
+      isCompact={isCompact}
+      onPress={handlePress}
+      accessible={true}
+      accessibilityRole="button"
+      accessibilityLabel={`Ver detalhes do evento: ${event.name}`}
+      accessibilityHint="Navega para a página de detalhes deste evento"
+    >
+      <BackgroundImage
+        source={imageSource}
+        accessible={false} // Escondemos a imagem de fundo para não duplicar
+      >
+        <GradientLayer
+          isCompact={isCompact}
+          accessible={true}
+          accessibilityLabel={altText}
+          // @ts-ignore
+          aria-label={altText}
+        >
           {event.time_left ? (
             <TimeBadge isCompact={isCompact}>
               <TimeText>{event.time_left}</TimeText>

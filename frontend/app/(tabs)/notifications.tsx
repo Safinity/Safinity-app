@@ -92,7 +92,7 @@ const CardTitle = styled.Text`
 const CardTime = styled.Text`
   font-family: ${({ theme }) => theme.text.label.fontFamily};
   font-size: ${({ theme }) => theme.text.label.fontSize}px;
-  color: ${({ theme }) => theme.colors.inactive};
+  color: #c4c4c8;
 `;
 
 const CardMessage = styled.Text`

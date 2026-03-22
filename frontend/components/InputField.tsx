@@ -3,7 +3,6 @@ import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
 import { TouchableOpacity } from 'react-native';
 
-
 export default function InputField({
   label,
   icon,

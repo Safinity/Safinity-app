@@ -51,10 +51,7 @@ export default function FriendsScreen() {
 
       <Header variant="default" title="Friends" showBottomDivider={false} />
 
-      <ScrollArea
-        importantForAccessibility="yes"
-        accessibilityLabel="Lista de amigos"
-      >
+      <ScrollArea importantForAccessibility="yes" accessibilityLabel="Lista de amigos">
         {/* Region: Friends Header */}
         <RegionContainer accessibilityRole="region" accessibilityLabel="Cabeçalho de amigos">
           <SectionTitle accessibilityRole="header" accessibilityLevel={1}>
@@ -107,9 +104,7 @@ export default function FriendsScreen() {
                   accessibilityHint={`Send a buzz to ${friend.name}`}
                 />
                 <FindFriendButton
-                  onPress={() =>
-                    router.push({ pathname: '/map', params: { focusId: friend.id } })
-                  }
+                  onPress={() => router.push({ pathname: '/map', params: { focusId: friend.id } })}
                   accessibilityRole="button"
                   accessibilityLabel={`Locate ${friend.name} on the map`}
                   accessibilityHint="Shows the location of the friend on the map"

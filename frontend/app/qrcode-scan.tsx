@@ -73,7 +73,6 @@ const SectionTitle = styled.Text`
   margin-bottom: ${({ theme }) => theme.spacing.md}px;
 `;
 
-
 export default function QRCodeScreen() {
   const [mode, setMode] = useState<'scan' | 'my'>('scan');
   const [permission, requestPermission] = useCameraPermissions();
@@ -118,11 +117,7 @@ export default function QRCodeScreen() {
       </View>
 
       <View accessibilityRole="main">
-
-        <ToggleContainer
-          accessibilityRole="region"
-          accessibilityLabel="QR Code mode selector"
-        >
+        <ToggleContainer accessibilityRole="region" accessibilityLabel="QR Code mode selector">
           <Slider style={{ transform: [{ translateX: sliderTranslate }] }} />
 
           <TabButton
@@ -147,14 +142,8 @@ export default function QRCodeScreen() {
         </ToggleContainer>
 
         {mode === 'scan' ? (
-          <View
-            accessibilityRole="region"
-            accessibilityLabel="QR code scanner"
-          >
-            <SectionTitle
-              accessibilityRole="header"
-              accessibilityLevel={2}
-            >
+          <View accessibilityRole="region" accessibilityLabel="QR code scanner">
+            <SectionTitle accessibilityRole="header" accessibilityLevel={2}>
               Scan QR Code
             </SectionTitle>
 
@@ -177,14 +166,8 @@ export default function QRCodeScreen() {
             </CameraWrapper>
           </View>
         ) : (
-          <View
-            accessibilityRole="region"
-            accessibilityLabel="My QR code"
-          >
-            <SectionTitle
-              accessibilityRole="header"
-              accessibilityLevel={2}
-            >
+          <View accessibilityRole="region" accessibilityLabel="My QR code">
+            <SectionTitle accessibilityRole="header" accessibilityLevel={2}>
               My QR Code
             </SectionTitle>
 
@@ -196,9 +179,7 @@ export default function QRCodeScreen() {
                 accessibilityElementsHidden
                 importantForAccessibility="no"
               />
-              <HelperText>
-                Share your QR Code with friends
-              </HelperText>
+              <HelperText>Share your QR Code with friends</HelperText>
             </QRCodeContainer>
           </View>
         )}

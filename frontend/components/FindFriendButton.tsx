@@ -17,7 +17,11 @@ const Button = styled.TouchableOpacity<{ disabled?: boolean }>`
   opacity: ${({ disabled }) => (disabled ? 0.6 : 1)};
 `;
 
-export default function FindFriendButton({ onPress, disabled = false, ...rest }: FindFriendButtonProps) {
+export default function FindFriendButton({
+  onPress,
+  disabled = false,
+  ...rest
+}: FindFriendButtonProps) {
   const theme = useTheme();
 
   return (

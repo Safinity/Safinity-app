@@ -32,17 +32,11 @@ export default function FriendProfile() {
   if (!friendData) return null;
 
   return (
-    <Container
-      accessibilityLabel="Friend profile screen"
-      accessibilityRole="summary"
-    >
+    <Container accessibilityLabel="Friend profile screen" accessibilityRole="summary">
       <Head>
         <title> {friendData.name} profile | Safinity</title>
       </Head>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        accessibilityRole="scrollview"
-      >
+      <ScrollView showsVerticalScrollIndicator={false} accessibilityRole="scrollview">
         {/* Navegação Superior */}
         <HeaderNav accessibilityRole="header" accessibilityLabel="Top navigation">
           <BackButton
@@ -50,11 +44,7 @@ export default function FriendProfile() {
             accessibilityRole="button"
             accessibilityLabel="Go back to friends list"
           >
-            <Ionicons
-              name="arrow-back"
-              size={theme.width.iconHeader}
-              color={theme.colors.white}
-            />
+            <Ionicons name="arrow-back" size={theme.width.iconHeader} color={theme.colors.white} />
           </BackButton>
 
           <UsernameText
@@ -74,13 +64,9 @@ export default function FriendProfile() {
           />
 
           <InfoSection>
-            <DisplayName accessibilityRole="header">
-              {friendData.name}
-            </DisplayName>
+            <DisplayName accessibilityRole="header">{friendData.name}</DisplayName>
 
-            <StatsText
-              accessibilityLabel={`${friendData.pastEvents?.length || 0} events attended`}
-            >
+            <StatsText accessibilityLabel={`${friendData.pastEvents?.length || 0} events attended`}>
               Been in {friendData.pastEvents?.length || 0} events
             </StatsText>
           </InfoSection>
@@ -89,10 +75,7 @@ export default function FriendProfile() {
         </ProfileHeader>
 
         {/* Eventos */}
-        <SectionTitle
-          accessibilityRole="header"
-          accessibilityLabel="Events section"
-        >
+        <SectionTitle accessibilityRole="header" accessibilityLabel="Events section">
           {userPastEvents.length} Events in common
         </SectionTitle>
 
@@ -129,9 +112,9 @@ const HeaderNav = styled.View`
   flex-direction: row;
   align-items: center;
   padding: ${({ theme }) =>
-    Platform.OS === 'ios'
-      ? theme.spacing.margemTop + theme.spacing.lg
-      : theme.spacing.margemTop}px
+      Platform.OS === 'ios'
+        ? theme.spacing.margemTop + theme.spacing.lg
+        : theme.spacing.margemTop}px
     ${({ theme }) => theme.spacing.margemLateral}px ${({ theme }) => theme.spacing.md}px;
 `;
 

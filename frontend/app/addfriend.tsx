@@ -52,9 +52,7 @@ export default function AddFriendScreen() {
       <Stack.Screen options={{ title: 'Add Friend | Safinity', headerShown: false }} />
 
       {/* Banner/Header */}
-      <HeaderContainer
-        accessibilityRole="banner"
-      >
+      <HeaderContainer accessibilityRole="banner">
         <BackButton
           onPress={handleBack}
           accessibilityRole="button"
@@ -62,10 +60,7 @@ export default function AddFriendScreen() {
         >
           <Ionicons name="arrow-back" size={28} color="white" />
         </BackButton>
-        <Title
-          accessibilityRole="header"
-          accessibilityLevel={1}
-        >
+        <Title accessibilityRole="header" accessibilityLevel={1}>
           Add Friend
         </Title>
       </HeaderContainer>
@@ -83,7 +78,9 @@ export default function AddFriendScreen() {
 
         {search.length === 0 ? (
           <>
-            <Subtitle accessibilityRole="header" accessibilityLevel={2}>Recent searches</Subtitle>
+            <Subtitle accessibilityRole="header" accessibilityLevel={2}>
+              Recent searches
+            </Subtitle>
             {recentSearches.length === 0 ? (
               <EmptyText>No recent searches</EmptyText>
             ) : (
@@ -94,7 +91,13 @@ export default function AddFriendScreen() {
                   accessibilityRole="button"
                   accessibilityLabel={`Search again for ${item}`}
                 >
-                  <Ionicons name="time-outline" size={18} color="white" accessibilityElementsHidden importantForAccessibility="no" />
+                  <Ionicons
+                    name="time-outline"
+                    size={18}
+                    color="white"
+                    accessibilityElementsHidden
+                    importantForAccessibility="no"
+                  />
                   <RecentText>{item}</RecentText>
                 </RecentItem>
               ))
@@ -102,7 +105,9 @@ export default function AddFriendScreen() {
           </>
         ) : (
           <>
-            <Subtitle accessibilityRole="header" accessibilityLevel={2}>Results</Subtitle>
+            <Subtitle accessibilityRole="header" accessibilityLevel={2}>
+              Results
+            </Subtitle>
             {filteredUsers.map(user => (
               <TouchableOpacity
                 key={user.id}

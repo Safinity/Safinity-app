@@ -55,14 +55,11 @@ export default function NotFound() {
       </Head>
 
       <Content accessibilityRole="region" accessibilityLabel="404 error content">
-        <Title accessibilityRole="header" accessibilityLevel={1}>Opss!</Title>
-        <Message accessibilityRole="text">
-          Unable to find the location{'\n'}of this page
-        </Message>
-        <GradientText
-          text="404"
-          style={styles.errorCode}
-        />
+        <Title accessibilityRole="header" accessibilityLevel={1}>
+          Opss!
+        </Title>
+        <Message accessibilityRole="text">Unable to find the location{'\n'}of this page</Message>
+        <GradientText text="404" style={styles.errorCode} />
       </Content>
 
       <Button

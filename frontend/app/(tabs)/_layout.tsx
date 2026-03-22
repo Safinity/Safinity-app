@@ -64,15 +64,11 @@ function CustomTabBar({ state, navigation }: any) {
   return (
     <NavbarContainer accessibilityRole="tablist">
       {/* Heading invisível para acessibilidade web */}
-      <HiddenHeader accessibilityRole="header">
-        Main Navigation
-      </HiddenHeader>
+      <HiddenHeader accessibilityRole="header">Main Navigation</HiddenHeader>
 
       <TabBarContent>
         {tabConfigs.map(tab => {
-          const routeIndex = state.routes.findIndex(
-            (r: any) => r.name === tab.name
-          );
+          const routeIndex = state.routes.findIndex((r: any) => r.name === tab.name);
           const isFocused = state.index === routeIndex;
 
           if (routeIndex === -1) return null;

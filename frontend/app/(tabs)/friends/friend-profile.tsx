@@ -24,9 +24,9 @@ const HeaderNav = styled.View`
   flex-direction: row;
   align-items: center;
   padding: ${({ theme }) =>
-    Platform.OS === 'ios'
-      ? theme.spacing.margemTop + theme.spacing.lg
-      : theme.spacing.margemTop}px
+      Platform.OS === 'ios'
+        ? theme.spacing.margemTop + theme.spacing.lg
+        : theme.spacing.margemTop}px
     ${({ theme }) => theme.spacing.margemLateral}px ${({ theme }) => theme.spacing.md}px;
 `;
 

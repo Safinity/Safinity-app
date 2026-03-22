@@ -69,6 +69,10 @@ const SearchInput: React.FC<SearchInputProps> = ({
         accessibilityLabel="Campo de pesquisa de eventos"
         // @ts-ignore
         aria-label="Campo de pesquisa de eventos"
+        // novas LINHAS:
+        required={false}
+        // @ts-ignore
+        aria-required="false"
       />
     </SearchBox>
   );

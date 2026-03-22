@@ -23,6 +23,8 @@ export default function HomeScreen() {
     e => e.status === 'upcoming' && e.category.toLowerCase() === selectedCategory.toLowerCase(),
   );
 
+  // Altera o teu return para incluir estes roles estruturais:
+
   return (
     <Container>
       <Head>
@@ -31,9 +33,12 @@ export default function HomeScreen() {
       <Stack.Screen options={{ title: 'Home | Safinity', headerShown: false }} />
 
       <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
-      <Header />
 
-      <Content>
+      {/* 1. O Header deve ter role de banner (topo da página) */}
+      <Header accessibilityRole="banner" />
+
+      {/* 2. O conteúdo principal deve ter role de main */}
+      <Content accessibilityRole="main">
         {liveEvent && <HeroBanner event={liveEvent} />}
 
         <PaddedContent>
@@ -42,11 +47,14 @@ export default function HomeScreen() {
           </SearchWrapper>
         </PaddedContent>
 
+        {/* 3. Filtros são tecnicamente uma navegação de categorias */}
         <FilterTags
           tags={categories}
           selectedTags={[selectedCategory]}
           onTagPress={setSelectedCategory}
           variant="homepage"
+          accessible={true}
+          accessibilityRole="tablist" // Indica que é uma lista de opções selecionáveis
         />
 
         <PaddedContent>
@@ -54,27 +62,36 @@ export default function HomeScreen() {
             <SectionTitle
               accessible={true}
               accessibilityRole="header"
-              // @ts-ignore - Indica ao browser que este é um título de nível 2
+              // @ts-ignore
               aria-level="2"
             >
               {selectedCategory} events
             </SectionTitle>
+
             <Pressable
               onPress={() => router.push('/events-list')}
               accessible={true}
-              accessibilityRole="button"
+              accessibilityRole="link"
               accessibilityLabel={`Ver mais eventos de ${selectedCategory}`}
+              // ADICIONADO PARA ACESSIBILIDADE DE TECLADO:
+              onKeyDown={(e: any) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  router.push('/events-list');
+                }
+              }}
             >
               <SeeMore>See more</SeeMore>
             </Pressable>
           </SectionHeader>
         </PaddedContent>
 
+        {/* 4. A lista de eventos é uma lista de conteúdos */}
         <FlatList
           horizontal
           data={upcomingEvents}
           renderItem={({ item }) => <EventCard event={item} />}
           keyExtractor={item => item.id}
+          accessibilityRole="list" // Indica que os itens abaixo formam uma lista
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{
             paddingLeft: 40,

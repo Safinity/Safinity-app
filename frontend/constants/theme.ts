@@ -156,7 +156,7 @@ export const TextStyles = {
   },
   label: {
     fontFamily: 'PlusJakartaSans_300Light',
-    fontSize: moderateScale(10),
+    fontSize: moderateScale(12),
     lineHeight: 20,
   },
   textoFiltros: {

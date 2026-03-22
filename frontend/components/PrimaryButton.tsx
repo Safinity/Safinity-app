@@ -19,12 +19,13 @@ const Label = styled.Text`
 
 export default function PrimaryButton({ title, onPress, disabled, accessibilityLabel }: any) {
   return (
-    <Button 
-    disabled={disabled}
-    onPress={onPress}
-    accessible={true}
-    accessibilityRole="button"
-    accessibilityLabel={accessibilityLabel || title}>
+    <Button
+      disabled={disabled}
+      onPress={onPress}
+      accessible={true}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel || title}
+    >
       <Label>{title}</Label>
     </Button>
   );

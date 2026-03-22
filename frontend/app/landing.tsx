@@ -27,13 +27,13 @@ const Content = styled.View`
 
 export default function Landing() {
   return (
-    <Background source={StaticImages.landingBg}>
-      <Content>
-        <Head>
-          <title>Welcome to Safinity!</title>
-        </Head>
-        <Stack.Screen options={{ title: 'Welcome to Safinity!', headerShown: false }} />
+    <Background source={StaticImages.landingBg} accessible={false}>
+      <Head>
+        <title>Welcome to Safinity!</title>
+      </Head>
+      <Stack.Screen options={{ title: 'Welcome to Safinity!', headerShown: false }} />
 
+      <Content>
         <PrimaryButton title="Log in" onPress={() => router.push('/login')} />
 
         <SecondaryButton title="Create account" onPress={() => router.push('/register')} />

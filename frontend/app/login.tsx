@@ -53,9 +53,7 @@ export default function Login() {
       </HeadingArea>
 
       <MainArea accessibilityRole="main">
-
         <InputGroup>
-
           <Label>Email *</Label>
           <InputBox>
             <Input
@@ -80,7 +78,6 @@ export default function Login() {
         </InputGroup>
 
         <InputGroup>
-
           <Label>Password *</Label>
 
           <InputBox>
@@ -131,7 +128,7 @@ export default function Login() {
         <PrimaryButton title="Log In" onPress={handleLogin} accessibilityLabel="Log In" />
 
         <RowWithLink>
-          <SmallText>Don't have an account?</SmallText>
+          <SmallText>Don`t have an account?</SmallText>
           <LinkArea accessibilityRole="link" onPress={() => router.push('/register')}>
             <LinkText>Create Account</LinkText>
           </LinkArea>
@@ -168,7 +165,6 @@ const Subtitle = styled.Text`
   color: ${({ theme }) => theme.colors.inactive};
   ${({ theme }) => theme.text.corpo.corpoTexto};
 `;
-
 
 const MainArea = styled.View`
   flex: 1;

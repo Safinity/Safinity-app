@@ -1,8 +1,9 @@
 import React, { useMemo } from 'react';
-import { Dimensions, FlatList, ScrollView, Platform } from 'react-native';
+import { Dimensions, FlatList, ScrollView, Platform, AccessibilityInfo } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
+import Head from 'expo-router/head';
 
 // --- Dados e Assets ---
 import users from '@/data/users.json';
@@ -31,30 +32,56 @@ export default function FriendProfile() {
   if (!friendData) return null;
 
   return (
-    <Container>
-      <ScrollView showsVerticalScrollIndicator={false}>
+    <Container accessibilityLabel="Friend profile screen" accessibilityRole="summary">
+      <Head>
+        <title> {friendData.name} profile | Safinity</title>
+      </Head>
+      <ScrollView showsVerticalScrollIndicator={false} accessibilityRole="scrollview">
         {/* Navegação Superior */}
-        <HeaderNav theme={theme}>
-          <BackButton onPress={() => router.push('/friends')}>
+        <HeaderNav accessibilityRole="header" accessibilityLabel="Top navigation">
+          <BackButton
+            onPress={() => router.push('/friends')}
+            accessibilityRole="button"
+            accessibilityLabel="Go back to friends list"
+          >
             <Ionicons name="arrow-back" size={theme.width.iconHeader} color={theme.colors.white} />
           </BackButton>
-          <UsernameText theme={theme}>@{friendData.username}</UsernameText>
+
+          <UsernameText
+            accessibilityRole="header"
+            accessibilityLabel={`Username ${friendData.username}`}
+          >
+            @{friendData.username}
+          </UsernameText>
         </HeaderNav>
 
         {/* Perfil */}
-        <ProfileHeader theme={theme}>
-          <AvatarImage theme={theme} source={userImages[friendData.image]} />
-          <InfoSection theme={theme}>
-            <DisplayName theme={theme}>{friendData.name}</DisplayName>
-            <StatsText theme={theme}>Been in {friendData.pastEvents?.length || 0} events</StatsText>
+        <ProfileHeader accessibilityRole="summary" accessibilityLabel="User profile information">
+          <AvatarImage
+            source={userImages[friendData.image]}
+            accessibilityRole="image"
+            accessibilityLabel={`Profile picture of ${friendData.name}`}
+          />
+
+          <InfoSection>
+            <DisplayName accessibilityRole="header">{friendData.name}</DisplayName>
+
+            <StatsText accessibilityLabel={`${friendData.pastEvents?.length || 0} events attended`}>
+              Been in {friendData.pastEvents?.length || 0} events
+            </StatsText>
           </InfoSection>
+
           <FriendActionButton />
         </ProfileHeader>
 
         {/* Eventos */}
-        <SectionTitle theme={theme}>{userPastEvents.length} Events in common</SectionTitle>
+        <SectionTitle accessibilityRole="header" accessibilityLabel="Events section">
+          {userPastEvents.length} Events in common
+        </SectionTitle>
 
         <FlatList
+          accessibilityRole="list"
+          accessibilityLabel="List of events in common"
           data={userPastEvents}
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -62,21 +89,25 @@ export default function FriendProfile() {
           snapToInterval={width * 0.75 + theme.spacing.margemLateral}
           decelerationRate="fast"
           contentContainerStyle={{ paddingRight: theme.spacing.margemLateral }}
-          renderItem={({ item }) => <EventCard event={item} />}
+          renderItem={({ item }) => (
+            <EventCard
+              event={item}
+              accessibilityRole="button"
+              accessibilityLabel={`Event ${item.title}`}
+            />
+          )}
         />
       </ScrollView>
     </Container>
   );
 }
 
-/* ----------------------------- Styled Components ----------------------------- */
-
 const Container = styled.View`
   flex: 1;
   background-color: ${({ theme }) => theme.colors.background};
 `;
 
-const HeaderNav = styled.View<{ theme: any }>`
+const HeaderNav = styled.View`
   flex-direction: row;
   align-items: center;
   padding: ${({ theme }) =>
@@ -90,7 +121,7 @@ const BackButton = styled.Pressable`
   padding: ${({ theme }) => theme.spacing.sm}px;
 `;
 
-const UsernameText = styled.Text<{ theme: any }>`
+const UsernameText = styled.Text`
   color: ${({ theme }) => theme.colors.palette.primary.light90};
   font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
   font-size: ${({ theme }) => theme.text.titulo.h.fontSize}px;
@@ -98,14 +129,14 @@ const UsernameText = styled.Text<{ theme: any }>`
   margin-left: ${({ theme }) => theme.spacing.sm}px;
 `;
 
-const ProfileHeader = styled.View<{ theme: any }>`
+const ProfileHeader = styled.View`
   flex-direction: row;
   align-items: center;
   padding: ${({ theme }) => theme.spacing.lg}px ${({ theme }) => theme.spacing.margemLateral}px;
   margin-bottom: ${({ theme }) => theme.spacing.xl}px;
 `;
 
-const AvatarImage = styled.Image<{ theme: any }>`
+const AvatarImage = styled.Image`
   width: ${({ theme }) => theme.height.friendProfileAvatar}px;
   height: ${({ theme }) => theme.height.friendProfileAvatar}px;
   border-radius: ${({ theme }) => theme.borderRadius.round}px;
@@ -113,26 +144,26 @@ const AvatarImage = styled.Image<{ theme: any }>`
   border-color: ${({ theme }) => theme.colors.primary};
 `;
 
-const InfoSection = styled.View<{ theme: any }>`
+const InfoSection = styled.View`
   margin-left: ${({ theme }) => theme.spacing.lg}px;
   flex: 1;
 `;
 
-const DisplayName = styled.Text<{ theme: any }>`
+const DisplayName = styled.Text`
   color: ${({ theme }) => theme.colors.white};
   font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
   font-size: ${({ theme }) => theme.text.titulo.h1.fontSize}px;
   font-weight: 600;
 `;
 
-const StatsText = styled.Text<{ theme: any }>`
-  color: ${({ theme }) => theme.colors.palette.neutral.neutral40};
+const StatsText = styled.Text`
+  color: ${({ theme }) => theme.colors.palette.neutral.neutral60};
   font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
   font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
   margin-top: ${({ theme }) => theme.spacing.xs}px;
 `;
 
-const SectionTitle = styled.Text<{ theme: any }>`
+const SectionTitle = styled.Text`
   color: ${({ theme }) => theme.colors.palette.primary.light50};
   font-family: ${({ theme }) => theme.text.titulo.h3.fontFamily};
   font-size: ${({ theme }) => theme.text.titulo.h3.fontSize}px;

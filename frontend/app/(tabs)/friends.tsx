@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { TouchableOpacity } from 'react-native';
 import styled from 'styled-components/native';
-import { Ionicons } from '@expo/vector-icons';
+import { TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
-
+import { Ionicons } from '@expo/vector-icons';
+import Head from 'expo-router/head';
 import users from '@/data/users.json';
 import { userImages } from '../../assets/images/Users/userImages';
 import auth from '@/data/auth.json';
 import Header from '@/components/ui/header';
 import FindFriendButton from '@/components/FindFriendButton';
 import PingFriend from '@/components/VibrateButton';
-import RemoveFriend from '@/components/FriendActionButton';
+import FriendActionButton from '@/components/FriendActionButton';
 
 export default function FriendsScreen() {
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -24,7 +24,7 @@ export default function FriendsScreen() {
   if (!currentUser) {
     return (
       <Container>
-        <LoadingText>Loading...</LoadingText>
+        <LoadingText accessibilityRole="text">Loading...</LoadingText>
       </Container>
     );
   }
@@ -45,22 +45,51 @@ export default function FriendsScreen() {
 
   return (
     <Container>
+      <Head>
+        <title>Friends | Safinity</title>
+      </Head>
+
       <Header variant="default" title="Friends" showBottomDivider={false} />
 
-      <ScrollArea>
-        <SectionTitle>
-          <Title>Friends</Title>
-          <TouchableOpacity onPress={handleAddFriend}>
-            <Ionicons name="person-add-outline" size={24} color="white" />
-          </TouchableOpacity>
-        </SectionTitle>
+      <ScrollArea importantForAccessibility="yes" accessibilityLabel="Lista de amigos">
+        {/* Region: Friends Header */}
+        <RegionContainer accessibilityRole="region" accessibilityLabel="Cabeçalho de amigos">
+          <SectionTitle accessibilityRole="header" accessibilityLevel={1}>
+            <Title>Friends</Title>
+            <TouchableOpacity
+              onPress={handleAddFriend}
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel="Add a new friend"
+              accessibilityHint="Go to the add friend screen"
+            >
+              <Ionicons name="person-add-outline" size={24} color="white" />
+            </TouchableOpacity>
+          </SectionTitle>
+        </RegionContainer>
 
-        <SectionSubtitle>On the same event</SectionSubtitle>
-        {onSameEvent.map(friend => (
-          <TouchableOpacity key={friend.id} onPress={() => router.push(`/friends/${friend.id}`)}>
-            <FriendRow>
+        {/* Region: On the same event */}
+        <RegionContainer accessibilityRole="region" accessibilityLabel="Amigos no mesmo evento">
+          <SectionSubtitle accessibilityRole="header" accessibilityLevel={2}>
+            On the same event
+          </SectionSubtitle>
+          {onSameEvent.map(friend => (
+            <TouchableOpacity
+              key={friend.id}
+              onPress={() => router.push(`/friends/${friend.id}`)}
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel={`${friend.name}, username ${friend.username}. Tap to view profile.`}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginTop: 8,
+                marginBottom: 16,
+              }}
+            >
               <Avatar
                 source={userImages[friend.image]}
+                accessibilityRole="image"
                 accessibilityLabel={`Profile picture of ${friend.name}`}
               />
               <Info>
@@ -68,26 +97,45 @@ export default function FriendsScreen() {
                 <Username>@{friend.username}</Username>
               </Info>
               <Buttons>
-                <PingFriend onPress={() => console.log('Vibrar amigo')} />
+                <PingFriend
+                  onPress={() => console.log('Buzz amigo')}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Buzz ${friend.name}`}
+                  accessibilityHint={`Send a buzz to ${friend.name}`}
+                />
                 <FindFriendButton
-                  onPress={() =>
-                    router.push({
-                      pathname: '/map',
-                      params: { focusId: friend.id },
-                    })
-                  }
+                  onPress={() => router.push({ pathname: '/map', params: { focusId: friend.id } })}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Locate ${friend.name} on the map`}
+                  accessibilityHint="Shows the location of the friend on the map"
                 />
               </Buttons>
-            </FriendRow>
-          </TouchableOpacity>
-        ))}
+            </TouchableOpacity>
+          ))}
+        </RegionContainer>
 
-        <SectionSubtitle>Other Friends</SectionSubtitle>
-        {otherFriends.map(friend => (
-          <TouchableOpacity key={friend.id} onPress={() => router.push(`/friends/${friend.id}`)}>
-            <FriendRow>
+        {/* Region: Other Friends */}
+        <RegionContainer accessibilityRole="region" accessibilityLabel="Other friends">
+          <SectionSubtitle accessibilityRole="header" accessibilityLevel={2}>
+            Other Friends
+          </SectionSubtitle>
+          {otherFriends.map(friend => (
+            <TouchableOpacity
+              key={friend.id}
+              onPress={() => router.push(`/friends/${friend.id}`)}
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel={`${friend.name}, username ${friend.username}. Tap to view profile.`}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginTop: 8,
+                marginBottom: 16,
+              }}
+            >
               <Avatar
                 source={userImages[friend.image]}
+                accessibilityRole="image"
                 accessibilityLabel={`Profile picture of ${friend.name}`}
               />
               <Info>
@@ -95,16 +143,24 @@ export default function FriendsScreen() {
                 <Username>@{friend.username}</Username>
               </Info>
               <Buttons>
-                <RemoveFriend onPress={() => removeFriend(friend.id)} />
+                <FriendActionButton
+                  variant="remove"
+                  onPress={() => removeFriend(friend.id)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Remove ${friend.name}`}
+                  accessibilityHint="Remove this friend from your list"
+                />
               </Buttons>
-            </FriendRow>
-          </TouchableOpacity>
-        ))}
+            </TouchableOpacity>
+          ))}
+        </RegionContainer>
       </ScrollArea>
     </Container>
   );
 }
 
+// ---------------------------------------------
+// Styled Components
 const Container = styled.View`
   flex: 1;
   background-color: ${({ theme }) => theme.colors.background};
@@ -123,6 +179,10 @@ const ScrollArea = styled.ScrollView.attrs(({ theme }) => ({
   flex: 1;
 `;
 
+const RegionContainer = styled.View`
+  margin-bottom: ${({ theme }) => theme.spacing.md}px;
+`;
+
 const LoadingText = styled.Text`
   margin-top: ${({ theme }) => theme.spacing.xl}px;
   text-align: center;
@@ -133,6 +193,7 @@ const LoadingText = styled.Text`
 const SectionTitle = styled.View`
   flex-direction: row;
   justify-content: space-between;
+  align-items: center;
 `;
 
 const Title = styled.Text`

@@ -1,6 +1,5 @@
-// app/(tabs)/perfil/edit-profile.tsx
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { Stack, router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Alert } from 'react-native';
 import styled from 'styled-components/native';
@@ -90,6 +89,7 @@ export default function EditProfile() {
 
   return (
     <Container>
+      <Stack.Screen options={{ title: 'Edit Profile' }} />
       <TopGradient
         colors={['rgba(190, 142, 224)', 'rgba(34, 39, 52, 0)']}
         locations={[0, 0.33]}
@@ -103,15 +103,25 @@ export default function EditProfile() {
         <ProfileImageSection>
           <ProfileImageContainer>
             {profileImage ? (
-              <ProfileImage source={profileImage} />
+              <ProfileImage
+                source={profileImage}
+                accessibilityLabel={`Current profile picture of ${user.name}`}
+              />
             ) : (
-              <DefaultImagePlaceholder>
-                <Ionicons name="person" size={80} color={Colors.white} />
+              <DefaultImagePlaceholder
+                accessible={true}
+                accessibilityLabel="No profile picture set"
+              >
+                <Ionicons name="person" size={80} color={Colors.white} accessible={false} />
               </DefaultImagePlaceholder>
             )}
 
-            <CameraButton onPress={takePhoto}>
-              <EditImage source={Camera} />
+            <CameraButton
+              onPress={takePhoto}
+              accessibilityRole="button"
+              accessibilityLabel="Take a new profile photo"
+            >
+              <EditImage source={Camera} accessible={false} />
             </CameraButton>
           </ProfileImageContainer>
         </ProfileImageSection>
@@ -131,7 +141,13 @@ export default function EditProfile() {
             onChangeText={(value: string) => handleChange('username', value)}
           />
 
-          <SaveButton onPress={handleSave} disabled={isLoading}>
+          <SaveButton
+            onPress={handleSave}
+            disabled={isLoading}
+            accessibilityRole="button"
+            accessibilityLabel={isLoading ? 'Saving changes, please wait' : 'Save changes'}
+            accessibilityState={{ disabled: isLoading }}
+          >
             {isLoading ? <ButtonText>Saving...</ButtonText> : <ButtonText>Save Changes</ButtonText>}
           </SaveButton>
         </FormSection>

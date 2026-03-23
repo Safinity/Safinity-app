@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { ScrollView, StatusBar, View, Modal, Text } from 'react-native';
-import { useLocalSearchParams, useRouter, useNavigation } from 'expo-router';
+import { useLocalSearchParams, useRouter, useNavigation, Stack } from 'expo-router'; // Adicionado Stack
+import Head from 'expo-router/head'; // Adicionado Head
 import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -44,7 +45,9 @@ const SectionTitle = styled.Text`
 
 const DescriptionText = styled.Text`
   color: ${({ theme }) => theme.colors.inactive};
-  ${({ theme }) => theme.text.corpo.corpoTexto};
+  font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
+  font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
+  line-height: ${({ theme }) => theme.text.corpo.corpoTexto.lineHeight}px;
 `;
 
 const ActionGrid = styled.View`
@@ -77,10 +80,8 @@ const LinkButton = styled.TouchableOpacity`
   align-items: center;
   margin-top: ${({ theme }) => theme.spacing.xl}px;
   align-self: center;
-  shadow-color: white;
-  shadow-offset: 0px 0px;
-  shadow-opacity: 0.15;
-  shadow-radius: ${({ theme }) => theme.spacing.xl}px;
+  /* Corrigido para evitar erro de shadow na Web */
+  box-shadow: 0px 4px 15px rgba(255, 255, 255, 0.15);
   elevation: 2;
 `;
 
@@ -103,16 +104,16 @@ const AvatarStack = styled.View`
 `;
 
 const Avatar = styled.Image`
-  width: ${({ theme }) => theme.spacing.margemLateral}px;
-  height: ${({ theme }) => theme.spacing.margemLateral}px;
-  border-radius: ${({ theme }) => theme.borderRadius.round}px;
-  border-width: ${({ theme }) => theme.spacing.xxs}px;
+  width: 24px;
+  height: 24px;
+  border-radius: 12px;
+  border-width: 2px;
   border-color: ${({ theme }) => theme.colors.background};
 `;
 
 const ModalOverlay = styled.View`
   flex: 1;
-  background-color: rgba(255, 255, 255, 0.6);
+  background-color: rgba(0, 0, 0, 0.7);
   justify-content: center;
   align-items: center;
   padding: ${({ theme }) => theme.spacing.lg}px;
@@ -128,14 +129,16 @@ const ModalContent = styled.View`
 
 const ModalTitle = styled.Text`
   color: ${({ theme }) => theme.colors.white};
-  ${({ theme }) => theme.text.titulo.h};
+  font-family: ${({ theme }) => theme.text.titulo.h.fontFamily};
+  font-size: ${({ theme }) => theme.text.titulo.h.fontSize}px;
   margin-bottom: ${({ theme }) => theme.spacing.md}px;
 `;
 
 const ModalDescription = styled.Text`
   color: ${({ theme }) => theme.colors.white};
   text-align: center;
-  ${({ theme }) => theme.text.corpo.corpoTexto};
+  font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
+  font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
   margin-bottom: ${({ theme }) => theme.spacing.lg}px;
 `;
 
@@ -147,11 +150,11 @@ const CodeRow = styled.View`
 `;
 
 const CodeBox = styled.View`
-  width: ${({ theme }) => theme.width.linkTicket}px;
-  height: ${({ theme }) => theme.height.md}px;
+  width: 40px;
+  height: 50px;
   border-width: 1px;
   border-color: rgba(255, 255, 255, 0.5);
-  border-radius: ${({ theme }) => theme.borderRadius.small}px;
+  border-radius: 8px;
 `;
 
 const ModalButtons = styled.View`
@@ -169,7 +172,8 @@ const ModalBtn = styled.TouchableOpacity<{ isPrimary?: boolean }>`
 `;
 
 const ModalBtnText = styled.Text<{ isPrimary?: boolean }>`
-  ${({ theme }) => theme.text.botao};
+  font-family: ${({ theme }) => theme.text.botao.fontFamily};
+  font-size: ${({ theme }) => theme.text.botao.fontSize}px;
   color: ${({ isPrimary, theme }) => (isPrimary ? theme.colors.white : theme.colors.primary)};
 `;
 
@@ -195,31 +199,61 @@ export default function EventDetailsScreen() {
     else router.replace('/');
   };
 
+  const pageTitle = `${event.name} | Safinity`;
+
   return (
     <Container>
+      <Head>
+        <title>{pageTitle}</title>
+      </Head>
+      <Stack.Screen options={{ title: pageTitle, headerShown: false }} />
+
       <StatusBar barStyle="light-content" />
 
-      <Modal animationType="fade" transparent visible={modalVisible}>
+      <Modal
+        animationType="fade"
+        transparent
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+        accessibilityViewIsModal={true} // Melhora acessibilidade mobile
+        // @ts-ignore
+        aria-modal="true" // Melhora acessibilidade Web
+      >
         <ModalOverlay>
-          <ModalContent>
-            <ModalTitle>Link my ticket</ModalTitle>
+          <ModalContent accessibilityRole="alert">
+            <ModalTitle accessibilityRole="header" aria-level={2}>
+              Link my ticket
+            </ModalTitle>
             <ModalDescription>
               Your ticket has a{' '}
               <Text style={{ color: '#E5D9F2', fontWeight: 'bold' }}>6-digit validation code</Text>.
-              Enter that code bellow!
+              Enter that code below!
             </ModalDescription>
 
-            <CodeRow>
+            <CodeRow
+              accessible={true}
+              accessibilityRole="text"
+              accessibilityLabel="6-digit validation code. Required field."
+              // @ts-ignore
+              aria-required="true"
+            >
               {[1, 2, 3, 4, 5, 6].map(i => (
                 <CodeBox key={i} />
               ))}
             </CodeRow>
 
             <ModalButtons>
-              <ModalBtn onPress={() => setModalVisible(false)}>
+              <ModalBtn
+                onPress={() => setModalVisible(false)}
+                accessibilityLabel="Cancel ticket linking"
+              >
                 <ModalBtnText>Cancel</ModalBtnText>
               </ModalBtn>
-              <ModalBtn isPrimary onPress={() => setModalVisible(false)}>
+              <ModalBtn
+                isPrimary
+                onPress={() => setModalVisible(false)}
+                accessibilityLabel="Link your ticket"
+              >
                 <ModalBtnText isPrimary>Link</ModalBtnText>
               </ModalBtn>
             </ModalButtons>
@@ -227,31 +261,41 @@ export default function EventDetailsScreen() {
         </ModalOverlay>
       </Modal>
 
-      <BackButton onPress={handleBack}>
+      <BackButton onPress={handleBack} accessibilityLabel="Go back" accessibilityRole="button">
         <Ionicons name="arrow-back" size={24} color="white" />
       </BackButton>
 
-      <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
+      <ScrollView bounces={false} showsVerticalScrollIndicator={false} accessibilityRole="main">
         <HeroBanner event={event} isDetail />
 
         <ContentCard>
-          <SectionTitle>Description</SectionTitle>
+          <SectionTitle accessibilityRole="header" aria-level={2}>
+            Description
+          </SectionTitle>
           <DescriptionText>{event.description}</DescriptionText>
 
           <ActionGrid>
-            <ActionButton onPress={() => router.push('/(tabs)/map')}>
+            <ActionButton
+              onPress={() => router.push('/(tabs)/map')}
+              accessibilityLabel="View event map"
+            >
               <Ionicons name="map-outline" size={26} color="white" />
               <ActionLabel>Map</ActionLabel>
             </ActionButton>
 
-            <ActionButton onPress={() => router.push('/(tabs)/calendar')}>
+            <ActionButton
+              onPress={() => router.push('/(tabs)/calendar')}
+              accessibilityLabel="View in calendar"
+            >
               <Ionicons name="calendar-outline" size={26} color="white" />
               <ActionLabel>Calendar</ActionLabel>
             </ActionButton>
           </ActionGrid>
 
-          <SectionTitle>Friends going</SectionTitle>
-          <FriendsSection>
+          <SectionTitle accessibilityRole="header" aria-level={2}>
+            Friends going
+          </SectionTitle>
+          <FriendsSection accessible={true} accessibilityLabel={`3 friends and 2 more are going`}>
             <AvatarStack>
               {randomFriends.map((friend, index) => (
                 <Avatar
@@ -264,7 +308,11 @@ export default function EventDetailsScreen() {
             <DescriptionText>+ 2 friends going</DescriptionText>
           </FriendsSection>
 
-          <LinkButton onPress={() => setModalVisible(true)}>
+          <LinkButton
+            onPress={() => setModalVisible(true)}
+            accessibilityRole="button"
+            accessibilityHint="Opens a popup to enter your ticket code"
+          >
             <ButtonText>Link my ticket</ButtonText>
           </LinkButton>
 

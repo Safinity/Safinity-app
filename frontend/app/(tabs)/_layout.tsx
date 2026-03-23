@@ -31,7 +31,7 @@ const TabIcon = styled(Ionicons).attrs(({ theme }) => ({
   size: theme.height.xs,
 }))<{ $active: boolean }>`
   color: ${({ $active, theme }) =>
-    $active ? theme.colors.white : theme.colors.palette.neutral.neutral70};
+    $active ? theme.colors.white : theme.colors.palette.neutral.neutral80};
 `;
 
 const IconBox = styled.View`
@@ -45,7 +45,7 @@ const TabText = styled.Text<{ $active: boolean }>`
   ${({ theme }) => theme.text.textoPequeno};
   margin-top: ${({ theme }) => theme.spacing.xxs}px;
   color: ${({ $active, theme }) =>
-    $active ? theme.colors.white : theme.colors.palette.neutral.neutral70};
+    $active ? theme.colors.white : theme.colors.palette.neutral.neutral80};
 `;
 
 const HiddenHeader = styled.Text`
@@ -63,9 +63,6 @@ const tabConfigs = [
 function CustomTabBar({ state, navigation }: any) {
   return (
     <NavbarContainer accessibilityRole="tablist">
-      {/* Heading invisível para acessibilidade web */}
-      <HiddenHeader accessibilityRole="header">Main Navigation</HiddenHeader>
-
       <TabBarContent>
         {tabConfigs.map(tab => {
           const routeIndex = state.routes.findIndex((r: any) => r.name === tab.name);

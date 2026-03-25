@@ -47,7 +47,7 @@ export const Colors = {
     error: {
       light75: '#F4D2D2',
       light50: '#E9A4A4',
-      normal: '#D34A4A',
+      normal: '#ff5252',
       dark50: '#6A2525',
       dark75: '#351313',
     },

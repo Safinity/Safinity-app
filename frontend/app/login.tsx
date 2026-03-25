@@ -54,7 +54,9 @@ export default function Login() {
 
       <MainArea accessibilityRole="main">
         <InputGroup>
-          <Label>Email *</Label>
+          <Label>
+            Email <RequiredAsterisk>*</RequiredAsterisk>
+          </Label>
           <InputBox>
             <Input
               accessibilityLabel="Email input field"
@@ -78,7 +80,9 @@ export default function Login() {
         </InputGroup>
 
         <InputGroup>
-          <Label>Password *</Label>
+          <Label>
+            Password <RequiredAsterisk>*</RequiredAsterisk>
+          </Label>
 
           <InputBox>
             <Input
@@ -125,7 +129,12 @@ export default function Login() {
           </ErrorArea>
         ) : null}
 
-        <PrimaryButton title="Log In" onPress={handleLogin} accessibilityLabel="Log In" />
+        <PrimaryButton
+          accessibilityLabel="Log In"
+          title="Log In"
+          disabled={email === '' || password === ''}
+          onPress={handleLogin}
+        />
 
         <RowWithLink>
           <SmallText>Don`t have an account?</SmallText>
@@ -230,5 +239,10 @@ const ErrorArea = styled.View`
 const ErrorText = styled.Text`
   color: ${({ theme }) => theme.colors.error};
   text-align: center;
+  font-weight: bold;
   ${({ theme }) => theme.text.corpo.corpoTexto};
+`;
+
+const RequiredAsterisk = styled.Text`
+  color: #ff5252;
 `;

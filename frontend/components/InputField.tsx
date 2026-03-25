@@ -17,7 +17,13 @@ export default function InputField({
 
   return (
     <Wrapper style={style}>
-      <Label>{label}</Label>
+      <Label>
+        {/* Se a label tiver *, remove-o do texto principal. Se não, mostra a label normal */}
+        {label.includes('*') ? label.replace('*', '').trim() : label}
+
+        {/* Se houver um *, renderiza o componente vermelho */}
+        {label.includes('*') && <RequiredAsterisk aria-hidden="true"> *</RequiredAsterisk>}
+      </Label>
 
       <Box>
         <Input
@@ -50,20 +56,28 @@ const Wrapper = styled.View`
 `;
 
 const Label = styled.Text`
-  color: ${({ theme }) => theme.colors.white};
-  font-size: 14px;
-  margin-bottom: 6px;
+  color: ${({ theme }) => theme.colors.inactive};
+  margin-bottom: ${({ theme }) => theme.spacing.xs}px;
+  ${({ theme }) => theme.text.corpo.corpoTexto};
 `;
 
 const Box = styled.View`
-  background-color: #2a303f;
-  border-radius: 10px;
-  padding: 12px 14px;
+  background-color: ${({ theme }) => theme.colors.grayNavbar};
+  border-radius: ${({ theme }) => theme.borderRadius.medium}px;
+  padding: ${({ theme }) => theme.spacing.md}px;
   flex-direction: row;
   align-items: center;
 `;
 
 const Input = styled.TextInput`
   flex: 1;
-  color: white;
+  color: ${({ theme }) => theme.colors.white};
+  ${({ theme }) => theme.text.corpo.corpoTexto};
+  include-font-padding: false;
+  padding-vertical: 0px;
+`;
+
+const RequiredAsterisk = styled.Text`
+  color: #ff5252;
+  ${({ theme }) => theme.text.corpo.corpoTexto};
 `;

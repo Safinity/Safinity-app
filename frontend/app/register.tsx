@@ -97,12 +97,7 @@ export default function Register() {
 
           {confirmPassword.length > 0 && password !== confirmPassword && (
             <ErrorArea accessibilityLiveRegion="assertive" accessibilityRole="alert">
-              <Ionicons
-                name="alert-circle-outline"
-                size={18}
-                color="#ff4d4d"
-                style={{ marginRight: 8 }}
-              />
+              <Ionicons name="alert-circle" size={18} color="#ff5252" style={{ marginRight: 8 }} />
               <ErrorText>The passwords entered do not match.</ErrorText>
             </ErrorArea>
           )}
@@ -227,5 +222,7 @@ const ErrorArea = styled.View`
 const ErrorText = styled.Text`
   color: ${({ theme }) => theme.colors.error};
   text-align: center;
+  font-weight: bold;
   ${({ theme }) => theme.text.corpo.corpoTexto};
 `;
+

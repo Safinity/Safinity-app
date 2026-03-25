@@ -225,4 +225,3 @@ const ErrorText = styled.Text`
   font-weight: bold;
   ${({ theme }) => theme.text.corpo.corpoTexto};
 `;
-

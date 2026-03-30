@@ -50,14 +50,10 @@ export const EventCard: React.FC<EventCardProps> = ({ event, variant }) => {
 
       <GradientLayer $isCompact={$isCompact}>
         {isLive && <LiveBadge>Live Now</LiveBadge>}
-        {event.time_left && (
-          <TimeBadge $isCompact={$isCompact}>{event.time_left}</TimeBadge>
-        )}
+        {event.time_left && <TimeBadge $isCompact={$isCompact}>{event.time_left}</TimeBadge>}
 
         <CardFooter>
-          <DateText>
-            {formatEventDate(event.start_date, event.end_date)}
-          </DateText>
+          <DateText>{formatEventDate(event.start_date, event.end_date)}</DateText>
           <TitleText>{event.name}</TitleText>
         </CardFooter>
       </GradientLayer>

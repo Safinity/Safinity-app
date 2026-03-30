@@ -58,7 +58,7 @@ export default function HomeCard({
       <Title>{title}</Title>
 
       <ImageWrapper>
-        <Image src={image} alt={""} />
+        <Image src={image} alt={''} />
       </ImageWrapper>
 
       <Description>{description}</Description>

@@ -17,7 +17,7 @@ const Card = styled.div`
   width: 100%;
 `;
 
-const Title = styled.h2`
+const Title = styled.h1`
   color: var(--white);
   font-size: 24px;
   font-weight: 600;
@@ -58,7 +58,7 @@ export default function HomeCard({
       <Title>{title}</Title>
 
       <ImageWrapper>
-        <Image src={image} alt={title} />
+        <Image src={image} alt={""} />
       </ImageWrapper>
 
       <Description>{description}</Description>

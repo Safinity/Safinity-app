@@ -41,7 +41,6 @@ export const Alerts: React.FC = () => {
               >
                 <AlertsBar
                   type={alert.type}
-                  dotColor={alert.dotColor}
                   title={alert.title}
                   message={alert.message}
                   time={alert.time}

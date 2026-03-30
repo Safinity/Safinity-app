@@ -2,10 +2,10 @@ import React from 'react';
 import styled from 'styled-components';
 import '../theme/theme.ts';
 
-import emergencyIcon from '../assets/icons/emergency.svg';
-import warningIcon from '../assets/icons/warning.svg';
-import infoIcon from '../assets/icons/info.svg';
-import successIcon from '../assets/icons/success.svg';
+import emergencyIcon from '../assets/Icons/emergency.svg';
+import warningIcon from '../assets/Icons/warning.svg';
+import infoIcon from '../assets/Icons/info.svg';
+import successIcon from '../assets/Icons/success.svg';
 
 type Props = {
   type: string;

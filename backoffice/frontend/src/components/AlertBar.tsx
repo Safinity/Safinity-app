@@ -16,14 +16,17 @@ type Props = {
 };
 
 export const AlertsBar: React.FC<Props> = ({ type, title, message, time, submittedby }) => {
-  
   const getIconByType = (t: string) => {
     switch (t.toLowerCase()) {
       case 'emergency':
-      case 'critical': return emergencyIcon;
-      case 'warning': return warningIcon;
-      case 'success': return successIcon;
-      default: return infoIcon;
+      case 'critical':
+        return emergencyIcon;
+      case 'warning':
+        return warningIcon;
+      case 'success':
+        return successIcon;
+      default:
+        return infoIcon;
     }
   };
 
@@ -31,19 +34,17 @@ export const AlertsBar: React.FC<Props> = ({ type, title, message, time, submitt
     <Container>
       <Left>
         {/* aria-hidden="true" porque a imagem é decorativa (o texto já explica o tipo) */}
-        <IconImage 
-          src={getIconByType(type)} 
-          alt="" 
-          aria-hidden="true" 
-        />
-        
+        <IconImage src={getIconByType(type)} alt="" aria-hidden="true" />
+
         <TextBlock>
           {/* aria-hidden="true" aqui evita que o leitor de ecrã leia "EMERGENCY" e logo a seguir o aria-label do pai */}
           <TypeLabel $type={type.toLowerCase()} aria-hidden="true">
             {type.toUpperCase()}
           </TypeLabel>
-          
-          <Title role="heading" aria-level={3}>{title}</Title>
+
+          <Title role="heading" aria-level={3}>
+            {title}
+          </Title>
           <Message>{message}</Message>
 
           <Meta>
@@ -81,11 +82,11 @@ const Left = styled.div`
 `;
 
 const IconImage = styled.img`
-  width: 32px; 
+  width: 32px;
   height: 32px;
   object-fit: contain;
   flex-shrink: 0;
-  margin-top: 14px; 
+  margin-top: 14px;
 `;
 
 const TextBlock = styled.div`
@@ -100,7 +101,7 @@ const TypeLabel = styled.span<{ $type: string }>`
   letter-spacing: 1.5px;
   margin-bottom: 2px;
   /* Texto branco em cima do fundo escuro (Contraste 21:1 - Perfeito) */
-  color: #FFFFFF; 
+  color: #ffffff;
 `;
 
 const Title = styled.div`

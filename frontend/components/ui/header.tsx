@@ -37,16 +37,11 @@ const Header: React.FC<HeaderProps> = ({
               <LogoImage
                 source={require('../../assets/logos/logo-header.png')}
                 resizeMode="contain"
-                accessibilityLabel="Safinity logo"
               />
             </LogoContainer>
 
             <IconRow>
-              <IconButton
-                onPress={() => router.push('/notifications')}
-                accessibilityRole="button"
-                accessibilityLabel="Notifications"
-              >
+              <IconButton onPress={() => router.push('/notifications')}>
                 <Ionicons
                   name="notifications-outline"
                   size={Width.iconHeader}
@@ -54,11 +49,7 @@ const Header: React.FC<HeaderProps> = ({
                 />
               </IconButton>
 
-              <IconButton
-                onPress={() => router.push('/perfil/profile')}
-                accessibilityRole="button"
-                accessibilityLabel="Profile"
-              >
+              <IconButton onPress={() => router.push('/perfil/profile')}>
                 <Ionicons name="person-circle" size={Width.iconHeader} color={Colors.white} />
               </IconButton>
             </IconRow>

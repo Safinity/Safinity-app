@@ -100,7 +100,7 @@ const LongCancelButton = styled.Pressable`
 `;
 
 const CancelText = styled.Text`
-  color: ${Colors.error};
+  color: #ed7979;
   font-size: 16px;
   font-weight: bold;
 `;
@@ -237,12 +237,7 @@ export default function MapScreen() {
       </Head>
       <Stack.Screen options={{ title: 'Map | Safinity', headerShown: false }} />
 
-      <GestureDetector
-        gesture={composedGesture}
-        accessibilityRole="main"
-        accessibilityLabel="Map interaction area"
-        accessibilityHint="Use pinch to zoom and drag to pan the map"
-      >
+      <GestureDetector gesture={composedGesture}>
         <Animated.View
           style={[{ width: IMAGE_WIDTH, height: IMAGE_HEIGHT }, animatedStyle]}
           accessible={false}
@@ -283,9 +278,6 @@ export default function MapScreen() {
                 width={IMAGE_WIDTH}
                 height={IMAGE_HEIGHT}
                 onPress={() => handlePinPress(pin)}
-                accessible
-                accessibilityRole="button"
-                accessibilityLabel={`Map pin: ${getDisplayName(pin)} (${pin.type})`}
               />
             );
           })}
@@ -298,9 +290,6 @@ export default function MapScreen() {
               width={IMAGE_WIDTH}
               height={IMAGE_HEIGHT}
               onPress={() => handlePinPress(stage)}
-              accessible
-              accessibilityRole="button"
-              accessibilityLabel={`Stage: ${getDisplayName(stage)}`}
             />
           ))}
 
@@ -326,7 +315,7 @@ export default function MapScreen() {
 
       <OverlayContent pointerEvents="box-none">
         <PageHeader>
-          <Ionicons name="location" size={28} color={Colors.primary} />
+          <Ionicons name="location" size={28} color={Colors.palette.primary.light50} />
           <PageTitle accessibilityRole="header">University of Aveiro</PageTitle>
         </PageHeader>
 
@@ -354,16 +343,16 @@ export default function MapScreen() {
 
       {activeRoute && (
         <NavigationFooter
-          accesibilityRole="Contentinfo"
-          accessibilityLabel="Active navigation route information"
+          accessibilityRole="contentinfo"
+          accessibilityLabel={`Active navigation route to ${destinationName}`}
         >
           <LongCancelButton
             onPress={handleCancelRoute}
             accessible
             accessibilityRole="button"
-            accessibilityLabel={`Cancel route to ${destinationName}`}
+            accessibilityLabel={`Cancel Route to ${destinationName}`}
           >
-            <Ionicons name="close-circle" size={20} color={Colors.error} />
+            <Ionicons name="close-circle" size={20} color="#ed7979" />
             <CancelText>Cancel Route</CancelText>
             <DestinationText>| {destinationName}</DestinationText>
           </LongCancelButton>
@@ -374,26 +363,10 @@ export default function MapScreen() {
         onPress={() => router.push('/sos')}
         accessible
         accessibilityRole="button"
-        accessibilityLabel="Emergency SOS button"
+        accessibilityLabel="SOS - Emergency button"
       >
         <SOSButtonText>SOS</SOSButtonText>
       </SosButton>
     </Container>
   );
 }
-
-/*
-WCAG Level A Compliance Summary for MapScreen
-
-Requirement                     Status   Notes
----------------------------------------------------------------------------
-Page title                        ✅      <Head><title> present
-Headings                           ✅      PageTitle set with accessibilityRole="header"
-Alt text / images                  ⚠️      Static map has no description; pins and stages now labeled
-Role attributes                     ✅      Buttons and interactive elements have roles
-Labels for inputs                   ✅      SearchInput and FilterTags labeled
-Required fields / validation        ✅      Not applicable
-Contrast                            ✅      Colors verified for Level A
-Keyboard / focus                    ⚠️      GestureDetector may require custom focus handling for screen readers
-Bypass blocks (skip links)          ✅      Not required on mobile for Level A
-*/

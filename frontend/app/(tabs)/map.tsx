@@ -363,7 +363,7 @@ export default function MapScreen() {
         onPress={() => router.push('/sos')}
         accessible
         accessibilityRole="button"
-        accessibilityLabel="SOS - Emergency button"
+        accessibilityLabel="SOS"
       >
         <SOSButtonText>SOS</SOSButtonText>
       </SosButton>

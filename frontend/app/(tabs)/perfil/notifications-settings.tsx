@@ -4,7 +4,7 @@ import { ScrollView } from 'react-native';
 import { Stack } from 'expo-router';
 import Header from '../../../components/ui/header';
 import Toggle from '../../../components/ui/toggle';
-import { Colors, Spacing, Fonts } from '../../../constants/theme';
+import { Colors, Spacing } from '../../../constants/theme';
 
 const NotificationSettingsScreen = () => {
   const [notifications, setNotifications] = useState({
@@ -76,7 +76,7 @@ const Container = styled.View`
 
 const Content = styled.View`
   padding: 0 ${Spacing.margemLateral}px;
-  padding-top: ${Spacing.xxl}px;
+  padding-top: ${Spacing.xxxl}px;
   padding-bottom: ${Spacing.xl}px;
 `;
 

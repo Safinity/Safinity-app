@@ -3,42 +3,13 @@ import { ScrollView, StatusBar, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
-
+import Header from '../../components/ui/header';
 import { HeroBanner } from '../../components/HeroBanner';
 import calendarData from '../../data/calendar.json';
-
-/*
-WCAG Level A Compliance Summary
-
-Requirement                      Status   Notes
----------------------------------------------------------------
-Page title                        ✅       <Head><title> present on CalendarScreen
-Headings                           ✅       SectionTitle elements have accessibilityRole="header"
-Alt text / images                  ✅       Avatars have accessible + accessibilityLabel
-Role attributes                     ✅       Buttons, main, navigation, headers properly marked
-Labels for inputs                    ✅       Search input has accessibilityLabel and accessibilityHint
-Required fields / validation         ✅       Not applicable (no forms requiring validation)
-Keyboard / focus                     ✅       Pressable/TouchableOpacity components are accessible by default
-Bypass blocks (skip links)           ✅       Not required on mobile for Level A
-*/
 
 const Container = styled.View`
   flex: 1;
   background-color: ${({ theme }) => theme.colors.background};
-`;
-
-const BackButton = styled.Pressable`
-  position: absolute;
-  top: ${({ theme }) => theme.spacing.margemTop}px;
-  left: ${({ theme }) => theme.spacing.margemLateral}px;
-  z-index: 999;
-  background-color: rgba(0, 0, 0, 0.5);
-  width: ${({ theme }) => theme.height.tam_42}px;
-  height: ${({ theme }) => theme.height.tam_42}px;
-  border-radius: ${({ theme }) => theme.borderRadius.round}px;
-  justify-content: center;
-  align-items: center;
-  elevation: 10;
 `;
 
 const ContentCard = styled.View`
@@ -181,13 +152,7 @@ export default function ActivityDetailsScreen() {
       </ScrollView>
 
       {/* BACK BUTTON */}
-      <BackButton
-        onPress={() => router.push('/(tabs)/calendar')}
-        accessibilityRole="button"
-        accessibilityLabel="Go back to calendar"
-      >
-        <Ionicons name="chevron-back" size={26} color="white" />
-      </BackButton>
+      <Header variant="pageDetails" />
     </Container>
   );
 }

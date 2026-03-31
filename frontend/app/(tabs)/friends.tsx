@@ -115,6 +115,7 @@ export default function FriendsScreen() {
         </RegionContainer>
 
         {/* Region: Other Friends */}
+
         <RegionContainer accessibilityRole="region" accessibilityLabel="Other friends">
           <SectionSubtitle accessibilityRole="header" accessibilityLevel={2}>
             Other Friends

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { FlatList } from 'react-native';
 import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
-import Header from '@/components/ui/header';
+import Header from '../../components/ui/header';
 import { userImages } from '../../assets/images/Users/userImages';
 import initialData from '../../data/notifications.json';
 import { Stack } from 'expo-router';
@@ -13,25 +13,8 @@ const Container = styled.View`
 `;
 
 const PageHeaderContent = styled.View`
-  padding: ${({ theme }) => theme.spacing.xxl}px ${({ theme }) => theme.spacing.margemLateral}px
-    ${({ theme }) => theme.spacing.lg}px;
-`;
-
-const Title = styled.Text`
-  font-family: ${({ theme }) => theme.text.titulo.h.fontFamily};
-  font-size: ${({ theme }) => theme.text.titulo.h.fontSize}px;
-  color: ${({ theme }) => theme.colors.white};
-  margin-bottom: ${({ theme }) => theme.spacing.sm}px;
-`;
-
-const CountText = styled.Text`
-  font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
-  font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
-  color: ${({ theme }) => theme.colors.white};
-`;
-
-const BoldCount = styled.Text`
-  font-family: ${({ theme }) => theme.text.titulo.h3.fontFamily};
+  padding: ${({ theme }) => theme.spacing.xxxl}px ${({ theme }) => theme.spacing.margemLateral}px
+    ${({ theme }) => theme.spacing.md}px;
 `;
 
 const MarkReadButton = styled.Pressable`
@@ -39,7 +22,7 @@ const MarkReadButton = styled.Pressable`
   padding: ${({ theme }) => theme.spacing.sm}px ${({ theme }) => theme.spacing.lg}px;
   border-radius: ${({ theme }) => theme.borderRadius.small}px;
   align-self: flex-end;
-  margin-top: ${({ theme }) => theme.spacing.md}px;
+  margin-top: ${({ theme }) => theme.spacing.xl}px;
 `;
 
 const MarkReadText = styled.Text`
@@ -105,7 +88,6 @@ const CardMessage = styled.Text`
 const ActionRow = styled.View`
   flex-direction: row;
   margin-top: ${({ theme }) => theme.spacing.md}px;
-  gap: ${({ theme }) => theme.spacing.md}px;
 `;
 
 const AcceptButton = styled.TouchableOpacity`
@@ -124,14 +106,14 @@ const RemoveButton = styled.TouchableOpacity`
   border-radius: ${({ theme }) => theme.borderRadius.small}px;
   justify-content: center;
   align-items: center;
+  margin-right: ${({ theme }) => theme.spacing.md}px;
 `;
 
 const SectionLabel = styled.Text`
   color: ${({ theme }) => theme.colors.palette.primary.light50};
   font-size: ${({ theme }) => theme.text.titulo.h3.fontSize}px;
   font-family: ${({ theme }) => theme.text.titulo.h3.fontFamily};
-  margin: ${({ theme }) => theme.spacing.lg}px ${({ theme }) => theme.spacing.margemLateral}px
-    ${({ theme }) => theme.spacing.sm}px;
+  margin: 0px ${({ theme }) => theme.spacing.margemLateral}px ${({ theme }) => theme.spacing.sm}px;
 `;
 
 export default function NotificationsPage() {
@@ -226,7 +208,7 @@ export default function NotificationsPage() {
                 accessibilityRole="button"
                 accessibilityLabel={`Remove friend request from ${item.title}`}
               >
-                <MarkReadText style={{ color: '#E8CAFF' }}>Remove</MarkReadText>{' '}
+                <MarkReadText style={{ color: '#E8CAFF' }}>Remove</MarkReadText>
               </RemoveButton>
               <AcceptButton
                 accessibilityRole="button"
@@ -244,29 +226,36 @@ export default function NotificationsPage() {
   return (
     <Container>
       <Stack.Screen options={{ title: 'Notifications' }} />
-      <Header variant="back" />
+
+      {/* Header fixo no topo */}
+      <Header
+        variant="back"
+        title="Notifications"
+        subtitle={`You have ${newNotifications.length} new notifications.`}
+      />
+
+      {/* Botão Mark all read abaixo do header */}
+      <PageHeaderContent>
+        <MarkReadButton
+          onPress={handleMarkAllRead}
+          accessibilityRole="button"
+          accessibilityLabel="Mark all notifications as read"
+        >
+          <MarkReadText>Mark all as read</MarkReadText>
+        </MarkReadButton>
+      </PageHeaderContent>
+
+      {/* Lista apenas com notificações */}
       <FlatList
         data={dataToRender}
         keyExtractor={item => item.id.toString()}
         renderItem={renderItem}
         accessibilityRole="list"
-        ListHeaderComponent={
-          <PageHeaderContent>
-            <Title accessibilityRole="header">Notifications</Title>
-            <CountText accessibilityLabel={`You have ${newNotifications.length} new notifications`}>
-              You have <BoldCount>{newNotifications.length}</BoldCount> new notifications.
-            </CountText>
-            <MarkReadButton
-              onPress={handleMarkAllRead}
-              accessibilityRole="button"
-              accessibilityLabel="Mark all notifications as read"
-            >
-              <MarkReadText>Mark all as read</MarkReadText>
-            </MarkReadButton>
-          </PageHeaderContent>
-        }
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 50 }}
+        contentContainerStyle={{
+          paddingBottom: 50,
+          paddingHorizontal: 0, // já temos o padding no PageHeaderContent ou no container
+        }}
       />
     </Container>
   );

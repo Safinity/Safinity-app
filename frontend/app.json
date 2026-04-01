@@ -3,9 +3,20 @@
     "name": "Safinity",
     "slug": "frontend",
     "version": "1.0.0",
-
+    "orientation": "portrait",
     "icon": "./assets/icons/app_logo.png",
-
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "scheme": "frontend",
+    "owner": "beatriz-castros-organization",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.safinityapp.frontend",
+      "infoPlist": {
+        "CFBundleDisplayName": "Safinity",
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
     "android": {
       "package": "com.safinityapp.frontend",
       "compileSdkVersion": 35,
@@ -19,70 +30,18 @@
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
-    "extra": {
-      "eas": {
-        "projectId": "c6d74fda-161d-47df-afad-75b5aa15930c"
-      }
-    },
-    "owner": "beatriz-castros-organization",
+    "plugins": ["expo-router", "expo-font", "expo-camera"],
+    "platforms": ["ios", "android", "web"],
     "runtimeVersion": {
       "policy": "appVersion"
     },
     "updates": {
       "url": "https://u.expo.dev/c6d74fda-161d-47df-afad-75b5aa15930c"
     },
-    "ios": {
-      "bundleIdentifier": "com.safinityapp.frontend",
-      "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
-      }
-    },
-    "scheme": "frontend"
-  },
-  "name": "safinity-app",
-  "icon": "./assets/icons/app_logo.png",
-  "slug": "safinity-app",
-  "version": "1.0.0",
-  "orientation": "portrait",
-  "userInterfaceStyle": "automatic",
-  "newArchEnabled": true,
-  "ios": {
-    "supportsTablet": true,
-    "bundleIdentifier": "com.safinityapp.frontend",
-    "infoPlist": {
-      "ITSAppUsesNonExemptEncryption": false
-    }
-  },
-  "android": {
-    "adaptiveIcon": {
-      "backgroundColor": "#E6F4FE"
-    },
-
-    "ios": {
-      "bundleIdentifier": "com.safinityapp.frontend",
-      "infoPlist": {
-        "CFBundleDisplayName": "Safinity",
-        "ITSAppUsesNonExemptEncryption": false
-      }
-    },
-
-    "updates": {
-      "url": "https://u.expo.dev/29b2c487-32ee-4824-950b-00c95e98b88f"
-    },
-
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
-
     "extra": {
       "eas": {
-        "projectId": "29b2c487-32ee-4824-950b-00c95e98b88f"
+        "projectId": "c6d74fda-161d-47df-afad-75b5aa15930c"
       }
-    },
-
-    "plugins": ["expo-router", "expo-font", "expo-camera"],
-
-    "owner": "safinityapp",
-    "platforms": ["ios", "android", "web"]
+    }
   }
 }

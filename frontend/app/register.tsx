@@ -204,5 +204,6 @@ const ErrorArea = styled.View`
 const ErrorText = styled.Text`
   color: ${({ theme }) => theme.colors.error};
   text-align: center;
+  font-weight: bold;
   ${({ theme }) => theme.text.corpo.corpoTexto};
 `;

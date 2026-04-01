@@ -96,12 +96,14 @@ export const EventCard = ({ event, variant }: any) => {
 
   return (
     <CardContainer
-      isCompact={isCompact} onPress={handlePress} href={`/event-details/${event.id}`}
+      isCompact={isCompact}
+      onPress={handlePress}
+      href={`/event-details/${event.id}`}
       accessibilityRole="button"
       accessible={true}
       accessibilityLabel={`Evento: ${event.name}. Data: ${formatEventDate(event.start_date, event.end_date)}`}
-      accessibilityHint="Clica para ver os detalhes deste evento" focusable={true}
-      
+      accessibilityHint="Clica para ver os detalhes deste evento"
+      focusable={true}
       onKeyDown={(e: any) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();

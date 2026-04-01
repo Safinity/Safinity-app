@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import styled, { keyframes } from 'styled-components';
 import Logo from '../assets/logos/loading-logo.png';
+import { Helmet } from 'react-helmet-async';
 
 const fadeIn = keyframes`
   from { opacity: 0; }
@@ -31,8 +32,14 @@ export default function Loading({ onFinish }: Props) {
   }, [onFinish]);
 
   return (
-    <Container>
-      <LogoImg src={Logo} alt="Loading logo" />
-    </Container>
+    <>
+      <Helmet>
+        <title>Entering Safinity Backoffice...</title>
+      </Helmet>
+
+      <Container>
+        <LogoImg src={Logo} alt="Loading logo" />
+      </Container>
+    </>
   );
 }

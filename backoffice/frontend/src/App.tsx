@@ -13,7 +13,6 @@ import Loading from './pages/Loading';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
-// Removido o import duplicado de EventsPage
 import { Layout } from './layout/Layout';
 import { theme } from './theme/theme';
 
@@ -41,7 +40,7 @@ export default function App() {
           <Route
             path="/home"
             element={
-              <Layout>
+              <Layout title='Home | Safinity'>
                 <Home />
               </Layout>
             }
@@ -50,17 +49,16 @@ export default function App() {
           <Route
             path="/alerts"
             element={
-              <Layout>
+              <Layout title='Alerts | Safinity'>
                 <Alerts />
               </Layout>
             }
           />
 
-          {/* CORRIGIDO: Mupis agora tem / e está dentro do Layout */}
           <Route
             path="/mupis"
             element={
-              <Layout>
+              <Layout title='Mupis | Safinity'>
                 <MupisPage />
               </Layout>
             }
@@ -69,7 +67,7 @@ export default function App() {
           <Route
             path="/notifications"
             element={
-              <Layout>
+              <Layout title='Notifications | Safinity'>
                 <NotificationsPage />
               </Layout>
             }
@@ -77,7 +75,7 @@ export default function App() {
           <Route
             path="/events"
             element={
-              <Layout>
+              <Layout title='Events | Safinity'>
                 <EventPage />
               </Layout>
             }
@@ -85,7 +83,7 @@ export default function App() {
           <Route
             path="/manageevents"
             element={
-              <Layout>
+              <Layout title='Manage Events | Safinity'>
                 <ManageEventMap />
               </Layout>
             }

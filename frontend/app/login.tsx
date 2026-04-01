@@ -6,6 +6,7 @@ import { router, Stack } from 'expo-router';
 import users from '@/data/users.json';
 import PrimaryButton from '@/components/PrimaryButton';
 import Head from 'expo-router/head';
+import Header from '@/components/ui/header';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -38,19 +39,10 @@ export default function Login() {
       <Head>
         <title>Log In | Safinity</title>
       </Head>
-      <Stack.Screen options={{ title: 'Log In | Safinity', headerShown: false }} />
 
-      <HeadingArea accessibilityRole="header">
-        <BackButton
-          onPress={() => router.back()}
-          accessibilityLabel="Return to the previous page"
-          accessibilityRole="button"
-        >
-          <Ionicons name="arrow-back" size={26} color="white" />
-        </BackButton>
-        <Title accessibilityHeadingLevel={1}>Log In</Title>
-        <Subtitle accessibilityHeadingLevel={2}>Welcome back!</Subtitle>
-      </HeadingArea>
+      <Stack.Screen options={{ headerShown: false }} />
+
+      <Header variant="back" title="Log In" subtitle="Welcome back!" />
 
       <MainArea accessibilityRole="main">
         <InputGroup>
@@ -69,12 +61,13 @@ export default function Login() {
               value={email}
               onChangeText={setEmail}
             />
+
             <Ionicons
               name="mail-outline"
               size={20}
               color="#cfd3e0"
-              importantForAccessibility="no-hide-descendants" // Para Android
-              accessibilityElementsHidden={true} // Para iOS
+              importantForAccessibility="no-hide-descendants"
+              accessibilityElementsHidden={true}
             />
           </InputBox>
         </InputGroup>
@@ -112,6 +105,7 @@ export default function Login() {
 
         <RowWithLink>
           <SmallText>Forgot your password?</SmallText>
+
           <LinkArea accessibilityRole="link">
             <LinkText>Recover password</LinkText>
           </LinkArea>
@@ -138,6 +132,7 @@ export default function Login() {
 
         <RowWithLink>
           <SmallText>Don`t have an account?</SmallText>
+
           <LinkArea accessibilityRole="link" onPress={() => router.push('/register')}>
             <LinkText>Create Account</LinkText>
           </LinkArea>
@@ -147,36 +142,18 @@ export default function Login() {
   );
 }
 
-// ------------------------------------------------------Styled Components------------------------------------------------------
+/* ---------------- styled components ---------------- */
 
 const Container = styled.View`
   flex: 1;
-  padding-top: ${({ theme }) => theme.spacing.xl}px;
+  padding-top: ${({ theme }) => theme.spacing.xxxl}px;
+  padding-horizontal: ${({ theme }) => theme.spacing.margemLateral}px;
   background-color: ${({ theme }) => theme.colors.background};
-  padding: ${({ theme }) => theme.spacing.margemLateral}px;
-`;
-
-const BackButton = styled.TouchableOpacity`
-  margin-bottom: ${({ theme }) => theme.spacing.md}px;
-`;
-
-const HeadingArea = styled.View`
-  margin-bottom: ${({ theme }) => theme.spacing.xl}px;
-`;
-
-const Title = styled.Text`
-  color: ${({ theme }) => theme.colors.white};
-  margin-bottom: ${({ theme }) => theme.spacing.xs}px;
-  ${({ theme }) => theme.text.titulo.h1};
-`;
-
-const Subtitle = styled.Text`
-  color: ${({ theme }) => theme.colors.inactive};
-  ${({ theme }) => theme.text.corpo.corpoTexto};
 `;
 
 const MainArea = styled.View`
   flex: 1;
+  margin-top: ${({ theme }) => theme.spacing.lg}px;
 `;
 
 const InputGroup = styled.View`

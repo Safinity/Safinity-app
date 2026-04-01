@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
+import React from 'react';
 
 interface SidebarProps {
   open: boolean;
@@ -7,13 +8,26 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
+  const firstLinkRef = React.useRef<HTMLAnchorElement>(null);
+
+  // Focus first link when opening
+  React.useEffect(() => {
+    if (open) {
+      setTimeout(() => firstLinkRef.current?.focus(), 0);
+    }
+  }, [open]);
+
+  if (!open) return null; // Do not render when closed
+
   return (
     <>
-      <Wrapper $open={open}>
-        <CloseButton onClick={onClose}>×</CloseButton>
+      <Wrapper role="navigation" aria-label="Main menu">
+        <CloseButton onClick={onClose} aria-label="Close menu">
+          ×
+        </CloseButton>
 
         <Menu>
-          <MenuItem to="/home" onClick={onClose}>
+          <MenuItem to="/home" onClick={onClose} ref={firstLinkRef}>
             Home
           </MenuItem>
           <MenuItem to="/manageevents" onClick={onClose}>
@@ -31,12 +45,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
         </Menu>
       </Wrapper>
 
-      {open && <Overlay onClick={onClose} />}
+      <Overlay onClick={onClose} />
     </>
   );
 };
 
-const Wrapper = styled.div<{ $open: boolean }>`
+const Wrapper = styled.div`
   position: fixed;
   top: 0;
   left: 0;
@@ -44,7 +58,7 @@ const Wrapper = styled.div<{ $open: boolean }>`
   height: 100vh;
   background-color: ${({ theme }) => theme.colors.grayNavbar};
   padding: ${({ theme }) => theme.spacing.lg}px;
-  transform: translateX(${({ $open }) => ($open ? '0' : '-100%')});
+  transform: translateX(0);
   transition: transform 0.3s ease;
   z-index: 1000;
   display: flex;

@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { eventImages } from '../assets/images/Events';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 interface Event {
   id: string;
@@ -25,7 +25,6 @@ interface EventCardProps {
 }
 
 export const EventCard: React.FC<EventCardProps> = ({ event, variant }) => {
-  const navigate = useNavigate();
   const $isCompact = variant === 'compact';
   const isLive = event.status === 'live';
 
@@ -45,13 +44,10 @@ export const EventCard: React.FC<EventCardProps> = ({ event, variant }) => {
       : `${startDay} ${startDate.toLocaleString('en-GB', { month: 'short' })} - ${endDay} ${endDate.toLocaleString('en-GB', { month: 'short' })} ${year}`;
   };
 
-  const handleClick = () => {
-    navigate(`/manageevents`);
-  };
-
   return (
-    <CardContainer $isCompact={$isCompact} onClick={handleClick}>
+    <CardContainer to="/manageevents" $isCompact={$isCompact}>
       <BackgroundImage src={imageSource} alt={event.name} />
+
       <GradientLayer $isCompact={$isCompact}>
         {isLive && <LiveBadge>Live Now</LiveBadge>}
         {event.time_left && <TimeBadge $isCompact={$isCompact}>{event.time_left}</TimeBadge>}
@@ -67,7 +63,7 @@ export const EventCard: React.FC<EventCardProps> = ({ event, variant }) => {
 
 /* --- Styled Components --- */
 
-const CardContainer = styled.div<{ $isCompact?: boolean }>`
+const CardContainer = styled(Link)<{ $isCompact?: boolean }>`
   position: relative;
   width: 280px;
   height: ${({ $isCompact }) => ($isCompact ? '240px' : '380px')};
@@ -75,6 +71,9 @@ const CardContainer = styled.div<{ $isCompact?: boolean }>`
   border-radius: ${({ theme }) => theme.borderRadius.large}px;
   overflow: hidden;
   cursor: pointer;
+  display: block;
+  text-decoration: none;
+
   transition:
     transform 0.3s ease,
     box-shadow 0.3s ease;
@@ -82,6 +81,12 @@ const CardContainer = styled.div<{ $isCompact?: boolean }>`
   &:hover {
     transform: translateY(-5px);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+  }
+
+  /* 🔥 foco com teclado */
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.primary};
+    outline-offset: 4px;
   }
 `;
 

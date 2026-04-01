@@ -2,6 +2,7 @@ import { useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { AiOutlineCheckSquare, AiOutlineBorder } from 'react-icons/ai';
+import { Helmet } from 'react-helmet-async';
 
 import LogoImg from '../assets/images/landing/logo.png';
 import PhoneImg from '../assets/images/landing/phone.png';
@@ -162,119 +163,124 @@ export default function Register() {
   };
 
   return (
-    <Page>
-      <LeftContent>
-        <Logo src={LogoImg} alt="Safinity Logo" />
-        <Title>Create account</Title>
-        <Subtitle>Join us!</Subtitle>
+    <>
+      <Helmet>
+        <title>Register | Safinity Backoffice</title>
+      </Helmet>
+      <Page>
+        <LeftContent>
+          <Logo src={LogoImg} alt="Safinity Logo" />
+          <Title>Create account</Title>
+          <Subtitle>Join us!</Subtitle>
 
-        <Form>
-          <InputGroup>
-            <Label>First Name</Label>
-            <InputBox>
-              <Input
-                placeholder="First name"
-                value={firstName}
-                onChange={e => setFirstName(e.target.value)}
-              />
-              <FiUser size={20} color="#cfd3e0" />
-            </InputBox>
-          </InputGroup>
+          <Form>
+            <InputGroup>
+              <Label>First Name</Label>
+              <InputBox>
+                <Input
+                  placeholder="First name"
+                  value={firstName}
+                  onChange={e => setFirstName(e.target.value)}
+                />
+                <FiUser size={20} color="#cfd3e0" />
+              </InputBox>
+            </InputGroup>
 
-          <InputGroup>
-            <Label>Last Name</Label>
-            <InputBox>
-              <Input
-                placeholder="Last name"
-                value={lastName}
-                onChange={e => setLastName(e.target.value)}
-              />
-              <FiUser size={20} color="#cfd3e0" />
-            </InputBox>
-          </InputGroup>
+            <InputGroup>
+              <Label>Last Name</Label>
+              <InputBox>
+                <Input
+                  placeholder="Last name"
+                  value={lastName}
+                  onChange={e => setLastName(e.target.value)}
+                />
+                <FiUser size={20} color="#cfd3e0" />
+              </InputBox>
+            </InputGroup>
 
-          <InputGroup>
-            <Label>Username</Label>
-            <InputBox>
-              <Input
-                placeholder="Username"
-                value={username}
-                onChange={e => setUsername(e.target.value)}
-              />
-              <FiAtSign size={20} color="#cfd3e0" />
-            </InputBox>
-          </InputGroup>
+            <InputGroup>
+              <Label>Username</Label>
+              <InputBox>
+                <Input
+                  placeholder="Username"
+                  value={username}
+                  onChange={e => setUsername(e.target.value)}
+                />
+                <FiAtSign size={20} color="#cfd3e0" />
+              </InputBox>
+            </InputGroup>
 
-          <InputGroup>
-            <Label>Email</Label>
-            <InputBox>
-              <Input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-              />
-              <FiMail size={20} color="#cfd3e0" />
-            </InputBox>
-          </InputGroup>
+            <InputGroup>
+              <Label>Email</Label>
+              <InputBox>
+                <Input
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                />
+                <FiMail size={20} color="#cfd3e0" />
+              </InputBox>
+            </InputGroup>
 
-          <InputGroup>
-            <Label>Password</Label>
-            <InputBox>
-              <Input
-                type={showPassword ? 'text' : 'password'}
-                placeholder="Password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-              />
+            <InputGroup>
+              <Label>Password</Label>
+              <InputBox>
+                <Input
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                />
 
-              <IconButton type="button" onClick={() => setShowPassword(prev => !prev)}>
-                {showPassword ? <FiEyeOff size={22} /> : <FiEye size={22} />}
-              </IconButton>
-            </InputBox>
-          </InputGroup>
+                <IconButton type="button" onClick={() => setShowPassword(prev => !prev)}>
+                  {showPassword ? <FiEyeOff size={22} /> : <FiEye size={22} />}
+                </IconButton>
+              </InputBox>
+            </InputGroup>
 
-          <InputGroup>
-            <Label>Confirm Password</Label>
-            <InputBox>
-              <Input
-                type={showConfirmPassword ? 'text' : 'password'}
-                placeholder="Confirm password"
-                value={confirmPassword}
-                onChange={e => setConfirmPassword(e.target.value)}
-              />
+            <InputGroup>
+              <Label>Confirm Password</Label>
+              <InputBox>
+                <Input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  placeholder="Confirm password"
+                  value={confirmPassword}
+                  onChange={e => setConfirmPassword(e.target.value)}
+                />
 
-              <IconButton type="button" onClick={() => setShowConfirmPassword(prev => !prev)}>
-                {showConfirmPassword ? <FiEyeOff size={22} /> : <FiEye size={22} />}
-              </IconButton>
-            </InputBox>
-          </InputGroup>
-        </Form>
+                <IconButton type="button" onClick={() => setShowConfirmPassword(prev => !prev)}>
+                  {showConfirmPassword ? <FiEyeOff size={22} /> : <FiEye size={22} />}
+                </IconButton>
+              </InputBox>
+            </InputGroup>
+          </Form>
 
-        <CheckboxWrapper onClick={() => setChecked(!checked)} style={{ cursor: 'pointer' }}>
-          {checked ? (
-            <AiOutlineCheckSquare size={22} color="#E9D9F5" />
-          ) : (
-            <AiOutlineBorder size={22} color="#E9D9F5" />
-          )}
-          <CheckboxLabel>
-            I agree to the <LinkText>Terms of Use</LinkText> and <LinkText>Privacy Policy</LinkText>
-            .
-          </CheckboxLabel>
-        </CheckboxWrapper>
+          <CheckboxWrapper onClick={() => setChecked(!checked)} style={{ cursor: 'pointer' }}>
+            {checked ? (
+              <AiOutlineCheckSquare size={22} color="#E9D9F5" />
+            ) : (
+              <AiOutlineBorder size={22} color="#E9D9F5" />
+            )}
+            <CheckboxLabel>
+              I agree to the <LinkText>Terms of Use</LinkText> and{' '}
+              <LinkText>Privacy Policy</LinkText>.
+            </CheckboxLabel>
+          </CheckboxWrapper>
 
-        {error && <p style={{ color: 'red', marginTop: 8 }}>{error}</p>}
+          {error && <p style={{ color: 'red', marginTop: 8 }}>{error}</p>}
 
-        <PrimaryButton onClick={handleRegister}>Create account</PrimaryButton>
+          <PrimaryButton onClick={handleRegister}>Create account</PrimaryButton>
 
-        <BottomText>
-          Already have an account? <LinkText onClick={() => navigate('/login')}>Log in</LinkText>
-        </BottomText>
-      </LeftContent>
+          <BottomText>
+            Already have an account? <LinkText onClick={() => navigate('/login')}>Log in</LinkText>
+          </BottomText>
+        </LeftContent>
 
-      <RightContent>
-        <Phone src={PhoneImg} alt="App preview" />
-      </RightContent>
-    </Page>
+        <RightContent>
+          <Phone src={PhoneImg} alt="App preview" />
+        </RightContent>
+      </Page>
+    </>
   );
 }

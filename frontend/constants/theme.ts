@@ -22,7 +22,7 @@ export const Colors = {
   white: '#FFFFFF',
   black: '#000000',
   neutralGray: '#666666',
-  error: '#D34A4A',
+  error: '#b74040',
   palette: {
     primary: {
       light90: '#F4ECFA',

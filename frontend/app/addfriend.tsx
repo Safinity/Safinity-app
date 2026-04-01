@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import styled from 'styled-components/native';
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter, Stack } from 'expo-router';
 import { useUser } from '@/context/UserContext';
 import { userImages } from '../assets/images/Users/userImages';
@@ -9,6 +8,7 @@ import SearchBarQR from '@/components/SearchBarQR';
 import FriendActionButton from '@/components/FriendActionButton';
 import { TouchableOpacity } from 'react-native';
 import Head from 'expo-router/head';
+import Header from '@/components/ui/header';
 
 export default function AddFriendScreen() {
   const { currentUser, addFriend, removeFriend } = useUser();
@@ -17,10 +17,6 @@ export default function AddFriendScreen() {
   const router = useRouter();
 
   if (!currentUser) return null;
-
-  const handleBack = () => {
-    router.push('/(tabs)/friends');
-  };
 
   const handleSubmitSearch = () => {
     if (search.trim().length > 0) {
@@ -49,21 +45,16 @@ export default function AddFriendScreen() {
       <Head>
         <title>Add Friend | Safinity</title>
       </Head>
-      <Stack.Screen options={{ title: 'Add Friend | Safinity', headerShown: false }} />
 
-      {/* Banner/Header */}
-      <HeaderContainer accessibilityRole="banner">
-        <BackButton
-          onPress={handleBack}
-          accessibilityRole="button"
-          accessibilityLabel="Return to the previous page"
-        >
-          <Ionicons name="arrow-back" size={28} color="white" />
-        </BackButton>
-        <Title accessibilityRole="header" accessibilityLevel={1}>
-          Add Friend
-        </Title>
-      </HeaderContainer>
+      <Stack.Screen
+        options={{
+          title: 'Add Friend | Safinity',
+          headerShown: false,
+        }}
+      />
+
+      {/* Global Header */}
+      <Header variant="back" title="Add Friend" />
 
       {/* Main content */}
       <MainContent accessibilityRole="main" accessibilityLabel="Search and add friends">
@@ -81,6 +72,7 @@ export default function AddFriendScreen() {
             <Subtitle accessibilityRole="header" accessibilityLevel={2}>
               Recent searches
             </Subtitle>
+
             {recentSearches.length === 0 ? (
               <EmptyText>No recent searches</EmptyText>
             ) : (
@@ -91,13 +83,6 @@ export default function AddFriendScreen() {
                   accessibilityRole="button"
                   accessibilityLabel={`Search again for ${item}`}
                 >
-                  <Ionicons
-                    name="time-outline"
-                    size={18}
-                    color="white"
-                    accessibilityElementsHidden
-                    importantForAccessibility="no"
-                  />
                   <RecentText>{item}</RecentText>
                 </RecentItem>
               ))
@@ -108,10 +93,11 @@ export default function AddFriendScreen() {
             <Subtitle accessibilityRole="header" accessibilityLevel={2}>
               Results
             </Subtitle>
+
             {filteredUsers.map(user => (
               <TouchableOpacity
                 key={user.id}
-                onPress={() => router.push(`/friends/${user.id}`)} // vai para o perfil do amigo
+                onPress={() => router.push(`/friends/${user.id}`)}
                 accessible={true}
                 accessibilityRole="button"
                 accessibilityLabel={`Open profile of ${user.name}`}
@@ -127,10 +113,13 @@ export default function AddFriendScreen() {
                   accessibilityRole="image"
                   accessibilityLabel={`Profile picture of ${user.name}`}
                 />
+
                 <Info>
                   <Name>{user.name}</Name>
+
                   <Username>@{user.username}</Username>
                 </Info>
+
                 {isFriend(user.id) ? (
                   <FriendActionButton
                     variant="remove"
@@ -157,35 +146,19 @@ export default function AddFriendScreen() {
   );
 }
 
-// ------------------------------------------------------ Styled Components ---------------------------------------------------
+/* ---------------- styled components ---------------- */
 
 const Container = styled.View`
   flex: 1;
   background-color: ${({ theme }) => theme.colors.background};
-  padding: 60px 30px 20px;
-`;
-
-const HeaderContainer = styled.View`
-  margin-bottom: 30px;
-`;
-
-const BackButton = styled.TouchableOpacity`
-  margin-bottom: 20px;
-  width: 40px;
-`;
-
-const Title = styled.Text`
-  color: ${({ theme }) => theme.colors.white};
-  font-family: ${({ theme }) => theme.text.titulo.h1.fontFamily};
-  font-size: ${({ theme }) => theme.text.titulo.h1.fontSize}px;
-  font-weight: bold;
+  padding: 120px 30px 20px;
 `;
 
 const MainContent = styled.ScrollView.attrs({
   showsVerticalScrollIndicator: false,
   bounces: false,
   contentContainerStyle: {
-    paddingTop: 20,
+    paddingTop: 50,
   },
 })`
   flex: 1;
@@ -215,7 +188,6 @@ const RecentItem = styled.TouchableOpacity`
 const RecentText = styled.Text`
   color: ${({ theme }) => theme.colors.white};
   font-size: 16px;
-  margin-left: 10px;
 `;
 
 const Avatar = styled.Image`
@@ -223,12 +195,6 @@ const Avatar = styled.Image`
   height: 70px;
   border-radius: 35px;
   background-color: #ccc;
-`;
-
-const UserRow = styled.View`
-  flex-direction: row;
-  align-items: center;
-  margin-bottom: 16px;
 `;
 
 const Info = styled.View`

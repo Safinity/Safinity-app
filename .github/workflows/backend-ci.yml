@@ -2,9 +2,13 @@ name: Build & Deploy Safinity Backoffice Frontend
 
 on:
   push:
+    paths:
+      - 'backoffice/frontend/**'
     branches:
       - '**'
   pull_request:
+    paths:
+      - 'backoffice/frontend/**'
     branches:
       - main
 
@@ -23,19 +27,19 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-        working-directory: frontend
+        working-directory: backoffice/frontend
 
       - name: Run ESLint
         run: npm run lint
-        working-directory: frontend
+        working-directory: backoffice/frontend
 
       - name: Run Prettier Check
         run: npm run format:check
-        working-directory: frontend
+        working-directory: backoffice/frontend
 
       - name: Build frontend
         run: npm run build
-        working-directory: frontend
+        working-directory: backoffice/frontend
         env:
           VITE_MAPBOX_TOKEN: ${{ secrets.VITE_MAPBOX_TOKEN }}
 
@@ -43,7 +47,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: safinity-backoffice-dist
-          path: frontend/dist
+          path: backoffice/frontend/dist
 
   deploy:
     name: Deploy to Netlify

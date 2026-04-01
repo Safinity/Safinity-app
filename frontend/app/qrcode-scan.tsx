@@ -10,7 +10,6 @@ import Header from '../components/ui/header';
 const Container = styled.View`
   flex: 1;
   background-color: ${({ theme }) => theme.colors.background};
-  padding: 0 ${({ theme }) => theme.spacing.margemLateral}px;
 `;
 
 const ToggleContainer = styled.View`
@@ -22,6 +21,8 @@ const ToggleContainer = styled.View`
   margin-bottom: ${({ theme }) => theme.spacing.xl}px;
   position: relative;
   overflow: hidden;
+  margin-left: ${({ theme }) => theme.spacing.margemLateral}px;
+  margin-right: ${({ theme }) => theme.spacing.margemLateral}px;
 `;
 
 const Slider = styled(Animated.View)`
@@ -143,10 +144,6 @@ export default function QRCodeScreen() {
 
         {mode === 'scan' ? (
           <View accessibilityRole="region" accessibilityLabel="QR code scanner">
-            <SectionTitle accessibilityRole="header" accessibilityLevel={2}>
-              Scan QR Code
-            </SectionTitle>
-
             <CameraWrapper>
               <CameraView
                 style={StyleSheet.absoluteFillObject}
@@ -167,10 +164,6 @@ export default function QRCodeScreen() {
           </View>
         ) : (
           <View accessibilityRole="region" accessibilityLabel="My QR code">
-            <SectionTitle accessibilityRole="header" accessibilityLevel={2}>
-              My QR Code
-            </SectionTitle>
-
             <QRCodeContainer>
               <Ionicons
                 name="qr-code-outline"

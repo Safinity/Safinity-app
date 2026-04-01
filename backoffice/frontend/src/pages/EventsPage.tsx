@@ -3,10 +3,14 @@ import React from 'react';
 import styled from 'styled-components';
 import { EventCard } from '../components/EventCards';
 import eventData from '../data/events.json';
+import { Helmet } from 'react-helmet-async';
 
 const EventsPage: React.FC = () => {
   return (
     <>
+    <Helmet>
+        <title>Events | Safinity Backoffice</title>
+      </Helmet>
       <PageWrapper>
         <Header>
           <Title>Events List</Title>

@@ -4,6 +4,7 @@ import PhoneImg from '../assets/images/landing/phone.png';
 import LogoImg from '../assets/images/landing/logo.png';
 import PrimaryButton from '../components/PrimaryButton';
 import SecondaryButton from '../components/SecondaryButton';
+import { Helmet } from 'react-helmet-async';
 
 const Page = styled.div`
   height: 100vh;
@@ -66,25 +67,32 @@ export default function Landing() {
   const navigate = useNavigate();
 
   return (
-    <Page>
-      <Content>
-        <Logo src={LogoImg} alt="Safinity logo" />
+    <>
 
-        <div>
-          <Title>Welcome to Safinity</Title>
-          <Subtitle>Back Office</Subtitle>
-        </div>
+      <Helmet>
+        <title>Welcome to Safinity Backoffice!</title>
+      </Helmet>
 
-        <Buttons>
-          <PrimaryButton onClick={() => navigate('/login')}>Log in</PrimaryButton>
+      <Page>
+        <Content>
+          <Logo src={LogoImg} alt="Safinity logo" />
 
-          <SecondaryButton onClick={() => navigate('/register')}>Create account</SecondaryButton>
-        </Buttons>
-      </Content>
+          <div>
+            <Title>Welcome to Safinity</Title>
+            <Subtitle>Backoffice</Subtitle>
+          </div>
 
-      <PhoneWrapper>
-        <Phone src={PhoneImg} alt="App preview" />
-      </PhoneWrapper>
-    </Page>
+          <Buttons>
+            <PrimaryButton onClick={() => navigate('/login')}>Log in</PrimaryButton>
+
+            <SecondaryButton onClick={() => navigate('/register')}>Create account</SecondaryButton>
+          </Buttons>
+        </Content>
+
+        <PhoneWrapper>
+          <Phone src={PhoneImg} alt="App preview" />
+        </PhoneWrapper>
+      </Page>
+    </>
   );
 }

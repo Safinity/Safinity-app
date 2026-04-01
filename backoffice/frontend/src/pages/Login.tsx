@@ -7,6 +7,7 @@ import PhoneImg from '../assets/images/landing/phone.png';
 import PrimaryButton from '../components/PrimaryButton';
 import users from '../data/users.json';
 import { FiMail, FiEye, FiEyeOff } from 'react-icons/fi';
+import { Helmet } from 'react-helmet-async';
 
 const Page = styled.div`
   height: 100vh;
@@ -148,56 +149,62 @@ export default function Login() {
   };
 
   return (
-    <Page>
-      <LeftContent>
-        <Logo src={LogoImg} alt="Safinity Logo" />
-        <Title>Log in</Title>
-        <Subtitle>Welcome back!</Subtitle>
+    <>
+      <Helmet>
+        <title>Login | Safinity Backoffice</title>
+      </Helmet>
+      
+      <Page>
+        <LeftContent>
+          <Logo src={LogoImg} alt="Safinity Logo" />
+          <Title>Log in</Title>
+          <Subtitle>Welcome back!</Subtitle>
 
-        <InputGroup>
-          <Label>Email</Label>
-          <InputBox>
-            <Input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-            />
-            <FiMail size={20} color="#cfd3e0" />
-          </InputBox>
-        </InputGroup>
+          <InputGroup>
+            <Label>Email</Label>
+            <InputBox>
+              <Input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+              />
+              <FiMail size={20} color="#cfd3e0" />
+            </InputBox>
+          </InputGroup>
 
-        <InputGroup>
-          <Label>Password</Label>
-          <InputBox>
-            <Input
-              type={showPassword ? 'text' : 'password'}
-              placeholder="Password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-            />
+          <InputGroup>
+            <Label>Password</Label>
+            <InputBox>
+              <Input
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+              />
 
-            <IconButton type="button" onClick={() => setShowPassword(prev => !prev)}>
-              {showPassword ? <FiEyeOff size={22} /> : <FiEye size={22} />}
-            </IconButton>
-          </InputBox>
-        </InputGroup>
+              <IconButton type="button" onClick={() => setShowPassword(prev => !prev)}>
+                {showPassword ? <FiEyeOff size={22} /> : <FiEye size={22} />}
+              </IconButton>
+            </InputBox>
+          </InputGroup>
 
-        <ForgotText>Forgot your password?</ForgotText>
+          <ForgotText>Forgot your password?</ForgotText>
 
-        {error && <ErrorText>{error}</ErrorText>}
+          {error && <ErrorText>{error}</ErrorText>}
 
-        <PrimaryButton onClick={handleLogin}>Log in</PrimaryButton>
+          <PrimaryButton onClick={handleLogin}>Log in</PrimaryButton>
 
-        <BottomText>
-          Don’t have an account?{' '}
-          <LinkText onClick={() => navigate('/register')}>Create Account</LinkText>
-        </BottomText>
-      </LeftContent>
+          <BottomText>
+            Don’t have an account?{' '}
+            <LinkText onClick={() => navigate('/register')}>Create Account</LinkText>
+          </BottomText>
+        </LeftContent>
 
-      <RightContent>
-        <Phone src={PhoneImg} alt="App preview" />
-      </RightContent>
-    </Page>
+        <RightContent>
+          <Phone src={PhoneImg} alt="App preview" />
+        </RightContent>
+      </Page>
+    </>
   );
 }

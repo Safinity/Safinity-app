@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import styled from 'styled-components';
+import { Helmet } from 'react-helmet-async';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import mapData from '../data/mapdata.json';
 import { latLngToPixelFromBounds } from '../components/maps/coordinates';
@@ -78,88 +79,93 @@ const ManageEventPage: React.FC = () => {
   };
 
   return (
-    <MainContent>
-      <HeaderSection>
-        <Title tabIndex={0}>Manage Event</Title>
-        <Subtitle tabIndex={0}>Web Summit 2025</Subtitle>
-      </HeaderSection>
+    <>
+      <Helmet>
+        <title>Manage Event | Safinity Backoffice</title>
+      </Helmet>
+      <MainContent>
+        <HeaderSection>
+          <Title tabIndex={0}>Manage Event</Title>
+          <Subtitle tabIndex={0}>Web Summit 2025</Subtitle>
+        </HeaderSection>
 
-      <DashboardGrid>
-        {/* MAP */}
-        <SectionContainer>
-          <SectionLabel id="map-section">Map</SectionLabel>
+        <DashboardGrid>
+          {/* MAP */}
+          <SectionContainer>
+            <SectionLabel id="map-section">Map</SectionLabel>
 
-          <MapViewport
-            role="region"
-            aria-label="Event Map"
-            tabIndex={0}
-            ref={mapViewportRef}
-            onFocus={() => setMapFocused(true)}
-            onBlur={() => setMapFocused(false)}
-            onKeyDown={handleMapKeyDown}
-          >
-            <TransformWrapper initialScale={1.2} minScale={0.5} maxScale={4} centerOnInit>
-              <TransformComponent wrapperStyle={{ width: '100%', height: '100%' }}>
-                <MapCanvas>
-                  <StaticMapPreview
-                    center={universityCoords}
-                    width={MAP_SIZE}
-                    height={MAP_SIZE}
-                    theme="dark"
-                  />
-
-                  {filteredPins.map(pin => (
-                    <MapPin
-                      key={pin.id}
-                      pin={pin}
-                      bounds={bounds}
+            <MapViewport
+              role="region"
+              aria-label="Event Map"
+              tabIndex={0}
+              ref={mapViewportRef}
+              onFocus={() => setMapFocused(true)}
+              onBlur={() => setMapFocused(false)}
+              onKeyDown={handleMapKeyDown}
+            >
+              <TransformWrapper initialScale={1.2} minScale={0.5} maxScale={4} centerOnInit>
+                <TransformComponent wrapperStyle={{ width: '100%', height: '100%' }}>
+                  <MapCanvas>
+                    <StaticMapPreview
+                      center={universityCoords}
                       width={MAP_SIZE}
                       height={MAP_SIZE}
-                      onPress={() => handleItemClick(pin)}
-                      ariaLabel={`${pin.type} pin: ${pin.name}`}
+                      theme="dark"
                     />
-                  ))}
 
-                  {stages.map(stage => (
-                    <MapStage
-                      key={stage.id}
-                      stage={stage}
-                      bounds={bounds}
-                      width={MAP_SIZE}
-                      height={MAP_SIZE}
-                      onPress={() => handleItemClick(stage)}
-                      onKeyDown={handlePinStageKeyDown} // <-- handle Esc
-                    />
-                  ))}
+                    {filteredPins.map(pin => (
+                      <MapPin
+                        key={pin.id}
+                        pin={pin}
+                        bounds={bounds}
+                        width={MAP_SIZE}
+                        height={MAP_SIZE}
+                        onPress={() => handleItemClick(pin)}
+                        ariaLabel={`${pin.type} pin: ${pin.name}`}
+                      />
+                    ))}
 
-                  {selectedItem && (
-                    <MapCallout
-                      x={selectedItem.px}
-                      y={selectedItem.py}
-                      title={selectedItem.name}
-                      aria-live="polite"
-                    />
-                  )}
-                </MapCanvas>
-              </TransformComponent>
-            </TransformWrapper>
-          </MapViewport>
-        </SectionContainer>
+                    {stages.map(stage => (
+                      <MapStage
+                        key={stage.id}
+                        stage={stage}
+                        bounds={bounds}
+                        width={MAP_SIZE}
+                        height={MAP_SIZE}
+                        onPress={() => handleItemClick(stage)}
+                        onKeyDown={handlePinStageKeyDown} // <-- handle Esc
+                      />
+                    ))}
 
-        {/* Cameras */}
-        <CamerasColumn>
-          <SectionContainer>
-            <SectionLabel>Cameras - video</SectionLabel>
-            <CameraImage src={camerawebsummit} alt="Camera feed" tabIndex={0} />
+                    {selectedItem && (
+                      <MapCallout
+                        x={selectedItem.px}
+                        y={selectedItem.py}
+                        title={selectedItem.name}
+                        aria-live="polite"
+                      />
+                    )}
+                  </MapCanvas>
+                </TransformComponent>
+              </TransformWrapper>
+            </MapViewport>
           </SectionContainer>
 
-          <SectionContainer>
-            <SectionLabel>Cameras - AI-powered analysis</SectionLabel>
-            <CameraImage src={aicaamerawebsummit} alt="AI Camera feed" tabIndex={0} />
-          </SectionContainer>
-        </CamerasColumn>
-      </DashboardGrid>
-    </MainContent>
+          {/* Cameras */}
+          <CamerasColumn>
+            <SectionContainer>
+              <SectionLabel>Cameras - video</SectionLabel>
+              <CameraImage src={camerawebsummit} alt="Camera feed" tabIndex={0} />
+            </SectionContainer>
+
+            <SectionContainer>
+              <SectionLabel>Cameras - AI-powered analysis</SectionLabel>
+              <CameraImage src={aicaamerawebsummit} alt="AI Camera feed" tabIndex={0} />
+            </SectionContainer>
+          </CamerasColumn>
+        </DashboardGrid>
+      </MainContent>
+    </>
   );
 };
 

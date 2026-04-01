@@ -79,5 +79,5 @@ const Input = styled.TextInput`
 
 const RequiredAsterisk = styled.Text`
   color: #ff5252;
-  ${({ theme }) => theme.text.corpo.corpoTexto};
+  font-weight: bold;
 `;

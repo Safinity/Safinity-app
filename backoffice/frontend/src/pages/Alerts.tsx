@@ -8,6 +8,7 @@ import { AlertsBar } from '../components/AlertBar';
 export const Alerts: React.FC = () => {
   return (
     <Container>
+
       <Content>
         <Title>Alerts</Title>
         <Subtitle>Web Summit 2025</Subtitle>

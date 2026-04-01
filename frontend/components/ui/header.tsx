@@ -4,82 +4,92 @@ import React from 'react';
 import { Platform, StatusBar } from 'react-native';
 import styled from 'styled-components/native';
 
-import { Colors, Fonts, Spacing, Height, Width } from '../../constants/theme';
+import { Colors, Spacing, Height, Width } from '../../constants/theme';
 
-export type HeaderVariant = 'default' | 'back';
+export type HeaderVariant = 'default' | 'back' | 'pageDetails';
 
 interface HeaderProps {
   variant?: HeaderVariant;
   showBottomDivider?: boolean;
   title?: string;
+  subtitle?: string;
 }
 
 const Header: React.FC<HeaderProps> = ({
   variant = 'default',
   showBottomDivider = false,
   title,
+  subtitle,
 }) => {
   const statusBarHeight = Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 24;
-  const headerHeight = statusBarHeight + Height.sm;
+
+  const hasText = Boolean(title || subtitle);
 
   return (
-    <HeaderFixedContainer height={headerHeight}>
+    <HeaderFixedContainer>
       <SafeArea height={statusBarHeight} />
 
       <HeaderContent>
+        {/* DEFAULT HEADER */}
         {variant === 'default' && (
           <HeaderRow>
             <LogoContainer>
               <LogoImage
                 source={require('../../assets/logos/logo-header.png')}
                 resizeMode="contain"
-                accessibilityLabel="Safinity logo"
               />
             </LogoContainer>
 
             <IconRow>
-              <IconButton
-                onPress={() => router.push('/notifications')}
-                accessibilityRole="button"
-                accessibilityLabel="Notifications"
-              >
+              <IconButton onPress={() => router.push('/notifications')}>
                 <Ionicons
                   name="notifications-outline"
                   size={Width.iconHeader}
                   color={Colors.white}
-                  accessible={false}
                 />
               </IconButton>
 
-              <IconButton
-                onPress={() => router.push('/perfil/profile')}
-                accessibilityRole="button"
-                accessibilityLabel="Profile"
-              >
+              <IconButton onPress={() => router.push('/perfil/profile')}>
                 <Ionicons name="person-circle" size={Width.iconHeader} color={Colors.white} />
               </IconButton>
             </IconRow>
           </HeaderRow>
         )}
 
+        {/* BACK HEADER */}
         {variant === 'back' && (
-          <BackContainer>
+          <BackContainer hasText={hasText}>
             <BackButtonRow>
-              <IconButton
+              <BackButton
                 onPress={() => router.back()}
-                accessibilityRole="button"
                 accessibilityLabel="Go back"
+                accessibilityRole="button"
               >
                 <Ionicons name="arrow-back" size={Width.iconHeader} color={Colors.white} />
-              </IconButton>
+              </BackButton>
             </BackButtonRow>
 
             {title && (
               <TitleContainer>
                 <Title accessibilityRole="header">{title}</Title>
+
+                {subtitle && <Subtitle>{subtitle}</Subtitle>}
               </TitleContainer>
             )}
           </BackContainer>
+        )}
+
+        {/* PAGE DETAILS HEADER */}
+        {variant === 'pageDetails' && (
+          <DetailsRow>
+            <BackButtonDetails
+              onPress={() => router.back()}
+              accessibilityLabel="Go back"
+              accessibilityRole="button"
+            >
+              <Ionicons name="arrow-back" size={Width.iconHeader} color={Colors.white} />
+            </BackButtonDetails>
+          </DetailsRow>
         )}
 
         {showBottomDivider && <Divider />}
@@ -92,9 +102,9 @@ export default Header;
 
 /* ---------------- styled components ---------------- */
 
-const HeaderFixedContainer = styled.View<{ height: number }>`
+const HeaderFixedContainer = styled.View`
   position: absolute;
-  top: 0;
+  top: 10;
   left: ${Spacing.margemLateral}px;
   right: ${Spacing.margemLateral}px;
   z-index: 1000;
@@ -106,9 +116,7 @@ const SafeArea = styled.View<{ height: number }>`
 `;
 
 const HeaderContent = styled.View`
-  flex: 1;
   justify-content: center;
-  height: auto;
 `;
 
 const HeaderRow = styled.View`
@@ -117,14 +125,27 @@ const HeaderRow = styled.View`
   align-items: center;
 `;
 
-const BackContainer = styled.View`
+const BackContainer = styled.View<{ hasText: boolean }>`
   flex-direction: column;
-  margin-top: ${Spacing.xl}px;
+  margin-top: ${Spacing.sm}px;
 `;
 
 const BackButtonRow = styled.View`
   flex-direction: row;
   align-items: center;
+`;
+
+const BackButton = styled.Pressable`
+  z-index: 99;
+  padding-bottom: ${({ theme }) => theme.spacing.sm}px;
+  border-radius: ${({ theme }) => theme.borderRadius.round}px;
+`;
+
+const BackButtonDetails = styled.Pressable`
+  z-index: 99;
+  background-color: ${({ theme }) => theme.colors.background};
+  padding: ${({ theme }) => theme.spacing.sm}px;
+  border-radius: ${({ theme }) => theme.borderRadius.round}px;
 `;
 
 const TitleContainer = styled.View``;
@@ -144,11 +165,39 @@ const IconRow = styled.View`
 
 const IconButton = styled.Pressable``;
 
+/* PAGE DETAILS */
+
+const DetailsRow = styled.View`
+  flex-direction: row;
+  align-items: center;
+  gap: ${Spacing.md}px;
+`;
+
+const DetailsTextContainer = styled.View`
+  flex: 1;
+`;
+
+const DetailsTitle = styled.Text`
+  color: ${Colors.white};
+  ${({ theme }) => theme.text.titulo.h3};
+`;
+
+const DetailsSubtitle = styled.Text`
+  color: ${Colors.inactive};
+  margin-top: ${Spacing.xs}px;
+  ${({ theme }) => theme.text.corpo.corpoTexto};
+`;
+
 const Title = styled.Text`
   color: ${Colors.white};
   ${({ theme }) => theme.text.titulo.h};
   include-font-padding: false;
-  margin-top: ${Spacing.md}px;
+`;
+
+const Subtitle = styled.Text`
+  color: ${Colors.inactive};
+  margin-top: ${Spacing.xs}px;
+  ${({ theme }) => theme.text.corpo.corpoTexto};
 `;
 
 const Divider = styled.View`

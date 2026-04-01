@@ -1,6 +1,6 @@
+import { FlatList, ScrollView, Pressable, View } from 'react-native';
 import { Stack, router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { FlatList, ScrollView, TouchableOpacity, Pressable, View } from 'react-native';
 import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -13,24 +13,7 @@ import eventsData from '../../../data/events.json';
 import users from '../../../data/users.json';
 
 import EditIcon from '../../../assets/Icons/edit.png';
-
-const HeaderContainer = styled.View`
-  margin-bottom: 10px;
-  padding: 60px 30px 0px;
-  z-index: 2;
-`;
-
-const BackButton = styled.TouchableOpacity`
-  margin-bottom: 20px;
-  width: 40px;
-`;
-
-const Title = styled.Text`
-  color: ${({ theme }) => theme.colors.white};
-  font-family: ${({ theme }) => theme.text.titulo.h1.fontFamily};
-  font-size: ${({ theme }) => theme.text.titulo.h1.fontSize}px;
-  font-weight: bold;
-`;
+import Header from '../../../components/ui/header'; // import do header customizado
 
 const Container = styled(ScrollView).attrs({
   showsVerticalScrollIndicator: false,
@@ -135,7 +118,7 @@ const SectionHeader = styled.View`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  margin-top: 20px; /* Ajustado para o perfil */
+  margin-top: 20px;
   margin-bottom: ${({ theme }) => theme.spacing.md}px;
 `;
 
@@ -178,7 +161,7 @@ const LogoutButton = styled.TouchableOpacity`
   border-radius: ${({ theme }) => theme.borderRadius.large}px;
   padding: 12px 20px;
   margin-top: 24px;
-  margin-bottom: 110px;
+  margin-bottom: ${({ theme }) => theme.spacing.xxl}px;
   align-self: center;
 `;
 
@@ -210,7 +193,9 @@ export default function Profile() {
 
   return (
     <Container>
-      <Stack.Screen options={{ title: 'Profile' }} />
+      {/* Header Customizado */}
+      <Header variant="back" title="Profile" />
+
       <TopGradient
         colors={['rgba(190, 142, 224)', 'rgba(34, 39, 52, 0)']}
         locations={[0, 0.33]}
@@ -218,18 +203,7 @@ export default function Profile() {
         end={{ x: 0.5, y: 3 }}
       />
 
-      <HeaderContainer>
-        <BackButton
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-        >
-          <Ionicons name="arrow-back" size={28} color="white" accessible={false} />
-        </BackButton>
-        <Title accessibilityRole="header">Profile</Title>
-      </HeaderContainer>
-
-      <PaddedContent>
+      <PaddedContent style={{ marginTop: 120 }}>
         <AvatarContainer>
           <AvatarCircle>
             <Avatar source={imageSource} accessibilityLabel={`Profile picture of ${user.name}`} />

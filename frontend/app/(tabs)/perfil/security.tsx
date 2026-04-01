@@ -98,7 +98,8 @@ const Container = styled.View`
 
 const Content = styled.View`
   padding: 0 ${Spacing.margemLateral}px;
-  padding-top: ${Spacing.lg}px;
+  padding-top: ${Spacing.xl}px;
+  margin-top: ${Spacing.xl}px;
   padding-bottom: ${Spacing.xl}px;
 `;
 

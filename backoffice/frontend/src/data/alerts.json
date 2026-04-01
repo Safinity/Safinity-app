@@ -2,7 +2,7 @@
   {
     "id": 1,
     "type": "Critical",
-    "dotColor": "#D34A4A",
+    "dotImage": "../assets/Icons/emergency.svg",
     "title": "Critical density detected",
     "message": "Crowd concentration has exceeded the safe limit (92%).",
     "time": "18:30",
@@ -10,8 +10,8 @@
   },
   {
     "id": 2,
-    "type": "Attention",
-    "dotColor": "#D39E4A",
+    "type": "Warning",
+    "dotImage": "../assets/Icons/warning.svg",
     "title": "User feedback",
     "message": "Long queue at the north entrance, public growing impatient.",
     "time": "16:18",
@@ -20,7 +20,7 @@
   {
     "id": 3,
     "type": "Critical",
-    "dotColor": "#D34A4A",
+    "dotImage": "../assets/Icons/emergency.svg",
     "title": "Thermal alert",
     "message": "Temperature above 36°C, risk of overheating in tents.",
     "time": "15:03",
@@ -28,8 +28,8 @@
   },
   {
     "id": 4,
-    "type": "Informative",
-    "dotColor": "#51D34A",
+    "type": "Success",
+    "dotImage": "../assets/Icons/success.svg",
     "title": "Main Stage",
     "message": "Version 1.2.3 of the sensor module has been installed successfully.",
     "time": "13:12",
@@ -37,8 +37,8 @@
   },
   {
     "id": 5,
-    "type": "Attention",
-    "dotColor": "#D39E4A",
+    "type": "Informative",
+    "dotImage": "../assets/Icons/info.svg",
     "title": "Weather condition",
     "message": "Probability of rain in the next 2 hours.",
     "time": "15:10",
@@ -46,8 +46,8 @@
   },
   {
     "id": 6,
-    "type": "Informative",
-    "dotColor": "#51D34A",
+    "type": "Success",
+    "dotImage": "../assets/Icons/success.svg",
     "title": "Automatic message sent",
     "message": "Notification 'Stay hydrated and rest' sent to VIP zone users.",
     "time": "14:55",

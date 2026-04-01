@@ -4,6 +4,7 @@ import { useLocalSearchParams, useRouter, useNavigation, Stack } from 'expo-rout
 import Head from 'expo-router/head'; // Adicionado Head
 import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
+import Header from '../../components/ui/header';
 
 // Componentes e Dados
 import { HeroBanner } from '../../components/HeroBanner';
@@ -194,11 +195,6 @@ export default function EventDetailsScreen() {
 
   if (!event) return null;
 
-  const handleBack = () => {
-    if (navigation.canGoBack()) navigation.goBack();
-    else router.replace('/');
-  };
-
   const pageTitle = `${event.name} | Safinity`;
 
   return (
@@ -261,12 +257,9 @@ export default function EventDetailsScreen() {
         </ModalOverlay>
       </Modal>
 
-      <BackButton onPress={handleBack} accessibilityLabel="Go back" accessibilityRole="button">
-        <Ionicons name="arrow-back" size={24} color="white" />
-      </BackButton>
-
       <ScrollView bounces={false} showsVerticalScrollIndicator={false} accessibilityRole="main">
         <HeroBanner event={event} isDetail />
+        <Header variant="pageDetails" />
 
         <ContentCard>
           <SectionTitle accessibilityRole="header" aria-level={2}>
@@ -295,7 +288,8 @@ export default function EventDetailsScreen() {
           <SectionTitle accessibilityRole="header" aria-level={2}>
             Friends going
           </SectionTitle>
-          <FriendsSection accessible={true} accessibilityLabel={`3 friends and 2 more are going`}>
+
+          <FriendsSection accessible={true}>
             <AvatarStack>
               {randomFriends.map((friend, index) => (
                 <Avatar

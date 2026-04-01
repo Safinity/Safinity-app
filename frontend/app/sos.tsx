@@ -3,6 +3,7 @@ import styled from 'styled-components/native';
 import { useRouter, Stack } from 'expo-router';
 import tags from '../data/tags.json';
 import Head from 'expo-router/head';
+import Header from '@/components/ui/header';
 
 /* ---------------------- STYLES ---------------------- */
 
@@ -150,6 +151,7 @@ export default function SOSForm() {
       <Head>
         <title>SOS | Safinity</title>
       </Head>
+      <Header variant="back" />
       <Stack.Screen options={{ title: 'SOS | Safinity', headerShown: false }} />
       <ContentWrapper>
         <Title>Help us help you!</Title>

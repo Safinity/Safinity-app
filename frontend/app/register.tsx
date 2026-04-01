@@ -7,6 +7,7 @@ import Head from 'expo-router/head';
 import InputField from '@/components/InputField';
 import Checkbox from '@/components/Checkbox';
 import PrimaryButton from '@/components/PrimaryButton';
+import Header from '@/components/ui/header';
 
 export default function Register() {
   const [firstName, setFirstName] = useState('');
@@ -16,29 +17,19 @@ export default function Register() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const [error, setError] = useState('');
   const [checked, setChecked] = useState(false);
 
   return (
     <Screen>
+      <Stack.Screen options={{ headerShown: false }} />
+
+      <Head>
+        <title>Register | Safinity</title>
+      </Head>
+
+      <Header variant="back" title="Register" subtitle="Create your account here!" />
+
       <Container>
-        <Stack.Screen options={{ title: 'Register | Safinity', headerShown: false }} />
-        <Head>
-          <title>Register | Safinity</title>
-        </Head>
-
-        <HeadingArea accessibilityRole="header">
-          <BackButton
-            onPress={() => router.back()}
-            accessibilityLabel="Return to the previous page"
-            accessibilityRole="button"
-          >
-            <Ionicons name="arrow-back" size={26} color="white" />
-          </BackButton>
-          <Title accessibilityHeadingLevel={1}>Register</Title>
-          <Subtitle accessibilityHeadingLevel={2}>Create your account here!</Subtitle>
-        </HeadingArea>
-
         <MainArea accessibilityRole="main">
           <InputRow>
             <InputField
@@ -49,6 +40,7 @@ export default function Register() {
               style={{ flex: 1 }}
               accessibilityState={{ required: true }}
             />
+
             <InputField
               label="Last Name *"
               placeholder="Last Name"
@@ -80,7 +72,7 @@ export default function Register() {
           <InputField
             label="Password *"
             placeholder="Password"
-            password // Ativa a lógica do olho
+            password
             value={password}
             onChangeText={setPassword}
             accessibilityState={{ required: true }}
@@ -89,7 +81,7 @@ export default function Register() {
           <InputField
             label="Confirm Password *"
             placeholder="Confirm Password"
-            password // Ativa a lógica do olho
+            password
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             accessibilityState={{ required: true }}
@@ -103,6 +95,7 @@ export default function Register() {
                 color="#ff4d4d"
                 style={{ marginRight: 8 }}
               />
+
               <ErrorText>The passwords entered do not match.</ErrorText>
             </ErrorArea>
           )}
@@ -112,7 +105,7 @@ export default function Register() {
               <CheckboxArea
                 onPress={() => setChecked(!checked)}
                 accessibilityRole="checkbox"
-                accessibilityState={{ checked: checked }}
+                accessibilityState={{ checked }}
                 accessibilityLabel="I agree to the terms and conditions"
               >
                 <Checkbox style={{ marginLeft: 8 }} checked={checked} />
@@ -127,6 +120,7 @@ export default function Register() {
 
             <RowWithLink>
               <SmallText>Already have an account?</SmallText>
+
               <LinkArea accessibilityRole="link" onPress={() => router.push('/login')}>
                 <LinkText>Log In</LinkText>
               </LinkArea>
@@ -138,7 +132,7 @@ export default function Register() {
   );
 }
 
-// --------------------------------------------------------- Styled Components -------------------------------------------------------
+/* ---------------- styled components ---------------- */
 
 const Screen = styled.SafeAreaView`
   flex: 1;
@@ -147,30 +141,13 @@ const Screen = styled.SafeAreaView`
 
 const Container = styled.ScrollView.attrs(({ theme }) => ({
   contentContainerStyle: {
-    padding: theme.spacing.xl,
+    paddingTop: theme.spacing.xxl,
+    paddingHorizontal: theme.spacing.margemLateral,
+    paddingBottom: theme.spacing.xl,
     flexGrow: 1,
   },
   showsVerticalScrollIndicator: false,
 }))``;
-
-const HeadingArea = styled.View`
-  margin-bottom: ${({ theme }) => theme.spacing.xl}px;
-`;
-
-const Title = styled.Text`
-  color: ${({ theme }) => theme.colors.white};
-  margin-bottom: ${({ theme }) => theme.spacing.xs}px;
-  ${({ theme }) => theme.text.titulo.h1};
-`;
-
-const Subtitle = styled.Text`
-  color: ${({ theme }) => theme.colors.inactive};
-  ${({ theme }) => theme.text.corpo.corpoTexto};
-`;
-
-const BackButton = styled.TouchableOpacity`
-  margin-bottom: ${({ theme }) => theme.spacing.md}px;
-`;
 
 const MainArea = styled.View`
   flex: 1;

@@ -96,21 +96,14 @@ export const EventCard = ({ event, variant }: any) => {
 
   return (
     <CardContainer
-      isCompact={isCompact}
-      onPress={handlePress}
-      // 1. O Expo Router permite passar o link diretamente aqui para Web
-      // @ts-ignore
-      href={`/event-details/${event.id}`}
-      accessible={true}
+      isCompact={isCompact} onPress={handlePress} href={`/event-details/${event.id}`}
       accessibilityRole="button"
+      accessible={true}
       accessibilityLabel={`Evento: ${event.name}. Data: ${formatEventDate(event.start_date, event.end_date)}`}
-      accessibilityHint="Clica para ver os detalhes deste evento"
-      focusable={true}
-      // 2. No Web, usamos estas props para garantir o evento de teclado
-      // @ts-ignore
+      accessibilityHint="Clica para ver os detalhes deste evento" focusable={true}
+      
       onKeyDown={(e: any) => {
         if (e.key === 'Enter' || e.key === ' ') {
-          // 3. Previne o comportamento default (como scroll no Espaço)
           e.preventDefault();
           handlePress();
         }

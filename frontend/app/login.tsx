@@ -30,6 +30,7 @@ export default function Login() {
       return;
     }
 
+
     router.replace('/(tabs)');
   }
 
@@ -86,14 +87,17 @@ export default function Login() {
 
           <InputBox>
             <Input
+              accessibilityLabel="Password input field"
+              accessibilityState={{ required: true }}
+              returnKeyType="done"
+
+
               placeholder="Password"
               placeholderTextColor="#8a90a5"
               secureTextEntry={!showPass}
               value={password}
               onChangeText={setPassword}
-              accessibilityLabel="Password input field"
-              accessibilityState={{ required: true }}
-              returnKeyType="done"
+              
             />
 
             <TouchableOpacity
@@ -245,4 +249,5 @@ const ErrorText = styled.Text`
 
 const RequiredAsterisk = styled.Text`
   color: #ff5252;
+  font-weight: bold;
 `;

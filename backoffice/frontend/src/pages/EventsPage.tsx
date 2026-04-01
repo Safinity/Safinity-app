@@ -8,7 +8,7 @@ import { Helmet } from 'react-helmet-async';
 const EventsPage: React.FC = () => {
   return (
     <>
-    <Helmet>
+      <Helmet>
         <title>Events | Safinity Backoffice</title>
       </Helmet>
       <PageWrapper>

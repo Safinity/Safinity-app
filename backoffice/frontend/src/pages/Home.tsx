@@ -24,25 +24,25 @@ export default function Home() {
       <Helmet>
         <title>Home | Safinity Backoffice</title>
       </Helmet>
-    <Page>
-      <Content>
-        <HomeCard
-          title="Current events"
-          description="See here the list of events you are associated with."
-          image={imgCard}
-          buttonLabel="See events"
-          onClick={() => navigate('/events')}
-        />
+      <Page>
+        <Content>
+          <HomeCard
+            title="Current events"
+            description="See here the list of events you are associated with."
+            image={imgCard}
+            buttonLabel="See events"
+            onClick={() => navigate('/events')}
+          />
 
-        <HomeCard
-          title="New event"
-          description="Create a new event and manage all its information here."
-          image={imgCard2}
-          buttonLabel="Add new event"
-          onClick={() => console.log('Add new event')}
-        />
-      </Content>
-    </Page>
+          <HomeCard
+            title="New event"
+            description="Create a new event and manage all its information here."
+            image={imgCard2}
+            buttonLabel="Add new event"
+            onClick={() => console.log('Add new event')}
+          />
+        </Content>
+      </Page>
     </>
   );
 }

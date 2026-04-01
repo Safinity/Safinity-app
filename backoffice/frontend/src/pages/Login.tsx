@@ -153,7 +153,7 @@ export default function Login() {
       <Helmet>
         <title>Login | Safinity Backoffice</title>
       </Helmet>
-      
+
       <Page>
         <LeftContent>
           <Logo src={LogoImg} alt="Safinity Logo" />

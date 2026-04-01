@@ -40,7 +40,7 @@ export default function App() {
           <Route
             path="/home"
             element={
-              <Layout title='Home | Safinity'>
+              <Layout title="Home | Safinity">
                 <Home />
               </Layout>
             }
@@ -49,7 +49,7 @@ export default function App() {
           <Route
             path="/alerts"
             element={
-              <Layout title='Alerts | Safinity'>
+              <Layout title="Alerts | Safinity">
                 <Alerts />
               </Layout>
             }
@@ -58,7 +58,7 @@ export default function App() {
           <Route
             path="/mupis"
             element={
-              <Layout title='Mupis | Safinity'>
+              <Layout title="Mupis | Safinity">
                 <MupisPage />
               </Layout>
             }
@@ -67,7 +67,7 @@ export default function App() {
           <Route
             path="/notifications"
             element={
-              <Layout title='Notifications | Safinity'>
+              <Layout title="Notifications | Safinity">
                 <NotificationsPage />
               </Layout>
             }
@@ -75,7 +75,7 @@ export default function App() {
           <Route
             path="/events"
             element={
-              <Layout title='Events | Safinity'>
+              <Layout title="Events | Safinity">
                 <EventPage />
               </Layout>
             }
@@ -83,7 +83,7 @@ export default function App() {
           <Route
             path="/manageevents"
             element={
-              <Layout title='Manage Events | Safinity'>
+              <Layout title="Manage Events | Safinity">
                 <ManageEventMap />
               </Layout>
             }

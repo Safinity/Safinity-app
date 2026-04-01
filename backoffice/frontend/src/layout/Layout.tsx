@@ -18,7 +18,7 @@ export const Layout: React.FC<{ children: React.ReactNode; title?: string }> = (
       <Helmet>
         <title>{title || 'Safinity'}</title>
       </Helmet>
-      
+
       <Navbar
         userName={user.name}
         avatarUrl={user.avatar}

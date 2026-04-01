@@ -68,7 +68,6 @@ export default function Landing() {
 
   return (
     <>
-
       <Helmet>
         <title>Welcome to Safinity Backoffice!</title>
       </Helmet>

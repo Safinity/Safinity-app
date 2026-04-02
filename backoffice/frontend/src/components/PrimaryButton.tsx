@@ -5,10 +5,10 @@ interface PrimaryButtonProps {
   children: React.ReactNode;
   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
   type?: 'button' | 'submit' | 'reset';
-  'aria-label'?: string; 
+  'aria-label'?: string;
 }
 
-export default function PrimaryButton({ children, onClick, type = 'button' }: PrimaryButtonProps) {
+export default function PrimaryButton({ children, onClick }: PrimaryButtonProps) {
   return <Button onClick={onClick}>{children}</Button>;
 }
 

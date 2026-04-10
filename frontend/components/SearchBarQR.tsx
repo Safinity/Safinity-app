@@ -42,11 +42,7 @@ export default function SearchBarQR({
         />
       </Bar>
 
-      <QRButton
-        onPress={onPressQR}
-        role="button"
-        accessibilityLabel="Scan QR code to find friends"
-      >
+      <QRButton onPress={onPressQR} role="button" accessibilityLabel="Scan QR code to find friends">
         <Ionicons
           name="qr-code-outline"
           size={34}

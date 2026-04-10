@@ -47,10 +47,7 @@ export default function FriendProfile() {
             <Ionicons name="arrow-back" size={theme.width.iconHeader} color={theme.colors.white} />
           </BackButton>
 
-          <UsernameText
-            role="header"
-            accessibilityLabel={`Username ${friendData.username}`}
-          >
+          <UsernameText role="header" accessibilityLabel={`Username ${friendData.username}`}>
             @{friendData.username}
           </UsernameText>
         </HeaderNav>
@@ -90,11 +87,7 @@ export default function FriendProfile() {
           decelerationRate="fast"
           contentContainerStyle={{ paddingRight: theme.spacing.margemLateral }}
           renderItem={({ item }) => (
-            <EventCard
-              event={item}
-              role="button"
-              accessibilityLabel={`Event ${item.title}`}
-            />
+            <EventCard event={item} role="button" accessibilityLabel={`Event ${item.title}`} />
           )}
         />
       </ScrollView>
@@ -111,9 +104,9 @@ const HeaderNav = styled.View`
   flex-direction: row;
   align-items: center;
   padding: ${({ theme }) =>
-    Platform.OS === 'ios'
-      ? theme.spacing.margemTop + theme.spacing.lg
-      : theme.spacing.margemTop}px
+      Platform.OS === 'ios'
+        ? theme.spacing.margemTop + theme.spacing.lg
+        : theme.spacing.margemTop}px
     ${({ theme }) => theme.spacing.margemLateral}px ${({ theme }) => theme.spacing.md}px;
 `;
 

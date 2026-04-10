@@ -12,7 +12,7 @@ const Screen = styled.View`
   justify-content: space-between;
 `;
 
-const DecorativeImage = styled(Image) <{ step: number }>`
+const DecorativeImage = styled(Image)<{ step: number }>`
   position: absolute;
   width: 420px;
   height: 420px;

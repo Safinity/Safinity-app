@@ -29,7 +29,7 @@ const TabButton = styled.TouchableOpacity`
 
 const TabIcon = styled(Ionicons).attrs(({ theme }) => ({
   size: theme.height.xs,
-})) <{ $active: boolean }>`
+}))<{ $active: boolean }>`
   color: ${({ $active, theme }) =>
     $active ? theme.colors.white : theme.colors.palette.neutral.neutral80};
 `;

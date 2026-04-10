@@ -31,12 +31,12 @@ export default function AddFriendScreen() {
     search.length === 0
       ? []
       : users.filter(u => {
-        const text = search.toLowerCase();
-        return (
-          u.id !== currentUser.id &&
-          (u.name.toLowerCase().includes(text) || u.username.toLowerCase().includes(text))
-        );
-      });
+          const text = search.toLowerCase();
+          return (
+            u.id !== currentUser.id &&
+            (u.name.toLowerCase().includes(text) || u.username.toLowerCase().includes(text))
+          );
+        });
 
   const isFriend = (id: string) => currentUser.friends.includes(id);
 

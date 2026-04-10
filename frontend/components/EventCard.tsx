@@ -25,7 +25,7 @@ const BackgroundImage = styled.ImageBackground.attrs({
 const GradientLayer = styled(LinearGradient).attrs({
   colors: ['transparent', 'rgba(0,0,0,0.8)'],
   locations: [0.4, 1.0],
-}) <{ isCompact?: boolean }>`
+})<{ isCompact?: boolean }>`
   flex: 1;
   padding: ${({ isCompact, theme }) =>
     isCompact ? `${theme.spacing.sm}px` : `${theme.spacing.md}px`};

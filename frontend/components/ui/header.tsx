@@ -68,11 +68,7 @@ const Header: React.FC<HeaderProps> = ({
         {variant === 'back' && (
           <BackContainer hasText={hasText}>
             <BackButtonRow>
-              <BackButton
-                onPress={() => router.back()}
-                accessibilityLabel="Go back"
-                role="button"
-              >
+              <BackButton onPress={() => router.back()} accessibilityLabel="Go back" role="button">
                 <Ionicons name="arrow-back" size={Width.iconHeader} color={Colors.white} />
               </BackButton>
             </BackButtonRow>

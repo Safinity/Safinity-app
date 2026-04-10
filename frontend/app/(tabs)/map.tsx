@@ -211,10 +211,10 @@ export default function MapScreen() {
     selectedTags.length === 0
       ? pins.filter(pin => matchesSearch(pin, searchValue))
       : pins.filter(
-        pin =>
-          selectedTags.some(tag => TAG_TO_PIN_TYPE[tag]?.includes(pin.type)) &&
-          matchesSearch(pin, searchValue),
-      );
+          pin =>
+            selectedTags.some(tag => TAG_TO_PIN_TYPE[tag]?.includes(pin.type)) &&
+            matchesSearch(pin, searchValue),
+        );
 
   const visibleStages =
     selectedTags.length === 0 || selectedTags.includes('Stages')

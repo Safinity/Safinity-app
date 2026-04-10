@@ -176,11 +176,7 @@ export default function MyCalendarScreen() {
         <Title role="header">My calendar</Title>
 
         {/* NAVIGATION REGION */}
-        <DropdownContainer
-          accessible
-          role="navigation"
-          accessibilityLabel="Event selection"
-        >
+        <DropdownContainer accessible role="navigation" accessibilityLabel="Event selection">
           <DropdownText>Web Summit 2025</DropdownText>
           <Ionicons
             name="chevron-down"

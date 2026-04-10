@@ -100,7 +100,7 @@ const LongCancelButton = styled.Pressable`
 `;
 
 const CancelText = styled.Text`
-  color: ${Colors.error};
+  color: #ed7979;
   font-size: 16px;
   font-weight: bold;
 `;
@@ -326,8 +326,8 @@ export default function MapScreen() {
 
       <OverlayContent pointerEvents="box-none">
         <PageHeader>
-          <Ionicons name="location" size={28} color={Colors.primary} />
-          <PageTitle role="header">University of Aveiro</PageTitle>
+          <Ionicons name="location" size={28} color={Colors.palette.primary.light50} />
+          <PageTitle accessibilityRole="header">University of Aveiro</PageTitle>
         </PageHeader>
 
         <PaddingSearchInput>
@@ -354,8 +354,8 @@ export default function MapScreen() {
 
       {activeRoute && (
         <NavigationFooter
-          accesibilityRole="Contentinfo"
-          accessibilityLabel="Active navigation route information"
+          accessibilityRole="contentinfo"
+          accessibilityLabel={`Active navigation route to ${destinationName}`}
         >
           <LongCancelButton
             onPress={handleCancelRoute}
@@ -363,7 +363,7 @@ export default function MapScreen() {
             role="button"
             accessibilityLabel={`Cancel route to ${destinationName}`}
           >
-            <Ionicons name="close-circle" size={20} color={Colors.error} />
+            <Ionicons name="close-circle" size={20} color="#ed7979" />
             <CancelText>Cancel Route</CancelText>
             <DestinationText>| {destinationName}</DestinationText>
           </LongCancelButton>
@@ -381,19 +381,3 @@ export default function MapScreen() {
     </Container>
   );
 }
-
-/*
-WCAG Level A Compliance Summary for MapScreen
-
-Requirement                     Status   Notes
----------------------------------------------------------------------------
-Page title                        ✅      <Head><title> present
-Headings                           ✅      PageTitle set with role="header"
-Alt text / images                  ⚠️      Static map has no description; pins and stages now labeled
-Role attributes                     ✅      Buttons and interactive elements have roles
-Labels for inputs                   ✅      SearchInput and FilterTags labeled
-Required fields / validation        ✅      Not applicable
-Contrast                            ✅      Colors verified for Level A
-Keyboard / focus                    ⚠️      GestureDetector may require custom focus handling for screen readers
-Bypass blocks (skip links)          ✅      Not required on mobile for Level A
-*/

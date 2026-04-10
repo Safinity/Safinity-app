@@ -37,7 +37,6 @@ const Header: React.FC<HeaderProps> = ({
               <LogoImage
                 source={require('../../assets/logos/logo-header.png')}
                 resizeMode="contain"
-                accessibilityLabel="Safinity logo"
               />
             </LogoContainer>
 

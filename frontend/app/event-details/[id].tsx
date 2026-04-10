@@ -216,8 +216,8 @@ export default function EventDetailsScreen() {
         aria-modal="true" // Melhora acessibilidade Web
       >
         <ModalOverlay>
-          <ModalContent accessibilityRole="alert">
-            <ModalTitle accessibilityRole="header" aria-level={2}>
+          <ModalContent role="alert">
+            <ModalTitle role="header" aria-level={2}>
               Link my ticket
             </ModalTitle>
             <ModalDescription>
@@ -228,7 +228,7 @@ export default function EventDetailsScreen() {
 
             <CodeRow
               accessible={true}
-              accessibilityRole="text"
+              role="text"
               accessibilityLabel="6-digit validation code. Required field."
               // @ts-ignore
               aria-required="true"
@@ -257,12 +257,12 @@ export default function EventDetailsScreen() {
         </ModalOverlay>
       </Modal>
 
-      <ScrollView bounces={false} showsVerticalScrollIndicator={false} accessibilityRole="main">
+      <ScrollView bounces={false} showsVerticalScrollIndicator={false} role="main">
         <HeroBanner event={event} isDetail />
         <Header variant="pageDetails" />
 
         <ContentCard>
-          <SectionTitle accessibilityRole="header" aria-level={2}>
+          <SectionTitle role="header" aria-level={2}>
             Description
           </SectionTitle>
           <DescriptionText>{event.description}</DescriptionText>
@@ -285,7 +285,7 @@ export default function EventDetailsScreen() {
             </ActionButton>
           </ActionGrid>
 
-          <SectionTitle accessibilityRole="header" aria-level={2}>
+          <SectionTitle role="header" aria-level={2}>
             Friends going
           </SectionTitle>
 
@@ -304,7 +304,7 @@ export default function EventDetailsScreen() {
 
           <LinkButton
             onPress={() => setModalVisible(true)}
-            accessibilityRole="button"
+            role="button"
             accessibilityHint="Opens a popup to enter your ticket code"
           >
             <ButtonText>Link my ticket</ButtonText>

@@ -30,7 +30,7 @@ export default function Register() {
       <Header variant="back" title="Register" subtitle="Create your account here!" />
 
       <Container>
-        <MainArea accessibilityRole="main">
+        <MainArea role="main">
           <InputRow>
             <InputField
               label="First Name *"
@@ -88,7 +88,7 @@ export default function Register() {
           />
 
           {confirmPassword.length > 0 && password !== confirmPassword && (
-            <ErrorArea accessibilityLiveRegion="assertive" accessibilityRole="alert">
+            <ErrorArea accessibilityLiveRegion="assertive" role="alert">
               <Ionicons
                 name="alert-circle-outline"
                 size={18}
@@ -104,7 +104,7 @@ export default function Register() {
             <CheckboxWrapper>
               <CheckboxArea
                 onPress={() => setChecked(!checked)}
-                accessibilityRole="checkbox"
+                role="checkbox"
                 accessibilityState={{ checked }}
                 accessibilityLabel="I agree to the terms and conditions"
               >
@@ -121,7 +121,7 @@ export default function Register() {
             <RowWithLink>
               <SmallText>Already have an account?</SmallText>
 
-              <LinkArea accessibilityRole="link" onPress={() => router.push('/login')}>
+              <LinkArea role="link" onPress={() => router.push('/login')}>
                 <LinkText>Log In</LinkText>
               </LinkArea>
             </RowWithLink>

@@ -211,10 +211,10 @@ export default function MapScreen() {
     selectedTags.length === 0
       ? pins.filter(pin => matchesSearch(pin, searchValue))
       : pins.filter(
-          pin =>
-            selectedTags.some(tag => TAG_TO_PIN_TYPE[tag]?.includes(pin.type)) &&
-            matchesSearch(pin, searchValue),
-        );
+        pin =>
+          selectedTags.some(tag => TAG_TO_PIN_TYPE[tag]?.includes(pin.type)) &&
+          matchesSearch(pin, searchValue),
+      );
 
   const visibleStages =
     selectedTags.length === 0 || selectedTags.includes('Stages')
@@ -239,7 +239,7 @@ export default function MapScreen() {
 
       <GestureDetector
         gesture={composedGesture}
-        accessibilityRole="main"
+        role="main"
         accessibilityLabel="Map interaction area"
         accessibilityHint="Use pinch to zoom and drag to pan the map"
       >
@@ -284,7 +284,7 @@ export default function MapScreen() {
                 height={IMAGE_HEIGHT}
                 onPress={() => handlePinPress(pin)}
                 accessible
-                accessibilityRole="button"
+                role="button"
                 accessibilityLabel={`Map pin: ${getDisplayName(pin)} (${pin.type})`}
               />
             );
@@ -299,7 +299,7 @@ export default function MapScreen() {
               height={IMAGE_HEIGHT}
               onPress={() => handlePinPress(stage)}
               accessible
-              accessibilityRole="button"
+              role="button"
               accessibilityLabel={`Stage: ${getDisplayName(stage)}`}
             />
           ))}
@@ -327,7 +327,7 @@ export default function MapScreen() {
       <OverlayContent pointerEvents="box-none">
         <PageHeader>
           <Ionicons name="location" size={28} color={Colors.primary} />
-          <PageTitle accessibilityRole="header">University of Aveiro</PageTitle>
+          <PageTitle role="header">University of Aveiro</PageTitle>
         </PageHeader>
 
         <PaddingSearchInput>
@@ -360,7 +360,7 @@ export default function MapScreen() {
           <LongCancelButton
             onPress={handleCancelRoute}
             accessible
-            accessibilityRole="button"
+            role="button"
             accessibilityLabel={`Cancel route to ${destinationName}`}
           >
             <Ionicons name="close-circle" size={20} color={Colors.error} />
@@ -373,7 +373,7 @@ export default function MapScreen() {
       <SosButton
         onPress={() => router.push('/sos')}
         accessible
-        accessibilityRole="button"
+        role="button"
         accessibilityLabel="Emergency SOS button"
       >
         <SOSButtonText>SOS</SOSButtonText>
@@ -388,7 +388,7 @@ WCAG Level A Compliance Summary for MapScreen
 Requirement                     Status   Notes
 ---------------------------------------------------------------------------
 Page title                        ✅      <Head><title> present
-Headings                           ✅      PageTitle set with accessibilityRole="header"
+Headings                           ✅      PageTitle set with role="header"
 Alt text / images                  ⚠️      Static map has no description; pins and stages now labeled
 Role attributes                     ✅      Buttons and interactive elements have roles
 Labels for inputs                   ✅      SearchInput and FilterTags labeled

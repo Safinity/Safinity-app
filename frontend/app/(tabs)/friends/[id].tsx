@@ -32,23 +32,23 @@ export default function FriendProfile() {
   if (!friendData) return null;
 
   return (
-    <Container accessibilityLabel="Friend profile screen" accessibilityRole="summary">
+    <Container accessibilityLabel="Friend profile screen" role="summary">
       <Head>
         <title> {friendData.name} profile | Safinity</title>
       </Head>
-      <ScrollView showsVerticalScrollIndicator={false} accessibilityRole="scrollview">
+      <ScrollView showsVerticalScrollIndicator={false} role="scrollview">
         {/* Navegação Superior */}
-        <HeaderNav accessibilityRole="header" accessibilityLabel="Top navigation">
+        <HeaderNav role="header" accessibilityLabel="Top navigation">
           <BackButton
             onPress={() => router.push('/friends')}
-            accessibilityRole="button"
+            role="button"
             accessibilityLabel="Go back to friends list"
           >
             <Ionicons name="arrow-back" size={theme.width.iconHeader} color={theme.colors.white} />
           </BackButton>
 
           <UsernameText
-            accessibilityRole="header"
+            role="header"
             accessibilityLabel={`Username ${friendData.username}`}
           >
             @{friendData.username}
@@ -56,15 +56,15 @@ export default function FriendProfile() {
         </HeaderNav>
 
         {/* Perfil */}
-        <ProfileHeader accessibilityRole="summary" accessibilityLabel="User profile information">
+        <ProfileHeader role="summary" accessibilityLabel="User profile information">
           <AvatarImage
             source={userImages[friendData.image]}
-            accessibilityRole="image"
+            role="image"
             accessibilityLabel={`Profile picture of ${friendData.name}`}
           />
 
           <InfoSection>
-            <DisplayName accessibilityRole="header">{friendData.name}</DisplayName>
+            <DisplayName role="header">{friendData.name}</DisplayName>
 
             <StatsText accessibilityLabel={`${friendData.pastEvents?.length || 0} events attended`}>
               Been in {friendData.pastEvents?.length || 0} events
@@ -75,12 +75,12 @@ export default function FriendProfile() {
         </ProfileHeader>
 
         {/* Eventos */}
-        <SectionTitle accessibilityRole="header" accessibilityLabel="Events section">
+        <SectionTitle role="header" accessibilityLabel="Events section">
           {userPastEvents.length} Events in common
         </SectionTitle>
 
         <FlatList
-          accessibilityRole="list"
+          role="list"
           accessibilityLabel="List of events in common"
           data={userPastEvents}
           horizontal
@@ -92,7 +92,7 @@ export default function FriendProfile() {
           renderItem={({ item }) => (
             <EventCard
               event={item}
-              accessibilityRole="button"
+              role="button"
               accessibilityLabel={`Event ${item.title}`}
             />
           )}
@@ -111,9 +111,9 @@ const HeaderNav = styled.View`
   flex-direction: row;
   align-items: center;
   padding: ${({ theme }) =>
-      Platform.OS === 'ios'
-        ? theme.spacing.margemTop + theme.spacing.lg
-        : theme.spacing.margemTop}px
+    Platform.OS === 'ios'
+      ? theme.spacing.margemTop + theme.spacing.lg
+      : theme.spacing.margemTop}px
     ${({ theme }) => theme.spacing.margemLateral}px ${({ theme }) => theme.spacing.md}px;
 `;
 

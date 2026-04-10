@@ -42,7 +42,7 @@ const SecurityScreen = () => {
             </Section>
 
             <Section>
-              <SectionTitle accessibilityRole="header">Change Password</SectionTitle>
+              <SectionTitle role="header">Change Password</SectionTitle>
 
               <InputField
                 label="Current Password"
@@ -77,7 +77,7 @@ const SecurityScreen = () => {
                 accessibilityHint="Repeat the new password exactly as entered above"
               />
 
-              <SaveButton accessibilityRole="button" accessibilityLabel="Save password changes">
+              <SaveButton role="button" accessibilityLabel="Save password changes">
                 <SaveButtonText>Save changes</SaveButtonText>
               </SaveButton>
             </Section>

@@ -27,7 +27,7 @@ const NotificationSettingsScreen = () => {
       <Header variant="back" title="Notification Settings" showBottomDivider={false} />
       <ScrollView>
         <Content>
-          <Section accessible={false} accessibilityRole="none">
+          <Section accessible={false} role="none">
             <Toggle
               isEnabled={notifications.allNotifications}
               onToggle={() => toggleNotification('allNotifications')}

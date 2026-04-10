@@ -44,7 +44,7 @@ const Header: React.FC<HeaderProps> = ({
             <IconRow>
               <IconButton
                 onPress={() => router.push('/notifications')}
-                accessibilityRole="button"
+                role="button"
                 accessibilityLabel="Notifications"
               >
                 <Ionicons
@@ -56,7 +56,7 @@ const Header: React.FC<HeaderProps> = ({
 
               <IconButton
                 onPress={() => router.push('/perfil/profile')}
-                accessibilityRole="button"
+                role="button"
                 accessibilityLabel="Profile"
               >
                 <Ionicons name="person-circle" size={Width.iconHeader} color={Colors.white} />
@@ -72,7 +72,7 @@ const Header: React.FC<HeaderProps> = ({
               <BackButton
                 onPress={() => router.back()}
                 accessibilityLabel="Go back"
-                accessibilityRole="button"
+                role="button"
               >
                 <Ionicons name="arrow-back" size={Width.iconHeader} color={Colors.white} />
               </BackButton>
@@ -80,7 +80,7 @@ const Header: React.FC<HeaderProps> = ({
 
             {title && (
               <TitleContainer>
-                <Title accessibilityRole="header">{title}</Title>
+                <Title role="header">{title}</Title>
 
                 {subtitle && <Subtitle>{subtitle}</Subtitle>}
               </TitleContainer>
@@ -94,7 +94,7 @@ const Header: React.FC<HeaderProps> = ({
             <BackButtonDetails
               onPress={() => router.back()}
               accessibilityLabel="Go back"
-              accessibilityRole="button"
+              role="button"
             >
               <Ionicons name="arrow-back" size={Width.iconHeader} color={Colors.white} />
             </BackButtonDetails>

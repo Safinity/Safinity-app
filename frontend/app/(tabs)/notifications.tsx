@@ -167,7 +167,7 @@ export default function NotificationsPage() {
   };
 
   const renderItem = ({ item }: { item: any }) => {
-    if (item.isDivider) return <SectionLabel accessibilityRole="header">Oldest</SectionLabel>;
+    if (item.isDivider) return <SectionLabel role="header">Oldest</SectionLabel>;
 
     const cardLabel = `${item.title}, ${item.time}. ${item.message}${item.read ? '' : ', new notification'}`;
 
@@ -175,7 +175,7 @@ export default function NotificationsPage() {
       <NotificationCard
         $isNew={!item.read}
         accessible={true}
-        accessibilityRole="none"
+        role="none"
         accessibilityLabel={cardLabel}
       >
         {item.type === 'friend' ? (
@@ -205,13 +205,13 @@ export default function NotificationsPage() {
           {item.type === 'friend' && (
             <ActionRow>
               <RemoveButton
-                accessibilityRole="button"
+                role="button"
                 accessibilityLabel={`Remove friend request from ${item.title}`}
               >
                 <MarkReadText style={{ color: '#E8CAFF' }}>Remove</MarkReadText>
               </RemoveButton>
               <AcceptButton
-                accessibilityRole="button"
+                role="button"
                 accessibilityLabel={`Accept friend request from ${item.title}`}
               >
                 <MarkReadText>Accept</MarkReadText>
@@ -238,7 +238,7 @@ export default function NotificationsPage() {
       <PageHeaderContent>
         <MarkReadButton
           onPress={handleMarkAllRead}
-          accessibilityRole="button"
+          role="button"
           accessibilityLabel="Mark all notifications as read"
         >
           <MarkReadText>Mark all as read</MarkReadText>
@@ -250,7 +250,7 @@ export default function NotificationsPage() {
         data={dataToRender}
         keyExtractor={item => item.id.toString()}
         renderItem={renderItem}
-        accessibilityRole="list"
+        role="list"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingBottom: 50,

@@ -29,7 +29,7 @@ const TabButton = styled.TouchableOpacity`
 
 const TabIcon = styled(Ionicons).attrs(({ theme }) => ({
   size: theme.height.xs,
-}))<{ $active: boolean }>`
+})) <{ $active: boolean }>`
   color: ${({ $active, theme }) =>
     $active ? theme.colors.white : theme.colors.palette.neutral.neutral80};
 `;
@@ -62,7 +62,7 @@ const tabConfigs = [
 
 function CustomTabBar({ state, navigation }: any) {
   return (
-    <NavbarContainer accessibilityRole="tablist">
+    <NavbarContainer role="tablist">
       <TabBarContent>
         {tabConfigs.map(tab => {
           const routeIndex = state.routes.findIndex((r: any) => r.name === tab.name);
@@ -80,7 +80,7 @@ function CustomTabBar({ state, navigation }: any) {
             <TabButton
               key={tab.name}
               onPress={onPress}
-              accessibilityRole="tab"
+              role="tab"
               accessibilityLabel={tab.title}
               accessibilityState={{ selected: isFocused }}
             >

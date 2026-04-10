@@ -86,9 +86,9 @@ export default function EventsListScreen() {
       <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
 
       {/* Header com papel semântico */}
-      <Header accessibilityRole="banner" />
+      <Header role="banner" />
 
-      <Content accessibilityRole="main">
+      <Content role="main">
         {/* Banner com Título Principal (H1) */}
         <HeroBanner
           event={{
@@ -97,7 +97,7 @@ export default function EventsListScreen() {
           title="What's Coming Up"
           description="Discover events with safety you can trust"
           hideMap={true}
-          accessibilityRole="header"
+          role="header"
           // @ts-ignore
           aria-level="1"
         />
@@ -118,7 +118,7 @@ export default function EventsListScreen() {
           selectedTags={selectedCategories}
           onTagPress={handleTagPress}
           variant="homepage"
-          accessibilityRole="tablist"
+          role="tablist"
         />
 
         {selectedCategories.map(category => {
@@ -133,7 +133,7 @@ export default function EventsListScreen() {
               <PaddedContent>
                 <SectionHeader>
                   <SectionTitle
-                    accessibilityRole="header"
+                    role="header"
                     // @ts-ignore
                     aria-level="2"
                   >
@@ -147,7 +147,7 @@ export default function EventsListScreen() {
                 data={sectionEvents}
                 renderItem={({ item }) => <EventCard event={item} variant="compact" />}
                 keyExtractor={item => `${category}-${item.id}`}
-                accessibilityRole="list"
+                role="list"
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={{
                   paddingLeft: 40,

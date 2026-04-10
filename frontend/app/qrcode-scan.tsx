@@ -113,18 +113,18 @@ export default function QRCodeScreen() {
 
       <Stack.Screen options={{ title: 'QR Code | Safinity', headerShown: false }} />
 
-      <View accessibilityRole="banner">
+      <View role="banner">
         <Header variant="back" title="Profile’s QR Code" />
       </View>
 
-      <View accessibilityRole="main">
-        <ToggleContainer accessibilityRole="region" accessibilityLabel="QR Code mode selector">
+      <View role="main">
+        <ToggleContainer role="region" accessibilityLabel="QR Code mode selector">
           <Slider style={{ transform: [{ translateX: sliderTranslate }] }} />
 
           <TabButton
             onPress={() => handleToggle('scan')}
             accessible={true}
-            accessibilityRole="button"
+            role="button"
             accessibilityLabel="Scan QR Code"
             accessibilityState={{ selected: mode === 'scan' }}
           >
@@ -134,7 +134,7 @@ export default function QRCodeScreen() {
           <TabButton
             onPress={() => handleToggle('my')}
             accessible={true}
-            accessibilityRole="button"
+            role="button"
             accessibilityLabel="Show my QR Code"
             accessibilityState={{ selected: mode === 'my' }}
           >
@@ -143,7 +143,7 @@ export default function QRCodeScreen() {
         </ToggleContainer>
 
         {mode === 'scan' ? (
-          <View accessibilityRole="region" accessibilityLabel="QR code scanner">
+          <View role="region" accessibilityLabel="QR code scanner">
             <CameraWrapper>
               <CameraView
                 style={StyleSheet.absoluteFillObject}
@@ -163,7 +163,7 @@ export default function QRCodeScreen() {
             </CameraWrapper>
           </View>
         ) : (
-          <View accessibilityRole="region" accessibilityLabel="My QR code">
+          <View role="region" accessibilityLabel="My QR code">
             <QRCodeContainer>
               <Ionicons
                 name="qr-code-outline"

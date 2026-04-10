@@ -123,7 +123,7 @@ export const HeroBanner = ({
       <HeroGradient
         accessible={true}
         accessibilityLabel={accessibleLabel}
-        accessibilityRole="header"
+        role="header"
         // @ts-ignore
         aria-label={accessibleLabel}
       >
@@ -139,7 +139,7 @@ export const HeroBanner = ({
                 onPress={() => router.push('/(tabs)/my-calendar')}
                 accessible={true}
                 accessibilityLabel="Adicionar ao meu calendário"
-                accessibilityRole="button"
+                role="button"
               >
                 <Ionicons name="calendar-outline" size={26} color="#9333EA" />
               </AddCalendarButton>

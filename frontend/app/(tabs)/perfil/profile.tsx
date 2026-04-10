@@ -210,7 +210,7 @@ export default function Profile() {
           </AvatarCircle>
           <EditButtonContainer
             onPress={() => router.push('/perfil/edit-profile')}
-            accessibilityRole="button"
+            role="button"
             accessibilityLabel="Edit profile picture"
           >
             <EditIconCircle>
@@ -222,15 +222,15 @@ export default function Profile() {
         <Name>{user.name}</Name>
         <Username>@{user.username}</Username>
 
-        <LinkButton accessibilityRole="button" accessibilityLabel="Link my ticket">
+        <LinkButton role="button" accessibilityLabel="Link my ticket">
           <LinkButtonText>Link my ticket</LinkButtonText>
         </LinkButton>
 
         <SectionHeader>
-          <SectionTitle accessibilityRole="header">Past Events</SectionTitle>
+          <SectionTitle role="header">Past Events</SectionTitle>
           <Pressable
             onPress={() => router.push('/events-list')}
-            accessibilityRole="button"
+            role="button"
             accessibilityLabel="See more past events"
           >
             <SeeMore>See more</SeeMore>
@@ -249,18 +249,18 @@ export default function Profile() {
         keyExtractor={item => item.id}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingLeft: 40, paddingRight: 40 }}
-        accessibilityRole="list"
+        role="list"
         accessibilityLabel="Past events"
       />
 
       <PaddedContent>
         <View style={{ marginTop: 40 }}>
-          <SectionTitle accessibilityRole="header">Settings</SectionTitle>
+          <SectionTitle role="header">Settings</SectionTitle>
         </View>
 
         <SettingsRow
           onPress={() => router.push('/perfil/notifications-settings')}
-          accessibilityRole="button"
+          role="button"
           accessibilityLabel="Notifications settings"
         >
           <SettingsText>Notifications</SettingsText>
@@ -269,21 +269,21 @@ export default function Profile() {
 
         <SettingsRow
           onPress={() => router.push('/perfil/security')}
-          accessibilityRole="button"
+          role="button"
           accessibilityLabel="Password and security settings"
         >
           <SettingsText>Password and Security</SettingsText>
           <SettingsIcon accessible={false}>›</SettingsIcon>
         </SettingsRow>
 
-        <SettingsRow accessibilityRole="button" accessibilityLabel="Terms and conditions">
+        <SettingsRow role="button" accessibilityLabel="Terms and conditions">
           <SettingsText>Terms and Conditions</SettingsText>
           <SettingsIcon accessible={false}>›</SettingsIcon>
         </SettingsRow>
 
         <LogoutButton
           onPress={() => router.push('../../landing')}
-          accessibilityRole="button"
+          role="button"
           accessibilityLabel="Log out of the app"
         >
           <LogoutText>Log out</LogoutText>

@@ -31,12 +31,12 @@ export default function AddFriendScreen() {
     search.length === 0
       ? []
       : users.filter(u => {
-          const text = search.toLowerCase();
-          return (
-            u.id !== currentUser.id &&
-            (u.name.toLowerCase().includes(text) || u.username.toLowerCase().includes(text))
-          );
-        });
+        const text = search.toLowerCase();
+        return (
+          u.id !== currentUser.id &&
+          (u.name.toLowerCase().includes(text) || u.username.toLowerCase().includes(text))
+        );
+      });
 
   const isFriend = (id: string) => currentUser.friends.includes(id);
 
@@ -57,7 +57,7 @@ export default function AddFriendScreen() {
       <Header variant="back" title="Add Friend" />
 
       {/* Main content */}
-      <MainContent accessibilityRole="main" accessibilityLabel="Search and add friends">
+      <MainContent role="main" accessibilityLabel="Search and add friends">
         <SearchBarQR
           value={search}
           onChangeText={setSearch}
@@ -69,7 +69,7 @@ export default function AddFriendScreen() {
 
         {search.length === 0 ? (
           <>
-            <Subtitle accessibilityRole="header" accessibilityLevel={2}>
+            <Subtitle role="header" accessibilityLevel={2}>
               Recent searches
             </Subtitle>
 
@@ -80,7 +80,7 @@ export default function AddFriendScreen() {
                 <RecentItem
                   key={item}
                   onPress={() => setSearch(item)}
-                  accessibilityRole="button"
+                  role="button"
                   accessibilityLabel={`Search again for ${item}`}
                 >
                   <RecentText>{item}</RecentText>
@@ -90,7 +90,7 @@ export default function AddFriendScreen() {
           </>
         ) : (
           <>
-            <Subtitle accessibilityRole="header" accessibilityLevel={2}>
+            <Subtitle role="header" accessibilityLevel={2}>
               Results
             </Subtitle>
 
@@ -99,7 +99,7 @@ export default function AddFriendScreen() {
                 key={user.id}
                 onPress={() => router.push(`/friends/${user.id}`)}
                 accessible={true}
-                accessibilityRole="button"
+                role="button"
                 accessibilityLabel={`Open profile of ${user.name}`}
                 accessibilityHint="Tap to view this friend's profile"
                 style={{
@@ -110,7 +110,7 @@ export default function AddFriendScreen() {
               >
                 <Avatar
                   source={userImages[user.image]}
-                  accessibilityRole="image"
+                  role="image"
                   accessibilityLabel={`Profile picture of ${user.name}`}
                 />
 
@@ -124,7 +124,7 @@ export default function AddFriendScreen() {
                   <FriendActionButton
                     variant="remove"
                     onPress={() => removeFriend(user.id)}
-                    accessibilityRole="button"
+                    role="button"
                     accessibilityLabel={`Remove ${user.name} from friends`}
                     accessibilityHint="Removes this user from your friend list"
                   />
@@ -132,7 +132,7 @@ export default function AddFriendScreen() {
                   <FriendActionButton
                     variant="add"
                     onPress={() => addFriend(user.id)}
-                    accessibilityRole="button"
+                    role="button"
                     accessibilityLabel={`Add ${user.name} as a friend`}
                     accessibilityHint="Adds this user to your friend list"
                   />

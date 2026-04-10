@@ -44,7 +44,7 @@ export default function SearchBarQR({
 
       <QRButton
         onPress={onPressQR}
-        accessibilityRole="button"
+        role="button"
         accessibilityLabel="Scan QR code to find friends"
       >
         <Ionicons

@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import MupiCard from '../components/MupiCard';
 import mupisDataJson from '../data/mupis.json';
 import InputField from '../components/InputField';
+import { Helmet } from 'react-helmet-async';
 
 interface Mupi {
   id: number;
@@ -209,71 +210,76 @@ export default function MupisPage() {
   };
 
   return (
-    <Page>
-      <Title>Web Summit</Title>
+    <>
+      <Helmet>
+        <title>Mupis | Safinity Backoffice</title>
+      </Helmet>
+      <Page>
+        <Title>Web Summit</Title>
 
-      <SubtitleRow>
-        <Subtitle>Mupis</Subtitle>
-        <AddButton onClick={openModalForNew}>+ Add Mupi</AddButton>
-      </SubtitleRow>
+        <SubtitleRow>
+          <Subtitle>Mupis</Subtitle>
+          <AddButton onClick={openModalForNew}>+ Add Mupi</AddButton>
+        </SubtitleRow>
 
-      <ListWrapper>
-        <ScrollableList>
-          {mupisData.map(mupi => (
-            <div key={mupi.id} onClick={() => openModalForEdit(mupi)}>
-              <MupiCard title={mupi.title} image={mupi.image} />
-            </div>
-          ))}
-        </ScrollableList>
-      </ListWrapper>
+        <ListWrapper>
+          <ScrollableList>
+            {mupisData.map(mupi => (
+              <div key={mupi.id} onClick={() => openModalForEdit(mupi)}>
+                <MupiCard title={mupi.title} image={mupi.image} />
+              </div>
+            ))}
+          </ScrollableList>
+        </ListWrapper>
 
-      {showModal && (
-        <ModalOverlay onClick={() => setShowModal(false)}>
-          <ModalContainer onClick={e => e.stopPropagation()}>
-            <PreviewCard>{previewUrl && <img src={previewUrl} />}</PreviewCard>
+        {showModal && (
+          <ModalOverlay onClick={() => setShowModal(false)}>
+            <ModalContainer onClick={e => e.stopPropagation()}>
+              <PreviewCard>{previewUrl && <img src={previewUrl} />}</PreviewCard>
 
-            <FormColumn>
-              <InputField
-                label="Title"
-                value={newTitle}
-                onChange={e => setNewTitle(e.target.value)}
-              />
+              <FormColumn>
+                <InputField
+                  label="Title"
+                  value={newTitle}
+                  onChange={e => setNewTitle(e.target.value)}
+                />
 
-              <FileInput
-                type="file"
-                accept="image/*"
-                onChange={e => setNewImage(e.target.files?.[0] ?? null)}
-              />
+                <FileInput
+                  type="file"
+                  accept="image/*"
+                  onChange={e => setNewImage(e.target.files?.[0] ?? null)}
+                />
 
-              <ButtonRow>
-                {editingMupiId !== null && (
-                  <ModalButton variant="danger" onClick={() => setShowConfirmModal(true)}>
-                    Remove
+                <ButtonRow>
+                  {editingMupiId !== null && (
+                    <ModalButton variant="danger" onClick={() => setShowConfirmModal(true)}>
+                      Remove
+                    </ModalButton>
+                  )}
+                  <ModalButton onClick={() => setShowModal(false)}>Cancel</ModalButton>
+                  <ModalButton variant="primary" onClick={handleSave}>
+                    {editingMupiId !== null ? 'Save' : 'Add'}
                   </ModalButton>
-                )}
-                <ModalButton onClick={() => setShowModal(false)}>Cancel</ModalButton>
-                <ModalButton variant="primary" onClick={handleSave}>
-                  {editingMupiId !== null ? 'Save' : 'Add'}
+                </ButtonRow>
+              </FormColumn>
+            </ModalContainer>
+          </ModalOverlay>
+        )}
+
+        {showConfirmModal && (
+          <ModalOverlay onClick={() => setShowConfirmModal(false)}>
+            <ConfirmModalContainer onClick={e => e.stopPropagation()}>
+              <ConfirmText>Are you sure you want to remove this mupi?</ConfirmText>
+              <ButtonRow>
+                <ModalButton onClick={() => setShowConfirmModal(false)}>Cancel</ModalButton>
+                <ModalButton variant="danger" onClick={handleRemove}>
+                  Remove
                 </ModalButton>
               </ButtonRow>
-            </FormColumn>
-          </ModalContainer>
-        </ModalOverlay>
-      )}
-
-      {showConfirmModal && (
-        <ModalOverlay onClick={() => setShowConfirmModal(false)}>
-          <ConfirmModalContainer onClick={e => e.stopPropagation()}>
-            <ConfirmText>Are you sure you want to remove this mupi?</ConfirmText>
-            <ButtonRow>
-              <ModalButton onClick={() => setShowConfirmModal(false)}>Cancel</ModalButton>
-              <ModalButton variant="danger" onClick={handleRemove}>
-                Remove
-              </ModalButton>
-            </ButtonRow>
-          </ConfirmModalContainer>
-        </ModalOverlay>
-      )}
-    </Page>
+            </ConfirmModalContainer>
+          </ModalOverlay>
+        )}
+      </Page>
+    </>
   );
 }

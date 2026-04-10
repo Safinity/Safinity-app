@@ -7,12 +7,131 @@ import PhoneImg from '../assets/images/landing/phone.png';
 import PrimaryButton from '../components/PrimaryButton';
 import users from '../data/users.json';
 import { FiMail, FiEye, FiEyeOff } from 'react-icons/fi';
+import { Helmet } from 'react-helmet-async';
 
-const Page = styled.div`
+export default function Login() {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleLogin = () => {
+    setError('');
+
+    if (!email || !password) {
+      setError('Please fill in all fields');
+      return;
+    }
+
+    const user = users.find(
+      u => u.email.toLowerCase() === email.toLowerCase() && u.password === password,
+    );
+
+    if (!user) {
+      setError('Invalid email or password');
+      return;
+    }
+
+    navigate('/home');
+  };
+
+  return (
+    <>
+      <Helmet>
+        <title>Login | Safinity Backoffice</title>
+      </Helmet>
+
+      <Page>
+        <LeftContent>
+          <Logo src={LogoImg} alt="Safinity Logo" />
+          <Title>Log in</Title>
+          <Subtitle>Welcome back!</Subtitle>
+
+          <LoginForm
+            onSubmit={e => {
+              e.preventDefault();
+              handleLogin();
+            }}
+            noValidate
+          >
+            <InputGroup>
+              <Label htmlFor="email">Email</Label>
+              <InputBox>
+                <Input
+                  type="email"
+                  id="email"
+                  placeholder="Email"
+                  value={email}
+                  autoComplete="email"
+                  onChange={e => setEmail(e.target.value)}
+                />
+                <FiMail size={20} color="#cfd3e0" aria-hidden="true" />
+              </InputBox>
+            </InputGroup>
+
+            <InputGroup>
+              <Label htmlFor="password">Password</Label>
+              <InputBox>
+                <Input
+                  type={showPassword ? 'text' : 'password'}
+                  id="password"
+                  placeholder="Password"
+                  value={password}
+                  autoComplete="current-password"
+                  onChange={e => setPassword(e.target.value)}
+                />
+
+                <IconButton
+                  type="button"
+                  onClick={() => setShowPassword(prev => !prev)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? (
+                    <FiEyeOff size={22} aria-hidden="true" />
+                  ) : (
+                    <FiEye size={22} aria-hidden="true" />
+                  )}
+                </IconButton>
+              </InputBox>
+            </InputGroup>
+
+            <ForgotButton type="button" onClick={() => navigate('/forgot-password')}>
+              Forgot your password?
+            </ForgotButton>
+
+            {error && <ErrorText role="alert">{error}</ErrorText>}
+
+            <PrimaryButton type="submit">Log in</PrimaryButton>
+          </LoginForm>
+
+          <BottomText>
+            Don’t have an account?
+            <LinkText type="button" onClick={() => navigate('/register')}>
+              Create Account
+            </LinkText>
+          </BottomText>
+        </LeftContent>
+
+        <RightContent>
+          <Phone src={PhoneImg} alt="" aria-hidden="true" />
+        </RightContent>
+      </Page>
+    </>
+  );
+}
+
+const Page = styled.main`
   height: 100vh;
   width: 100vw;
   display: flex;
   background-color: ${({ theme }) => theme.colors.background};
+`;
+
+const LoginForm = styled.form`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 `;
 
 const LeftContent = styled.div`
@@ -46,7 +165,7 @@ const Title = styled.h1`
   margin-bottom: 4px;
 `;
 
-const Subtitle = styled.p`
+const Subtitle = styled.h2`
   color: ${({ theme }) => theme.colors.inactive};
   font-size: 20px;
   margin-bottom: 24px;
@@ -81,6 +200,11 @@ const Input = styled.input`
   font-size: 16px;
   height: 24px;
   line-height: 24px;
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.palette.primary.normal};
+    border-radius: 4px;
+  }
 `;
 
 const IconButton = styled.button`
@@ -92,6 +216,11 @@ const IconButton = styled.button`
   justify-content: center;
   color: #cfd3e0;
   padding: 0;
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.palette.primary.normal};
+    border-radius: 4px;
+  }
 `;
 
 const ErrorText = styled.p`
@@ -100,12 +229,20 @@ const ErrorText = styled.p`
   margin-bottom: 12px;
 `;
 
-const ForgotText = styled.p`
+const ForgotButton = styled.button`
+  background: none;
+  border: none;
+  padding: 0;
   text-align: right;
   color: ${({ theme }) => theme.colors.palette.primary.light80};
   text-decoration: underline;
   cursor: pointer;
   margin-bottom: 24px;
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.palette.primary.normal};
+    border-radius: 4px;
+  }
 `;
 
 const BottomText = styled.p`
@@ -114,90 +251,16 @@ const BottomText = styled.p`
   margin-top: 24px;
 `;
 
-const LinkText = styled.span`
+const LinkText = styled.button`
+  background: none;
+  border: none;
+  padding: 0;
   color: ${({ theme }) => theme.colors.palette.primary.light80};
   text-decoration: underline;
   cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.palette.primary.normal};
+    border-radius: 4px;
+  }
 `;
-
-export default function Login() {
-  const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-
-  const handleLogin = () => {
-    setError('');
-
-    if (!email || !password) {
-      setError('Please fill in all fields');
-      return;
-    }
-
-    const user = users.find(
-      u => u.email.toLowerCase() === email.toLowerCase() && u.password === password,
-    );
-
-    if (!user) {
-      setError('Invalid email or password');
-      return;
-    }
-
-    navigate('/home');
-  };
-
-  return (
-    <Page>
-      <LeftContent>
-        <Logo src={LogoImg} alt="Safinity Logo" />
-        <Title>Log in</Title>
-        <Subtitle>Welcome back!</Subtitle>
-
-        <InputGroup>
-          <Label>Email</Label>
-          <InputBox>
-            <Input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-            />
-            <FiMail size={20} color="#cfd3e0" />
-          </InputBox>
-        </InputGroup>
-
-        <InputGroup>
-          <Label>Password</Label>
-          <InputBox>
-            <Input
-              type={showPassword ? 'text' : 'password'}
-              placeholder="Password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-            />
-
-            <IconButton type="button" onClick={() => setShowPassword(prev => !prev)}>
-              {showPassword ? <FiEyeOff size={22} /> : <FiEye size={22} />}
-            </IconButton>
-          </InputBox>
-        </InputGroup>
-
-        <ForgotText>Forgot your password?</ForgotText>
-
-        {error && <ErrorText>{error}</ErrorText>}
-
-        <PrimaryButton onClick={handleLogin}>Log in</PrimaryButton>
-
-        <BottomText>
-          Don’t have an account?{' '}
-          <LinkText onClick={() => navigate('/register')}>Create Account</LinkText>
-        </BottomText>
-      </LeftContent>
-
-      <RightContent>
-        <Phone src={PhoneImg} alt="App preview" />
-      </RightContent>
-    </Page>
-  );
-}

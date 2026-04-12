@@ -4,11 +4,12 @@
     "slug": "frontend",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icons/app_logo.png",
+    "icon": "./assets/Icons/app_logo.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "scheme": "frontend",
+    "scheme": ["frontend", "com.safinityapp.frontend"],
     "owner": "beatriz-castros-organization",
+    "platforms": ["ios", "android", "web"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.safinityapp.frontend",
@@ -19,24 +20,19 @@
     },
     "android": {
       "package": "com.safinityapp.frontend",
-      "compileSdkVersion": 35,
-      "targetSdkVersion": 35,
-      "minSdkVersion": 24,
-      "buildToolsVersion": "35.0.0",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/icons/app_logo.png",
+        "foregroundImage": "./assets/Icons/app_logo.png",
         "backgroundColor": "#E6F4FE"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
     "plugins": ["expo-router", "expo-font", "expo-camera"],
-    "platforms": ["ios", "android", "web"],
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
     "updates": {
       "url": "https://u.expo.dev/c6d74fda-161d-47df-afad-75b5aa15930c"
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
     },
     "extra": {
       "eas": {

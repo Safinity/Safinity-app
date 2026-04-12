@@ -16,12 +16,17 @@ import '../theme/theme.ts';
 
 import alerts from '../data/alerts.json';
 import { AlertsBar } from '../components/AlertBar';
+import { Helmet } from 'react-helmet-async';
 
 export const Alerts: React.FC = () => {
   const listRef = useRef<HTMLDivElement>(null);
 
   return (
     <>
+      <Helmet>
+        <title>Alerts | Safinity Backoffice</title>
+      </Helmet>
+
       {/* Skip link for keyboard users */}
       <SkipLink href="#alerts-list">Skip to alerts</SkipLink>
 

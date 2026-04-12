@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import styled from 'styled-components';
 import initialData from '../data/notifications.json';
+import { Helmet } from 'react-helmet-async';
 
 // --- Styled Components (Layout e Tabela) ---
 
@@ -225,107 +226,112 @@ export const NotificationsPage = () => {
   };
 
   return (
-    <Container>
-      <Content>
-        <Header>
-          <div>
-            <Title>Notification History</Title>
-            <Subtitle>Web Summit 2025</Subtitle>
-          </div>
-          <ActionButton onClick={() => setIsModalOpen(true)}>+ New Notification</ActionButton>
-        </Header>
+    <>
+      <Helmet>
+        <title>Notifications | Safinity Backoffice</title>
+      </Helmet>
+      <Container>
+        <Content>
+          <Header>
+            <div>
+              <Title>Notification History</Title>
+              <Subtitle>Web Summit 2025</Subtitle>
+            </div>
+            <ActionButton onClick={() => setIsModalOpen(true)}>+ New Notification</ActionButton>
+          </Header>
 
-        <NotificationTable>
-          <thead>
-            <tr>
-              <Th>Category</Th>
-              <Th>Title</Th>
-              <Th>Message</Th>
-              <Th>Target Audience</Th>
-              <Th>Date</Th>
-            </tr>
-          </thead>
-          <tbody>
-            {notifications.map(notif => (
-              <Tr key={notif.id}>
-                <Td>
-                  <Badge type={notif.type}>{notif.category}</Badge>
-                </Td>
-                <Td style={{ fontWeight: 600 }}>{notif.title}</Td>
-                <Td style={{ opacity: 0.7, maxWidth: '400px', fontSize: '14px' }}>
-                  {notif.message}
-                </Td>
-                <Td style={{ fontSize: '14px' }}>{notif.target}</Td>
-                <Td style={{ fontSize: '14px', opacity: 0.6 }}>
-                  {new Date(notif.sentAt).toLocaleDateString('en-GB')}
-                </Td>
-              </Tr>
-            ))}
-          </tbody>
-        </NotificationTable>
-      </Content>
+          <NotificationTable>
+            <thead>
+              <tr>
+                <Th>Category</Th>
+                <Th>Title</Th>
+                <Th>Message</Th>
+                <Th>Target Audience</Th>
+                <Th>Date</Th>
+              </tr>
+            </thead>
+            <tbody>
+              {notifications.map(notif => (
+                <Tr key={notif.id}>
+                  <Td>
+                    <Badge type={notif.type}>{notif.category}</Badge>
+                  </Td>
+                  <Td style={{ fontWeight: 600 }}>{notif.title}</Td>
+                  <Td style={{ opacity: 0.7, maxWidth: '400px', fontSize: '14px' }}>
+                    {notif.message}
+                  </Td>
+                  <Td style={{ fontSize: '14px' }}>{notif.target}</Td>
+                  <Td style={{ fontSize: '14px', opacity: 0.6 }}>
+                    {new Date(notif.sentAt).toLocaleDateString('en-GB')}
+                  </Td>
+                </Tr>
+              ))}
+            </tbody>
+          </NotificationTable>
+        </Content>
 
-      {isModalOpen && (
-        <Overlay onClick={() => setIsModalOpen(false)}>
-          <ModalContainer onClick={e => e.stopPropagation()}>
-            <Title style={{ fontSize: '24px', marginBottom: '32px' }}>Create Notification</Title>
+        {isModalOpen && (
+          <Overlay onClick={() => setIsModalOpen(false)}>
+            <ModalContainer onClick={e => e.stopPropagation()}>
+              <Title style={{ fontSize: '24px', marginBottom: '32px' }}>Create Notification</Title>
 
-            <FormGroup>
-              <Label>Notification Title</Label>
-              <Input
-                name="title"
-                value={formData.title}
-                onChange={handleInputChange}
-                placeholder="Ex: Welcome to the Arena"
-              />
-            </FormGroup>
+              <FormGroup>
+                <Label>Notification Title</Label>
+                <Input
+                  name="title"
+                  value={formData.title}
+                  onChange={handleInputChange}
+                  placeholder="Ex: Welcome to the Arena"
+                />
+              </FormGroup>
 
-            <FormGroup>
-              <Label>Category</Label>
-              <Select name="category" value={formData.category} onChange={handleInputChange}>
-                <option value="" disabled>
-                  Select a category
-                </option>
-                <option value="emergency">Emergency / Security</option>
-                <option value="crowd">Capacity / Crowd Control</option>
-                <option value="event">Event Update</option>
-                <option value="promo">Partners / Promos</option>
-                <option value="logistics">Logistics / Shuttle</option>
-                <option value="health">Health / Hydration</option>
-              </Select>
-            </FormGroup>
+              <FormGroup>
+                <Label>Category</Label>
+                <Select name="category" value={formData.category} onChange={handleInputChange}>
+                  <option value="" disabled>
+                    Select a category
+                  </option>
+                  <option value="emergency">Emergency / Security</option>
+                  <option value="crowd">Capacity / Crowd Control</option>
+                  <option value="event">Event Update</option>
+                  <option value="promo">Partners / Promos</option>
+                  <option value="logistics">Logistics / Shuttle</option>
+                  <option value="health">Health / Hydration</option>
+                </Select>
+              </FormGroup>
 
-            <FormGroup>
-              <Label>Target Audience</Label>
-              <Input
-                name="target"
-                value={formData.target}
-                onChange={handleInputChange}
-                placeholder="Ex: All Attendees, VIP, Speakers..."
-              />
-            </FormGroup>
+              <FormGroup>
+                <Label>Target Audience</Label>
+                <Input
+                  name="target"
+                  value={formData.target}
+                  onChange={handleInputChange}
+                  placeholder="Ex: All Attendees, VIP, Speakers..."
+                />
+              </FormGroup>
 
-            <FormGroup>
-              <Label>Message Content</Label>
-              <TextArea
-                name="message"
-                value={formData.message}
-                onChange={handleInputChange}
-                placeholder="What do you want to broadcast?"
-              />
-            </FormGroup>
+              <FormGroup>
+                <Label>Message Content</Label>
+                <TextArea
+                  name="message"
+                  value={formData.message}
+                  onChange={handleInputChange}
+                  placeholder="What do you want to broadcast?"
+                />
+              </FormGroup>
 
-            <ButtonGroup>
-              <ActionButton variant="white" isFullWidth onClick={() => setIsModalOpen(false)}>
-                Cancel
-              </ActionButton>
-              <ActionButton variant="primary" isFullWidth onClick={handleSend}>
-                Send Notification
-              </ActionButton>
-            </ButtonGroup>
-          </ModalContainer>
-        </Overlay>
-      )}
-    </Container>
+              <ButtonGroup>
+                <ActionButton variant="white" isFullWidth onClick={() => setIsModalOpen(false)}>
+                  Cancel
+                </ActionButton>
+                <ActionButton variant="primary" isFullWidth onClick={handleSend}>
+                  Send Notification
+                </ActionButton>
+              </ButtonGroup>
+            </ModalContainer>
+          </Overlay>
+        )}
+      </Container>
+    </>
   );
 };

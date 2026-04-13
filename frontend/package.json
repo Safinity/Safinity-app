@@ -10,7 +10,9 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "build-apk": "eas build --profile preview --platform android --clear-cache",
+    "build-qr": "eas update --branch main --message 'minha atualização'"
   },
   "dependencies": {
     "@expo-google-fonts/plus-jakarta-sans": "^0.4.2",

@@ -15,11 +15,11 @@ export default function Landing() {
       </Head>
       <Stack.Screen options={{ title: 'Welcome to Safinity!', headerShown: false }} />
 
-      <WelcomeTitle accessibilityRole="header" accessibilityHeadingLevel={1}>
+      <WelcomeTitle role="header" accessibilityHeadingLevel={1}>
         Welcome to Safinity!
       </WelcomeTitle>
 
-      <Content accessibilityRole="main">
+      <Content role="main">
         <PrimaryButton
           accessibilityLabel="Log in"
           title="Log in"

@@ -167,7 +167,7 @@ export default function OnboardingScreen({
       )}
 
       <AnimatedContent style={animatedStyle}>
-        <Title accessibilityRole="header">{title}</Title>
+        <Title role="header">{title}</Title>
         <Description>{description}</Description>
       </AnimatedContent>
 
@@ -176,7 +176,7 @@ export default function OnboardingScreen({
           {onPrev && (
             <LeftButton
               onPress={onPrev}
-              accessibilityRole="button"
+              role="button"
               accessibilityLabel={`Return to step ${step} of ${total}`}
             >
               <Ionicons name="chevron-back" size={26} color="white" />
@@ -185,7 +185,7 @@ export default function OnboardingScreen({
 
           <Dots
             accessible={true}
-            accessibilityRole="progressbar"
+            role="progressbar"
             accessibilityLabel={stepLabel}
             accessibilityValue={{ min: 1, max: total, now: step + 1 }}
           >
@@ -201,7 +201,7 @@ export default function OnboardingScreen({
 
           <RightButton
             onPress={onNext}
-            accessibilityRole="button"
+            role="button"
             accessibilityLabel={
               step === total - 1 ? 'Start using the app' : `Advance to step ${step + 2} of ${total}`
             }
@@ -214,7 +214,7 @@ export default function OnboardingScreen({
           <TertiaryButton
             title="Skip"
             onPress={onSkip}
-            accessibilityRole="button"
+            role="button"
             accessibilityLabel="Skip onboarding to enter the app"
           />
         </SkipWrapper>

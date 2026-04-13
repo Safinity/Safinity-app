@@ -41,7 +41,11 @@ const Header: React.FC<HeaderProps> = ({
             </LogoContainer>
 
             <IconRow>
-              <IconButton onPress={() => router.push('/notifications')}>
+              <IconButton
+                onPress={() => router.push('/notifications')}
+                role="button"
+                accessibilityLabel="Notifications"
+              >
                 <Ionicons
                   name="notifications-outline"
                   size={Width.iconHeader}
@@ -49,7 +53,11 @@ const Header: React.FC<HeaderProps> = ({
                 />
               </IconButton>
 
-              <IconButton onPress={() => router.push('/perfil/profile')}>
+              <IconButton
+                onPress={() => router.push('/perfil/profile')}
+                role="button"
+                accessibilityLabel="Profile"
+              >
                 <Ionicons name="person-circle" size={Width.iconHeader} color={Colors.white} />
               </IconButton>
             </IconRow>
@@ -60,18 +68,14 @@ const Header: React.FC<HeaderProps> = ({
         {variant === 'back' && (
           <BackContainer hasText={hasText}>
             <BackButtonRow>
-              <BackButton
-                onPress={() => router.back()}
-                accessibilityLabel="Go back"
-                accessibilityRole="button"
-              >
+              <BackButton onPress={() => router.back()} accessibilityLabel="Go back" role="button">
                 <Ionicons name="arrow-back" size={Width.iconHeader} color={Colors.white} />
               </BackButton>
             </BackButtonRow>
 
             {title && (
               <TitleContainer>
-                <Title accessibilityRole="header">{title}</Title>
+                <Title role="header">{title}</Title>
 
                 {subtitle && <Subtitle>{subtitle}</Subtitle>}
               </TitleContainer>
@@ -85,7 +89,7 @@ const Header: React.FC<HeaderProps> = ({
             <BackButtonDetails
               onPress={() => router.back()}
               accessibilityLabel="Go back"
-              accessibilityRole="button"
+              role="button"
             >
               <Ionicons name="arrow-back" size={Width.iconHeader} color={Colors.white} />
             </BackButtonDetails>

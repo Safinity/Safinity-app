@@ -6,7 +6,7 @@ import { Height, BorderRadius, TextStyles } from '../../constants/theme';
 Accessibility Enhancements / WCAG Level A Compliance
 
 - Each Tag (Pressable) now includes:
-  • accessibilityRole="button" to identify it as an interactive element
+  • role="button" to identify it as an interactive element
   • accessibilityState={{ selected: isSelected }} to communicate selection state
   • accessibilityLabel={`Filtrar por ${tag}`} to provide descriptive text for screen readers
   • accessibilityHint="Aplica este filtro de atividades" to explain its action
@@ -117,7 +117,7 @@ const FilterTags: React.FC<FilterTagsProps> = ({
               selected={isSelected}
               variant={variant}
               onPress={() => onTagPress(tag)}
-              accessibilityRole="button"
+              role="button"
               accessibilityState={{ selected: isSelected }}
               accessibilityLabel={`Filtrar por ${tag}`}
               accessibilityHint="Aplica este filtro de atividades"

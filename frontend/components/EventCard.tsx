@@ -101,6 +101,7 @@ export const EventCard = ({ event, variant }: any) => {
       href={`/event-details/${event.id}`}
       accessibilityRole="button"
       accessible={true}
+      role="link"
       accessibilityLabel={`Evento: ${event.name}. Data: ${formatEventDate(event.start_date, event.end_date)}`}
       accessibilityHint="Clica para ver os detalhes deste evento"
       focusable={true}
@@ -124,8 +125,8 @@ export const EventCard = ({ event, variant }: any) => {
           <CardFooter>
             <DateText>{formatEventDate(event.start_date, event.end_date)}</DateText>
             <TitleText
-              accessible={false}
-              accessibilityRole="header"
+              accessible={true}
+              role="header"
               // @ts-ignore
               aria-level="3"
             >

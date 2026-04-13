@@ -54,18 +54,18 @@ export default function NotFound() {
         <title>Not Found | Safinity</title>
       </Head>
 
-      <Content accessibilityRole="region" accessibilityLabel="404 error content">
-        <Title accessibilityRole="header" accessibilityLevel={1}>
+      <Content role="region" accessibilityLabel="404 error content">
+        <Title role="header" accessibilityLevel={1}>
           Opss!
         </Title>
-        <Message accessibilityRole="text">Unable to find the location{'\n'}of this page</Message>
+        <Message role="text">Unable to find the location{'\n'}of this page</Message>
         <GradientText text="404" style={styles.errorCode} />
       </Content>
 
       <Button
         onPress={() => router.replace('./map')}
         accessible={true}
-        accessibilityRole="button"
+        role="button"
         accessibilityLabel="Return to Home"
         accessibilityHint="Navigates back to the home map page"
       >

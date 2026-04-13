@@ -21,7 +21,7 @@ export default function TertiaryButton({
   return (
     <Button
       onPress={onPress}
-      accessibilityRole={accessibilityRole ?? 'button '}
+      accessibilityRole={accessibilityRole ?? 'button'}
       accessibilityLabel={accessibilityLabel ?? title}
     >
       <Label>{title}</Label>

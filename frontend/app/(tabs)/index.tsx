@@ -35,10 +35,10 @@ export default function HomeScreen() {
       <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
 
       {/* 1. O Header deve ter role de banner (topo da página) */}
-      <Header accessibilityRole="banner" />
+      <Header role="banner" />
 
       {/* 2. O conteúdo principal deve ter role de main */}
-      <Content accessibilityRole="main">
+      <Content role="main">
         {liveEvent && <HeroBanner event={liveEvent} />}
 
         <PaddedContent>
@@ -54,14 +54,14 @@ export default function HomeScreen() {
           onTagPress={setSelectedCategory}
           variant="homepage"
           accessible={true}
-          accessibilityRole="tablist" // Indica que é uma lista de opções selecionáveis
+          role="tablist" // Indica que é uma lista de opções selecionáveis
         />
 
         <PaddedContent>
           <SectionHeader>
             <SectionTitle
               accessible={true}
-              accessibilityRole="header"
+              role="header"
               // @ts-ignore
               aria-level="2"
             >
@@ -71,7 +71,7 @@ export default function HomeScreen() {
             <Pressable
               onPress={() => router.push('/events-list')}
               accessible={true}
-              accessibilityRole="link"
+              role="link"
               accessibilityLabel={`Ver mais eventos de ${selectedCategory}`}
               // ADICIONADO PARA ACESSIBILIDADE DE TECLADO:
               onKeyDown={(e: any) => {
@@ -91,7 +91,7 @@ export default function HomeScreen() {
           data={upcomingEvents}
           renderItem={({ item }) => <EventCard event={item} />}
           keyExtractor={item => item.id}
-          accessibilityRole="list" // Indica que os itens abaixo formam uma lista
+          role="list" // Indica que os itens abaixo formam uma lista
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{
             paddingLeft: 40,

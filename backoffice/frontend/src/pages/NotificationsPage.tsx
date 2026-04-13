@@ -1,9 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import initialData from '../data/notifications.json';
 import { Helmet } from 'react-helmet-async';
-
-// --- Styled Components (Layout e Tabela) ---
 
 const Container = styled.div`
   background-color: ${({ theme }) => theme.colors.background};
@@ -29,7 +27,7 @@ const Title = styled.h1`
   color: ${({ theme }) => theme.colors.white};
 `;
 
-const Subtitle = styled.h3`
+const Subtitle = styled.h2`
   font-size: ${({ theme }) => theme.text.titulo.h3.fontSize};
   font-family: ${({ theme }) => theme.text.titulo.h3.fontFamily};
   color: ${({ theme }) => theme.colors.primary_50};
@@ -107,11 +105,10 @@ const Badge = styled.span<{ type: string }>`
   font-size: 10px;
   font-weight: 800;
   text-transform: uppercase;
+  color: ${({ theme }) => theme.colors.white};
   background-color: ${({ type, theme }) =>
-    type === 'emergency' ? theme.colors.error : theme.colors.palette.primary.dark40};
+    type === 'emergency' ? '#A83232' : theme.colors.palette.primary.dark40};
 `;
-
-// --- Modal e Form ---
 
 const Overlay = styled.div`
   position: fixed;
@@ -139,7 +136,7 @@ const FormGroup = styled.div`
 `;
 
 const Label = styled.label`
-  color: ${({ theme }) => theme.colors.inactive};
+  color: #c4c4c8;
   font-size: 11px;
   font-weight: 700;
   margin-bottom: 8px;
@@ -177,6 +174,11 @@ const TextArea = styled.textarea`
   min-height: 100px;
   resize: none;
   font-family: 'Plus Jakarta Sans', sans-serif;
+  /* adicionar o mesmo focus que o Input tem */
+  &:focus {
+    outline: none;
+    border-color: ${({ theme }) => theme.colors.primary};
+  }
 `;
 
 const ButtonGroup = styled.div`
@@ -185,18 +187,37 @@ const ButtonGroup = styled.div`
   margin-top: 32px;
 `;
 
-// --- Componente Principal ---
-
 export const NotificationsPage = () => {
   const [notifications, setNotifications] = useState(initialData);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
   const [formData, setFormData] = useState({
     title: '',
     category: '',
     message: '',
     target: '',
   });
+
+  const modalRef = useRef<HTMLDivElement>(null);
+  const openButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (isModalOpen) {
+      modalRef.current?.querySelector<HTMLElement>('input, select, textarea, button')?.focus();
+    }
+  }, [isModalOpen]);
+
+  const handleClose = () => {
+    setIsModalOpen(false);
+    openButtonRef.current?.focus();
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isModalOpen) handleClose();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isModalOpen]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
@@ -208,10 +229,9 @@ export const NotificationsPage = () => {
     if (!formData.title || !formData.message || !formData.category || !formData.target) {
       return alert('Please fill in all fields');
     }
-
     const newNotification = {
       id: (notifications.length + 1).toString(),
-      type: formData.category, // ex: emergency, crowd
+      type: formData.category,
       category: formData.category.charAt(0).toUpperCase() + formData.category.slice(1),
       title: formData.title,
       message: formData.message,
@@ -219,9 +239,8 @@ export const NotificationsPage = () => {
       target: formData.target,
       reach: 0,
     };
-
     setNotifications([newNotification, ...notifications]);
-    setIsModalOpen(false);
+    handleClose();
     setFormData({ title: '', category: '', message: '', target: '' });
   };
 
@@ -230,6 +249,7 @@ export const NotificationsPage = () => {
       <Helmet>
         <title>Notifications | Safinity Backoffice</title>
       </Helmet>
+
       <Container>
         <Content>
           <Header>
@@ -237,17 +257,24 @@ export const NotificationsPage = () => {
               <Title>Notification History</Title>
               <Subtitle>Web Summit 2025</Subtitle>
             </div>
-            <ActionButton onClick={() => setIsModalOpen(true)}>+ New Notification</ActionButton>
+            <ActionButton
+              ref={openButtonRef}
+              onClick={() => setIsModalOpen(true)}
+              aria-haspopup="dialog"
+              aria-expanded={isModalOpen}
+            >
+              + New Notification
+            </ActionButton>
           </Header>
 
-          <NotificationTable>
+          <NotificationTable aria-label="Notification history">
             <thead>
               <tr>
-                <Th>Category</Th>
-                <Th>Title</Th>
-                <Th>Message</Th>
-                <Th>Target Audience</Th>
-                <Th>Date</Th>
+                <Th scope="col">Category</Th>
+                <Th scope="col">Title</Th>
+                <Th scope="col">Message</Th>
+                <Th scope="col">Target Audience</Th>
+                <Th scope="col">Date</Th>
               </tr>
             </thead>
             <tbody>
@@ -257,11 +284,18 @@ export const NotificationsPage = () => {
                     <Badge type={notif.type}>{notif.category}</Badge>
                   </Td>
                   <Td style={{ fontWeight: 600 }}>{notif.title}</Td>
-                  <Td style={{ opacity: 0.7, maxWidth: '400px', fontSize: '14px' }}>
+                  <Td
+                    style={{
+                      color: '#C4C4C8',
+                      maxWidth: '400px',
+                      fontSize: '14px',
+                      fontWeight: 300,
+                    }}
+                  >
                     {notif.message}
                   </Td>
                   <Td style={{ fontSize: '14px' }}>{notif.target}</Td>
-                  <Td style={{ fontSize: '14px', opacity: 0.6 }}>
+                  <Td style={{ fontSize: '14px', color: '#C4C4C8', fontWeight: 300 }}>
                     {new Date(notif.sentAt).toLocaleDateString('en-GB')}
                   </Td>
                 </Tr>
@@ -271,13 +305,22 @@ export const NotificationsPage = () => {
         </Content>
 
         {isModalOpen && (
-          <Overlay onClick={() => setIsModalOpen(false)}>
-            <ModalContainer onClick={e => e.stopPropagation()}>
-              <Title style={{ fontSize: '24px', marginBottom: '32px' }}>Create Notification</Title>
+          <Overlay onClick={handleClose}>
+            <ModalContainer
+              ref={modalRef}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="modal-title"
+              onClick={e => e.stopPropagation()}
+            >
+              <Title id="modal-title" style={{ fontSize: '24px', marginBottom: '32px' }}>
+                Create Notification
+              </Title>
 
               <FormGroup>
-                <Label>Notification Title</Label>
+                <Label htmlFor="notif-title">Notification Title</Label>
                 <Input
+                  id="notif-title"
                   name="title"
                   value={formData.title}
                   onChange={handleInputChange}
@@ -286,8 +329,13 @@ export const NotificationsPage = () => {
               </FormGroup>
 
               <FormGroup>
-                <Label>Category</Label>
-                <Select name="category" value={formData.category} onChange={handleInputChange}>
+                <Label htmlFor="notif-category">Category</Label>
+                <Select
+                  id="notif-category"
+                  name="category"
+                  value={formData.category}
+                  onChange={handleInputChange}
+                >
                   <option value="" disabled>
                     Select a category
                   </option>
@@ -301,8 +349,9 @@ export const NotificationsPage = () => {
               </FormGroup>
 
               <FormGroup>
-                <Label>Target Audience</Label>
+                <Label htmlFor="notif-target">Target Audience</Label>
                 <Input
+                  id="notif-target"
                   name="target"
                   value={formData.target}
                   onChange={handleInputChange}
@@ -311,8 +360,9 @@ export const NotificationsPage = () => {
               </FormGroup>
 
               <FormGroup>
-                <Label>Message Content</Label>
+                <Label htmlFor="notif-message">Message Content</Label>
                 <TextArea
+                  id="notif-message"
                   name="message"
                   value={formData.message}
                   onChange={handleInputChange}
@@ -321,7 +371,7 @@ export const NotificationsPage = () => {
               </FormGroup>
 
               <ButtonGroup>
-                <ActionButton variant="white" isFullWidth onClick={() => setIsModalOpen(false)}>
+                <ActionButton variant="white" isFullWidth onClick={handleClose}>
                   Cancel
                 </ActionButton>
                 <ActionButton variant="primary" isFullWidth onClick={handleSend}>

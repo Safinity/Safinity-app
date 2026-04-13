@@ -24,7 +24,7 @@ export default function FriendsScreen() {
   if (!currentUser) {
     return (
       <Container>
-        <LoadingText accessibilityRole="text">Loading...</LoadingText>
+        <LoadingText role="text">Loading...</LoadingText>
       </Container>
     );
   }
@@ -53,13 +53,13 @@ export default function FriendsScreen() {
 
       <ScrollArea importantForAccessibility="yes" accessibilityLabel="Lista de amigos">
         {/* Region: Friends Header */}
-        <RegionContainer accessibilityRole="region" accessibilityLabel="Cabeçalho de amigos">
-          <SectionTitle accessibilityRole="header" accessibilityLevel={1}>
+        <RegionContainer role="region" accessibilityLabel="Cabeçalho de amigos">
+          <SectionTitle role="header" accessibilityLevel={1}>
             <Title>Friends</Title>
             <TouchableOpacity
               onPress={handleAddFriend}
               accessible={true}
-              accessibilityRole="button"
+              role="button"
               accessibilityLabel="Add a new friend"
               accessibilityHint="Go to the add friend screen"
             >
@@ -69,8 +69,8 @@ export default function FriendsScreen() {
         </RegionContainer>
 
         {/* Region: On the same event */}
-        <RegionContainer accessibilityRole="region" accessibilityLabel="Amigos no mesmo evento">
-          <SectionSubtitle accessibilityRole="header" accessibilityLevel={2}>
+        <RegionContainer role="region" accessibilityLabel="Amigos no mesmo evento">
+          <SectionSubtitle role="header" accessibilityLevel={2}>
             On the same event
           </SectionSubtitle>
           {onSameEvent.map(friend => (
@@ -78,7 +78,7 @@ export default function FriendsScreen() {
               key={friend.id}
               onPress={() => router.push(`/friends/${friend.id}`)}
               accessible={true}
-              accessibilityRole="button"
+              role="button"
               accessibilityLabel={`${friend.name}, username ${friend.username}. Tap to view profile.`}
               style={{
                 flexDirection: 'row',
@@ -89,7 +89,7 @@ export default function FriendsScreen() {
             >
               <Avatar
                 source={userImages[friend.image]}
-                accessibilityRole="image"
+                role="image"
                 accessibilityLabel={`Profile picture of ${friend.name}`}
               />
               <Info>
@@ -99,13 +99,13 @@ export default function FriendsScreen() {
               <Buttons>
                 <PingFriend
                   onPress={() => console.log('Buzz amigo')}
-                  accessibilityRole="button"
+                  role="button"
                   accessibilityLabel={`Buzz ${friend.name}`}
                   accessibilityHint={`Send a buzz to ${friend.name}`}
                 />
                 <FindFriendButton
                   onPress={() => router.push({ pathname: '/map', params: { focusId: friend.id } })}
-                  accessibilityRole="button"
+                  role="button"
                   accessibilityLabel={`Locate ${friend.name} on the map`}
                   accessibilityHint="Shows the location of the friend on the map"
                 />
@@ -116,8 +116,8 @@ export default function FriendsScreen() {
 
         {/* Region: Other Friends */}
 
-        <RegionContainer accessibilityRole="region" accessibilityLabel="Other friends">
-          <SectionSubtitle accessibilityRole="header" accessibilityLevel={2}>
+        <RegionContainer role="region" accessibilityLabel="Other friends">
+          <SectionSubtitle role="header" accessibilityLevel={2}>
             Other Friends
           </SectionSubtitle>
           {otherFriends.map(friend => (
@@ -125,7 +125,7 @@ export default function FriendsScreen() {
               key={friend.id}
               onPress={() => router.push(`/friends/${friend.id}`)}
               accessible={true}
-              accessibilityRole="button"
+              role="button"
               accessibilityLabel={`${friend.name}, username ${friend.username}. Tap to view profile.`}
               style={{
                 flexDirection: 'row',
@@ -136,7 +136,7 @@ export default function FriendsScreen() {
             >
               <Avatar
                 source={userImages[friend.image]}
-                accessibilityRole="image"
+                role="image"
                 accessibilityLabel={`Profile picture of ${friend.name}`}
               />
               <Info>
@@ -147,7 +147,7 @@ export default function FriendsScreen() {
                 <FriendActionButton
                   variant="remove"
                   onPress={() => removeFriend(friend.id)}
-                  accessibilityRole="button"
+                  role="button"
                   accessibilityLabel={`Remove ${friend.name}`}
                   accessibilityHint="Remove this friend from your list"
                 />

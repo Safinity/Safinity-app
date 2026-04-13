@@ -237,7 +237,12 @@ export default function MapScreen() {
       </Head>
       <Stack.Screen options={{ title: 'Map | Safinity', headerShown: false }} />
 
-      <GestureDetector gesture={composedGesture}>
+      <GestureDetector
+        gesture={composedGesture}
+        role="main"
+        accessibilityLabel="Map interaction area"
+        accessibilityHint="Use pinch to zoom and drag to pan the map"
+      >
         <Animated.View
           style={[{ width: IMAGE_WIDTH, height: IMAGE_HEIGHT }, animatedStyle]}
           accessible={false}
@@ -278,6 +283,9 @@ export default function MapScreen() {
                 width={IMAGE_WIDTH}
                 height={IMAGE_HEIGHT}
                 onPress={() => handlePinPress(pin)}
+                accessible
+                role="button"
+                accessibilityLabel={`Map pin: ${getDisplayName(pin)} (${pin.type})`}
               />
             );
           })}
@@ -290,6 +298,9 @@ export default function MapScreen() {
               width={IMAGE_WIDTH}
               height={IMAGE_HEIGHT}
               onPress={() => handlePinPress(stage)}
+              accessible
+              role="button"
+              accessibilityLabel={`Stage: ${getDisplayName(stage)}`}
             />
           ))}
 
@@ -349,8 +360,8 @@ export default function MapScreen() {
           <LongCancelButton
             onPress={handleCancelRoute}
             accessible
-            accessibilityRole="button"
-            accessibilityLabel={`Cancel Route to ${destinationName}`}
+            role="button"
+            accessibilityLabel={`Cancel route to ${destinationName}`}
           >
             <Ionicons name="close-circle" size={20} color="#ed7979" />
             <CancelText>Cancel Route</CancelText>
@@ -362,8 +373,8 @@ export default function MapScreen() {
       <SosButton
         onPress={() => router.push('/sos')}
         accessible
-        accessibilityRole="button"
-        accessibilityLabel="SOS"
+        role="button"
+        accessibilityLabel="Emergency SOS button"
       >
         <SOSButtonText>SOS</SOSButtonText>
       </SosButton>

@@ -118,7 +118,7 @@ export default function EditProfile() {
 
             <CameraButton
               onPress={takePhoto}
-              accessibilityRole="button"
+              role="button"
               accessibilityLabel="Take a new profile photo"
             >
               <EditImage source={Camera} accessible={false} />
@@ -144,7 +144,7 @@ export default function EditProfile() {
           <SaveButton
             onPress={handleSave}
             disabled={isLoading}
-            accessibilityRole="button"
+            role="button"
             accessibilityLabel={isLoading ? 'Saving changes, please wait' : 'Save changes'}
             accessibilityState={{ disabled: isLoading }}
           >

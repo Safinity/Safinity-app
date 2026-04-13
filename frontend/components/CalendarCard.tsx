@@ -97,7 +97,7 @@ export const CalendarCard = ({ item }: any) => {
       activeOpacity={0.8}
       onPress={handlePress}
       accessible={true}
-      accessibilityRole="button"
+      role="button"
       accessibilityLabel={`Abrir detalhes de: ${item.title}`}
       accessibilityHint="Navega para a descrição completa desta atividade do calendário"
     >

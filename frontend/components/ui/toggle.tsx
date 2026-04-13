@@ -37,7 +37,7 @@ const Toggle: React.FC<ToggleProps> = ({
           onPress={disabled ? undefined : onToggle}
           active={isEnabled}
           disabled={disabled}
-          accessibilityRole="switch"
+          role="switch"
           accessibilityLabel={label}
           accessibilityState={{
             checked: isEnabled,

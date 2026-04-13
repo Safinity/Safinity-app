@@ -19,7 +19,7 @@ WCAG Level A Compliance Summary for CalendarScreen
 Requirement                      Status   Notes
 ---------------------------------------------------------------
 Page title                        ✅       <Head><title> present
-Headings                           ✅       DateHeader elements have accessibilityRole="header"
+Headings                           ✅       DateHeader elements have role="header"
 Alt text / images                  ✅       CalendarCard and icons use accessibility labels where needed
 Role attributes                     ✅       Buttons, main, navigation, headers properly marked
 Labels for inputs                    ✅       Search input has accessibilityLabel and accessibilityHint
@@ -127,19 +127,19 @@ export default function CalendarScreen() {
       <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
 
       {/* HEADER REGION */}
-      <HeaderWrapper topInset={insets.top} accessibilityRole="header">
+      <HeaderWrapper topInset={insets.top} role="header">
         <Header />
       </HeaderWrapper>
 
       {/* MAIN REGION */}
-      <ScrollContent accessibilityRole="main" accessibilityLabel="Calendar events">
+      <ScrollContent role="main" accessibilityLabel="Calendar events">
         <Spacer />
 
         {/* Activities selector */}
         <EventSelector
           activeOpacity={0.7}
           accessible
-          accessibilityRole="button"
+          role="button"
           accessibilityLabel="Select event"
           accessibilityHint="Opens event selector"
         >
@@ -168,7 +168,7 @@ export default function CalendarScreen() {
           style={{
             marginHorizontal: -theme.spacing.margemLateral,
           }}
-          accessibilityRole="navigation"
+          role="navigation"
           accessibilityLabel="Filter activities by category"
         >
           <FilterTags
@@ -184,12 +184,12 @@ export default function CalendarScreen() {
           filteredActivities.map((item, index) => (
             <View key={item.id}>
               {(index === 0 || filteredActivities[index - 1].date !== item.date) && (
-                <DateHeader accessibilityRole="header">{item.date}</DateHeader>
+                <DateHeader role="header">{item.date}</DateHeader>
               )}
 
               <View
                 accessible
-                accessibilityRole="button"
+                role="button"
                 accessibilityLabel={`${item.title}, ${item.date}, ${item.category}`}
               >
                 <CalendarCard item={item} />
@@ -213,7 +213,7 @@ export default function CalendarScreen() {
         activeOpacity={0.8}
         onPress={() => router.push('/(tabs)/my-calendar')}
         accessible
-        accessibilityRole="button"
+        role="button"
         accessibilityLabel="Go to my calendar"
       >
         <ButtonText>My calendar</ButtonText>

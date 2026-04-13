@@ -23,7 +23,7 @@ export default function PrimaryButton({ title, onPress, disabled, accessibilityL
       disabled={disabled}
       onPress={onPress}
       accessible={true}
-      accessibilityRole="button"
+      role="button"
       accessibilityLabel={accessibilityLabel || title}
     >
       <Label>{title}</Label>

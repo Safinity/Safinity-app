@@ -1,0 +1,225 @@
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "binary"
+  output     = "./node_modules/@prisma/client"
+
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+}
+
+model alerts {
+  id            BigInt                    @id
+  sos_id        BigInt?
+  event_id      BigInt?
+  staff_id      BigInt?
+  title         String?                   @db.VarChar(32)
+  description   String?                   @db.VarChar(255)
+  category      String?                   @db.VarChar(32)
+  location      Unsupported("geography")?
+  time          DateTime?                 @default(now()) @db.Timestamp(6)
+  status        String?                   @db.VarChar(32)
+  event         event?                    @relation(fields: [event_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  sos           sos?                      @relation(fields: [sos_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  staff_details staff_details?            @relation(fields: [staff_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model coordinates {
+  id              BigInt                   @id
+  point_id        BigInt?
+  location        Unsupported("geography")
+  points_interest points_interest?         @relation(fields: [point_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model event {
+  id                   BigInt                    @id
+  organization_id      BigInt?
+  name                 String?                   @db.VarChar(32)
+  venue_name           String?                   @db.VarChar(64)
+  description          String?                   @db.VarChar(255)
+  status               String?                   @db.VarChar(32)
+  category             String?                   @db.VarChar(24)
+  image                Bytes?
+  start_date           DateTime?                 @db.Timestamp(6)
+  end_date             DateTime?                 @db.Timestamp(6)
+  location             Unsupported("geography")?
+  others               Json?
+  alerts               alerts[]
+  organizations        organizations?            @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  event_activities     event_activities[]
+  event_tickets_master event_tickets_master[]
+  notifications        notifications[]
+  points_interest      points_interest[]
+  sensor               sensor[]
+  user_tickets         user_tickets[]
+}
+
+model event_activities {
+  id                BigInt           @id
+  event_id          BigInt
+  name              String?          @db.VarChar(100)
+  start_time        DateTime         @db.Timestamp(6)
+  end_time          DateTime         @db.Timestamp(6)
+  description       String?          @db.VarChar(255)
+  image             Bytes?
+  speakers          Json?
+  speakers_img      Bytes?
+  point_interest_id BigInt
+  specifications    Json?
+  event             event            @relation(fields: [event_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  points_interest   points_interest  @relation(fields: [point_interest_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user_favorites    user_favorites[]
+}
+
+model event_tickets_master {
+  id                BigInt        @id
+  event_id          BigInt
+  ticket_code       String        @unique @db.VarChar(64)
+  is_already_linked Boolean       @default(false)
+  event             event         @relation(fields: [event_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user_tickets      user_tickets?
+}
+
+model friendship {
+  id                               BigInt  @id
+  user1_id                         String? @db.Uuid
+  user2_id                         String? @db.Uuid
+  state                            String? @db.VarChar(24)
+  users_friendship_user1_idTousers users?  @relation("friendship_user1_idTousers", fields: [user1_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_friendship_user2_idTousers users?  @relation("friendship_user2_idTousers", fields: [user2_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model notifications {
+  id                       BigInt                     @id
+  event_id                 BigInt?
+  title                    String?                    @db.VarChar(32)
+  description              String?                    @db.VarChar(255)
+  category                 String?                    @db.VarChar(32)
+  time                     DateTime?                  @default(now()) @db.Timestamp(6)
+  event                    event?                     @relation(fields: [event_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user_notification_status user_notification_status[]
+}
+
+model organizations {
+  id            BigInt          @id
+  name          String          @unique @db.VarChar(64)
+  email         String?         @db.VarChar(255)
+  website       String?         @db.VarChar(255)
+  created_at    DateTime?       @default(now()) @db.Timestamp(6)
+  event         event[]
+  staff_details staff_details[]
+}
+
+model points_interest {
+  id               BigInt             @id
+  event_id         BigInt?
+  name             String?            @db.VarChar(32)
+  coordinates      coordinates[]
+  event_activities event_activities[]
+  event            event?             @relation(fields: [event_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model sensor {
+  id                 BigInt                   @id
+  event_id           BigInt?
+  location           Unsupported("geography")
+  sensor_type        String?                  @db.VarChar(32)
+  last_reading_value Float?
+  last_reading_time  DateTime?                @db.Timestamp(6)
+  event              event?                   @relation(fields: [event_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([location], type: Gist)
+}
+
+model sos {
+  id           BigInt                   @id
+  user_id      String                   @db.Uuid
+  location     Unsupported("geography")
+  description  String?
+  tag_selected String?                  @db.VarChar(32)
+  options      Json?
+  time         DateTime                 @default(now()) @db.Timestamp(6)
+  alerts       alerts[]
+  users        users                    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([location], type: Gist)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model spatial_ref_sys {
+  srid      Int     @id
+  auth_name String? @db.VarChar(256)
+  auth_srid Int?
+  srtext    String? @db.VarChar(2048)
+  proj4text String? @db.VarChar(2048)
+}
+
+model staff_details {
+  id              BigInt         @id
+  user_id         String?        @unique @db.Uuid
+  organization_id BigInt?
+  role_in_org     String?        @db.VarChar(32)
+  alerts          alerts[]
+  organizations   organizations? @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users           users?         @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model user_favorites {
+  id               BigInt           @id
+  user_id          String           @db.Uuid
+  activity_id      BigInt
+  event_activities event_activities @relation(fields: [activity_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users            users            @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model user_locations {
+  id        BigInt                   @id
+  user_id   String?                  @db.Uuid
+  location  Unsupported("geography")
+  timestamp DateTime                 @default(now()) @db.Timestamp(6)
+  users     users?                   @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model user_notification_status {
+  id              BigInt         @id
+  user_id         String?        @db.Uuid
+  notification_id BigInt?
+  read_at         DateTime?      @db.Timestamp(6)
+  notifications   notifications? @relation(fields: [notification_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users           users?         @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([user_id, notification_id], map: "unique_user_notification")
+}
+
+model user_tickets {
+  id                   BigInt               @id
+  user_id              String               @db.Uuid
+  event_id             BigInt
+  ticket_code          String               @unique @db.VarChar(64)
+  linked_at            DateTime?            @default(now()) @db.Timestamp(6)
+  event                event                @relation(fields: [event_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  event_tickets_master event_tickets_master @relation(fields: [ticket_code], references: [ticket_code], onDelete: NoAction, onUpdate: NoAction)
+  users                users                @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model users {
+  id                                    String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                                  String?                    @db.VarChar(50)
+  username                              String?                    @unique @db.VarChar(32)
+  password_hash                         String                     @db.VarChar(255)
+  role                                  String                     @db.VarChar(24)
+  email                                 String?                    @unique @db.VarChar(255)
+  image                                 Bytes?
+  location                              Unsupported("geography")?
+  emergency_contact                     String?                    @db.VarChar(20)
+  friendship_friendship_user1_idTousers friendship[]               @relation("friendship_user1_idTousers")
+  friendship_friendship_user2_idTousers friendship[]               @relation("friendship_user2_idTousers")
+  sos                                   sos[]
+  staff_details                         staff_details?
+  user_favorites                        user_favorites[]
+  user_locations                        user_locations[]
+  user_notification_status              user_notification_status[]
+  user_tickets                          user_tickets[]
+}

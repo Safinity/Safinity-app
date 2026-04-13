@@ -44,7 +44,7 @@ export default function Login() {
 
       <Header variant="back" title="Log In" subtitle="Welcome back!" />
 
-      <MainArea accessibilityRole="main">
+      <MainArea role="main">
         <InputGroup>
           <Label>
             Email <RequiredAsterisk>*</RequiredAsterisk>
@@ -91,7 +91,7 @@ export default function Login() {
 
             <TouchableOpacity
               onPress={() => setShowPass(!showPass)}
-              accessibilityRole="button"
+              role="button"
               accessibilityLabel={showPass ? 'Hide password' : 'Show password'}
             >
               <Ionicons
@@ -106,7 +106,7 @@ export default function Login() {
         <RowWithLink>
           <SmallText>Forgot your password?</SmallText>
 
-          <LinkArea accessibilityRole="link">
+          <LinkArea role="link">
             <LinkText>Recover password</LinkText>
           </LinkArea>
         </RowWithLink>
@@ -115,7 +115,7 @@ export default function Login() {
           <ErrorArea
             accessible={true}
             accessibilityLiveRegion="assertive"
-            accessibilityRole="alert"
+            role="alert"
             accessibilityLabel={`Error: ${error}`}
           >
             <Ionicons name="alert-circle" size={18} color="#ff5252" style={{ marginRight: 8 }} />
@@ -133,7 +133,7 @@ export default function Login() {
         <RowWithLink>
           <SmallText>Don`t have an account?</SmallText>
 
-          <LinkArea accessibilityRole="link" onPress={() => router.push('/register')}>
+          <LinkArea role="link" onPress={() => router.push('/register')}>
             <LinkText>Create Account</LinkText>
           </LinkArea>
         </RowWithLink>

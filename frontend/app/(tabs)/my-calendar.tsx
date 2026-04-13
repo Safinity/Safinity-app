@@ -163,24 +163,20 @@ export default function MyCalendarScreen() {
       </Head>
 
       {/* HEADER REGION */}
-      <ContentWrapper accessibilityRole="banner">
+      <ContentWrapper role="banner">
         <BackButton
           onPress={() => router.push('/(tabs)/calendar')}
           accessible
-          accessibilityRole="button"
+          role="button"
           accessibilityLabel="Go back to calendar"
         >
           <Ionicons name="arrow-back" size={26} color="white" />
         </BackButton>
 
-        <Title accessibilityRole="header">My calendar</Title>
+        <Title role="header">My calendar</Title>
 
         {/* NAVIGATION REGION */}
-        <DropdownContainer
-          accessible
-          accessibilityRole="navigation"
-          accessibilityLabel="Event selection"
-        >
+        <DropdownContainer accessible role="navigation" accessibilityLabel="Event selection">
           <DropdownText>Web Summit 2025</DropdownText>
           <Ionicons
             name="chevron-down"
@@ -191,13 +187,13 @@ export default function MyCalendarScreen() {
           />
         </DropdownContainer>
 
-        <DateSelector accessibilityRole="group" accessibilityLabel="Select date">
+        <DateSelector role="group" accessibilityLabel="Select date">
           {dates.map(item => (
             <DateItem
               key={item.day}
               onPress={() => setSelectedDate(item.day)}
               accessible
-              accessibilityRole="button"
+              role="button"
               accessibilityLabel={`Select date ${item.day} ${item.month}`}
             >
               <DateMonth>{item.month}</DateMonth>
@@ -212,7 +208,7 @@ export default function MyCalendarScreen() {
       {/* MAIN REGION */}
       <ScrollView
         showsVerticalScrollIndicator={false}
-        accessibilityRole="main"
+        role="main"
         accessibilityLabel="My events timeline"
       >
         <TimelineContainer>
@@ -230,7 +226,7 @@ export default function MyCalendarScreen() {
                 <EventCard
                   activeOpacity={1}
                   accessible
-                  accessibilityRole="button"
+                  role="button"
                   accessibilityLabel={`${event.title}, Location: ${event.location}, from ${event.startTime} to ${event.endTime}`}
                 >
                   <EventTitle>{event.title}</EventTitle>

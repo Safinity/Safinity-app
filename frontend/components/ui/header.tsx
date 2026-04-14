@@ -95,8 +95,10 @@ export default Header;
 const HeaderFixedContainer = styled.View<{ height: number }>`
   position: absolute;
   top: 0;
-  left: ${Spacing.margemLateral}px;
-  right: ${Spacing.margemLateral}px;
+  left: 0px; /* Altera de Spacing.margemLateral para 0 para o fundo cobrir tudo */
+  right: 0px;
+  padding-left: ${Spacing.margemLateral}px; /* Mantém a margem no conteúdo */
+  padding-right: ${Spacing.margemLateral}px;
   z-index: 1000;
   background-color: transparent;
 `;

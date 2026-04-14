@@ -64,12 +64,10 @@ const SearchInput: React.FC<SearchInputProps> = ({
         value={value}
         onChangeText={onChangeText}
         textColor={config.textColor}
-        // Linhas novas:
         accessible={true}
         accessibilityLabel="Campo de pesquisa de eventos"
         // @ts-ignore
         aria-label="Campo de pesquisa de eventos"
-        // novas LINHAS:
         required={false}
         // @ts-ignore
         aria-required="false"

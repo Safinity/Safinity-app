@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 //import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 // Fix BigInt serialization
 declare global {
@@ -30,6 +31,15 @@ async function bootstrap() {
   //     forbidNonWhitelisted: true,
   //   }),
   //);
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('Safinity API')
+    .setDescription('Safinity backend API documentation')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('api', app, document);
 
   await app.listen(process.env.PORT ?? 3000);
 }

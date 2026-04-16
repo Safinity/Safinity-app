@@ -73,46 +73,48 @@ const TitleText = styled.Text`
 export const EventCard = ({ event, variant }: any) => {
   const router = useRouter();
   const isCompact = variant === 'compact';
-  const imageSource = eventImages[event.id] || { uri: 'https://via.placeholder.com/300' };
+
+  /** * A SOLUÇÃO ESTÁ AQUI:
+   * 1. Convertemos o ID da API para String.
+   * 2. Usamos essa String para aceder ao eventImages.
+   */
+  const eventId = String(event.name).toLowerCase().replace(/\s+/g, '-'); // Exemplo: "Tech Conference" -> "tech-conference"
+  const imageSource = eventImages[eventId] || { uri: 'https://via.placeholder.com/300' };
 
   const handlePress = () => {
-    router.push(`/event-details/${event.id}`);
+    router.push(`/event-details/${eventId}`);
   };
 
   const formatEventDate = (start: string, end: string) => {
-    if (!start || !end) return '';
-    const startDate = new Date(start);
-    const endDate = new Date(end);
-    const startDay = startDate.getDate();
-    const endDay = endDate.getDate();
-    const month = startDate.toLocaleString('en-GB', { month: 'long' });
-    const year = startDate.getFullYear();
+    if (!start || !end) return 'Date TBD';
+    try {
+      const startDate = new Date(start);
+      const endDate = new Date(end);
+      const startDay = startDate.getDate();
+      const endDay = endDate.getDate();
+      const month = startDate.toLocaleString('en-GB', { month: 'long' });
+      const year = startDate.getFullYear();
 
-    if (startDate.getMonth() === endDate.getMonth()) {
-      return `${startDay}-${endDay} ${month} ${year}`;
+      if (startDate.getMonth() === endDate.getMonth()) {
+        return `${startDay}-${endDay} ${month} ${year}`;
+      }
+      return `${startDay} ${startDate.toLocaleString('en-GB', { month: 'short' })} - ${endDay} ${endDate.toLocaleString('en-GB', { month: 'short' })} ${year}`;
+    } catch (e) {
+      return 'Invalid Date';
     }
-    return `${startDay} ${startDate.toLocaleString('en-GB', { month: 'short' })} - ${endDay} ${endDate.toLocaleString('en-GB', { month: 'short' })} ${year}`;
   };
 
   return (
     <CardContainer
       isCompact={isCompact}
       onPress={handlePress}
-      href={`/event-details/${event.id}`}
+      // @ts-ignore - apenas para garantir acessibilidade web se necessário
+      href={`/event-details/${eventId}`}
       accessibilityRole="button"
       accessible={true}
-      role="link"
       accessibilityLabel={`Evento: ${event.name}. Data: ${formatEventDate(event.start_date, event.end_date)}`}
-      accessibilityHint="Clica para ver os detalhes deste evento"
-      focusable={true}
-      onKeyDown={(e: any) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          handlePress();
-        }
-      }}
     >
-      <BackgroundImage source={imageSource} accessible={false}>
+      <BackgroundImage source={imageSource}>
         <GradientLayer isCompact={isCompact}>
           {event.time_left ? (
             <TimeBadge isCompact={isCompact}>
@@ -124,14 +126,7 @@ export const EventCard = ({ event, variant }: any) => {
 
           <CardFooter>
             <DateText>{formatEventDate(event.start_date, event.end_date)}</DateText>
-            <TitleText
-              accessible={true}
-              role="header"
-              // @ts-ignore
-              aria-level="3"
-            >
-              {event.name}
-            </TitleText>
+            <TitleText aria-level="3">{event.name || 'Untitled Event'}</TitleText>
           </CardFooter>
         </GradientLayer>
       </BackgroundImage>

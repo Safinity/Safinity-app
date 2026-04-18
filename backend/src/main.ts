@@ -1,7 +1,8 @@
 import { NestFactory } from '@nestjs/core';
-//import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
 // Fix BigInt serialization
 declare global {
@@ -24,13 +25,17 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // app.useGlobalPipes(
-  //   new ValidationPipe({
-  //     whitelist: true,
-  //     transform: true,
-  //     forbidNonWhitelisted: true,
-  //   }),
-  //);
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+      forbidNonWhitelisted: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+    }),
+  );
+  app.useGlobalFilters(new AllExceptionsFilter());
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Safinity API')
     .setDescription('Safinity backend API documentation')

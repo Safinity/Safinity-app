@@ -12,6 +12,7 @@ RUN npm install
 RUN npx prisma generate
 
 # Build
+RUN rm -rf dist tsconfig.build.tsbuildinfo
 RUN npx nest build
 
 EXPOSE 3000

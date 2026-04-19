@@ -7,10 +7,30 @@ import { UsersController } from './users/users.controller';
 import { EventsController } from './events/events.controller';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
+import { NotificationsController } from './notifications/notifications.controller';
+import { NotificationsService } from './notifications/notifications.service';
+import { AlertsController } from './alerts/alerts.controller';
+import { AlertsService } from './alerts/alerts.service';
+import { SosController } from './sos/sos.controller';
+import { SosService } from './sos/sos.service';
 
 @Module({
   imports: [PrismaModule, AuthModule],
-  controllers: [AppController, UsersController, EventsController],
-  providers: [AppService, UsersService, EventsService],
+  controllers: [
+    AppController,
+    UsersController,
+    EventsController,
+    NotificationsController,
+    AlertsController,
+    SosController,
+  ],
+  providers: [
+    AppService,
+    UsersService,
+    EventsService,
+    NotificationsService,
+    AlertsService,
+    SosService,
+  ],
 })
 export class AppModule {}

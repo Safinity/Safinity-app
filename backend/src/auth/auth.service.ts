@@ -12,6 +12,8 @@ import {
   verifyToken,
   type JwtPayload,
 } from './auth.token';
+import type { UpdateCredentialsDto } from './dto/update-credentials.dto';
+import type { UpdateProfileDto } from './dto/update-profile.dto';
 
 type SelfProfileUser = {
   id: string;
@@ -172,5 +174,110 @@ export class AuthService {
 
   async getAuthenticatedProfile(userId: string): Promise<SelfProfileUser> {
     return await this.getSelfProfile(userId);
+  }
+
+  async updateProfile(
+    userId: string,
+    body: UpdateProfileDto,
+  ): Promise<AuthResponse> {
+    const name = body.name?.trim();
+    const username = body.username?.trim();
+
+    if (!name && !username) {
+      throw new BadRequestException('name or username is required');
+    }
+
+    if (username) {
+      const existingUser = await this.prisma.users.findFirst({
+        where: {
+          id: { not: userId },
+          username,
+        },
+        select: { id: true },
+      });
+
+      if (existingUser) {
+        throw new BadRequestException('This username is already in use');
+      }
+    }
+
+    const updatedUser = await this.prisma.users.update({
+      where: { id: userId },
+      data: {
+        ...(name !== undefined ? { name: name || null } : {}),
+        ...(username !== undefined ? { username: username || null } : {}),
+      },
+      select: {
+        id: true,
+        email: true,
+        role: true,
+      },
+    });
+
+    return this.buildResponse(updatedUser);
+  }
+
+  async updateCredentials(
+    userId: string,
+    body: UpdateCredentialsDto,
+  ): Promise<AuthResponse> {
+    const email = body.email?.trim().toLowerCase();
+    const currentPassword = body.currentPassword;
+    const password = body.password;
+
+    if (!email && !password) {
+      throw new BadRequestException('email or password is required');
+    }
+
+    if (password && !currentPassword) {
+      throw new BadRequestException('currentPassword is required to change password');
+    }
+
+    const currentUser = await this.prisma.users.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        password_hash: true,
+      },
+    });
+
+    if (!currentUser) {
+      throw new UnauthorizedException('Authenticated user not found');
+    }
+
+    if (currentPassword && !comparePassword(currentPassword, currentUser.password_hash)) {
+      throw new UnauthorizedException('Current password is invalid');
+    }
+
+    if (email) {
+      const existingUser = await this.prisma.users.findFirst({
+        where: {
+          id: { not: userId },
+          email,
+        },
+        select: { id: true },
+      });
+
+      if (existingUser) {
+        throw new BadRequestException('This email is already in use');
+      }
+    }
+
+    const updatedUser = await this.prisma.users.update({
+      where: { id: userId },
+      data: {
+        ...(email !== undefined ? { email } : {}),
+        ...(password !== undefined ? { password_hash: hashPassword(password) } : {}),
+      },
+      select: {
+        id: true,
+        email: true,
+        role: true,
+      },
+    });
+
+    return this.buildResponse(updatedUser);
   }
 }

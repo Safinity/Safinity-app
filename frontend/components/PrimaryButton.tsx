@@ -1,8 +1,9 @@
 import styled from 'styled-components/native';
+import { Spacing, BorderRadius, Colors } from '../constants/theme';
 
 const Button = styled.TouchableOpacity<{ disabled?: boolean }>`
-  padding: ${({ theme }) => theme.spacing.md}px;
-  border-radius: ${({ theme }) => theme.borderRadius.medium}px;
+  padding: ${Spacing.md}px;
+  border-radius: ${BorderRadius.medium}px;
   background-color: ${({ disabled, theme }) =>
     disabled ? theme.colors.palette.primary.dark60 : theme.colors.palette.primary.normal};
   opacity: ${({ disabled }) => (disabled ? 0.8 : 1)};
@@ -13,7 +14,7 @@ const Button = styled.TouchableOpacity<{ disabled?: boolean }>`
 
 const Label = styled.Text`
   text-align: center;
-  color: ${({ theme }) => theme.colors.white};
+  color: ${Colors.white};
   font-weight: 600;
 `;
 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ScrollView, View, TouchableOpacity } from 'react-native';
-import styled, { useTheme } from 'styled-components/native';
+import { Spacing, BorderRadius, Colors, Height, Fonts, TextStyles } from '../../constants/theme';
+import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import Head from 'expo-router/head';
@@ -10,46 +11,46 @@ import calendarData from '../../data/calendar.json';
 
 const Container = styled.View`
   flex: 1;
-  background-color: ${({ theme }) => theme.colors.background};
-  padding-top: ${({ theme }) => theme.spacing.margemTop}px;
+  background-color: ${Colors.background};
+  padding-top: ${Spacing.margemTop}px;
 `;
 
 const ContentWrapper = styled.View`
-  padding: 0 ${({ theme }) => theme.spacing.margemLateral}px;
+  padding: 0 ${Spacing.margemLateral}px;
 `;
 
 const BackButton = styled.TouchableOpacity`
-  margin-bottom: ${({ theme }) => theme.spacing.md}px;
+  margin-bottom: ${Spacing.md}px;
 `;
 
 const Title = styled.Text`
-  color: ${({ theme }) => theme.colors.white};
-  ${({ theme }) => theme.text.titulo.h};
+  color: ${Colors.white};
+  ${TextStyles.titulo.h};
   font-weight: bold;
-  margin-bottom: ${({ theme }) => theme.spacing.lg}px;
+  margin-bottom: ${Spacing.lg}px;
 `;
 
 const DropdownContainer = styled.View`
-  background-color: ${({ theme }) => theme.colors.white};
-  border-radius: ${({ theme }) => theme.borderRadius.medium}px;
-  padding: ${({ theme }) => theme.spacing.sm}px ${({ theme }) => theme.spacing.md}px;
+  background-color: ${Colors.white};
+  border-radius: ${BorderRadius.medium}px;
+  padding: ${Spacing.sm}px ${Spacing.md}px;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: ${({ theme }) => theme.spacing.xl}px;
-  height: ${({ theme }) => theme.height.sm}px;
+  margin-bottom: ${Spacing.xl}px;
+  height: ${Height.sm}px;
 `;
 
 const DropdownText = styled.Text`
-  color: ${({ theme }) => theme.colors.background};
-  font-size: ${({ theme }) => theme.fonts.sizes.base}px;
-  font-family: ${({ theme }) => theme.fonts.weights.semibold};
+  color: ${Colors.background};
+  font-size: ${Fonts.sizes.base}px;
+  font-family: ${Fonts.weights.semibold};
 `;
 
 const DateSelector = styled.View`
   flex-direction: row;
   justify-content: space-between;
-  margin-bottom: ${({ theme }) => theme.spacing.xxl}px;
+  margin-bottom: ${Spacing.xxl}px;
 `;
 
 const DateItem = styled.TouchableOpacity`
@@ -57,44 +58,45 @@ const DateItem = styled.TouchableOpacity`
 `;
 
 const DateMonth = styled.Text`
-  color: ${({ theme }) => theme.colors.white};
-  font-size: ${({ theme }) => theme.fonts.sizes.base}px;
-  margin-bottom: ${({ theme }) => theme.spacing.xs}px;
+  color: ${Colors.white};
+  font-size: ${Fonts.sizes.base}px;
+  margin-bottom: ${Spacing.xs}px;
   opacity: 1;
 `;
 
 const DateCircle = styled.View<{ active?: boolean }>`
-  width: ${({ theme }) => theme.height.tam_42}px;
-  height: ${({ theme }) => theme.height.tam_42}px;
-  border-radius: ${({ theme }) => theme.height.tam_42 / 2}px;
-  background-color: ${({ active, theme }) => (active ? theme.colors.white : 'rgba(255,255,255,0)')};
+  width: ${Height.tam_42}px;
+  height: ${Height.tam_42}px;
+  border-radius: ${Height.tam_42 / 2}px;
+  background-color: ${({ active }: { active?: boolean }) =>
+    active ? Colors.white : 'rgba(255,255,255,0)'};
   justify-content: center;
   align-items: center;
   overflow: hidden;
 `;
 
 const DateDay = styled.Text<{ active?: boolean }>`
-  color: ${({ active, theme }) => (active ? theme.colors.background : theme.colors.white)};
-  font-size: ${({ theme }) => theme.fonts.sizes.base}px;
-  ${({ theme }) => theme.text.textoPequeno};
+  color: ${({ active }: { active?: boolean }) => (active ? Colors.background : Colors.white)};
+  font-size: ${Fonts.sizes.base}px;
+  ${TextStyles.textoPequeno};
 `;
 
 const TimelineContainer = styled.View`
   flex: 1;
-  padding: 0 ${({ theme }) => theme.spacing.margemLateral}px;
+  padding: 0 ${Spacing.margemLateral}px;
 `;
 
 const TimeRow = styled.View`
   flex-direction: row;
   align-items: flex-start;
-  margin-bottom: ${({ theme }) => theme.spacing.sm}px;
-  height: ${({ theme }) => theme.height.md}px;
+  margin-bottom: ${Spacing.sm}px;
+  height: ${Height.md}px;
 `;
 
 const TimeLabel = styled.Text`
-  color: ${({ theme }) => theme.colors.white};
-  width: ${({ theme }) => theme.height.tam_42}px;
-  ${({ theme }) => theme.text.label};
+  color: ${Colors.white};
+  width: ${Height.tam_42}px;
+  ${TextStyles.label};
   opacity: 1;
 `;
 
@@ -105,7 +107,7 @@ const TimelineContent = styled.View`
 
 const GridLine = styled.View`
   position: absolute;
-  top: ${({ theme }) => theme.spacing.xs}px;
+  top: ${Spacing.xs}px;
   left: 0;
   right: 0;
   height: 1px;
@@ -113,20 +115,20 @@ const GridLine = styled.View`
 `;
 
 const EventCard = styled.TouchableOpacity`
-  background-color: ${({ theme }) => theme.colors.palette.primary.light80};
-  border-radius: ${({ theme }) => theme.borderRadius.large}px;
-  padding: ${({ theme }) => theme.spacing.md}px;
-  margin-top: ${({ theme }) => theme.spacing.sm}px;
-  min-height: ${({ theme }) => theme.height.sm}px;
+  background-color: ${Colors.palette.primary.light80};
+  border-radius: ${BorderRadius.large}px;
+  padding: ${Spacing.md}px;
+  margin-top: ${Spacing.sm}px;
+  min-height: ${Height.sm}px;
   justify-content: center;
   align-items: center;
 `;
 
 const EventTitle = styled.Text`
-  color: ${({ theme }) => theme.colors.background};
+  color: ${Colors.background};
   text-align: center;
-  margin-bottom: ${({ theme }) => theme.spacing.xs}px;
-  ${({ theme }) => theme.text.cardsCalendar};
+  margin-bottom: ${Spacing.xs}px;
+  ${TextStyles.cardsCalendar};
 `;
 
 const LocationRow = styled.View`
@@ -135,15 +137,14 @@ const LocationRow = styled.View`
 `;
 
 const LocationText = styled.Text`
-  color: ${({ theme }) => theme.colors.background};
-  font-size: ${({ theme }) => theme.fonts.sizes.xs}px;
-  margin-left: ${({ theme }) => theme.spacing.xxs}px;
+  color: ${Colors.background};
+  font-size: ${Fonts.sizes.xs}px;
+  margin-left: ${Spacing.xxs}px;
 `;
 
 // --- Screen ---
 
 export default function MyCalendarScreen() {
-  const theme = useTheme();
   const router = useRouter();
   const [selectedDate, setSelectedDate] = useState('10');
 
@@ -216,9 +217,7 @@ export default function MyCalendarScreen() {
             <TimeRow key={event.id}>
               <View>
                 <TimeLabel>{event.startTime}</TimeLabel>
-                <TimeLabel style={{ marginTop: theme.spacing.xl, opacity: 1 }}>
-                  {event.endTime}
-                </TimeLabel>
+                <TimeLabel style={{ marginTop: Spacing.xl, opacity: 1 }}>{event.endTime}</TimeLabel>
               </View>
 
               <TimelineContent>
@@ -234,7 +233,7 @@ export default function MyCalendarScreen() {
                     <Ionicons
                       name="location"
                       size={14}
-                      color={theme.colors.palette.primary.dark50}
+                      color={Colors.palette.primary.dark50}
                       accessibilityElementsHidden
                       importantForAccessibility="no"
                     />

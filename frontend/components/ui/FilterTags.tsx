@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components/native';
-import { Height, BorderRadius, TextStyles } from '../../constants/theme';
+import { Spacing, Height, BorderRadius, TextStyles, Colors } from '../../constants/theme';
 
 /*
 Accessibility Enhancements / WCAG Level A Compliance
@@ -16,22 +16,22 @@ These changes improve screen reader support, keyboard navigation, and overall ac
 */
 export type FilterTagsVariant = 'homepage' | 'mapa';
 
-const getTagTheme = (theme: any) => ({
+const getTagTheme = () => ({
   homepage: {
-    color: theme.colors.grayNavbar,
-    selectedColor: theme.colors.primary,
-    textColor: theme.colors.white,
-    selectedTextColor: theme.colors.white,
-    paddingLeft: theme.spacing.margemLateral,
-    paddingRight: theme.spacing.lg,
+    color: Colors.grayNavbar,
+    selectedColor: Colors.primary,
+    textColor: Colors.white,
+    selectedTextColor: Colors.white,
+    paddingLeft: Spacing.margemLateral,
+    paddingRight: Spacing.lg,
   },
   mapa: {
-    color: theme.colors.background,
-    selectedColor: theme.colors.primary,
-    textColor: theme.colors.white,
-    selectedTextColor: theme.colors.white,
-    paddingLeft: theme.spacing.margemLateral,
-    paddingRight: theme.spacing.lg,
+    color: Colors.background,
+    selectedColor: Colors.primary,
+    textColor: Colors.white,
+    selectedTextColor: Colors.white,
+    paddingLeft: Spacing.margemLateral,
+    paddingRight: Spacing.lg,
   },
 });
 
@@ -45,8 +45,9 @@ interface FilterTagsProps {
 }
 
 const TagsScrollView = styled.ScrollView.attrs<{ variant: FilterTagsVariant }>(
-  ({ theme, variant }) => {
-    const tagTheme = getTagTheme(theme)[variant];
+  ({ variant }: { variant: FilterTagsVariant }) => {
+    const tagTheme = getTagTheme()[variant];
+
     return {
       horizontal: true,
       showsHorizontalScrollIndicator: false,
@@ -58,24 +59,23 @@ const TagsScrollView = styled.ScrollView.attrs<{ variant: FilterTagsVariant }>(
   },
 )`
   flex-grow: 0;
-  margin-top: ${({ theme }) => theme.spacing.md}px;
+  margin-top: ${Spacing.md}px;
 `;
 
 const TagsContainer = styled.View`
   flex-direction: row;
-  gap: ${({ theme }) => theme.spacing.sm}px;
+  gap: ${Spacing.sm}px;
 `;
 
 const Tag = styled.Pressable<{ selected: boolean; variant: FilterTagsVariant }>`
-  padding: ${({ theme }) => theme.spacing.sm}px ${({ theme }) => theme.spacing.md}px;
-  border-radius: ${({ theme }) => theme.borderRadius.round}px;
+  padding: ${Spacing.sm}px ${Spacing.md}px;
+  border-radius: ${BorderRadius.round}px;
   border-width: 1px;
-  min-height: ${({ theme }) => theme.height.tam_42}px;
+  min-height: ${Height.tam_42}px;
   justify-content: center;
   align-items: center;
-
-  ${({ theme, selected, variant }) => {
-    const tagTheme = getTagTheme(theme)[variant];
+  ${({ selected, variant }: { selected: boolean; variant: FilterTagsVariant }) => {
+    const tagTheme = getTagTheme()[variant];
     return `
       background-color: ${selected ? tagTheme.selectedColor : tagTheme.color};
       border-color: ${selected ? tagTheme.selectedColor : 'transparent'};
@@ -84,9 +84,9 @@ const Tag = styled.Pressable<{ selected: boolean; variant: FilterTagsVariant }>`
 `;
 
 const TagText = styled.Text<{ selected: boolean; variant: FilterTagsVariant }>`
-  ${({ theme }) => TextStyles.textoFiltros};
-  ${({ theme, selected, variant }) => {
-    const tagTheme = getTagTheme(theme)[variant];
+  ${TextStyles.textoFiltros};
+  ${({ selected, variant }: { selected: boolean; variant: FilterTagsVariant }) => {
+    const tagTheme = getTagTheme()[variant];
     return `
       color: ${selected ? tagTheme.selectedTextColor : tagTheme.textColor};
     `;

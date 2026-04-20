@@ -1,6 +1,7 @@
 import React from 'react';
 import { Image } from 'react-native';
 import styled from 'styled-components/native';
+import { Spacing, BorderRadius, Colors, TextStyles } from '../constants/theme';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 
@@ -10,9 +11,9 @@ import { calendarImages } from '../assets/images/Calendar/index';
 const CardContainer = styled.TouchableOpacity`
   height: 180px;
   width: 100%;
-  border-radius: ${({ theme }) => theme.borderRadius.large}px;
+  border-radius: ${BorderRadius.large}px;
   overflow: hidden;
-  margin-bottom: ${({ theme }) => theme.spacing.md}px;
+  margin-bottom: ${Spacing.md}px;
   background-color: #121417;
 `;
 
@@ -37,8 +38,8 @@ const Overlay = styled(LinearGradient)`
 
 const Badge = styled.Text`
   align-self: flex-end;
-  color: ${({ theme }) => theme.colors.white};
-  font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
+  color: ${Colors.white};
+  font-family: ${TextStyles.corpo.corpoTexto.fontFamily};
   font-size: 10px;
   background-color: rgba(255, 255, 255, 0.2);
   padding: 4px 10px;
@@ -51,16 +52,16 @@ const InfoSection = styled.View`
 `;
 
 const TimeText = styled.Text`
-  color: ${({ theme }) => theme.colors.white};
-  font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
+  color: ${Colors.white};
+  font-family: ${TextStyles.corpo.corpoTexto.fontFamily};
   font-size: 12px;
   font-weight: 400;
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
 `;
 
 const TitleText = styled.Text`
-  color: ${({ theme }) => theme.colors.white};
-  font-family: ${({ theme }) => theme.text.titulo.h3.fontFamily};
+  color: ${Colors.white};
+  font-family: ${TextStyles.titulo.h3.fontFamily};
   font-size: 18px;
   font-weight: bold;
   margin-top: 4px;

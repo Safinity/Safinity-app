@@ -1,19 +1,57 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import type { AuthenticatedUser } from '../auth/auth.types';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateNotificationDto } from './dto/create-notification.dto';
+import { CreateOrganizationNotificationDto } from './dto/create-organization-notification.dto';
 
 @Injectable()
 export class NotificationsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll() {
+  // App-related methods
+
+  async findAll(): Promise<unknown> {
     return await this.prisma.notifications.findMany({
       orderBy: { time: 'desc' },
       include: { event: true },
     });
   }
 
-  async create(input: CreateNotificationDto) {
+  async findForTicketedEvents(
+    user: AuthenticatedUser | undefined,
+  ): Promise<unknown> {
+    const userId = await this.resolveAppUserId(user);
+
+    const ticketedEvents = await this.prisma.user_tickets.findMany({
+      where: { user_id: userId },
+      select: { event_id: true },
+      orderBy: { linked_at: 'desc' },
+    });
+
+    const eventIds = [
+      ...new Set(ticketedEvents.map((ticket) => ticket.event_id)),
+    ];
+
+    if (eventIds.length === 0) {
+      return [];
+    }
+
+    return await this.prisma.notifications.findMany({
+      where: {
+        event_id: { in: eventIds },
+      },
+      orderBy: { time: 'desc' },
+      include: { event: true },
+    });
+  }
+
+  async create(input: CreateNotificationDto): Promise<unknown> {
     this.validateInput(input);
     const id = await this.nextId();
     const eventId =
@@ -28,6 +66,75 @@ export class NotificationsService {
         title: input.title,
         description: input.description,
         category: input.category,
+      },
+      include: { event: true },
+    });
+  }
+
+  // Backoffice-related methods
+
+  async findByOrganizationEvent(
+    user: AuthenticatedUser | undefined,
+    eventIdInput: string,
+  ): Promise<unknown> {
+    const organizationId = await this.resolveStaffOrganizationId(user);
+    const eventId = this.toBigInt(eventIdInput, 'eventId');
+
+    const event = await this.prisma.event.findUnique({
+      where: { id: eventId },
+      select: { id: true, organization_id: true },
+    });
+
+    if (!event) {
+      throw new NotFoundException(`Event with ID ${eventIdInput} not found`);
+    }
+
+    if (event.organization_id !== organizationId) {
+      throw new ForbiddenException(
+        'You can only view notifications from events in your organization',
+      );
+    }
+
+    return await this.prisma.notifications.findMany({
+      where: { event_id: eventId },
+      orderBy: { time: 'desc' },
+      include: { event: true },
+    });
+  }
+
+  async createForOrganizationEvent(
+    user: AuthenticatedUser | undefined,
+    eventIdInput: string,
+    input: CreateOrganizationNotificationDto,
+  ): Promise<unknown> {
+    const organizationId = await this.resolveStaffOrganizationId(user);
+    const eventId = this.toBigInt(eventIdInput, 'eventId');
+
+    const event = await this.prisma.event.findUnique({
+      where: { id: eventId },
+      select: { id: true, organization_id: true },
+    });
+
+    if (!event) {
+      throw new NotFoundException(`Event with ID ${eventIdInput} not found`);
+    }
+
+    if (event.organization_id !== organizationId) {
+      throw new ForbiddenException(
+        'You can only create notifications for events in your organization',
+      );
+    }
+
+    this.validateNotificationContent(input);
+    const id = await this.nextId();
+
+    return await this.prisma.notifications.create({
+      data: {
+        id,
+        event_id: eventId,
+        title: input.title?.trim() || null,
+        description: input.description?.trim() || null,
+        category: input.category?.trim() || null,
       },
       include: { event: true },
     });
@@ -63,6 +170,64 @@ export class NotificationsService {
     if (errors.length > 0) {
       throw new BadRequestException(errors.join('; '));
     }
+  }
+
+  private validateNotificationContent(
+    input: CreateOrganizationNotificationDto,
+  ) {
+    const errors: string[] = [];
+
+    this.validateOptionalString(input.title, 32, 'title', errors);
+    this.validateOptionalString(input.description, 255, 'description', errors);
+    this.validateOptionalString(input.category, 32, 'category', errors);
+
+    if (errors.length > 0) {
+      throw new BadRequestException(errors.join('; '));
+    }
+  }
+
+  private async resolveStaffOrganizationId(user?: AuthenticatedUser) {
+    if (!user?.id) {
+      throw new UnauthorizedException('Authentication required');
+    }
+
+    const dbUser = await this.prisma.users.findUnique({
+      where: { id: user.id },
+      select: {
+        staff_details: {
+          select: {
+            organization_id: true,
+          },
+        },
+      },
+    });
+
+    const organizationId = dbUser?.staff_details?.organization_id;
+
+    if (!organizationId) {
+      throw new ForbiddenException(
+        'User is not associated with any organization',
+      );
+    }
+
+    return organizationId;
+  }
+
+  private async resolveAppUserId(user?: AuthenticatedUser) {
+    if (!user?.id) {
+      throw new UnauthorizedException('Authentication required');
+    }
+
+    const dbUser = await this.prisma.users.findUnique({
+      where: { id: user.id },
+      select: { id: true },
+    });
+
+    if (!dbUser) {
+      throw new NotFoundException('Authenticated user not found');
+    }
+
+    return dbUser.id;
   }
 
   private validateOptionalString(

@@ -6,6 +6,7 @@ import { EventsService } from './events/events.service';
 import { UsersController } from './users/users.controller';
 import { EventsController } from './events/events.controller';
 import { PrismaModule } from './prisma/prisma.module';
+import { AuthModule } from './auth/auth.module';
 import { NotificationsController } from './notifications/notifications.controller';
 import { NotificationsService } from './notifications/notifications.service';
 import { AlertsController } from './alerts/alerts.controller';
@@ -16,7 +17,7 @@ import { UserTicketsController } from './tickets/user-tickets.controller';
 import { UserTicketsService } from './tickets/user-tickets.service';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, AuthModule],
   controllers: [
     AppController,
     UsersController,

@@ -4,11 +4,10 @@ on:
   push:
     branches:
       - main
-      - '**' # Isto cobre todas as outras branches
+      - '**'
     paths:
       - 'backend/**'
       - '.github/workflows/backend-ci.yml'
-      - '.prettierrc'
   pull_request:
     branches:
       - main
@@ -16,7 +15,6 @@ on:
     paths:
       - 'backend/**'
       - '.github/workflows/backend-ci.yml'
-      - '.prettierrc'
 
 jobs:
   ci:
@@ -47,8 +45,8 @@ jobs:
         run: npm run lint
 
       - name: Run Prettier check
-        # Verifica o código usando o config que está na raiz
-        run: npx prettier --check . 
+        # Removemos o --config para ele ignorar a raiz e usar o padrão ou o que estiver no backend
+        run: npx prettier --check .
 
       - name: Run Tests
         run: npm test

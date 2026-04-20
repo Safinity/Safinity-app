@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -20,8 +21,24 @@ export class EventsController {
 
   // GET /events
   @Get()
-  getAllEvents() {
-    return this.eventsService.getAllEvents();
+  getAllEvents(
+    @Query('page') page?: string,
+    @Query('pageSize') pageSize?: string,
+    @Query('search') search?: string,
+    @Query('category') category?: string,
+    @Query('status') status?: string,
+    @Query('sortBy') sortBy?: 'start_date' | 'end_date' | 'name',
+    @Query('sortOrder') sortOrder?: 'asc' | 'desc',
+  ) {
+    return this.eventsService.getAllEvents({
+      page,
+      pageSize,
+      search,
+      category,
+      status,
+      sortBy,
+      sortOrder,
+    });
   }
 
   // GET /events/activities/:activityId
@@ -58,8 +75,21 @@ export class EventsController {
 
   // GET /events/:id/activities
   @Get(':id/activities')
-  getActivities(@Param('id') id: string) {
-    return this.eventsService.getActivities(id);
+  getActivities(
+    @Param('id') id: string,
+    @Query('page') page?: string,
+    @Query('pageSize') pageSize?: string,
+    @Query('search') search?: string,
+    @Query('sortBy') sortBy?: 'start_time' | 'end_time' | 'name',
+    @Query('sortOrder') sortOrder?: 'asc' | 'desc',
+  ) {
+    return this.eventsService.getActivities(id, {
+      page,
+      pageSize,
+      search,
+      sortBy,
+      sortOrder,
+    });
   }
 
   // GET /events/:id/favourites

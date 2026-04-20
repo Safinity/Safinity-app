@@ -9,6 +9,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { NotificationsController } from './notifications/notifications.controller';
 import { NotificationsService } from './notifications/notifications.service';
+import { NOTIFICATIONS_SERVICE } from './notifications/notifications.constants';
 import { AlertsController } from './alerts/alerts.controller';
 import { AlertsService } from './alerts/alerts.service';
 import { SosController } from './sos/sos.controller';
@@ -32,6 +33,10 @@ import { FriendsService } from './friends/friends.service';
     UsersService,
     EventsService,
     NotificationsService,
+    {
+      provide: NOTIFICATIONS_SERVICE,
+      useExisting: NotificationsService,
+    },
     AlertsService,
     SosService,
     FriendsService,

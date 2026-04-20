@@ -1,14 +1,73 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import type { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateNotificationDto } from './dto/create-notification.dto';
+
+type NotificationsListQuery = {
+  page?: string;
+  pageSize?: string;
+  search?: string;
+  category?: string;
+  eventId?: string;
+  sortBy?: 'time' | 'title';
+  sortOrder?: 'asc' | 'desc';
+};
 
 @Injectable()
 export class NotificationsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll() {
+  private parsePositiveInt(
+    value: string | undefined,
+    fallback: number,
+  ): number {
+    if (!value) {
+      return fallback;
+    }
+
+    const parsed = Number.parseInt(value, 10);
+
+    if (!Number.isFinite(parsed) || parsed <= 0) {
+      throw new BadRequestException(`Invalid numeric value: ${value}`);
+    }
+
+    return parsed;
+  }
+
+  async findAll(query?: NotificationsListQuery) {
+    const page = this.parsePositiveInt(query?.page, 1);
+    const pageSize = Math.min(this.parsePositiveInt(query?.pageSize, 20), 100);
+    const skip = (page - 1) * pageSize;
+    const sortBy = query?.sortBy ?? 'time';
+    const sortOrder: Prisma.SortOrder = query?.sortOrder ?? 'desc';
+
+    const where: Prisma.notificationsWhereInput = {
+      ...(query?.search
+        ? {
+            OR: [
+              { title: { contains: query.search, mode: 'insensitive' } },
+              {
+                description: {
+                  contains: query.search,
+                  mode: 'insensitive',
+                },
+              },
+            ],
+          }
+        : {}),
+      ...(query?.category ? { category: query.category } : {}),
+      ...(query?.eventId
+        ? {
+            event_id: this.toBigInt(query.eventId, 'eventId'),
+          }
+        : {}),
+    };
+
     return await this.prisma.notifications.findMany({
-      orderBy: { time: 'desc' },
+      where,
+      orderBy: { [sortBy]: sortOrder },
+      skip,
+      take: pageSize,
       include: { event: true },
     });
   }

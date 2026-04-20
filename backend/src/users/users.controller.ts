@@ -1,28 +1,35 @@
-import { Controller, Get, Param, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Req, UseGuards } from '@nestjs/common';
 import { AuthRequiredGuard } from '../auth/auth.guards';
+import { AuthService } from '../auth/auth.service';
 import type { RequestWithUser } from '../auth/auth.types';
-import { UsersService } from './users.service';
+import { UpdateCredentialsDto } from '../auth/dto/update-credentials.dto';
+import { UpdateProfileDto } from '../auth/dto/update-profile.dto';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly authService: AuthService) {}
 
-  @Get('me/profile')
+  @Get('me')
   @UseGuards(AuthRequiredGuard)
-  getMyProfile(@Req() request: RequestWithUser) {
-    return this.usersService.getMyProfile(request.user);
+  async getMe(@Req() req: RequestWithUser) {
+    return this.authService.getAuthenticatedProfile(req.user!.id);
   }
 
-  @Get(':id/profile')
-  getProfile(@Param('id') id: string, @Req() request: RequestWithUser) {
-    return this.usersService.getProfile(id, request.user);
-  }
-
-  @Get(':userId/friends/event/:eventId')
-  getFriends(
-    @Param('userId') userId: string,
-    @Param('eventId') eventId: string,
+  @Patch('me/edit-profile')
+  @UseGuards(AuthRequiredGuard)
+  updateProfile(
+    @Req() request: RequestWithUser,
+    @Body() body: UpdateProfileDto,
   ) {
-    return this.usersService.findFriendsAtEvent(userId, BigInt(eventId));
+    return this.authService.updateProfile(request.user!.id, body);
+  }
+
+  @Patch('me/credentials')
+  @UseGuards(AuthRequiredGuard)
+  updateCredentials(
+    @Req() request: RequestWithUser,
+    @Body() body: UpdateCredentialsDto,
+  ) {
+    return this.authService.updateCredentials(request.user!.id, body);
   }
 }

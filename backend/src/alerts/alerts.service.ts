@@ -292,7 +292,7 @@ export class AlertsService {
     if (value === null || value === undefined || value === '') {
       return null;
     }
-
+    // Tenta converter para BigInt, se falhar lança uma exceção
     try {
       return BigInt(value);
     } catch {

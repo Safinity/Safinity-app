@@ -17,6 +17,8 @@ import { SosController } from './sos/sos.controller';
 import { SosService } from './sos/sos.service';
 import { AdminUsersController } from './users/users.admin.controller';
 import { AdminUsersService } from './users/users.admin.service';
+import { FriendsController } from './friends/friends.controller';
+import { FriendsService } from './friends/friends.service';
 
 @Module({
   imports: [PrismaModule, AuthModule],
@@ -29,6 +31,7 @@ import { AdminUsersService } from './users/users.admin.service';
     NotificationsController,
     AlertsController,
     SosController,
+    FriendsController,
   ],
   providers: [
     AppService,
@@ -39,6 +42,7 @@ import { AdminUsersService } from './users/users.admin.service';
     NotificationsService,
     AlertsService,
     SosService,
+    FriendsService,
   ],
 })
 export class AppModule {}

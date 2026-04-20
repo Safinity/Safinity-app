@@ -7,7 +7,6 @@ import { useRouter } from 'expo-router';
 import { calendarImages } from '../assets/images/Calendar/index';
 
 export const CalendarCard = ({ item }: any) => {
-
   const [isFavorite, setIsFavorite] = useState(item?.isFavorite ?? false);
   const router = useRouter();
 
@@ -19,7 +18,6 @@ export const CalendarCard = ({ item }: any) => {
 
   const handleToggleFavorite = () => {
     setIsFavorite((prev: boolean) => !prev);
-
   };
 
   const getImageSource = () => {
@@ -44,11 +42,7 @@ export const CalendarCard = ({ item }: any) => {
       accessibilityLabel={`Abrir detalhes de: ${item.title}`}
       accessibilityHint="Navega para a descrição completa desta atividade do calendário"
     >
-      <StyledImage
-        source={getImageSource()}
-        resizeMode="cover"
-        accessible={false}
-      />
+      <StyledImage source={getImageSource()} resizeMode="cover" accessible={false} />
 
       <Overlay
         colors={['rgba(0,0,0,0.1)', 'transparent', 'rgba(0,0,0,0.9)']}
@@ -68,11 +62,7 @@ export const CalendarCard = ({ item }: any) => {
             }
             accessibilityHint="Marca ou desmarca esta atividade como favorita"
           >
-            <Ionicons
-              name={isFavorite ? 'heart' : 'heart-outline'}
-              size={20}
-              color="white"
-            />
+            <Ionicons name={isFavorite ? 'heart' : 'heart-outline'} size={20} color="white" />
           </FavoriteButton>
         </TopRow>
 

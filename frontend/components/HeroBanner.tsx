@@ -140,9 +140,7 @@ export const HeroBanner = ({
                 onPress={() => setIsFavorite(prev => !prev)}
                 accessible={true}
                 accessibilityRole="button"
-                accessibilityLabel={
-                  isFavorite ? 'Remove from favorites' : 'Add to favorites'
-                }
+                accessibilityLabel={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
               >
                 <Ionicons name={isFavorite ? 'heart' : 'heart-outline'} size={30} color="#9333EA" />
               </AddCalendarButton>

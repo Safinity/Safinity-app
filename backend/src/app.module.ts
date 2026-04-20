@@ -13,6 +13,8 @@ import { AlertsController } from './alerts/alerts.controller';
 import { AlertsService } from './alerts/alerts.service';
 import { SosController } from './sos/sos.controller';
 import { SosService } from './sos/sos.service';
+import { FriendsController } from './friends/friends.controller';
+import { FriendsService } from './friends/friends.service';
 
 @Module({
   imports: [PrismaModule, AuthModule],
@@ -23,6 +25,7 @@ import { SosService } from './sos/sos.service';
     NotificationsController,
     AlertsController,
     SosController,
+    FriendsController
   ],
   providers: [
     AppService,
@@ -31,6 +34,7 @@ import { SosService } from './sos/sos.service';
     NotificationsService,
     AlertsService,
     SosService,
+    FriendsService
   ],
 })
 export class AppModule {}

@@ -1,6 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { FriendResponseDto, FriendsGroupedDto, FriendProfileDto } from './dto/friend-list.dto';
+import {
+  FriendResponseDto,
+  FriendsGroupedDto,
+  FriendProfileDto,
+} from './dto/friend-list.dto';
 
 @Injectable()
 export class FriendsService {
@@ -10,7 +14,7 @@ export class FriendsService {
     const myTicket = await this.prisma.user_tickets.findFirst({
       where: { user_id: userId },
       select: { event_id: true },
-      orderBy: { linked_at: 'desc' }
+      orderBy: { linked_at: 'desc' },
     });
 
     const myEventId = myTicket?.event_id;
@@ -33,21 +37,25 @@ export class FriendsService {
     const result = new FriendsGroupedDto();
 
     friendships.forEach((f) => {
-      const friendData = f.user1_id === userId 
-        ? f.users_friendship_user2_idTousers 
-        : f.users_friendship_user1_idTousers;
+      const friendData =
+        f.user1_id === userId
+          ? f.users_friendship_user2_idTousers
+          : f.users_friendship_user1_idTousers;
 
       if (!friendData) return;
 
-      const isAtSameEvent = !!(myEventId && friendData.user_tickets.some(
-        (t) => t.event_id === myEventId
-      ));
+      const isAtSameEvent = !!(
+        myEventId &&
+        friendData.user_tickets.some((t) => t.event_id === myEventId)
+      );
 
       const friendObj: FriendResponseDto = {
         id: friendData.id,
         name: friendData.name || '',
         username: friendData.username || '',
-        image: friendData.image ? Buffer.from(friendData.image).toString('base64') : null,
+        image: friendData.image
+          ? Buffer.from(friendData.image).toString('base64')
+          : null,
         isOnSameEvent: isAtSameEvent,
       };
 
@@ -71,9 +79,9 @@ export class FriendsService {
       take: 15,
     });
 
-    return users.map(u => ({
+    return users.map((u) => ({
       ...u,
-      image: u.image ? Buffer.from(u.image).toString('base64') : null
+      image: u.image ? Buffer.from(u.image).toString('base64') : null,
     }));
   }
 
@@ -92,11 +100,11 @@ export class FriendsService {
     }
 
     return this.prisma.friendship.create({
-      data: { 
-        id: BigInt(Date.now()), 
-        user1_id: userId, 
-        user2_id: friendId, 
-        state: 'PENDING' 
+      data: {
+        id: BigInt(Date.now()),
+        user1_id: userId,
+        user2_id: friendId,
+        state: 'PENDING',
       },
     });
   }
@@ -129,23 +137,28 @@ export class FriendsService {
       },
     });
 
-    return requests.map(r => {
+    return requests.map((r) => {
       // Usamos o "!" para garantir ao TS que o utilizador existe
       const sender = r.users_friendship_user1_idTousers!;
-      
+
       return {
         id: r.id.toString(),
         sender: {
           id: sender.id,
           name: sender.name,
           username: sender.username,
-          image: sender.image ? Buffer.from(sender.image).toString('base64') : null
-        }
+          image: sender.image
+            ? Buffer.from(sender.image).toString('base64')
+            : null,
+        },
       };
     });
   }
 
-  async getFriendProfile(userId: string, friendId: string): Promise<FriendProfileDto> {
+  async getFriendProfile(
+    userId: string,
+    friendId: string,
+  ): Promise<FriendProfileDto> {
     const friend = await this.prisma.users.findUnique({
       where: { id: friendId },
       include: { user_tickets: { include: { event: true } } },
@@ -172,4 +185,4 @@ export class FriendsService {
       commonEvents: commonEvents,
     };
   }
-} 
+}

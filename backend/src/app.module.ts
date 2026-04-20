@@ -25,7 +25,7 @@ import { FriendsService } from './friends/friends.service';
     NotificationsController,
     AlertsController,
     SosController,
-    FriendsController
+    FriendsController,
   ],
   providers: [
     AppService,
@@ -34,7 +34,7 @@ import { FriendsService } from './friends/friends.service';
     NotificationsService,
     AlertsService,
     SosService,
-    FriendsService
+    FriendsService,
   ],
 })
 export class AppModule {}

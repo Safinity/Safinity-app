@@ -224,6 +224,62 @@ export class EventsService {
     return this.serialize(activities);
   }
 
+  async getPastEvents(userId: string) {
+    if (!userId) {
+      throw new BadRequestException('user_id is required');
+    }
+
+    const now = new Date();
+
+    const tickets = await this.prisma.user_tickets.findMany({
+      where: { user_id: userId },
+      select: {
+        event: {
+          select: {
+            id: true,
+            organization_id: true,
+            name: true,
+            venue_name: true,
+            description: true,
+            status: true,
+            category: true,
+            start_date: true,
+            end_date: true,
+            others: true,
+          },
+        },
+      },
+    });
+
+    const pastEvents = tickets
+      .map((ticket) => ticket.event)
+      .filter((event) => {
+        if (!event) {
+          return false;
+        }
+
+        if (event.end_date && event.end_date < now) {
+          return true;
+        }
+
+        return (
+          !event.end_date && event.start_date !== null && event.start_date < now
+        );
+      })
+      .filter(
+        (event, index, array) =>
+          array.findIndex((candidate) => candidate.id === event.id) === index,
+      )
+      .sort((left, right) => {
+        const leftTime = left.end_date ?? left.start_date ?? new Date(0);
+        const rightTime = right.end_date ?? right.start_date ?? new Date(0);
+
+        return rightTime.getTime() - leftTime.getTime();
+      });
+
+    return this.serialize(pastEvents);
+  }
+
   async getFavourites(id: string, userId: string) {
     const eventId = this.parseEventId(id);
 

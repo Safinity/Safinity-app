@@ -13,6 +13,8 @@ import { AlertsController } from './alerts/alerts.controller';
 import { AlertsService } from './alerts/alerts.service';
 import { SosController } from './sos/sos.controller';
 import { SosService } from './sos/sos.service';
+import { UserTicketsController } from './tickets/user-tickets.controller';
+import { UserTicketsService } from './tickets/user-tickets.service';
 import { FriendsController } from './friends/friends.controller';
 import { FriendsService } from './friends/friends.service';
 
@@ -25,6 +27,7 @@ import { FriendsService } from './friends/friends.service';
     NotificationsController,
     AlertsController,
     SosController,
+    UserTicketsController,
     FriendsController,
   ],
   providers: [
@@ -34,6 +37,7 @@ import { FriendsService } from './friends/friends.service';
     NotificationsService,
     AlertsService,
     SosService,
+    UserTicketsService,
     FriendsService,
   ],
 })

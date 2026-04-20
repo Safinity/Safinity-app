@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -41,18 +42,14 @@ export class EventsController {
     });
   }
 
-  // GET /events/activities/:activityId
-  @Get('activities/:activityId')
-  getActivityById(@Param('activityId') activityId: string) {
-    return this.eventsService.getActivityById(activityId);
-  }
-
   // GET /events/past
   @Get('past')
   @UseGuards(AuthRequiredGuard)
   @ApiOperation({ summary: 'Get authenticated user past events' })
   getPastEvents(@Req() request: RequestWithUser) {
-    return this.eventsService.getPastEvents(request.user!.id);
+    const eventsService: EventsService = this.eventsService;
+
+    return eventsService.getPastEvents(request.user!.id);
   }
 
   // GET /events/:id
@@ -67,8 +64,8 @@ export class EventsController {
     return this.eventsService.getPointsInterest(id);
   }
 
-  // GET /events/:id/map
-  @Get(':id/map')
+  // GET /events/:id/mapa
+  @Get(':id/mapa')
   getMap(@Param('id') id: string) {
     return this.eventsService.getMap(id);
   }
@@ -99,6 +96,12 @@ export class EventsController {
     return this.eventsService.getFavourites(id, request.user!.id);
   }
 
+  // GET /events/activities/:id
+  @Get('activities/:id')
+  getActivityById(@Param('id') id: string) {
+    return this.eventsService.getActivityById(id);
+  }
+
   // POST /events/favourite
   @Post('favourite')
   @UseGuards(AuthRequiredGuard)
@@ -107,5 +110,17 @@ export class EventsController {
     @Req() request: RequestWithUser,
   ) {
     return this.eventsService.addFavourite(request.user!.id, body);
+  }
+
+  // DELETE /events/favourite/:activityId
+  @Delete('favourite/:activityId')
+  @UseGuards(AuthRequiredGuard)
+  removeFavourite(
+    @Param('activityId') activityId: string,
+    @Req() request: RequestWithUser,
+  ) {
+    const eventsService: EventsService = this.eventsService;
+
+    return eventsService.removeFavourite(request.user!.id, activityId);
   }
 }

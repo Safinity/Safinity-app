@@ -7,6 +7,8 @@ import type { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 export type AddFavouriteBody = {
+  user_id?: string;
+  userId?: string;
   activity_id?: string | number;
   activityId?: string | number;
 };
@@ -310,6 +312,30 @@ export class EventsService {
     return this.serialize(activities);
   }
 
+  async getAllActivities() {
+    const activities = await this.prisma.event_activities.findMany({
+      select: {
+        id: true,
+        event_id: true,
+        name: true,
+        start_time: true,
+        end_time: true,
+        description: true,
+        point_interest_id: true,
+        specifications: true,
+        points_interest: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      orderBy: [{ event_id: 'asc' }, { start_time: 'asc' }],
+    });
+
+    return this.serialize(activities);
+  }
+
   async getPastEvents(userId: string) {
     if (!userId) {
       throw new BadRequestException('user_id is required');
@@ -501,11 +527,60 @@ export class EventsService {
     return this.serialize(favourite);
   }
 
+  async addFavouriteFromBody(body: AddFavouriteBody) {
+    const userId = body.user_id ?? body.userId;
+
+    if (!userId) {
+      throw new BadRequestException('user_id is required');
+    }
+
+    return this.addFavourite(String(userId), body);
+  }
+
   async findAll() {
     return this.getAllEvents({});
   }
 
   async findOne(id: bigint) {
     return this.getEventById(id.toString());
+  }
+
+  async removeFavourite(userId: string, activityIdParam: string) {
+    if (!userId) {
+      throw new BadRequestException('user_id is required');
+    }
+
+    const activityId = this.parseActivityId(activityIdParam);
+
+    const existingFavourite = await this.prisma.user_favorites.findFirst({
+      where: {
+        user_id: userId,
+        activity_id: activityId,
+      },
+      select: {
+        id: true,
+        user_id: true,
+        activity_id: true,
+      },
+    });
+
+    if (!existingFavourite) {
+      throw new NotFoundException(
+        `Favourite for activity ID ${activityIdParam} not found`,
+      );
+    }
+
+    const deletedFavourite = await this.prisma.user_favorites.delete({
+      where: {
+        id: existingFavourite.id,
+      },
+      select: {
+        id: true,
+        user_id: true,
+        activity_id: true,
+      },
+    });
+
+    return this.serialize(deletedFavourite);
   }
 }

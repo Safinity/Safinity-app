@@ -5,7 +5,7 @@ import type { RequestWithUser } from '../auth/auth.types';
 @Controller('users')
 export class UsersController {
   @Get('me')
-  async getMe(@Req() req: RequestWithUser) {
+  getMe(@Req() req: RequestWithUser) {
     return req.user;
   }
 }

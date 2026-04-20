@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -77,5 +78,18 @@ export class EventsController {
     @Req() request: RequestWithUser,
   ) {
     return this.eventsService.addFavourite(request.user!.id, body);
+  }
+
+  // DELETE /events/favourite/:id
+  @Delete('favourite/:eventId')
+  @UseGuards(AuthRequiredGuard)
+  removeFavourite(
+    @Param('eventId') eventId: string,
+    @Req() request: RequestWithUser,
+  ) {
+    return this.eventsService.removeFavourite(
+      request.user!.id,
+      Number(eventId),
+    );
   }
 }

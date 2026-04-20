@@ -11,7 +11,7 @@ import { AuthRequiredGuard } from '../auth/auth.guards';
 import type { RequestWithUser } from '../auth/auth.types';
 import { EventsService } from './events.service';
 import type { AddFavouriteBody } from './events.service';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('events')
 @Controller('events')
@@ -28,6 +28,14 @@ export class EventsController {
   @Get('activities/:activityId')
   getActivityById(@Param('activityId') activityId: string) {
     return this.eventsService.getActivityById(activityId);
+  }
+
+  // GET /events/past
+  @Get('past')
+  @UseGuards(AuthRequiredGuard)
+  @ApiOperation({ summary: 'Get authenticated user past events' })
+  getPastEvents(@Req() request: RequestWithUser) {
+    return this.eventsService.getPastEvents(request.user!.id);
   }
 
   // GET /events/:id

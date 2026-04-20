@@ -119,7 +119,7 @@ export default function CalendarScreen() {
   return (
     <Container>
       <Head>
-        <title>Calendar | Safinity</title>
+        <title>Activities | Safinity</title>
       </Head>
 
       <Stack.Screen options={{ headerShown: false }} />
@@ -127,19 +127,19 @@ export default function CalendarScreen() {
       <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
 
       {/* HEADER REGION */}
-      <HeaderWrapper topInset={insets.top} role="header">
+      <HeaderWrapper topInset={insets.top} accessibilityRole="header">
         <Header />
       </HeaderWrapper>
 
       {/* MAIN REGION */}
-      <ScrollContent role="main" accessibilityLabel="Calendar events">
+      <ScrollContent accessibilityRole="main" accessibilityLabel="Calendar events">
         <Spacer />
 
         {/* Activities selector */}
         <EventSelector
           activeOpacity={0.7}
           accessible
-          role="button"
+          accessibilityRole="button"
           accessibilityLabel="Select event"
           accessibilityHint="Opens event selector"
         >
@@ -168,7 +168,7 @@ export default function CalendarScreen() {
           style={{
             marginHorizontal: -theme.spacing.margemLateral,
           }}
-          role="navigation"
+          accessibilityRole="navigation"
           accessibilityLabel="Filter activities by category"
         >
           <FilterTags
@@ -184,12 +184,12 @@ export default function CalendarScreen() {
           filteredActivities.map((item, index) => (
             <View key={item.id}>
               {(index === 0 || filteredActivities[index - 1].date !== item.date) && (
-                <DateHeader role="header">{item.date}</DateHeader>
+                <DateHeader accessibilityRole="header">{item.date}</DateHeader>
               )}
 
               <View
                 accessible
-                role="button"
+                accessibilityRole="button"
                 accessibilityLabel={`${item.title}, ${item.date}, ${item.category}`}
               >
                 <CalendarCard item={item} />
@@ -213,7 +213,7 @@ export default function CalendarScreen() {
         activeOpacity={0.8}
         onPress={() => router.push('/(tabs)/my-calendar')}
         accessible
-        role="button"
+        accessibilityRole="button"
         accessibilityLabel="Go to my calendar"
       >
         <ButtonText>My calendar</ButtonText>

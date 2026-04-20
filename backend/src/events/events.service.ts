@@ -367,3 +367,42 @@ export class EventsService {
     return this.getEventById(id.toString());
   }
 }
+
+async removeFavourite(userId: string, activityIdParam: string) {
+  if (!userId) {
+    throw new BadRequestException('user_id is required');
+  }
+
+  const activityId = this.parseActivityId(activityIdParam);
+
+  const existingFavourite = await this.prisma.user_favorites.findFirst({
+    where: {
+      user_id: userId,
+      activity_id: activityId,
+    },
+    select: {
+      id: true,
+      user_id: true,
+      activity_id: true,
+    },
+  });
+
+  if (!existingFavourite) {
+    throw new NotFoundException(
+      `Favourite for activity ID ${activityIdParam} not found`,
+    );
+  }
+
+  const deletedFavourite = await this.prisma.user_favorites.delete({
+    where: {
+      id: existingFavourite.id,
+    },
+    select: {
+      id: true,
+      user_id: true,
+      activity_id: true,
+    },
+  });
+
+  return this.serialize(deletedFavourite);
+}

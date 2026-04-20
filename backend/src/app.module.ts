@@ -25,7 +25,7 @@ import { UserTicketsService } from './tickets/user-tickets.service';
     NotificationsController,
     AlertsController,
     SosController,
-    UserTicketsController
+    UserTicketsController,
   ],
   providers: [
     AppService,
@@ -34,7 +34,7 @@ import { UserTicketsService } from './tickets/user-tickets.service';
     NotificationsService,
     AlertsService,
     SosService,
-    UserTicketsService
+    UserTicketsService,
   ],
 })
 export class AppModule {}

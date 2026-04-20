@@ -8,6 +8,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { UserTicketsService } from './user-tickets.service';
 import { AuthRequiredGuard } from '../auth/auth.guards';
 import { LinkUserTicketDto } from './dto/link-user-ticket.dto';
@@ -18,19 +19,25 @@ export class UserTicketsController {
 
   @Post()
   @UseGuards(AuthRequiredGuard)
-  linkTicket(@Body() dto: LinkUserTicketDto, @Req() req: any) {
+  linkTicket(
+    @Body() dto: LinkUserTicketDto,
+    @Req() req: Request & { user: { id: string } },
+  ) {
     return this.userTicketsService.linkTicket(dto, req.user.id);
   }
 
   @Get()
   @UseGuards(AuthRequiredGuard)
-  findAll(@Req() req: any) {
+  findAll(@Req() req: Request & { user: { id: string } }) {
     return this.userTicketsService.findAllByUser(req.user.id);
   }
 
   @Delete(':id')
   @UseGuards(AuthRequiredGuard)
-  remove(@Param('id') id: string, @Req() req: any) {
+  remove(
+    @Param('id') id: string,
+    @Req() req: Request & { user: { id: string } },
+  ) {
     return this.userTicketsService.remove(id, req.user.id);
   }
 }

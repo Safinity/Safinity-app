@@ -48,7 +48,7 @@ jobs:
 
       - name: Run Prettier check
         # Verifica o código usando o config que está na raiz
-        run: npx prettier --check . --config ../.prettierrc
+        run: npx prettier --check . 
 
       - name: Run Tests
         run: npm test

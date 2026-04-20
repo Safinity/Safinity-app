@@ -230,7 +230,9 @@ export class AuthService {
     }
 
     if (password && !currentPassword) {
-      throw new BadRequestException('currentPassword is required to change password');
+      throw new BadRequestException(
+        'currentPassword is required to change password',
+      );
     }
 
     const currentUser = await this.prisma.users.findUnique({
@@ -247,7 +249,10 @@ export class AuthService {
       throw new UnauthorizedException('Authenticated user not found');
     }
 
-    if (currentPassword && !comparePassword(currentPassword, currentUser.password_hash)) {
+    if (
+      currentPassword &&
+      !comparePassword(currentPassword, currentUser.password_hash)
+    ) {
       throw new UnauthorizedException('Current password is invalid');
     }
 
@@ -269,7 +274,9 @@ export class AuthService {
       where: { id: userId },
       data: {
         ...(email !== undefined ? { email } : {}),
-        ...(password !== undefined ? { password_hash: hashPassword(password) } : {}),
+        ...(password !== undefined
+          ? { password_hash: hashPassword(password) }
+          : {}),
       },
       select: {
         id: true,

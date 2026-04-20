@@ -30,7 +30,9 @@ export class EventsController {
   @UseGuards(AuthRequiredGuard)
   @ApiOperation({ summary: 'Get authenticated user past events' })
   getPastEvents(@Req() request: RequestWithUser) {
-    return this.eventsService.getPastEvents(request.user!.id);
+    const eventsService: EventsService = this.eventsService;
+
+    return eventsService.getPastEvents(request.user!.id);
   }
 
   // GET /events/:id
@@ -80,16 +82,15 @@ export class EventsController {
     return this.eventsService.addFavourite(request.user!.id, body);
   }
 
-  // DELETE /events/favourite/:id
-  @Delete('favourite/:eventId')
+  // DELETE /events/favourite/:activityId
+  @Delete('favourite/:activityId')
   @UseGuards(AuthRequiredGuard)
   removeFavourite(
-    @Param('eventId') eventId: string,
+    @Param('activityId') activityId: string,
     @Req() request: RequestWithUser,
   ) {
-    return this.eventsService.removeFavourite(
-      request.user!.id,
-      Number(eventId),
-    );
+    const eventsService: EventsService = this.eventsService;
+
+    return eventsService.removeFavourite(request.user!.id, activityId);
   }
 }

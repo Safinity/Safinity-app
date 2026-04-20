@@ -6,6 +6,8 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 
 export type AddFavouriteBody = {
+  user_id?: string;
+  userId?: string;
   activity_id?: string | number;
   activityId?: string | number;
 };
@@ -224,6 +226,30 @@ export class EventsService {
     return this.serialize(activities);
   }
 
+  async getAllActivities() {
+    const activities = await this.prisma.event_activities.findMany({
+      select: {
+        id: true,
+        event_id: true,
+        name: true,
+        start_time: true,
+        end_time: true,
+        description: true,
+        point_interest_id: true,
+        specifications: true,
+        points_interest: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      orderBy: [{ event_id: 'asc' }, { start_time: 'asc' }],
+    });
+
+    return this.serialize(activities);
+  }
+
   async getFavourites(id: string, userId: string) {
     const eventId = this.parseEventId(id);
 
@@ -357,6 +383,16 @@ export class EventsService {
     });
 
     return this.serialize(favourite);
+  }
+
+  async addFavouriteFromBody(body: AddFavouriteBody) {
+    const userId = body.user_id ?? body.userId;
+
+    if (!userId) {
+      throw new BadRequestException('user_id is required');
+    }
+
+    return this.addFavourite(String(userId), body);
   }
 
   async findAll() {

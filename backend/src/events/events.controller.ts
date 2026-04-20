@@ -24,12 +24,6 @@ export class EventsController {
     return this.eventsService.getAllEvents();
   }
 
-  // GET /events/activities/:activityId
-  @Get('activities/:activityId')
-  getActivityById(@Param('activityId') activityId: string) {
-    return this.eventsService.getActivityById(activityId);
-  }
-
   // GET /events/:id
   @Get(':id')
   getEventById(@Param('id') id: string) {
@@ -42,8 +36,8 @@ export class EventsController {
     return this.eventsService.getPointsInterest(id);
   }
 
-  // GET /events/:id/map
-  @Get(':id/map')
+  // GET /events/:id/mapa
+  @Get(':id/mapa')
   getMap(@Param('id') id: string) {
     return this.eventsService.getMap(id);
   }
@@ -59,6 +53,12 @@ export class EventsController {
   @UseGuards(AuthRequiredGuard)
   getFavourites(@Param('id') id: string, @Req() request: RequestWithUser) {
     return this.eventsService.getFavourites(id, request.user!.id);
+  }
+
+  // GET /events/activities/:id
+  @Get('activities/:id')
+  getActivityById(@Param('id') id: string) {
+    return this.eventsService.getActivityById(id);
   }
 
   // POST /events/favourite

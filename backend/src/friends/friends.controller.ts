@@ -7,13 +7,41 @@ export class FriendsController {
   constructor(private readonly friendsService: FriendsService) {}
 
   @Get('all')
-  async getAll(@Req() req: RequestWithUser) {
-    return this.friendsService.getFriendsGroupedByEvent(req.user!.id);
+  async getAll(
+    @Req() req: RequestWithUser,
+    @Query('page') page?: string,
+    @Query('pageSize') pageSize?: string,
+    @Query('search') search?: string,
+    @Query('inEvent') inEvent?: 'true' | 'false',
+    @Query('sortBy') sortBy?: 'name' | 'username',
+    @Query('sortOrder') sortOrder?: 'asc' | 'desc',
+  ) {
+    return this.friendsService.getFriendsGroupedByEvent(req.user!.id, {
+      page,
+      pageSize,
+      search,
+      inEvent,
+      sortBy,
+      sortOrder,
+    });
   }
 
   @Get('search')
-  async search(@Query('q') query: string, @Req() req: RequestWithUser) {
-    return this.friendsService.searchUsers(query, req.user!.id);
+  async search(
+    @Query('q') query: string,
+    @Req() req: RequestWithUser,
+    @Query('page') page?: string,
+    @Query('pageSize') pageSize?: string,
+    @Query('sortBy') sortBy?: 'name' | 'username',
+    @Query('sortOrder') sortOrder?: 'asc' | 'desc',
+  ) {
+    return this.friendsService.searchUsers(req.user!.id, {
+      query,
+      page,
+      pageSize,
+      sortBy,
+      sortOrder,
+    });
   }
 
   // Enviar Pedido (fica PENDING) ou Cancelar/Remover se já existir

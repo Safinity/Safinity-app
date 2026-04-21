@@ -6,11 +6,48 @@ import {
   FriendProfileDto,
 } from './dto/friend-list.dto';
 
+type FriendsListQuery = {
+  page?: string;
+  pageSize?: string;
+  search?: string;
+  inEvent?: 'true' | 'false';
+  sortBy?: 'name' | 'username';
+  sortOrder?: 'asc' | 'desc';
+};
+
+type FriendsSearchQuery = {
+  query: string;
+  page?: string;
+  pageSize?: string;
+  sortBy?: 'name' | 'username';
+  sortOrder?: 'asc' | 'desc';
+};
+
 @Injectable()
 export class FriendsService {
   constructor(private prisma: PrismaService) {}
 
-  async getFriendsGroupedByEvent(userId: string): Promise<FriendsGroupedDto> {
+  private parsePositiveInt(
+    value: string | undefined,
+    fallback: number,
+  ): number {
+    if (!value) {
+      return fallback;
+    }
+
+    const parsed = Number.parseInt(value, 10);
+
+    if (!Number.isFinite(parsed) || parsed <= 0) {
+      return fallback;
+    }
+
+    return parsed;
+  }
+
+  async getFriendsGroupedByEvent(
+    userId: string,
+    query?: FriendsListQuery,
+  ): Promise<FriendsGroupedDto> {
     const myTicket = await this.prisma.user_tickets.findFirst({
       where: { user_id: userId },
       select: { event_id: true },
@@ -34,7 +71,7 @@ export class FriendsService {
       },
     });
 
-    const result = new FriendsGroupedDto();
+    const allFriends: FriendResponseDto[] = [];
 
     friendships.forEach((f) => {
       const friendData =
@@ -59,24 +96,91 @@ export class FriendsService {
         isOnSameEvent: isAtSameEvent,
       };
 
-      if (isAtSameEvent) result.onSameEvent.push(friendObj);
-      else result.otherFriends.push(friendObj);
+      allFriends.push(friendObj);
+    });
+
+    const filteredFriends = allFriends.filter((friend) => {
+      if (query?.search) {
+        const search = query.search.toLowerCase();
+        const byName = friend.name.toLowerCase().includes(search);
+        const byUsername = friend.username.toLowerCase().includes(search);
+
+        if (!byName && !byUsername) {
+          return false;
+        }
+      }
+
+      if (query?.inEvent === 'true' && !friend.isOnSameEvent) {
+        return false;
+      }
+
+      if (query?.inEvent === 'false' && friend.isOnSameEvent) {
+        return false;
+      }
+
+      return true;
+    });
+
+    const sortBy = query?.sortBy ?? 'name';
+    const sortOrder = query?.sortOrder ?? 'asc';
+
+    const sortedFriends = filteredFriends.sort((left, right) => {
+      const leftValue =
+        sortBy === 'username'
+          ? left.username.toLowerCase()
+          : left.name.toLowerCase();
+      const rightValue =
+        sortBy === 'username'
+          ? right.username.toLowerCase()
+          : right.name.toLowerCase();
+
+      if (leftValue < rightValue) {
+        return sortOrder === 'asc' ? -1 : 1;
+      }
+
+      if (leftValue > rightValue) {
+        return sortOrder === 'asc' ? 1 : -1;
+      }
+
+      return 0;
+    });
+
+    const page = this.parsePositiveInt(query?.page, 1);
+    const pageSize = Math.min(this.parsePositiveInt(query?.pageSize, 20), 100);
+    const skip = (page - 1) * pageSize;
+    const pagedFriends = sortedFriends.slice(skip, skip + pageSize);
+
+    const result = new FriendsGroupedDto();
+    pagedFriends.forEach((friend) => {
+      if (friend.isOnSameEvent) {
+        result.onSameEvent.push(friend);
+      } else {
+        result.otherFriends.push(friend);
+      }
     });
 
     return result;
   }
 
-  async searchUsers(query: string, currentUserId: string) {
+  async searchUsers(currentUserId: string, query: FriendsSearchQuery) {
+    const page = this.parsePositiveInt(query.page, 1);
+    const pageSize = Math.min(this.parsePositiveInt(query.pageSize, 15), 100);
+    const skip = (page - 1) * pageSize;
+
     const users = await this.prisma.users.findMany({
       where: {
         id: { not: currentUserId },
         OR: [
-          { name: { contains: query, mode: 'insensitive' } },
-          { username: { contains: query, mode: 'insensitive' } },
+          { name: { contains: query.query, mode: 'insensitive' } },
+          { username: { contains: query.query, mode: 'insensitive' } },
         ],
       },
       select: { id: true, name: true, username: true, image: true },
-      take: 15,
+      orderBy: {
+        [query.sortBy ?? 'name']: query.sortOrder ?? 'asc',
+      },
+      skip,
+      take: pageSize,
     });
 
     return users.map((u) => ({

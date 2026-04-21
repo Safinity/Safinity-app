@@ -1,12 +1,14 @@
 import React from 'react';
 import styled from 'styled-components/native';
 import { ScrollView } from 'react-native';
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { Colors, Spacing, BorderRadius, TextStyles } from '../../../constants/theme';
 import Header from '../../../components/ui/header';
+import PrimaryButton from '../../../components/PrimaryButton';
 import eventsData from '../../../data/events.json';
 
 const TicketScreen = () => {
+  const router = useRouter();
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
   const event = eventsData.events.find(e => e.id === eventId);
 
@@ -53,6 +55,15 @@ const TicketScreen = () => {
       >
         <Content>
           <TicketCard>
+            <EventImage source={{ uri: event.image }} />
+
+            {event.time_left && (
+              <TimeLeftContainer>
+                <TimeLeftLabel>Time Left</TimeLeftLabel>
+                <TimeLeftValue>{event.time_left}</TimeLeftValue>
+              </TimeLeftContainer>
+            )}
+
             <TicketHeader>
               <EventName>{event.name}</EventName>
             </TicketHeader>
@@ -70,22 +81,41 @@ const TicketScreen = () => {
 
               <InfoRow>
                 <InfoLabel>Time:</InfoLabel>
-                <InfoValue>
-                  {event.start_time} - {event.end_time}
-                </InfoValue>
+                <InfoValue>{event.time_left}</InfoValue>
               </InfoRow>
 
-              <InfoRow>
-                <InfoLabel>Category:</InfoLabel>
-                <InfoValue>{event.category}</InfoValue>
-              </InfoRow>
-
-              <DescriptionLabel>Description:</DescriptionLabel>
-              <Description>{event.description}</Description>
+              {event.validity && (
+                <InfoRow>
+                  <InfoLabel>Validity:</InfoLabel>
+                  <InfoValue>{event.validity}</InfoValue>
+                </InfoRow>
+              )}
             </TicketInfo>
+
+            <ButtonContainer>
+              <PrimaryButton
+                title="View Event Details"
+                onPress={() => router.push(`/event-details/${eventId}`)}
+              />
+            </ButtonContainer>
+
+            <Divider />
+
+            <BarcodeSection>
+              <BarcodeText>0 1 2 3 4 5 6 7 8 9</BarcodeText>
+            </BarcodeSection>
           </TicketCard>
         </Content>
       </ScrollView>
+
+      <DeleteButtonContainer>
+        <PrimaryButton
+          title="Delete Ticket"
+          onPress={() => {
+            // falta implementar
+          }}
+        />
+      </DeleteButtonContainer>
     </Container>
   );
 };
@@ -107,7 +137,7 @@ const TicketCard = styled.View`
   max-width: 350px;
   border-radius: ${BorderRadius.large}px;
   background-color: ${Colors.white};
-  padding: ${Spacing.lg}px;
+  overflow: hidden;
   shadow-color: #000;
   shadow-offset: 0px 2px;
   shadow-opacity: 0.1;
@@ -115,11 +145,46 @@ const TicketCard = styled.View`
   elevation: 5;
 `;
 
+const EventImage = styled.Image`
+  width: 100%;
+  height: 187px;
+  background-color: ${Colors.background};
+`;
+
+const TimeLeftContainer = styled.View`
+  align-items: center;
+  padding-vertical: ${Spacing.md}px;
+  padding-horizontal: ${Spacing.lg}px;
+`;
+
+const TimeLeftLabel = styled.Text`
+  color: ${Colors.grayNavbar};
+  font-family: ${TextStyles.corpo.corpoTexto.fontFamily};
+  font-size: ${TextStyles.corpo.corpoTexto.fontSize}px;
+  margin-bottom: ${Spacing.xs}px;
+`;
+
+const TimeLeftValue = styled.Text`
+  color: ${Colors.primary};
+  font-family: ${TextStyles.corpo.corpoTexto.fontFamily};
+  font-size: ${TextStyles.corpo.corpoTexto.fontSize}px;
+  font-weight: bold;
+  text-align: center;
+`;
+
+const Divider = styled.View`
+  width: 100%;
+  height: 8px;
+  background-color: ${Colors.background};
+`;
+
 const TicketHeader = styled.View`
   border-bottom-width: 1px;
   border-bottom-color: ${Colors.grayNavbar};
   padding-bottom: ${Spacing.md}px;
   margin-bottom: ${Spacing.md}px;
+  padding-horizontal: ${Spacing.lg}px;
+  padding-top: ${Spacing.md}px;
 `;
 
 const EventName = styled.Text`
@@ -131,6 +196,8 @@ const EventName = styled.Text`
 
 const TicketInfo = styled.View`
   gap: ${Spacing.md}px;
+  padding-horizontal: ${Spacing.lg}px;
+  padding-vertical: ${Spacing.md}px;
 `;
 
 const InfoRow = styled.View`
@@ -146,7 +213,7 @@ const InfoLabel = styled.Text`
 `;
 
 const InfoValue = styled.Text`
-  color: ${Colors.white};
+  color: ${Colors.grayNavbar};
   font-family: ${TextStyles.corpo.corpoTexto.fontFamily};
   font-size: ${TextStyles.corpo.corpoTexto.fontSize}px;
   flex: 1;
@@ -154,20 +221,25 @@ const InfoValue = styled.Text`
   margin-left: ${Spacing.md}px;
 `;
 
-const DescriptionLabel = styled.Text`
+const ButtonContainer = styled.View`
+  padding-horizontal: ${Spacing.lg}px;
+  padding-vertical: ${Spacing.md}px;
+`;
+
+const BarcodeSection = styled.View`
+  height: 116px;
+  background-color: ${Colors.white};
+  align-items: center;
+  justify-content: center;
+  border-top-width: 1px;
+  border-top-color: ${Colors.grayNavbar};
+`;
+
+const BarcodeText = styled.Text`
   color: ${Colors.grayNavbar};
   font-family: ${TextStyles.corpo.corpoTexto.fontFamily};
   font-size: ${TextStyles.corpo.corpoTexto.fontSize}px;
-  font-weight: 600;
-  margin-top: ${Spacing.md}px;
-`;
-
-const Description = styled.Text`
-  color: ${Colors.white};
-  font-family: ${TextStyles.corpo.corpoTexto.fontFamily};
-  font-size: ${TextStyles.corpo.corpoTexto.fontSize}px;
-  line-height: ${TextStyles.corpo.corpoTexto.lineHeight}px;
-  margin-top: ${Spacing.xs}px;
+  letter-spacing: 2px;
 `;
 
 const ErrorText = styled.Text`
@@ -175,4 +247,10 @@ const ErrorText = styled.Text`
   font-family: ${TextStyles.corpo.corpoTexto.fontFamily};
   font-size: ${TextStyles.corpo.corpoTexto.fontSize}px;
   padding: ${Spacing.lg}px;
+`;
+
+const DeleteButtonContainer = styled.View`
+  padding-horizontal: ${Spacing.margemLateral}px;
+  padding-bottom: ${Spacing.xxl}px;
+  padding-top: ${Spacing.lg}px;
 `;

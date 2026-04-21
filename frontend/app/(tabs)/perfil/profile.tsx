@@ -194,7 +194,7 @@ export default function Profile() {
   return (
     <Container>
       {/* Header Customizado */}
-      <Header variant="back" title="Profile" />
+      <Header variant="back" title="Profile" rightIcon="wallet" onRightPress={() => router.push('/perfil/wallet')} />
 
       <TopGradient
         colors={['rgba(190, 142, 224)', 'rgba(34, 39, 52, 0)']}

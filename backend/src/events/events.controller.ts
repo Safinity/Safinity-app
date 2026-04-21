@@ -81,7 +81,7 @@ export class EventsController {
   ) {
     return this.eventsService.removeFavourite(
       request.user!.id,
-      Number(eventId),
+      eventId,
     );
   }
 }

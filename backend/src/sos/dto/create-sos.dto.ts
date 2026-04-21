@@ -4,21 +4,12 @@ import {
   IsObject,
   IsOptional,
   IsString,
-  IsUUID,
   ValidateNested,
   MaxLength,
 } from 'class-validator';
 import { GeoPointDto } from '../../common/dto/geo-point.dto';
 
 export class CreateSosDto {
-  @ApiProperty({
-    description: 'User ID that triggered the SOS',
-    type: String,
-    example: '550e8400-e29b-41d4-a716-446655440000',
-  })
-  @IsUUID()
-  user_id!: string;
-
   @ApiProperty({
     description: 'Current user location',
     type: () => GeoPointDto,

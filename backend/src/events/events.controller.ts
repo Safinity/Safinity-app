@@ -52,6 +52,18 @@ export class EventsController {
     return eventsService.getPastEvents(request.user!.id);
   }
 
+  // GET /events/present-event
+  @Get('present-event')
+  @UseGuards(AuthRequiredGuard)
+  @ApiOperation({
+    summary: 'Get the event currently happening for authenticated user',
+  })
+  getPresentEvent(@Req() request: RequestWithUser) {
+    const eventsService: EventsService = this.eventsService;
+
+    return eventsService.getPresentEvent(request.user!.id);
+  }
+
   // GET /events/:id
   @Get(':id')
   getEventById(@Param('id') id: string) {

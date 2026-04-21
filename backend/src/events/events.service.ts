@@ -392,6 +392,58 @@ export class EventsService {
     return this.serialize(pastEvents);
   }
 
+  async getPresentEvent(userId: string) {
+    if (!userId) {
+      throw new BadRequestException('user_id is required');
+    }
+
+    const now = new Date();
+
+    const tickets = await this.prisma.user_tickets.findMany({
+      where: { user_id: userId },
+      select: {
+        event: {
+          select: {
+            id: true,
+            organization_id: true,
+            name: true,
+            venue_name: true,
+            description: true,
+            status: true,
+            category: true,
+            start_date: true,
+            end_date: true,
+            others: true,
+          },
+        },
+      },
+    });
+
+    const presentEvent = tickets
+      .map((ticket) => ticket.event)
+      .filter((event) => {
+        if (!event) {
+          return false;
+        }
+
+        if (!event.start_date) {
+          return false;
+        }
+
+        const startTime = event.start_date;
+        const endTime =
+          event.end_date ?? new Date(startTime.getTime() + 24 * 60 * 60 * 1000);
+
+        return now >= startTime && now <= endTime;
+      })
+      .filter(
+        (event, index, array) =>
+          array.findIndex((candidate) => candidate.id === event.id) === index,
+      )[0];
+
+    return presentEvent ? this.serialize(presentEvent) : null;
+  }
+
   async getFavourites(id: string, userId: string) {
     const eventId = this.parseEventId(id);
 

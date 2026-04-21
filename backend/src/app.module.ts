@@ -15,6 +15,8 @@ import { SosController } from './sos/sos.controller';
 import { SosService } from './sos/sos.service';
 import { UserTicketsController } from './tickets/user-tickets.controller';
 import { UserTicketsService } from './tickets/user-tickets.service';
+import { FriendsController } from './friends/friends.controller';
+import { FriendsService } from './friends/friends.service';
 
 @Module({
   imports: [PrismaModule, AuthModule],
@@ -26,6 +28,7 @@ import { UserTicketsService } from './tickets/user-tickets.service';
     AlertsController,
     SosController,
     UserTicketsController,
+    FriendsController,
   ],
   providers: [
     AppService,
@@ -35,6 +38,7 @@ import { UserTicketsService } from './tickets/user-tickets.service';
     AlertsService,
     SosService,
     UserTicketsService,
+    FriendsService,
   ],
 })
 export class AppModule {}

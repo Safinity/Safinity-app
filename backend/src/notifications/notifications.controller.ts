@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -31,8 +32,24 @@ export class NotificationsController {
   }
 
   @Get()
-  getAll() {
-    return this.notificationsService.findAll();
+  getAll(
+    @Query('page') page?: string,
+    @Query('pageSize') pageSize?: string,
+    @Query('search') search?: string,
+    @Query('category') category?: string,
+    @Query('eventId') eventId?: string,
+    @Query('sortBy') sortBy?: 'time' | 'title',
+    @Query('sortOrder') sortOrder?: 'asc' | 'desc',
+  ) {
+    return this.notificationsService.findAll({
+      page,
+      pageSize,
+      search,
+      category,
+      eventId,
+      sortBy,
+      sortOrder,
+    });
   }
 
   // Backoffice-related endpoints

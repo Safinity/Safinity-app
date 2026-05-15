@@ -61,7 +61,7 @@ export default function HomeScreen() {
           <SectionHeader>
             <SectionTitle
               accessible={true}
-              role="header"
+              aria-role="header"
               // @ts-ignore
               aria-level="2"
             >

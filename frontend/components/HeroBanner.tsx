@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -99,6 +99,8 @@ export const HeroBanner = ({
 }: any) => {
   const router = useRouter();
 
+  const [isFavorite, setIsFavorite] = useState(false);
+
   const getSource = () => {
     if (!event) return null;
     if (calendarImages[event.image]) return calendarImages[event.image];
@@ -123,8 +125,7 @@ export const HeroBanner = ({
       <HeroGradient
         accessible={true}
         accessibilityLabel={accessibleLabel}
-        role="header"
-        // @ts-ignore
+        accessibilityRole="header"
         aria-label={accessibleLabel}
       >
         {isCalendar && (
@@ -136,12 +137,12 @@ export const HeroBanner = ({
 
               <AddCalendarButton
                 activeOpacity={0.8}
-                onPress={() => router.push('/(tabs)/my-calendar')}
+                onPress={() => setIsFavorite(prev => !prev)}
                 accessible={true}
-                accessibilityLabel="Adicionar ao meu calendário"
-                role="button"
+                accessibilityRole="button"
+                accessibilityLabel={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
               >
-                <Ionicons name="calendar-outline" size={26} color="#9333EA" />
+                <Ionicons name={isFavorite ? 'heart' : 'heart-outline'} size={30} color="#9333EA" />
               </AddCalendarButton>
             </TitleRow>
 

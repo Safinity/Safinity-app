@@ -1,12 +1,82 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Image } from 'react-native';
 import styled from 'styled-components/native';
 import { Spacing, BorderRadius, Colors, TextStyles } from '../constants/theme';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-
-// 1. Importação do mapeamento para resolver o erro 404
 import { calendarImages } from '../assets/images/Calendar/index';
+
+export const CalendarCard = ({ item }: any) => {
+  const [isFavorite, setIsFavorite] = useState(item?.isFavorite ?? false);
+  const router = useRouter();
+
+  const handlePress = () => {
+    if (item.id) {
+      router.push(`/activity-details/${item.id}`);
+    }
+  };
+
+  const handleToggleFavorite = () => {
+    setIsFavorite((prev: boolean) => !prev);
+  };
+
+  const getImageSource = () => {
+    if (!item.image) return null;
+    if (calendarImages[item.image]) {
+      return calendarImages[item.image];
+    }
+    if (typeof item.image === 'string' && item.image.startsWith('http')) {
+      return { uri: item.image };
+    }
+    return null;
+  };
+
+  const accessibleLabel = `Atividade: ${item.title} em ${item.location}. De ${item.startTime} até ${item.endTime}`;
+
+  return (
+    <CardContainer
+      activeOpacity={0.8}
+      onPress={handlePress}
+      accessible={true}
+      role="button"
+      accessibilityLabel={`Abrir detalhes de: ${item.title}`}
+      accessibilityHint="Navega para a descrição completa desta atividade do calendário"
+    >
+      <StyledImage source={getImageSource()} resizeMode="cover" accessible={false} />
+
+      <Overlay
+        colors={['rgba(0,0,0,0.1)', 'transparent', 'rgba(0,0,0,0.9)']}
+        accessible={true}
+        accessibilityLabel={accessibleLabel}
+        aria-label={accessibleLabel}
+      >
+        <TopRow>
+          <FavoriteButton
+            onPress={handleToggleFavorite}
+            activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel={
+              isFavorite
+                ? `Remover ${item.title} dos favoritos`
+                : `Adicionar ${item.title} aos favoritos`
+            }
+            accessibilityHint="Marca ou desmarca esta atividade como favorita"
+          >
+            <Ionicons name={isFavorite ? 'heart' : 'heart-outline'} size={20} color="white" />
+          </FavoriteButton>
+        </TopRow>
+
+        <InfoSection>
+          <TimeText>
+            {item.location} • {item.startTime} - {item.endTime}
+          </TimeText>
+          <TitleText numberOfLines={2}>{item.title}</TitleText>
+        </InfoSection>
+      </Overlay>
+    </CardContainer>
+  );
+};
 
 const CardContainer = styled.TouchableOpacity`
   height: 180px;
@@ -36,17 +106,6 @@ const Overlay = styled(LinearGradient)`
   justify-content: space-between;
 `;
 
-const Badge = styled.Text`
-  align-self: flex-end;
-  color: ${Colors.white};
-  font-family: ${TextStyles.corpo.corpoTexto.fontFamily};
-  font-size: 10px;
-  background-color: rgba(255, 255, 255, 0.2);
-  padding: 4px 10px;
-  border-radius: 12px;
-  overflow: hidden;
-`;
-
 const InfoSection = styled.View`
   width: 100%;
 `;
@@ -68,62 +127,16 @@ const TitleText = styled.Text`
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
 `;
 
-// Substitua o final do seu arquivo (o componente CalendarCard) por este:
+const FavoriteButton = styled.TouchableOpacity`
+  width: 36px;
+  height: 36px;
+  border-radius: 18px;
+  background-color: rgba(0, 0, 0, 0.45);
+  justify-content: center;
+  align-items: center;
+`;
 
-export const CalendarCard = ({ item }: any) => {
-  const router = useRouter();
-
-  const handlePress = () => {
-    if (item.id) {
-      router.push(`/activity-details/${item.id}`);
-    }
-  };
-
-  const getImageSource = () => {
-    if (!item.image) return null;
-    if (calendarImages[item.image]) {
-      return calendarImages[item.image];
-    }
-    if (typeof item.image === 'string' && item.image.startsWith('http')) {
-      return { uri: item.image };
-    }
-    return null;
-  };
-
-  // Texto descritivo para o Alt Text (Nome + Localização)
-  const accessibleLabel = `Atividade: ${item.title} em ${item.location}. De ${item.startTime} até ${item.endTime}`;
-
-  return (
-    <CardContainer
-      activeOpacity={0.8}
-      onPress={handlePress}
-      accessible={true}
-      role="button"
-      accessibilityLabel={`Abrir detalhes de: ${item.title}`}
-      accessibilityHint="Navega para a descrição completa desta atividade do calendário"
-    >
-      <StyledImage
-        source={getImageSource()}
-        resizeMode="cover"
-        accessible={false} // Esconde a imagem bruta para não duplicar a leitura
-      />
-
-      <Overlay
-        colors={['rgba(0,0,0,0.1)', 'transparent', 'rgba(0,0,0,0.9)']}
-        accessible={true}
-        accessibilityLabel={accessibleLabel}
-        // @ts-ignore
-        aria-label={accessibleLabel}
-      >
-        <Badge>Click to view more</Badge>
-
-        <InfoSection>
-          <TimeText>
-            {item.location} • {item.startTime} - {item.endTime}
-          </TimeText>
-          <TitleText numberOfLines={2}>{item.title}</TitleText>
-        </InfoSection>
-      </Overlay>
-    </CardContainer>
-  );
-};
+const TopRow = styled.View`
+  width: 100%;
+  align-items: end;
+`;

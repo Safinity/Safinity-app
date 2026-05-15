@@ -100,13 +100,13 @@ export default function ActivityDetailsScreen() {
         <HeroBanner event={activity} isDetail />
 
         <ContentCard>
-          <SectionTitle role="header">Description</SectionTitle>
+          <SectionTitle accessibilityRole="header">Description</SectionTitle>
           <DescriptionText>{activity.description || 'No description available.'}</DescriptionText>
 
           <RouteCard
             activeOpacity={0.8}
             onPress={() => router.push('/(tabs)/map')}
-            role="button"
+            accessibilityRole="button"
             accessibilityLabel={`View route to ${activity.location}`}
             accessibilityHint="Opens map for this activity"
           >
@@ -120,7 +120,7 @@ export default function ActivityDetailsScreen() {
             </RouteInfo>
           </RouteCard>
 
-          <SectionTitle role="header">Featuring</SectionTitle>
+          <SectionTitle accessibilityRole="header">Featuring</SectionTitle>
 
           <FeaturingSection>
             {activity.featuring && activity.featuring.length > 0 ? (

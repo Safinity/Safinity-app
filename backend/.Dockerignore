@@ -1,4 +1,12 @@
-# backend/.dockerignore
+node_modules
+dist
+npm-debug.log
+Dockerfile
+.dockerignore
+.Dockerignore
+.git
+.env
+.env.*# backend/.dockerignore
 node_modules
 dist
 npm-debug.log

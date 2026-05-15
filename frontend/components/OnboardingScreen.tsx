@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import styled from 'styled-components/native';
+import { Colors, Spacing } from '../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { Image, ImageSourcePropType } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
@@ -7,8 +8,8 @@ import TertiaryButton from './TertiaryButton';
 
 const Screen = styled.View`
   flex: 1;
-  background-color: ${({ theme }) => theme.colors.background};
-  padding: ${({ theme }) => theme.spacing.xl}px;
+  background-color: ${Colors.background};
+  padding: ${Spacing.xl}px;
   justify-content: space-between;
 `;
 

@@ -4,7 +4,7 @@ import React from 'react';
 import { Platform, StatusBar } from 'react-native';
 import styled from 'styled-components/native';
 
-import { Colors, Spacing, Height, Width } from '../../constants/theme';
+import { Colors, Spacing, Height, Width, BorderRadius, TextStyles } from '../../constants/theme';
 
 export type HeaderVariant = 'default' | 'back' | 'pageDetails';
 
@@ -116,7 +116,7 @@ const HeaderFixedContainer = styled.View`
 `;
 
 const SafeArea = styled.View<{ height: number }>`
-  height: ${({ height }) => height}px;
+  height: ${({ height }: { height: number }) => height}px;
 `;
 
 const HeaderContent = styled.View`
@@ -141,15 +141,15 @@ const BackButtonRow = styled.View`
 
 const BackButton = styled.Pressable`
   z-index: 99;
-  padding-bottom: ${({ theme }) => theme.spacing.sm}px;
-  border-radius: ${({ theme }) => theme.borderRadius.round}px;
+  padding-bottom: ${Spacing.sm}px;
+  border-radius: ${BorderRadius.round}px;
 `;
 
 const BackButtonDetails = styled.Pressable`
   z-index: 99;
-  background-color: ${({ theme }) => theme.colors.background};
-  padding: ${({ theme }) => theme.spacing.sm}px;
-  border-radius: ${({ theme }) => theme.borderRadius.round}px;
+  background-color: ${Colors.background};
+  padding: ${Spacing.sm}px;
+  border-radius: ${BorderRadius.round}px;
 `;
 
 const TitleContainer = styled.View``;
@@ -183,25 +183,25 @@ const DetailsTextContainer = styled.View`
 
 const DetailsTitle = styled.Text`
   color: ${Colors.white};
-  ${({ theme }) => theme.text.titulo.h3};
+  ${TextStyles.titulo.h3};
 `;
 
 const DetailsSubtitle = styled.Text`
   color: ${Colors.inactive};
   margin-top: ${Spacing.xs}px;
-  ${({ theme }) => theme.text.corpo.corpoTexto};
+  ${TextStyles.corpo.corpoTexto};
 `;
 
 const Title = styled.Text`
   color: ${Colors.white};
-  ${({ theme }) => theme.text.titulo.h};
+  ${TextStyles.titulo.h};
   include-font-padding: false;
 `;
 
 const Subtitle = styled.Text`
   color: ${Colors.inactive};
   margin-top: ${Spacing.xs}px;
-  ${({ theme }) => theme.text.corpo.corpoTexto};
+  ${TextStyles.corpo.corpoTexto};
 `;
 
 const Divider = styled.View`

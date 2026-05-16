@@ -3,8 +3,9 @@ import styled from 'styled-components/native';
 import { Animated } from 'react-native';
 import { router, Stack } from 'expo-router';
 import Head from 'expo-router/head';
+import { useAuth } from '@clerk/expo';
 
-import Logo from '../assets/logos/loading-logo.png';
+const Logo = require('../assets/logos/loading-logo.png');
 
 const Container = styled.View`
   flex: 1;
@@ -15,6 +16,7 @@ const Container = styled.View`
 
 export default function LoadingScreen() {
   const opacity = useRef(new Animated.Value(0)).current;
+  const { isLoaded, isSignedIn } = useAuth();
 
   useEffect(() => {
     Animated.timing(opacity, {
@@ -23,10 +25,14 @@ export default function LoadingScreen() {
       useNativeDriver: true,
     }).start();
 
-    const t = setTimeout(() => router.replace('/landing'), 2000);
+    if (!isLoaded) return;
+
+    const t = setTimeout(() => {
+      router.replace(isSignedIn ? '/(tabs)' : '/landing');
+    }, 1200);
 
     return () => clearTimeout(t);
-  }, [opacity]);
+  }, [isLoaded, isSignedIn, opacity]);
 
   return (
     <Container>

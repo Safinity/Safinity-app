@@ -8,12 +8,11 @@ import { userImages } from '../../../assets/images/Users/userImages';
 import InputField from '../../../components/InputField';
 import Header from '../../../components/ui/header';
 import { Colors, Fonts } from '../../../constants/theme';
-import auth from '../../../data/auth.json';
-import users from '../../../data/users.json';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useUser } from '../../../context/UserContext';
 
 export default function EditProfile() {
-  const [user, setUser] = useState<any>(null);
+  const { currentUser: user } = useUser();
   const [formData, setFormData] = useState({
     name: '',
     username: '',
@@ -22,21 +21,16 @@ export default function EditProfile() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const currentId = auth.currentUserId;
-    const foundUser = users.find(u => u.id === currentId);
-    setUser(foundUser);
-
-    if (foundUser) {
+    if (user) {
       setFormData({
-        name: foundUser.name || '',
-        username: foundUser.username || '',
+        name: user.name || '',
+        username: user.username || '',
       });
 
-      const imageFileName = foundUser.image;
-      const userImage = userImages[imageFileName] || userImages['default'];
+      const userImage = userImages[user.image] || userImages.default;
       setProfileImage(userImage);
     }
-  }, []);
+  }, [user]);
 
   const handleChange = (field: string, value: string) => {
     setFormData(prev => ({

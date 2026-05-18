@@ -20,6 +20,19 @@ type SelfProfileUser = {
   user_favorites: Array<unknown>;
 };
 
+function isClerkRateLimitError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') {
+    return false;
+  }
+
+  const maybeError = error as {
+    status?: unknown;
+    code?: unknown;
+  };
+
+  return maybeError.status === 429 || maybeError.code === 'api_response_error';
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -44,9 +57,8 @@ export class AuthService {
 
     // User doesn't exist, fetch from Clerk to sync
     try {
-      const clerkUser = await this.clerkService.client.users.getUser(
-        clerkUserId,
-      );
+      const clerkUser =
+        await this.clerkService.client.users.getUser(clerkUserId);
 
       // Build fields to sync from Clerk
       const email = clerkUser.emailAddresses?.[0]?.emailAddress ?? null;
@@ -57,18 +69,16 @@ export class AuthService {
         null;
 
       // Create new user
-      const [createdUser] = await this.prisma.$queryRaw<
-        Array<{ id: string }>
-      >`
+      const [createdUser] = await this.prisma.$queryRaw<Array<{ id: string }>>`
         INSERT INTO public.users (clerk_id, email, username, name, role, password_hash)
         VALUES (${clerkUserId}, ${email}, ${username}, ${name}, 'user', '')
         RETURNING "id"
       `;
 
       return this.getSelfProfile(createdUser.id);
-    } catch (error: any) {
+    } catch (error: unknown) {
       // If Clerk API is rate-limited or unavailable, create a stub user
-      if (error?.status === 429 || error?.code === 'api_response_error') {
+      if (isClerkRateLimitError(error)) {
         const [createdUser] = await this.prisma.$queryRaw<
           Array<{ id: string }>
         >`

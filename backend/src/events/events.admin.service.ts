@@ -51,7 +51,7 @@ export class AdminEventsService {
       return Prisma.JsonNull;
     }
 
-    return value as Prisma.InputJsonValue;
+    return value;
   }
 
   private serialize<T>(value: T): T {

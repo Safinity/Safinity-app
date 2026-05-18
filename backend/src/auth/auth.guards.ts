@@ -26,6 +26,19 @@ function getBearerToken(headerValue?: string | string[]) {
   return token;
 }
 
+function isClerkRateLimitError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') {
+    return false;
+  }
+
+  const maybeError = error as {
+    status?: unknown;
+    code?: unknown;
+  };
+
+  return maybeError.status === 429 || maybeError.code === 'api_response_error';
+}
+
 @Injectable()
 export class OptionalAuthGuard implements CanActivate {
   constructor(private readonly authService: AuthService) {}
@@ -54,13 +67,13 @@ export class OptionalAuthGuard implements CanActivate {
       };
 
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       // If Clerk is rate-limiting or unavailable, still allow the request through
       // AuthRequiredGuard will catch missing user on protected endpoints
-      if (error?.status === 429 || error?.code === 'api_response_error') {
+      if (isClerkRateLimitError(error)) {
         return true;
       }
-      
+
       console.error('Clerk token verification failed:', error);
       throw new UnauthorizedException('Invalid or expired token');
     }

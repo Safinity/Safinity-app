@@ -133,13 +133,22 @@ export default function Register() {
 
               {error ? (
                 <ErrorArea accessible={true} accessibilityLiveRegion="assertive" role="alert">
-                  <Ionicons name="alert-circle-outline" size={18} color="#ff4d4d" style={{ marginRight: 8 }} />
+                  <Ionicons
+                    name="alert-circle-outline"
+                    size={18}
+                    color="#ff4d4d"
+                    style={{ marginRight: 8 }}
+                  />
                   <ErrorText>{error}</ErrorText>
                 </ErrorArea>
               ) : null}
 
               <Actions>
-                <PrimaryButton title="Verify and continue" onPress={handleVerify} disabled={code === ''} />
+                <PrimaryButton
+                  title="Verify and continue"
+                  onPress={handleVerify}
+                  disabled={code === ''}
+                />
 
                 <RowWithLink>
                   <SmallText>Need to edit your details?</SmallText>
@@ -223,7 +232,12 @@ export default function Register() {
 
               {error ? (
                 <ErrorArea accessible={true} accessibilityLiveRegion="assertive" role="alert">
-                  <Ionicons name="alert-circle-outline" size={18} color="#ff4d4d" style={{ marginRight: 8 }} />
+                  <Ionicons
+                    name="alert-circle-outline"
+                    size={18}
+                    color="#ff4d4d"
+                    style={{ marginRight: 8 }}
+                  />
                   <ErrorText>{error}</ErrorText>
                 </ErrorArea>
               ) : null}

@@ -176,11 +176,15 @@ export default function Profile() {
   const { currentUser: user } = useUser();
   const { signOut } = useClerk();
 
-  const imageSource = user?.image ? userImages[user.image] || userImages.default : userImages.default;
+  const imageSource = user?.image
+    ? userImages[user.image] || userImages.default
+    : userImages.default;
 
   if (!user || !imageSource) return null;
 
-  const userPastEvents = eventsData.events.filter(event => (user.pastEvents ?? []).includes(event.id));
+  const userPastEvents = eventsData.events.filter(event =>
+    (user.pastEvents ?? []).includes(event.id),
+  );
 
   const handleLogout = async () => {
     await signOut();
@@ -277,11 +281,7 @@ export default function Profile() {
           <SettingsIcon accessible={false}>›</SettingsIcon>
         </SettingsRow>
 
-        <LogoutButton
-          onPress={handleLogout}
-          role="button"
-          accessibilityLabel="Log out of the app"
-        >
+        <LogoutButton onPress={handleLogout} role="button" accessibilityLabel="Log out of the app">
           <LogoutText>Log out</LogoutText>
         </LogoutButton>
       </PaddedContent>

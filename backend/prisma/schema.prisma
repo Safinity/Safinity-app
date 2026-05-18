@@ -205,10 +205,11 @@ model user_tickets {
 
 model users {
   id                                    String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clerk_id                              String                     @unique  @db.VarChar(50)
   name                                  String?                    @db.VarChar(50)
   username                              String?                    @unique @db.VarChar(32)
-  password_hash                         String                     @db.VarChar(255)
-  role                                  String                     @db.VarChar(24)
+  password_hash                         String?                    @db.VarChar(255)
+  role                                  String                     @default("user") @db.VarChar(24)
   email                                 String?                    @unique @db.VarChar(255)
   image                                 Bytes?
   location                              Unsupported("geography")?

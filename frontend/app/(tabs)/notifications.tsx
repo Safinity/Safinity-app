@@ -1,11 +1,17 @@
-import React, { useState } from 'react';
-import { FlatList } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { FlatList, ActivityIndicator } from 'react-native';
 import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '@clerk/expo';
 import Header from '../../components/ui/header';
 import { userImages } from '../../assets/images/Users/userImages';
 import initialData from '../../data/notifications.json';
 import { Stack } from 'expo-router';
+import api from '../../utils/api';
+
+const NOTIFICATIONS_FETCH_COOLDOWN_MS = 10000;
+let notificationsFetchInFlight = false;
+let notificationsLastFetchedAt = 0;
 
 const Container = styled.View`
   flex: 1;
@@ -116,8 +122,85 @@ const SectionLabel = styled.Text`
   margin: 0px ${({ theme }) => theme.spacing.margemLateral}px ${({ theme }) => theme.spacing.sm}px;
 `;
 
+const LoadingContainer = styled.View`
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  background-color: ${({ theme }) => theme.colors.background};
+`;
+
+const ErrorText = styled.Text`
+  color: #f67f7f;
+  font-size: 16px;
+  text-align: center;
+  padding: ${({ theme }) => theme.spacing.lg}px;
+`;
+
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState(initialData);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { getToken } = useAuth();
+
+  useEffect(() => {
+    let isActive = true;
+
+    const fetchNotifications = async () => {
+      const now = Date.now();
+
+      if (notificationsFetchInFlight) {
+        return;
+      }
+
+      // Prevent duplicate requests from rapid remounts or double-invoked effects in dev.
+      if (now - notificationsLastFetchedAt < NOTIFICATIONS_FETCH_COOLDOWN_MS) {
+        if (isActive) {
+          setLoading(false);
+        }
+        return;
+      }
+
+      notificationsFetchInFlight = true;
+
+      try {
+        if (isActive) {
+          setLoading(true);
+          setError(null);
+        }
+
+        const token = await getToken();
+
+        const response = await api.get('/notifications/me', {
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        });
+
+        if (isActive) {
+          setNotifications(response.data || []);
+        }
+
+        notificationsLastFetchedAt = Date.now();
+      } catch (err: any) {
+        console.error('Failed to fetch notifications:', err);
+
+        if (isActive) {
+          setError(err.response?.data?.message || 'Failed to load notifications');
+          setNotifications(initialData);
+        }
+      } finally {
+        notificationsFetchInFlight = false;
+
+        if (isActive) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchNotifications();
+
+    return () => {
+      isActive = false;
+    };
+  }, [getToken]);
 
   const newNotifications = notifications.filter(n => !n.read);
   const oldNotifications = notifications.filter(n => n.read);
@@ -167,7 +250,7 @@ export default function NotificationsPage() {
   };
 
   const renderItem = ({ item }: { item: any }) => {
-    if (item.isDivider) return <SectionLabel role="header">Oldest</SectionLabel>;
+    if (item.isDivider) return <SectionLabel>Oldest</SectionLabel>;
 
     const cardLabel = `${item.title}, ${item.time}. ${item.message}${item.read ? '' : ', new notification'}`;
 
@@ -227,36 +310,46 @@ export default function NotificationsPage() {
     <Container>
       <Stack.Screen options={{ title: 'Notifications' }} />
 
-      {/* Header fixo no topo */}
-      <Header
-        variant="back"
-        title="Notifications"
-        subtitle={`You have ${newNotifications.length} new notifications.`}
-      />
+      {loading ? (
+        <LoadingContainer>
+          <ActivityIndicator size="large" color="#9242CC" />
+        </LoadingContainer>
+      ) : (
+        <>
+          {/* Header fixo no topo */}
+          <Header
+            variant="back"
+            title="Notifications"
+            subtitle={`You have ${newNotifications.length} new notifications.`}
+          />
 
-      {/* Botão Mark all read abaixo do header */}
-      <PageHeaderContent>
-        <MarkReadButton
-          onPress={handleMarkAllRead}
-          role="button"
-          accessibilityLabel="Mark all notifications as read"
-        >
-          <MarkReadText>Mark all as read</MarkReadText>
-        </MarkReadButton>
-      </PageHeaderContent>
+          {error && <ErrorText>{error}</ErrorText>}
 
-      {/* Lista apenas com notificações */}
-      <FlatList
-        data={dataToRender}
-        keyExtractor={item => item.id.toString()}
-        renderItem={renderItem}
-        role="list"
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingBottom: 50,
-          paddingHorizontal: 0, // já temos o padding no PageHeaderContent ou no container
-        }}
-      />
+          {/* Botão Mark all read abaixo do header */}
+          <PageHeaderContent>
+            <MarkReadButton
+              onPress={handleMarkAllRead}
+              role="button"
+              accessibilityLabel="Mark all notifications as read"
+            >
+              <MarkReadText>Mark all as read</MarkReadText>
+            </MarkReadButton>
+          </PageHeaderContent>
+
+          {/* Lista apenas com notificações */}
+          <FlatList
+            data={dataToRender}
+            keyExtractor={item => item.id.toString()}
+            renderItem={renderItem}
+            role="list"
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{
+              paddingBottom: 50,
+              paddingHorizontal: 0, // já temos o padding no PageHeaderContent ou no container
+            }}
+          />
+        </>
+      )}
     </Container>
   );
 }

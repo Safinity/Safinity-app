@@ -27,6 +27,8 @@ services:
       dockerfile: Dockerfile
     container_name: safinity-api
     restart: always
+    env_file:
+      - ./backend/.env
     ports:
       - "${API_PORT}:${API_PORT}"
     environment:

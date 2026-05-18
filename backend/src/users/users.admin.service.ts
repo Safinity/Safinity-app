@@ -5,9 +5,10 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+
 import type { AuthenticatedUser } from '../auth/auth.types';
-import { hashPassword } from '../auth/auth.token';
 import { PrismaService } from '../prisma/prisma.service';
+import { ClerkService } from '../auth/clerk.service';
 
 type AdminScope = {
   userId: string;
@@ -18,7 +19,7 @@ type CreateOrganizationUserBody = {
   name?: string;
   username?: string;
   email?: string;
-  password?: string;
+  password?: string; // still optional input, but NOT stored in DB
   role?: string;
   role_in_org?: string;
 };
@@ -31,14 +32,16 @@ type UpdateOrganizationUserBody = {
 
 @Injectable()
 export class AdminUsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly clerkService: ClerkService,
+  ) {}
 
   private serialize<T>(value: T): T {
     const replacer = (_key: string, currentValue: unknown): unknown => {
       if (typeof currentValue === 'bigint') {
         return currentValue.toString();
       }
-
       return currentValue;
     };
 
@@ -119,6 +122,7 @@ export class AdminUsersService {
             username: true,
             email: true,
             role: true,
+            clerk_id: true,
           },
         },
       },
@@ -135,7 +139,7 @@ export class AdminUsersService {
 
     const username = body.username?.trim();
     const email = body.email?.trim().toLowerCase();
-    const password = body.password;
+    const password = body.password; // used ONLY for Clerk creation
 
     if (!username || !email || !password) {
       throw new BadRequestException(
@@ -156,12 +160,21 @@ export class AdminUsersService {
       );
     }
 
+    // 1. Create user in Clerk (AUTH source of truth)
+    const clerkUser = await this.clerkService.client.users.createUser({
+      emailAddress: [email],
+      password,
+      username,
+      firstName: body.name,
+    });
+
+    // 2. Store user in Prisma (APP data)
     const createdUser = await this.prisma.users.create({
       data: {
+        clerk_id: clerkUser.id,
         name: body.name?.trim() || null,
         username,
         email,
-        password_hash: hashPassword(password),
         role: body.role?.trim() || 'user',
       },
       select: {
@@ -170,9 +183,11 @@ export class AdminUsersService {
         username: true,
         email: true,
         role: true,
+        clerk_id: true,
       },
     });
 
+    // 3. Create staff record
     const staffId = await this.nextBigIntId(() =>
       this.prisma.staff_details.findFirst({
         orderBy: { id: 'desc' },
@@ -237,6 +252,7 @@ export class AdminUsersService {
           username: true,
           email: true,
           role: true,
+          clerk_id: true,
         },
       }),
       this.prisma.staff_details.update({

@@ -23,13 +23,4 @@ export class UsersController {
   ) {
     return this.authService.updateProfile(request.user!.id, body);
   }
-
-  @Patch('me/credentials')
-  @UseGuards(AuthRequiredGuard)
-  updateCredentials(
-    @Req() request: RequestWithUser,
-    @Body() body: UpdateCredentialsDto,
-  ) {
-    return this.authService.updateCredentials(request.user!.id, body);
-  }
 }

@@ -3,23 +3,16 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+
 import { PrismaService } from '../prisma/prisma.service';
-import type { AuthResponse, LoginDto, RegisterDto } from './auth.types';
-import {
-  comparePassword,
-  hashPassword,
-  signToken,
-  verifyToken,
-  type JwtPayload,
-} from './auth.token';
-import type { UpdateCredentialsDto } from './dto/update-credentials.dto';
-import type { UpdateProfileDto } from './dto/update-profile.dto';
+import { ClerkService } from './clerk.service';
 
 type SelfProfileUser = {
   id: string;
+  clerk_id: string;
   name: string | null;
   username: string | null;
-  image: Uint8Array | null;
+  image: string | null;
   role: string;
   email: string | null;
   emergency_contact: string | null;
@@ -29,20 +22,72 @@ type SelfProfileUser = {
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly clerkService: ClerkService,
+  ) {}
 
-  private serialize<T>(value: T): T {
-    const replacer = (_key: string, currentValue: unknown): unknown => {
-      if (typeof currentValue === 'bigint') {
-        return currentValue.toString();
+  /**
+   * Development helper:
+   * Ensures a Clerk user exists in your DB.
+   * Clerk is the source of truth for identity.
+   */
+  async findOrCreateUser(clerkUserId: string) {
+    // First, check if user exists in DB
+    const [existingUser] = await this.prisma.$queryRaw<
+      Array<{ id: string }>
+    >`SELECT "id" FROM public.users WHERE clerk_id = ${clerkUserId} LIMIT 1`;
+
+    if (existingUser) {
+      return this.getSelfProfile(existingUser.id);
+    }
+
+    // User doesn't exist, fetch from Clerk to sync
+    try {
+      const clerkUser = await this.clerkService.client.users.getUser(
+        clerkUserId,
+      );
+
+      // Build fields to sync from Clerk
+      const email = clerkUser.emailAddresses?.[0]?.emailAddress ?? null;
+      const username = clerkUser.username ?? null;
+      const name =
+        [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(' ') ||
+        clerkUser.fullName ||
+        null;
+
+      // Create new user
+      const [createdUser] = await this.prisma.$queryRaw<
+        Array<{ id: string }>
+      >`
+        INSERT INTO public.users (clerk_id, email, username, name, role, password_hash)
+        VALUES (${clerkUserId}, ${email}, ${username}, ${name}, 'user', '')
+        RETURNING "id"
+      `;
+
+      return this.getSelfProfile(createdUser.id);
+    } catch (error: any) {
+      // If Clerk API is rate-limited or unavailable, create a stub user
+      if (error?.status === 429 || error?.code === 'api_response_error') {
+        const [createdUser] = await this.prisma.$queryRaw<
+          Array<{ id: string }>
+        >`
+          INSERT INTO public.users (clerk_id, email, username, name, role, password_hash)
+          VALUES (${clerkUserId}, NULL, NULL, NULL, 'user', '')
+          RETURNING "id"
+        `;
+
+        return this.getSelfProfile(createdUser.id);
       }
 
-      return currentValue;
-    };
-
-    return JSON.parse(JSON.stringify(value, replacer)) as T;
+      // Re-throw other errors (token invalid, network error, etc.)
+      throw error;
+    }
   }
 
+  /**
+   * Internal DB profile builder
+   */
   private async getSelfProfile(userId: string): Promise<SelfProfileUser> {
     const user = await this.prisma.users.findUnique({
       where: { id: userId },
@@ -60,126 +105,41 @@ export class AuthService {
       throw new UnauthorizedException('Authenticated user not found');
     }
 
-    const profile: SelfProfileUser = {
+    return {
       id: user.id,
+      clerk_id: user.clerk_id,
       name: user.name,
       username: user.username,
-      image: user.image,
+      image: user.image as unknown as string | null,
       role: user.role,
       email: user.email,
       emergency_contact: user.emergency_contact,
       user_tickets: user.user_tickets,
       user_favorites: user.user_favorites,
     };
-
-    return this.serialize(profile);
   }
 
-  private async buildResponse(user: {
-    id: string;
-    email: string | null;
-    role: string;
-  }): Promise<AuthResponse> {
-    if (!user.email) {
-      throw new UnauthorizedException('Authenticated user is missing an email');
-    }
+  /**
+   * IMPORTANT:
+   * This now expects Clerk ID, NOT Prisma ID
+   */
+  async getAuthenticatedProfile(clerkId: string): Promise<SelfProfileUser> {
+    const user = await this.findOrCreateUser(clerkId);
 
-    return {
-      access_token: signToken({
-        sub: user.id,
-        email: user.email,
-        role: user.role,
-      }),
-      user: await this.getSelfProfile(user.id),
-    };
+    return this.getSelfProfile(user.id);
   }
 
-  async register(body: RegisterDto) {
-    const username = body.username?.trim();
-    const email = body.email?.trim().toLowerCase();
-    const password = body.password;
-    const name =
-      body.name?.trim() ||
-      [body.firstName, body.lastName].filter(Boolean).join(' ').trim();
-
-    if (!username || !email || !password) {
-      throw new BadRequestException(
-        'username, email and password are required',
-      );
-    }
-
-    const existingUser = await this.prisma.users.findFirst({
-      where: {
-        OR: [{ email }, { username }],
-      },
-      select: { id: true },
-    });
-
-    if (existingUser) {
-      throw new BadRequestException(
-        'An account with this email or username already exists',
-      );
-    }
-
-    const createdUser = await this.prisma.users.create({
-      data: {
-        name: name || null,
-        username,
-        email,
-        password_hash: hashPassword(password),
-        role: 'user',
-      },
-      select: {
-        id: true,
-        email: true,
-        role: true,
-      },
-    });
-
-    return this.buildResponse(createdUser);
-  }
-
-  async login(body: LoginDto) {
-    const identifier =
-      body.email?.trim().toLowerCase() ?? body.username?.trim();
-
-    if (!identifier || !body.password) {
-      throw new BadRequestException(
-        'email or username and password are required',
-      );
-    }
-
-    const user = await this.prisma.users.findFirst({
-      where: {
-        OR: [{ email: identifier }, { username: identifier }],
-      },
-      select: {
-        id: true,
-        email: true,
-        role: true,
-        password_hash: true,
-      },
-    });
-
-    if (!user || !comparePassword(body.password, user.password_hash)) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    return this.buildResponse(user);
-  }
-
-  verifyAccessToken(token: string): JwtPayload {
-    return verifyToken(token);
-  }
-
-  async getAuthenticatedProfile(userId: string): Promise<SelfProfileUser> {
-    return await this.getSelfProfile(userId);
-  }
-
+  /**
+   * Update profile (safe for dev + production)
+   * Uses Prisma user.id internally
+   */
   async updateProfile(
     userId: string,
-    body: UpdateProfileDto,
-  ): Promise<AuthResponse> {
+    body: {
+      name?: string;
+      username?: string;
+    },
+  ) {
     const name = body.name?.trim();
     const username = body.username?.trim();
 
@@ -201,90 +161,12 @@ export class AuthService {
       }
     }
 
-    const updatedUser = await this.prisma.users.update({
+    return this.prisma.users.update({
       where: { id: userId },
       data: {
-        ...(name !== undefined ? { name: name || null } : {}),
-        ...(username !== undefined ? { username: username || null } : {}),
-      },
-      select: {
-        id: true,
-        email: true,
-        role: true,
+        name: name ?? undefined,
+        username: username ?? undefined,
       },
     });
-
-    return this.buildResponse(updatedUser);
-  }
-
-  async updateCredentials(
-    userId: string,
-    body: UpdateCredentialsDto,
-  ): Promise<AuthResponse> {
-    const email = body.email?.trim().toLowerCase();
-    const currentPassword = body.currentPassword;
-    const password = body.password;
-
-    if (!email && !password) {
-      throw new BadRequestException('email or password is required');
-    }
-
-    if (password && !currentPassword) {
-      throw new BadRequestException(
-        'currentPassword is required to change password',
-      );
-    }
-
-    const currentUser = await this.prisma.users.findUnique({
-      where: { id: userId },
-      select: {
-        id: true,
-        email: true,
-        role: true,
-        password_hash: true,
-      },
-    });
-
-    if (!currentUser) {
-      throw new UnauthorizedException('Authenticated user not found');
-    }
-
-    if (
-      currentPassword &&
-      !comparePassword(currentPassword, currentUser.password_hash)
-    ) {
-      throw new UnauthorizedException('Current password is invalid');
-    }
-
-    if (email) {
-      const existingUser = await this.prisma.users.findFirst({
-        where: {
-          id: { not: userId },
-          email,
-        },
-        select: { id: true },
-      });
-
-      if (existingUser) {
-        throw new BadRequestException('This email is already in use');
-      }
-    }
-
-    const updatedUser = await this.prisma.users.update({
-      where: { id: userId },
-      data: {
-        ...(email !== undefined ? { email } : {}),
-        ...(password !== undefined
-          ? { password_hash: hashPassword(password) }
-          : {}),
-      },
-      select: {
-        id: true,
-        email: true,
-        role: true,
-      },
-    });
-
-    return this.buildResponse(updatedUser);
   }
 }

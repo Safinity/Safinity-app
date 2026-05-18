@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Image } from 'react-native';
+import { Image, Platform, View } from 'react-native';
 import styled from 'styled-components/native';
 import { Spacing, BorderRadius, Colors, TextStyles } from '../constants/theme';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -17,12 +17,20 @@ export const CalendarCard = ({ item }: any) => {
     }
   };
 
-  const handleToggleFavorite = () => {
+  const handleToggleFavorite = (e: any) => {
+    // Evita que o clique no coração também ative o clique do card inteiro (Bubbling/Propagation)
+    if (e && e.stopPropagation) {
+      e.stopPropagation();
+    }
     setIsFavorite((prev: boolean) => !prev);
   };
 
   const getImageSource = () => {
     if (!item.image) return null;
+
+    if (typeof item.image === 'object' || typeof item.image === 'number') {
+      return item.image;
+    }
     if (calendarImages[item.image]) {
       return calendarImages[item.image];
     }
@@ -39,7 +47,8 @@ export const CalendarCard = ({ item }: any) => {
       activeOpacity={0.8}
       onPress={handlePress}
       accessible={true}
-      role="button"
+      // CORREÇÃO: Evita a conversão para a tag HTML <button> duplicada na Web, mantendo o comportamento nativo no mobile
+      {...(Platform.OS === 'web' ? { as: View, onClick: handlePress, style: { cursor: 'pointer' } } : { role: 'button' })}
       accessibilityLabel={`Abrir detalhes de: ${item.title}`}
       accessibilityHint="Navega para a descrição completa desta atividade do calendário"
     >
@@ -91,8 +100,6 @@ const StyledImage = styled(Image)`
   width: 100%;
   height: 100%;
   position: absolute;
-  /* O transform scale(1.1) faz um zoom de 10%, eliminando as margens laterais 
-     sem perder o centro da imagem */
   transform: scale(1.1);
 `;
 
@@ -136,7 +143,8 @@ const FavoriteButton = styled.TouchableOpacity`
   align-items: center;
 `;
 
+// CORREÇÃO: Mudado de 'end' para 'flex-end' para limpar o aviso de propriedades flex da consola Web
 const TopRow = styled.View`
   width: 100%;
-  align-items: end;
+  align-items: flex-end;
 `;

@@ -86,5 +86,5 @@ const EventsContainer = styled.View`
 `;
 
 const BottomSpacer = styled.View`
-  height: ${Spacing.xxl * 2}px;
+  height: ${Spacing.xxl}px;
 `;

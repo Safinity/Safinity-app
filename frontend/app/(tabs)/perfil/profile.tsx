@@ -281,6 +281,11 @@ export default function Profile() {
           <SettingsIcon accessible={false}>›</SettingsIcon>
         </SettingsRow>
 
+        <SettingsRow role="button" accessibilityLabel="Theme settings">
+          <SettingsText>Theme</SettingsText>
+          <SettingsIcon accessible={false}>›</SettingsIcon>
+        </SettingsRow>
+
         <SettingsRow role="button" accessibilityLabel="Terms and conditions">
           <SettingsText>Terms and Conditions</SettingsText>
           <SettingsIcon accessible={false}>›</SettingsIcon>

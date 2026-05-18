@@ -74,15 +74,19 @@ export const EventCard = ({ event, variant }: any) => {
   const router = useRouter();
   const isCompact = variant === 'compact';
 
-  /** * A SOLUÇÃO ESTÁ AQUI:
-   * 1. Convertemos o ID da API para String.
-   * 2. Usamos essa String para aceder ao eventImages.
-   */
-  const eventId = String(event.name).toLowerCase().replace(/\s+/g, '-'); // Exemplo: "Tech Conference" -> "tech-conference"
-  const imageSource = eventImages[eventId] || { uri: 'https://via.placeholder.com/300' };
+  // MAPA ID → SLUG (porque não podes mexer na BD)
+  const eventIdToSlug: Record<string, string> = {
+    '1': 'music-festival',
+    '2': 'meo-mares-vivas-2025',
+    '3': 'superbock-superrock-2025',
+    '4': 'meo-sudoeste-2025',
+  };
+
+  const slug = eventIdToSlug[String(event.id)];
+  const imageSource = eventImages[slug] || eventImages['banner-lista-eventos'];
 
   const handlePress = () => {
-    router.push(`/event-details/${eventId}`);
+    router.push(`/event-details/${event.id}`);
   };
 
   const formatEventDate = (start: string, end: string) => {
@@ -108,8 +112,7 @@ export const EventCard = ({ event, variant }: any) => {
     <CardContainer
       isCompact={isCompact}
       onPress={handlePress}
-      // @ts-ignore - apenas para garantir acessibilidade web se necessário
-      href={`/event-details/${eventId}`}
+      href={`/event-details/${event.id}`}
       accessibilityRole="button"
       accessible={true}
       accessibilityLabel={`Evento: ${event.name}. Data: ${formatEventDate(event.start_date, event.end_date)}`}

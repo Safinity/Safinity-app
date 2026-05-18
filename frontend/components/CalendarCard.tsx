@@ -48,7 +48,9 @@ export const CalendarCard = ({ item }: any) => {
       onPress={handlePress}
       accessible={true}
       // CORREÇÃO: Evita a conversão para a tag HTML <button> duplicada na Web, mantendo o comportamento nativo no mobile
-      {...(Platform.OS === 'web' ? { as: View, onClick: handlePress, style: { cursor: 'pointer' } } : { role: 'button' })}
+      {...(Platform.OS === 'web'
+        ? { as: View, onClick: handlePress, style: { cursor: 'pointer' } }
+        : { role: 'button' })}
       accessibilityLabel={`Abrir detalhes de: ${item.title}`}
       accessibilityHint="Navega para a descrição completa desta atividade do calendário"
     >

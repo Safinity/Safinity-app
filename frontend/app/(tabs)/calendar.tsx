@@ -25,16 +25,16 @@ import img9 from '../../assets/images/Calendar/9.jpg';
 import img14 from '../../assets/images/Calendar/14.jpg';
 
 const localImages: { [key: string]: any } = {
-  "1.jpg": img1,
-  "2.jpg": img2,
-  "3.jpg": img3,
-  "4.jpg": img4,
-  "5.jpg": img5,
-  "6.jpg": img6,
-  "7.jpg": img7,
-  "8.jpg": img8,
-  "9.jpg": img9,
-  "14.jpg": img14,
+  '1.jpg': img1,
+  '2.jpg': img2,
+  '3.jpg': img3,
+  '4.jpg': img4,
+  '5.jpg': img5,
+  '6.jpg': img6,
+  '7.jpg': img7,
+  '8.jpg': img8,
+  '9.jpg': img9,
+  '14.jpg': img14,
 };
 
 // --- Styled Components ---
@@ -132,7 +132,7 @@ export default function CalendarScreen() {
           const data = Array.isArray(activitiesResponse.data)
             ? activitiesResponse.data
             : activitiesResponse.data?.results || [];
-          
+
           setActivities(data);
         }
       } catch (error) {
@@ -160,15 +160,15 @@ export default function CalendarScreen() {
       <Stack.Screen options={{ headerShown: false }} />
       <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
 
-      <HeaderWrapper 
-        style={{ paddingTop: Platform.OS === 'web' ? 15 : insets.top }} 
+      <HeaderWrapper
+        style={{ paddingTop: Platform.OS === 'web' ? 15 : insets.top }}
         accessibilityRole="header"
       >
         <Header />
       </HeaderWrapper>
 
-      <ScrollContent 
-        accessibilityRole="main" 
+      <ScrollContent
+        accessibilityRole="main"
         accessibilityLabel="Calendar events"
         contentContainerStyle={{ paddingTop: 10 }}
       >
@@ -201,48 +201,46 @@ export default function CalendarScreen() {
           />
         </View>
 
-        {!loading && filteredActivities.length > 0 ? (
-          filteredActivities.map((item, index) => {
-            let resolvedImage;
+        {!loading && filteredActivities.length > 0
+          ? filteredActivities.map((item, index) => {
+              let resolvedImage;
 
-            // Interceta strings locais ("1.jpg", etc) vindas da base de dados e injeta o import estático
-            if (item.image && (item.image.startsWith('http://') || item.image.startsWith('https://'))) {
-              resolvedImage = { uri: item.image };
-            } else if (localImages[item.image]) {
-              resolvedImage = localImages[item.image];
-            } else {
-              resolvedImage = img1; // Fallback seguro caso falte a propriedade
-            }
+              // Interceta strings locais ("1.jpg", etc) vindas da base de dados e injeta o import estático
+              if (
+                item.image &&
+                (item.image.startsWith('http://') || item.image.startsWith('https://'))
+              ) {
+                resolvedImage = { uri: item.image };
+              } else if (localImages[item.image]) {
+                resolvedImage = localImages[item.image];
+              } else {
+                resolvedImage = img1; // Fallback seguro caso falte a propriedade
+              }
 
-            const activityWithImage = { ...item, image: resolvedImage };
+              const activityWithImage = { ...item, image: resolvedImage };
 
-            return (
-              <View key={item.id}>
-                {(index === 0 || filteredActivities[index - 1].date !== item.date) && (
-                  <DateHeader>{item.date}</DateHeader>
-                )}
+              return (
+                <View key={item.id}>
+                  {(index === 0 || filteredActivities[index - 1].date !== item.date) && (
+                    <DateHeader>{item.date}</DateHeader>
+                  )}
 
-                <View style={{ marginBottom: 15 }}>
-                  <CalendarCard item={activityWithImage} />
+                  <View style={{ marginBottom: 15 }}>
+                    <CalendarCard item={activityWithImage} />
+                  </View>
                 </View>
-              </View>
-            );
-          })
-        ) : (
-          !loading && (
-            <DateHeader style={{ textAlign: 'center', marginTop: 50 }}>
-              No events found
-            </DateHeader>
-          )
-        )}
+              );
+            })
+          : !loading && (
+              <DateHeader style={{ textAlign: 'center', marginTop: 50 }}>
+                No events found
+              </DateHeader>
+            )}
 
         <SpaceBottom />
       </ScrollContent>
 
-      <MyCalendarButton
-        activeOpacity={0.8}
-        onPress={() => router.push('/(tabs)/my-calendar')}
-      >
+      <MyCalendarButton activeOpacity={0.8} onPress={() => router.push('/(tabs)/my-calendar')}>
         <ButtonText>My calendar</ButtonText>
       </MyCalendarButton>
     </Container>

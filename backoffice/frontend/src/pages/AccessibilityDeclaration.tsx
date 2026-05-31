@@ -240,7 +240,9 @@ export default function AccessibilityDeclaration() {
       <ol>
         <li>
           (2026-04-01). <strong>Relatório: </strong>
-          <a href="#">Tecnologias de apoio</a>
+          <a href="https://drive.google.com/file/d/1DAEtMYQ5omUfvea_qRHimHm_IIBCAV5q/view">
+            Tecnologias de apoio
+          </a>
           <ul>
             <li>
               <strong>Ferramentas utilizadas:</strong> Ferramenta de ampliação (Android/Windows),
@@ -279,7 +281,7 @@ export default function AccessibilityDeclaration() {
 
       <h2>Correio eletrónico:</h2>
       <p>
-        <a href="#">safinityapp@gmail.com</a>
+        <a href="mailto:safinityapp@gmail.com">safinityapp@gmail.com</a>
       </p>
 
       <h1>IV. Notas Adicionais e Outras Evidências</h1>

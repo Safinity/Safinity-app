@@ -1,6 +1,86 @@
+import styled from 'styled-components';
+import { Colors, Spacing } from '../theme/theme';
+
+const Container = styled.div`
+  max-width: 900px;
+  margin: 0 auto;
+  padding: ${Spacing.margemLateral}px ${Spacing.md}px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  line-height: 1.8;
+  color: ${Colors.palette.neutral.neutral100};
+  background-color: ${Colors.background};
+
+  h1 {
+    margin-top: ${Spacing.lg}px;
+    margin-bottom: ${Spacing.md}px;
+    font-size: 28px;
+    font-weight: 600;
+    color: ${Colors.primary_50};
+  }
+
+  h2 {
+    margin-top: ${Spacing.lg}px;
+    margin-bottom: ${Spacing.md}px;
+    font-size: 20px;
+    font-weight: 600;
+    color: ${Colors.primary_50};
+  }
+
+  p {
+    margin-bottom: ${Spacing.md}px;
+    text-align: justify;
+    font-weight: 400;
+  }
+
+  ol {
+    margin-left: ${Spacing.lg}px;
+    margin-bottom: ${Spacing.md}px;
+
+    li {
+      margin-bottom: ${Spacing.md}px;
+      padding-left: ${Spacing.md}px;
+
+      strong {
+        font-weight: 600;
+        color: ${Colors.primary_50};
+      }
+
+      ul {
+        margin-top: ${Spacing.sm}px;
+        margin-left: ${Spacing.lg}px;
+        margin-bottom: ${Spacing.sm}px;
+
+        li {
+          margin-bottom: ${Spacing.sm}px;
+          list-style-type: disc;
+          color: ${Colors.palette.neutral.neutral100};
+        }
+      }
+    }
+  }
+
+  a {
+    color: ${Colors.palette.secondary.icyBlue};
+    text-decoration: none;
+    font-weight: 500;
+    border-bottom: 2px solid ${Colors.palette.secondary.icyBlue};
+    transition: all 0.3s ease;
+
+    &:hover {
+      color: ${Colors.palette.secondary.turquoise};
+      border-bottom-color: ${Colors.palette.secondary.turquoise};
+    }
+
+    &:focus {
+      outline: 2px solid ${Colors.primary};
+      outline-offset: 2px;
+    }
+  }
+`;
+
 export default function AccessibilityDeclaration() {
   return (
-    <div>
+    <Container>
       <h1>Declaração de Acessibilidade: Safinity</h1>
       <p>
         A Safinity assume o compromisso de tornar o seu ecossistema digital, composto pelo
@@ -155,21 +235,69 @@ export default function AccessibilityDeclaration() {
           </ul>
         </li>
       </ol>
+
+      <h2>C. Testes com tecnologias de apoio:</h2>
       <ol>
         <li>
+          (2026-04-01). <strong>Relatório: </strong>
+          <a href="#">Tecnologias de apoio</a>
           <ul>
             <li>
-              <strong></strong>
+              <strong>Ferramentas utilizadas:</strong> Ferramenta de ampliação (Android/Windows),
+              Leitores de Ecra (NVDA e TalkBack) e Navegação por Teclado.
             </li>
             <li>
-              <strong></strong>
+              <strong>Amostra:</strong> 11 páginas.
             </li>
             <li>
-              <strong></strong>
+              <strong>Principais resultados (sumário):</strong> A avaliação revelou que o
+              ecossistema apresenta uma base sólida de operabilidade, o que permite a navegação
+              sequencial lógica. Foram identificadas e corrigidas barreiras críticas como a
+              sobreposição de elementos em ampliações de 400% ou a ausência de indicadores de foco
+              visual em componentes interativos. A implementacao de accessibilityLabel e
+              accessibilityRole garantiu que elementos anteriormente silenciosos passassem a ser
+              anunciados corretamente pelos leitores de ecra. Enquanto a otimizacao dos headings
+              melhorou a compreensao semantica.
             </li>
           </ul>
         </li>
       </ol>
-    </div>
+
+      <h2>D. Testes de usabilidade com pessoas com deficiência:</h2>
+      <p>
+        O sítio Web e aplicacao movel ainda nao foram alvo de testes com utilizadores com
+        deficiencia.
+      </p>
+
+      <h1>III. Contacto e solicitacão de informação relativa ao sítio Web e aplicação móvel</h1>
+      <p>
+        A equipa Safinity valoriza a participação ativa dos seus utilizadores na construção de um
+        ecossistema mais inclusivo. Caso encontre barreiras de acesso, necessite de esclarecimentos
+        sobre as funcionalidades de acessibilidade ou pretenda submeter sugestoes de melhoria tanto
+        no sitio Web como na aplicação móvel, poderá fazê-lo através do seguinte canal:
+      </p>
+
+      <h2>Correio eletrónico:</h2>
+      <p>
+        <a href="#">safinityapp@gmail.com</a>
+      </p>
+
+      <h1>IV. Notas Adicionais e Outras Evidências</h1>
+      <p>
+        Até à data de publicação desta Declaração, a equipa Safinity não submeteu o projeto a outras
+        certificações ou selos de maturidade digital, focando os seus recursos na implementacao
+        direta dos requisitos tecnicos de acessibilidade definidos no Decreto-Lei n.° 83/2018. O
+        projeto mantem-se num ciclo de melhoria continua para elevar os seus indices de
+        conformidade.
+      </p>
+
+      <h1>V. Denúncia de situações de discriminação</h1>
+      <p>
+        Sempre que o utilizador considere que a falha de acessibilidade do sitio Web ou aplicacao
+        movel origina uma situaçao de discriminação, podera apresentar queixa ao Instituto Nacional
+        para a Reabilitação (INR, I.P.), de acordo com o previsto no artigo 13.° do Decreto-Lei n.°
+        83/2018.
+      </p>
+    </Container>
   );
 }

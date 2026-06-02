@@ -232,8 +232,8 @@ INSERT INTO Sensor (id, event_id, location, sensor_type, last_reading_value, las
 -- Pontos de Interesse e Atividades
 INSERT INTO Points_interest (id, event_id, name) VALUES (1, 1, 'Palco Principal'), (2, 1, 'Posto Médico');
 
-INSERT INTO Event_activities (id, event_id, name, start_time, end_time, description, point_interest_id) VALUES 
-(1, 1, 'Keynote Principal', '2026-11-02 10:00:00', '2026-11-02 11:00:00', 'Abertura do evento', 1),
+INSERT INTO Event_activities (id, event_id, name, start_time, end_time, description, speaker, point_interest_id) VALUES 
+(1, 1, 'Keynote Principal', '2026-11-02 10:00:00', '2026-11-02 11:00:00', 'Abertura do evento', 'John Doe', 1),
 (2, 1, 'Workshop IA', '2026-11-02 14:00:00', '2026-11-02 16:00:00', 'Hands-on com IA', 1);
 
 -- SOS e Alertas

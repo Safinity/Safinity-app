@@ -1,5 +1,6 @@
 import React from 'react';
 import styled, { useTheme } from 'styled-components/native';
+import { Spacing, Height, BorderRadius, TextStyles, Colors } from '../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 
 export type SearchInputVariant = 'homepage' | 'mapa';
@@ -15,19 +16,19 @@ interface SearchInputProps {
 const SearchBox = styled.View<{ bgColor: string }>`
   flex-direction: row;
   align-items: center;
-  height: ${({ theme }) => theme.height.sm}px;
-  background-color: ${({ bgColor }) => bgColor};
-  border-radius: ${({ theme }) => theme.borderRadius.large}px;
-  padding: 0 ${({ theme }) => theme.spacing.md}px;
+  height: ${Height.sm}px;
+  background-color: ${Colors.grayNavbar};
+  border-radius: ${BorderRadius.large}px;
+  padding: 0 ${Spacing.md}px;
 `;
 
 const StyledInput = styled.TextInput<{ textColor: string }>`
   flex: 1;
-  color: ${({ theme }) => theme.colors.white};
-  ${({ theme }) => theme.text.corpo.corpoTexto};
+  color: ${Colors.white};
+  ${TextStyles.corpo.corpoTexto};
   include-font-padding: false;
   padding-vertical: 0px;
-  line-height: ${({ theme }) => theme.text.corpo.corpoTexto.lineHeight}px;
+  line-height: ${TextStyles.corpo.corpoTexto.lineHeight}px;
 `;
 
 const SearchInput: React.FC<SearchInputProps> = ({
@@ -37,19 +38,16 @@ const SearchInput: React.FC<SearchInputProps> = ({
   variant,
   style,
 }) => {
-  // Acedemos ao theme do Styled Components para as cores dinâmicas
-  const themeContext = useTheme();
-
   const SEARCH_THEME = {
     homepage: {
-      backgroundColor: themeContext.colors.grayNavbar,
-      iconColor: themeContext.colors.white,
-      textColor: themeContext.colors.white,
+      backgroundColor: Colors.grayNavbar,
+      iconColor: Colors.white,
+      textColor: Colors.white,
     },
     mapa: {
-      backgroundColor: themeContext.colors.background,
-      iconColor: themeContext.colors.white,
-      textColor: themeContext.colors.white,
+      backgroundColor: Colors.background,
+      iconColor: Colors.white,
+      textColor: Colors.white,
     },
   } as const;
 

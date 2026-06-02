@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -21,14 +22,24 @@ export class EventsController {
 
   // GET /events
   @Get()
-  getAllEvents() {
-    return this.eventsService.getAllEvents();
-  }
-
-  // GET /events/activities/:activityId
-  @Get('activities/:activityId')
-  getActivityById(@Param('activityId') activityId: string) {
-    return this.eventsService.getActivityById(activityId);
+  getAllEvents(
+    @Query('page') page?: string,
+    @Query('pageSize') pageSize?: string,
+    @Query('search') search?: string,
+    @Query('category') category?: string,
+    @Query('status') status?: string,
+    @Query('sortBy') sortBy?: 'start_date' | 'end_date' | 'name',
+    @Query('sortOrder') sortOrder?: 'asc' | 'desc',
+  ) {
+    return this.eventsService.getAllEvents({
+      page,
+      pageSize,
+      search,
+      category,
+      status,
+      sortBy,
+      sortOrder,
+    });
   }
 
   // GET /events/past
@@ -36,7 +47,21 @@ export class EventsController {
   @UseGuards(AuthRequiredGuard)
   @ApiOperation({ summary: 'Get authenticated user past events' })
   getPastEvents(@Req() request: RequestWithUser) {
-    return this.eventsService.getPastEvents(request.user!.id);
+    const eventsService: EventsService = this.eventsService;
+
+    return eventsService.getPastEvents(request.user!.id);
+  }
+
+  // GET /events/present-event
+  @Get('present-event')
+  @UseGuards(AuthRequiredGuard)
+  @ApiOperation({
+    summary: 'Get the event currently happening for authenticated user',
+  })
+  getPresentEvent(@Req() request: RequestWithUser) {
+    const eventsService: EventsService = this.eventsService;
+
+    return eventsService.getPresentEvent(request.user!.id);
   }
 
   // GET /events/:id
@@ -51,16 +76,29 @@ export class EventsController {
     return this.eventsService.getPointsInterest(id);
   }
 
-  // GET /events/:id/map
-  @Get(':id/map')
+  // GET /events/:id/mapa
+  @Get(':id/mapa')
   getMap(@Param('id') id: string) {
     return this.eventsService.getMap(id);
   }
 
   // GET /events/:id/activities
   @Get(':id/activities')
-  getActivities(@Param('id') id: string) {
-    return this.eventsService.getActivities(id);
+  getActivities(
+    @Param('id') id: string,
+    @Query('page') page?: string,
+    @Query('pageSize') pageSize?: string,
+    @Query('search') search?: string,
+    @Query('sortBy') sortBy?: 'start_time' | 'end_time' | 'name',
+    @Query('sortOrder') sortOrder?: 'asc' | 'desc',
+  ) {
+    return this.eventsService.getActivities(id, {
+      page,
+      pageSize,
+      search,
+      sortBy,
+      sortOrder,
+    });
   }
 
   // GET /events/:id/favourites
@@ -68,6 +106,12 @@ export class EventsController {
   @UseGuards(AuthRequiredGuard)
   getFavourites(@Param('id') id: string, @Req() request: RequestWithUser) {
     return this.eventsService.getFavourites(id, request.user!.id);
+  }
+
+  // GET /events/activities/:id
+  @Get('activities/:id')
+  getActivityById(@Param('id') id: string) {
+    return this.eventsService.getActivityById(id);
   }
 
   // POST /events/favourite
@@ -80,11 +124,11 @@ export class EventsController {
     return this.eventsService.addFavourite(request.user!.id, body);
   }
 
-  // DELETE /events/favourite/:id
-  @Delete('favourite/:eventId')
+  // DELETE /events/favourite/:activityId
+  @Delete('favourite/:activityId')
   @UseGuards(AuthRequiredGuard)
   removeFavourite(
-    @Param('eventId') eventId: string,
+    @Param('activityId') activityId: string,
     @Req() request: RequestWithUser,
   ) {
     return this.eventsService.removeFavourite(

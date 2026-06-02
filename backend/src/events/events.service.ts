@@ -3,11 +3,32 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import type { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 export type AddFavouriteBody = {
+  user_id?: string;
+  userId?: string;
   activity_id?: string | number;
   activityId?: string | number;
+};
+
+type EventsListQuery = {
+  page?: string;
+  pageSize?: string;
+  search?: string;
+  category?: string;
+  status?: string;
+  sortBy?: 'start_date' | 'end_date' | 'name';
+  sortOrder?: 'asc' | 'desc';
+};
+
+type ActivitiesListQuery = {
+  page?: string;
+  pageSize?: string;
+  search?: string;
+  sortBy?: 'start_time' | 'end_time' | 'name';
+  sortOrder?: 'asc' | 'desc';
 };
 
 @Injectable()
@@ -49,9 +70,54 @@ export class EventsService {
     return lastRecord ? lastRecord.id + 1n : 1n;
   }
 
-  async getAllEvents() {
+  private parsePositiveInt(
+    value: string | undefined,
+    fallback: number,
+  ): number {
+    if (!value) {
+      return fallback;
+    }
+
+    const parsed = Number.parseInt(value, 10);
+
+    if (!Number.isFinite(parsed) || parsed <= 0) {
+      throw new BadRequestException(`Invalid numeric value: ${value}`);
+    }
+
+    return parsed;
+  }
+
+  async getAllEvents(query?: EventsListQuery) {
+    const page = this.parsePositiveInt(query?.page, 1);
+    const pageSize = Math.min(this.parsePositiveInt(query?.pageSize, 20), 100);
+    const skip = (page - 1) * pageSize;
+    const sortBy = query?.sortBy ?? 'start_date';
+    const sortOrder: Prisma.SortOrder = query?.sortOrder ?? 'asc';
+
+    const where: Prisma.eventWhereInput = {
+      ...(query?.search
+        ? {
+            OR: [
+              { name: { contains: query.search, mode: 'insensitive' } },
+              {
+                description: {
+                  contains: query.search,
+                  mode: 'insensitive',
+                },
+              },
+              { venue_name: { contains: query.search, mode: 'insensitive' } },
+            ],
+          }
+        : {}),
+      ...(query?.category ? { category: query.category } : {}),
+      ...(query?.status ? { status: query.status } : {}),
+    };
+
     const events = await this.prisma.event.findMany({
-      orderBy: { start_date: 'asc' },
+      where,
+      orderBy: { [sortBy]: sortOrder },
+      skip,
+      take: pageSize,
       select: {
         id: true,
         organization_id: true,
@@ -197,11 +263,31 @@ export class EventsService {
     });
   }
 
-  async getActivities(id: string) {
+  async getActivities(id: string, query?: ActivitiesListQuery) {
     const eventId = this.parseEventId(id);
+    const page = this.parsePositiveInt(query?.page, 1);
+    const pageSize = Math.min(this.parsePositiveInt(query?.pageSize, 20), 100);
+    const skip = (page - 1) * pageSize;
+    const sortBy = query?.sortBy ?? 'start_time';
+    const sortOrder: Prisma.SortOrder = query?.sortOrder ?? 'asc';
 
     const activities = await this.prisma.event_activities.findMany({
-      where: { event_id: eventId },
+      where: {
+        event_id: eventId,
+        ...(query?.search
+          ? {
+              OR: [
+                { name: { contains: query.search, mode: 'insensitive' } },
+                {
+                  description: {
+                    contains: query.search,
+                    mode: 'insensitive',
+                  },
+                },
+              ],
+            }
+          : {}),
+      },
       select: {
         id: true,
         event_id: true,
@@ -218,7 +304,33 @@ export class EventsService {
           },
         },
       },
-      orderBy: { start_time: 'asc' },
+      orderBy: { [sortBy]: sortOrder },
+      skip,
+      take: pageSize,
+    });
+
+    return this.serialize(activities);
+  }
+
+  async getAllActivities() {
+    const activities = await this.prisma.event_activities.findMany({
+      select: {
+        id: true,
+        event_id: true,
+        name: true,
+        start_time: true,
+        end_time: true,
+        description: true,
+        point_interest_id: true,
+        specifications: true,
+        points_interest: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      orderBy: [{ event_id: 'asc' }, { start_time: 'asc' }],
     });
 
     return this.serialize(activities);
@@ -278,6 +390,58 @@ export class EventsService {
       });
 
     return this.serialize(pastEvents);
+  }
+
+  async getPresentEvent(userId: string) {
+    if (!userId) {
+      throw new BadRequestException('user_id is required');
+    }
+
+    const now = new Date();
+
+    const tickets = await this.prisma.user_tickets.findMany({
+      where: { user_id: userId },
+      select: {
+        event: {
+          select: {
+            id: true,
+            organization_id: true,
+            name: true,
+            venue_name: true,
+            description: true,
+            status: true,
+            category: true,
+            start_date: true,
+            end_date: true,
+            others: true,
+          },
+        },
+      },
+    });
+
+    const presentEvent = tickets
+      .map((ticket) => ticket.event)
+      .filter((event) => {
+        if (!event) {
+          return false;
+        }
+
+        if (!event.start_date) {
+          return false;
+        }
+
+        const startTime = event.start_date;
+        const endTime =
+          event.end_date ?? new Date(startTime.getTime() + 24 * 60 * 60 * 1000);
+
+        return now >= startTime && now <= endTime;
+      })
+      .filter(
+        (event, index, array) =>
+          array.findIndex((candidate) => candidate.id === event.id) === index,
+      )[0];
+
+    return presentEvent ? this.serialize(presentEvent) : null;
   }
 
   async getFavourites(id: string, userId: string) {
@@ -415,8 +579,18 @@ export class EventsService {
     return this.serialize(favourite);
   }
 
+  async addFavouriteFromBody(body: AddFavouriteBody) {
+    const userId = body.user_id ?? body.userId;
+
+    if (!userId) {
+      throw new BadRequestException('user_id is required');
+    }
+
+    return this.addFavourite(String(userId), body);
+  }
+
   async findAll() {
-    return this.getAllEvents();
+    return this.getAllEvents({});
   }
 
   async findOne(id: bigint) {

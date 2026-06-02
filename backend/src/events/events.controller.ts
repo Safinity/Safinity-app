@@ -131,8 +131,9 @@ export class EventsController {
     @Param('activityId') activityId: string,
     @Req() request: RequestWithUser,
   ) {
-    const eventsService: EventsService = this.eventsService;
-
-    return eventsService.removeFavourite(request.user!.id, activityId);
+    return this.eventsService.removeFavourite(
+      request.user!.id,
+      eventId,
+    );
   }
 }

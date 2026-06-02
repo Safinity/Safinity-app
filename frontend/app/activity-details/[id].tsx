@@ -1,11 +1,11 @@
-import React from 'react';
-import { ScrollView, StatusBar, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ScrollView, StatusBar, View, ActivityIndicator, Text } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
 import Header from '../../components/ui/header';
 import { HeroBanner } from '../../components/HeroBanner';
-import calendarData from '../../data/calendar.json';
+import api from '../../utils/api';
 
 const Container = styled.View`
   flex: 1;
@@ -81,8 +81,59 @@ const Avatar = styled.Image`
 export default function ActivityDetailsScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
+  const [activity, setActivity] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const activity = calendarData.activities.find(item => item.id === id);
+  useEffect(() => {
+    let mounted = true;
+
+    const loadActivity = async () => {
+      if (!id) return;
+      setLoading(true);
+      setError(null);
+
+      try {
+        const res = await api.get(`/events/activities/${id}`);
+        if (!mounted) return;
+        setActivity(res.data);
+      } catch (err: any) {
+        console.error('Erro ao carregar activity:', err);
+        if (!mounted) return;
+        setError('Erro ao carregar detalhes da atividade.');
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    loadActivity();
+
+    return () => {
+      mounted = false;
+    };
+  }, [id]);
+
+  if (loading) {
+    return (
+      <Container>
+        <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color="#fff" />
+        </View>
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container>
+        <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
+        <View style={{ padding: 24 }}>
+          <Text style={{ color: 'white' }}>{error}</Text>
+        </View>
+      </Container>
+    );
+  }
 
   if (!activity) return null;
 

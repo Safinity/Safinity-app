@@ -12,6 +12,7 @@
       "duration": "4 days",
       "location": "Lisbon, Portugal",
       "status": "live",
+      "validity": "valido",
       "description": "The largest technology conference in the world returns to Lisbon to discuss the future of AI, innovation, and the global impact of technology on modern society."
     },
     {
@@ -27,6 +28,7 @@
       "location": "Meco, Portugal",
       "status": "upcoming",
       "time_left": "9 days 21 hours",
+      "validity": "valido",
       "description": "Experience authentic rock by the Meco beach. Three days of intense music, camping, and an unforgettable atmosphere at one of Portugal's most iconic festivals."
     },
     {
@@ -41,6 +43,7 @@
       "duration": "3 days",
       "location": "Algés, Portugal",
       "status": "upcoming",
+      "validity": "valido",
       "time_left": "10 days 22 hours",
       "description": "Where the dream happens. The Passeio Marítimo de Algés hosts the best indie, rock, and pop lineup, combining the Lisbon sun with the best music of the moment."
     },
@@ -56,6 +59,7 @@
       "duration": "3 days",
       "location": "Vila Nova de Gaia, Portugal",
       "status": "upcoming",
+      "validity": "valido",
       "time_left": "19 days 15 hours",
       "description": "A festival with a privileged view over the Douro River, bringing major national and international pop-rock names to the north of the country."
     },
@@ -70,6 +74,7 @@
       "end_time": "06:00",
       "duration": "4 days",
       "location": "Zambujeira do Mar, Portugal",
+      "validity": "valido",
       "status": "upcoming",
       "time_left": "41 days 8 hours",
       "description": "The favorite vacation week for young Portuguese. Plenty of sun, beach, and the longest nights of electronic music and urban rhythms in Zambujeira."
@@ -85,6 +90,7 @@
       "end_time": "19:00",
       "duration": "1 day",
       "location": "Lisbon, Portugal",
+      "validity": "valido",
       "status": "upcoming",
       "time_left": "9 days 21 hours",
       "description": "Focused on leaders and entrepreneurs, this summit explores how new technologies are transforming traditional business models."
@@ -102,6 +108,7 @@
       "location": "Porto, Portugal",
       "status": "upcoming",
       "time_left": "9 days 21 hours",
+      "validity": "valido",
       "description": "An immersive experience in Porto about robotics, virtual reality, and the technologies of tomorrow that are already shaping our daily lives."
     },
     {
@@ -117,6 +124,7 @@
       "location": "Lisbon, Portugal",
       "status": "upcoming",
       "time_left": "9 days 21 hours",
+      "validity": "valido",
       "description": "A week dedicated to the Portuguese startup ecosystem, featuring workshops, networking, and decentralized events throughout the city of Lisbon."
     },
     {
@@ -131,6 +139,7 @@
       "duration": "16 days",
       "location": "Belém, Portugal",
       "status": "upcoming",
+      "validity": "valido",
       "time_left": "9 days 21 hours",
       "description": "Celebrate Portuguese tradition in a historical setting. Typical food, handicrafts, and folk music right by the Tagus River."
     },
@@ -146,6 +155,7 @@
       "duration": "3 days",
       "location": "Olhão, Portugal",
       "status": "upcoming",
+      "validity": "valido",
       "time_left": "9 days 21 hours",
       "description": "A celebration of Algarve culture. From seafood to traditional music, explore the essence of Olhão in a unique festival for the whole family."
     },
@@ -161,6 +171,7 @@
       "duration": "5 days",
       "location": "Aveiro, Portugal",
       "status": "upcoming",
+      "validity": "valido",
       "time_left": "9 days 21 hours",
       "description": "Art, contemporary circus, and concerts spread across the canals of Aveiro. The 'Venice of Portugal' transforms into a giant stage for creativity."
     },
@@ -175,6 +186,7 @@
       "end_time": "04:00",
       "duration": "30 days",
       "location": "Lisbon, Portugal",
+      "validity": "valido",
       "status": "upcoming",
       "time_left": "9 days 21 hours",
       "description": "June nights in Lisbon are not the same without the smell of grilled sardines and the excitement of traditional neighborhoods like Alfama and Graça."

@@ -3,7 +3,7 @@ import { FlatList, StatusBar, ActivityIndicator, Text, View } from 'react-native
 import styled from 'styled-components/native';
 import { useRouter, Stack } from 'expo-router';
 import Head from 'expo-router/head';
-import axios from 'axios';
+import api from '../../utils/api';
 
 // Imports de UI e Componentes
 import Header from '../../components/ui/header';
@@ -74,7 +74,7 @@ export default function EventsListScreen() {
     const fetchEvents = async () => {
       try {
         // Se usares Android Emulator, troca localhost por 10.0.2.2
-        const response = await axios.get('http://localhost:3000/events');
+        const response = await api.get('/events');
         const data = Array.isArray(response.data) ? response.data : [response.data];
 
         console.log('Dados crus da API:', data);
@@ -109,7 +109,7 @@ export default function EventsListScreen() {
 
       <Content role="main">
         <HeroBanner
-          event={{ id: 'banner-lista-eventos' }}
+          event={{ id: 'banner-lista-eventos', image: null }}
           title="What's Coming Up"
           description="Discover events with safety you can trust"
           hideMap={true}
@@ -155,7 +155,7 @@ export default function EventsListScreen() {
               // FILTRO ULTRA-ROBUSTO: trim() remove espaços, toLowerCase() ignora Caps
               const sectionEvents = events.filter((e: any) => {
                 const apiCat = e.category ? String(e.category).trim().toLowerCase() : '';
-                return apiCat === category.toLowerCase();
+                return apiCat.includes(category.toLowerCase());
               });
 
               if (sectionEvents.length === 0) return null;

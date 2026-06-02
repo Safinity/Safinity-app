@@ -1,0 +1,6 @@
+{
+  "name": "safinity-app",
+  "version": "1.0.0",
+  "description": "Safinity App - Monorepo root",
+  "private": true
+}

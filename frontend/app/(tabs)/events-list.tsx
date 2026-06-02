@@ -68,26 +68,40 @@ export default function EventsListScreen() {
   const [events, setEvents] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Categorias esperadas (Devem bater com o teu allCategories)
   const allCategories = ['Music', 'Tech', 'Cultural', 'Educational'];
   const [selectedCategories, setSelectedCategories] = useState(['Music', 'Tech']);
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        // Se usares Android Emulator, troca localhost por 10.0.2.2
         const token = await getToken();
-        console.log('Clerk token:', token);
+        console.log('=== DEBUG EVENTS ===');
+        console.log('Token exists:', !!token);
+        console.log('Token value:', token);
 
         const response = await api.get('/events', {
           headers: token ? { Authorization: `Bearer ${token}` } : undefined,
         });
+
+        console.log('Status HTTP:', response.status);
+        console.log('Tipo de response.data:', typeof response.data);
+        console.log('É array:', Array.isArray(response.data));
+        console.log('Response.data raw:', JSON.stringify(response.data, null, 2));
+
         const data = Array.isArray(response.data) ? response.data : [response.data];
 
-        console.log('Dados crus da API:', data);
+        console.log('Total eventos recebidos:', data.length);
+        console.log('Categorias na BD:', data.map((e: any) => `"${e.category}"`).join(', '));
+        console.log('Primeiro evento completo:', JSON.stringify(data[0], null, 2));
+        console.log('=== FIM DEBUG ===');
+
         setEvents(data);
-      } catch (error) {
-        console.error('Erro ao conectar ao NestJS:', error);
+      } catch (error: any) {
+        console.error('=== ERRO EVENTS ===');
+        console.error('Status:', error.response?.status);
+        console.error('Response data:', JSON.stringify(error.response?.data, null, 2));
+        console.error('Mensagem:', error.message);
+        console.error('=== FIM ERRO ===');
       } finally {
         setIsLoading(false);
       }
@@ -146,7 +160,6 @@ export default function EventsListScreen() {
           </View>
         ) : (
           <>
-            {/* Se a API deu dados mas nada aparece nos filtros, este aviso aparece */}
             {events.length > 0 &&
               selectedCategories.every(
                 cat =>
@@ -159,7 +172,6 @@ export default function EventsListScreen() {
               )}
 
             {selectedCategories.map(category => {
-              // FILTRO ULTRA-ROBUSTO: trim() remove espaços, toLowerCase() ignora Caps
               const sectionEvents = events.filter((e: any) => {
                 const apiCat = e.category ? String(e.category).trim().toLowerCase() : '';
                 return apiCat === category.toLowerCase();

@@ -13,6 +13,8 @@ interface HeaderProps {
   showBottomDivider?: boolean;
   title?: string;
   subtitle?: string;
+  rightIcon?: keyof typeof Ionicons.glyphMap;
+  onRightPress?: () => void;
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -20,6 +22,8 @@ const Header: React.FC<HeaderProps> = ({
   showBottomDivider = false,
   title,
   subtitle,
+  rightIcon,
+  onRightPress,
 }) => {
   const statusBarHeight = Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 24;
 
@@ -71,6 +75,12 @@ const Header: React.FC<HeaderProps> = ({
               <BackButton onPress={() => router.back()} accessibilityLabel="Go back" role="button">
                 <Ionicons name="arrow-back" size={Width.iconHeader} color={Colors.white} />
               </BackButton>
+
+              {rightIcon && onRightPress && (
+                <RightButton onPress={onRightPress} accessibilityLabel="Right action" role="button">
+                  <Ionicons name={rightIcon} size={Width.iconHeader} color={Colors.white} />
+                </RightButton>
+              )}
             </BackButtonRow>
 
             {title && (
@@ -137,12 +147,19 @@ const BackContainer = styled.View<{ hasText: boolean }>`
 const BackButtonRow = styled.View`
   flex-direction: row;
   align-items: center;
+  justify-content: space-between;
 `;
 
 const BackButton = styled.Pressable`
   z-index: 99;
   padding-bottom: ${Spacing.sm}px;
   border-radius: ${BorderRadius.round}px;
+`;
+
+const RightButton = styled.Pressable`
+  z-index: 99;
+  padding-bottom: ${({ theme }) => theme.spacing.sm}px;
+  border-radius: ${({ theme }) => theme.borderRadius.round}px;
 `;
 
 const BackButtonDetails = styled.Pressable`

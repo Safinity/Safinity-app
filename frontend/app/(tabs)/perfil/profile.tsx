@@ -2,7 +2,7 @@ import { FlatList, ScrollView, Pressable, View } from 'react-native';
 import { Stack, router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components/native';
-import { Ionicons } from '@expo/vector-icons';
+//import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { userImages } from '../../../assets/images/Users/userImages';
@@ -194,7 +194,12 @@ export default function Profile() {
   return (
     <Container>
       {/* Header Customizado */}
-      <Header variant="back" title="Profile" />
+      <Header
+        variant="back"
+        title="Profile"
+        rightIcon="wallet"
+        onRightPress={() => router.push('/perfil/wallet')}
+      />
 
       <TopGradient
         colors={['rgba(190, 142, 224)', 'rgba(34, 39, 52, 0)']}
@@ -273,6 +278,11 @@ export default function Profile() {
           accessibilityLabel="Password and security settings"
         >
           <SettingsText>Password and Security</SettingsText>
+          <SettingsIcon accessible={false}>›</SettingsIcon>
+        </SettingsRow>
+
+        <SettingsRow role="button" accessibilityLabel="Theme settings">
+          <SettingsText>Theme</SettingsText>
           <SettingsIcon accessible={false}>›</SettingsIcon>
         </SettingsRow>
 

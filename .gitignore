@@ -45,3 +45,4 @@ metro-cache/
 *.iml
 .idea/
 .vscode/
+backend/src/scripts/seed-user-event-link.sql

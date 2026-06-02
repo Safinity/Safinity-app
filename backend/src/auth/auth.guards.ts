@@ -4,8 +4,10 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+
+import { verifyToken } from '@clerk/backend';
+
 import { AuthService } from './auth.service';
-import type { JwtPayload } from './auth.token';
 import type { RequestWithUser } from './auth.types';
 
 function getBearerToken(headerValue?: string | string[]) {
@@ -24,12 +26,26 @@ function getBearerToken(headerValue?: string | string[]) {
   return token;
 }
 
+function isClerkRateLimitError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') {
+    return false;
+  }
+
+  const maybeError = error as {
+    status?: unknown;
+    code?: unknown;
+  };
+
+  return maybeError.status === 429 || maybeError.code === 'api_response_error';
+}
+
 @Injectable()
 export class OptionalAuthGuard implements CanActivate {
   constructor(private readonly authService: AuthService) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<RequestWithUser>();
+
     const token = getBearerToken(request.headers.authorization);
 
     if (!token) {
@@ -37,15 +53,28 @@ export class OptionalAuthGuard implements CanActivate {
     }
 
     try {
-      const payload: JwtPayload = this.authService.verifyAccessToken(token);
+      const payload = await verifyToken(token, {
+        secretKey: process.env.CLERK_SECRET_KEY,
+      });
+
+      const user = await this.authService.findOrCreateUser(payload.sub);
+
       request.user = {
-        id: payload.sub,
-        email: payload.email,
-        role: payload.role,
+        id: user.id,
+        clerk_id: user.clerk_id,
+        email: user.email || null,
+        role: user.role,
       };
 
       return true;
-    } catch {
+    } catch (error: unknown) {
+      // If Clerk is rate-limiting or unavailable, still allow the request through
+      // AuthRequiredGuard will catch missing user on protected endpoints
+      if (isClerkRateLimitError(error)) {
+        return true;
+      }
+
+      console.error('Clerk token verification failed:', error);
       throw new UnauthorizedException('Invalid or expired token');
     }
   }

@@ -34,12 +34,13 @@ CREATE TABLE Event (
 
 CREATE TABLE users (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  clerk_id varchar(255) UNIQUE,
   name varchar(50),
   username varchar(32) UNIQUE,
-  password_hash varchar(255) NOT NULL,
-  role varchar(24) NOT NULL,
-  email varchar(255) UNIQUE,
-  image bytea,
+  password_hash varchar(255),
+  role varchar(24) NOT NULL DEFAULT 'user',
+  email varchar(255) UNIQUE NOT NULL,
+  image text,
   location geography(Point, 4326), -- Alterado para PostGIS
   emergency_contact varchar(20)
 );
@@ -218,9 +219,9 @@ INSERT INTO Event (id, organization_id, name, venue_name, status, category, star
 (2, 2, 'Music Festival', 'Parque das Nações', 'planned', 'Music', '2026-07-20 14:00:00', '2026-07-22 23:00:00', ST_GeogFromText('SRID=4326;POINT(-9.092 38.765)'));
 
 -- Utilizadores
-INSERT INTO users (id, name, username, password_hash, role, email, location) VALUES 
-(gen_random_uuid(), 'João Silva', 'jsilva', '$2b$12$HqISlK5K7y5J8v9W4z6X6u4Xuwu', 'user', 'joao@mail.com', ST_GeogFromText('SRID=4326;POINT(-9.093 38.767)')),
-(gen_random_uuid(), 'Maria Costa', 'mcosta', '$2b$12$HqISlK5K7y5J8v9W4z6X6u4X4Hello', 'staff', 'maria@staff.pt', ST_GeogFromText('SRID=4326;POINT(-9.091 38.766)'));
+INSERT INTO users (id, clerk_id, name, username, role, email, location) VALUES 
+(gen_random_uuid(), 'clerk_user_1', 'João Silva', 'jsilva', 'user', 'joao@mail.com', ST_GeogFromText('SRID=4326;POINT(-9.093 38.767)')),
+(gen_random_uuid(), 'clerk_user_2', 'Maria Costa', 'mcosta', 'staff', 'maria@staff.pt', ST_GeogFromText('SRID=4326;POINT(-9.091 38.766)'));
 
 -- Sensores
 INSERT INTO Sensor (id, event_id, location, sensor_type, last_reading_value, last_reading_time) VALUES 

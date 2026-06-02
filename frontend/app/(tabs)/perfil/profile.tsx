@@ -1,19 +1,20 @@
 import { FlatList, ScrollView, Pressable, View } from 'react-native';
 import { Stack, router } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import styled from 'styled-components/native';
 //import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useClerk } from '@clerk/expo';
 
 import { userImages } from '../../../assets/images/Users/userImages';
 import { EventCard } from '../../../components/EventCard';
 import { Fonts } from '../../../constants/theme';
-import auth from '../../../data/auth.json';
 import eventsData from '../../../data/events.json';
 import users from '../../../data/users.json';
 
 import EditIcon from '../../../assets/Icons/edit.png';
 import Header from '../../../components/ui/header'; // import do header customizado
+import { useUser } from '../../../context/UserContext';
 
 const Container = styled(ScrollView).attrs({
   showsVerticalScrollIndicator: false,
@@ -172,24 +173,23 @@ const LogoutText = styled.Text`
 `;
 
 export default function Profile() {
-  const [user, setUser] = useState<any>(null);
-  const [imageSource, setImageSource] = useState<any>(null);
+  const { currentUser: user } = useUser();
+  const { signOut } = useClerk();
 
-  useEffect(() => {
-    const currentId = auth.currentUserId;
-    const foundUser = users.find(u => u.id === currentId);
-    setUser(foundUser);
-
-    if (foundUser) {
-      const imageFileName = foundUser.image;
-      const userImage = userImages[imageFileName] || userImages['default'];
-      setImageSource(userImage);
-    }
-  }, []);
+  const imageSource = user?.image
+    ? userImages[user.image] || userImages.default
+    : userImages.default;
 
   if (!user || !imageSource) return null;
 
-  const userPastEvents = eventsData.events.filter(event => user.pastEvents.includes(event.id));
+  const userPastEvents = eventsData.events.filter(event =>
+    (user.pastEvents ?? []).includes(event.id),
+  );
+
+  const handleLogout = async () => {
+    await signOut();
+    router.replace('/landing');
+  };
 
   return (
     <Container>
@@ -291,11 +291,7 @@ export default function Profile() {
           <SettingsIcon accessible={false}>›</SettingsIcon>
         </SettingsRow>
 
-        <LogoutButton
-          onPress={() => router.push('../../landing')}
-          role="button"
-          accessibilityLabel="Log out of the app"
-        >
+        <LogoutButton onPress={handleLogout} role="button" accessibilityLabel="Log out of the app">
           <LogoutText>Log out</LogoutText>
         </LogoutButton>
       </PaddedContent>

@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { FlatList, StatusBar, ActivityIndicator, Text, View } from 'react-native';
+import { FlatList, StatusBar, ActivityIndicator, View } from 'react-native';
 import styled from 'styled-components/native';
-import { useRouter, Stack } from 'expo-router';
+import { Stack } from 'expo-router';
 import Head from 'expo-router/head';
+import { useAuth } from '@clerk/expo';
 import api from '../../utils/api';
 
 // Imports de UI e Componentes
@@ -62,8 +63,9 @@ const DebugText = styled.Text`
 `;
 
 export default function EventsListScreen() {
+  const { getToken } = useAuth();
   const [searchValue, setSearchValue] = useState('');
-  const [events, setEvents] = useState([]);
+  const [events, setEvents] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Categorias esperadas (Devem bater com o teu allCategories)
@@ -74,7 +76,12 @@ export default function EventsListScreen() {
     const fetchEvents = async () => {
       try {
         // Se usares Android Emulator, troca localhost por 10.0.2.2
-        const response = await api.get('/events');
+        const token = await getToken();
+        console.log('Clerk token:', token);
+
+        const response = await api.get('/events', {
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        });
         const data = Array.isArray(response.data) ? response.data : [response.data];
 
         console.log('Dados crus da API:', data);
@@ -87,7 +94,7 @@ export default function EventsListScreen() {
     };
 
     fetchEvents();
-  }, []);
+  }, [getToken]);
 
   const handleTagPress = (category: string) => {
     if (selectedCategories.includes(category)) {
@@ -109,7 +116,7 @@ export default function EventsListScreen() {
 
       <Content role="main">
         <HeroBanner
-          event={{ id: 'banner-lista-eventos', image: null }}
+          event={{ id: 'banner-lista-eventos' }}
           title="What's Coming Up"
           description="Discover events with safety you can trust"
           hideMap={true}
@@ -155,7 +162,7 @@ export default function EventsListScreen() {
               // FILTRO ULTRA-ROBUSTO: trim() remove espaços, toLowerCase() ignora Caps
               const sectionEvents = events.filter((e: any) => {
                 const apiCat = e.category ? String(e.category).trim().toLowerCase() : '';
-                return apiCat.includes(category.toLowerCase());
+                return apiCat === category.toLowerCase();
               });
 
               if (sectionEvents.length === 0) return null;

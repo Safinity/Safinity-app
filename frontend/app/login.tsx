@@ -1,20 +1,30 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
-import { TouchableOpacity } from 'react-native';
 import { router, Stack } from 'expo-router';
-import users from '@/data/users.json';
-import PrimaryButton from '@/components/PrimaryButton';
 import Head from 'expo-router/head';
+import { useAuth, useClerk, useSignIn } from '@clerk/expo';
+
+import InputField from '@/components/InputField';
+import PrimaryButton from '@/components/PrimaryButton';
 import Header from '@/components/ui/header';
 
 export default function Login() {
+  const { isLoaded, isSignedIn } = useAuth();
+  const { setActive } = useClerk();
+  const { signIn } = useSignIn();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState('');
 
-  function handleLogin() {
+  useEffect(() => {
+    if (isLoaded && isSignedIn) {
+      router.replace('/(tabs)');
+    }
+  }, [isLoaded, isSignedIn]);
+
+  async function handleLogin() {
     setError('');
 
     if (!email || !password) {
@@ -22,16 +32,23 @@ export default function Login() {
       return;
     }
 
-    const user = users.find(
-      (u: any) => u.email.toLowerCase() === email.toLowerCase() && u.password === password,
-    );
+    const { error: clerkError } = await signIn.password({
+      emailAddress: email,
+      password,
+    });
 
-    if (!user) {
-      setError('Invalid email or password');
+    if (clerkError) {
+      setError(clerkError.message || 'Invalid email or password');
       return;
     }
 
-    router.replace('/(tabs)');
+    if (signIn.createdSessionId) {
+      await setActive({ session: signIn.createdSessionId });
+      router.replace('/(tabs)');
+      return;
+    }
+
+    setError('Unable to sign in. Please try again.');
   }
 
   return (
@@ -46,61 +63,24 @@ export default function Login() {
 
       <MainArea role="main">
         <InputGroup>
-          <Label>
-            Email <RequiredAsterisk>*</RequiredAsterisk>
-          </Label>
-          <InputBox>
-            <Input
-              accessibilityLabel="Email input field"
-              accessibilityState={{ required: true }}
-              returnKeyType="next"
-              placeholder="Email"
-              placeholderTextColor="#8a90a5"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              value={email}
-              onChangeText={setEmail}
-            />
+          <InputField
+            label="Email *"
+            placeholder="Email"
+            icon="mail-outline"
+            keyboardType="email-address"
+            value={email}
+            onChangeText={setEmail}
+            accessibilityState={{ required: true }}
+          />
 
-            <Ionicons
-              name="mail-outline"
-              size={20}
-              color="#cfd3e0"
-              importantForAccessibility="no-hide-descendants"
-              accessibilityElementsHidden={true}
-            />
-          </InputBox>
-        </InputGroup>
-
-        <InputGroup>
-          <Label>
-            Password <RequiredAsterisk>*</RequiredAsterisk>
-          </Label>
-
-          <InputBox>
-            <Input
-              accessibilityLabel="Password input field"
-              accessibilityState={{ required: true }}
-              returnKeyType="done"
-              placeholder="Password"
-              placeholderTextColor="#8a90a5"
-              secureTextEntry={!showPass}
-              value={password}
-              onChangeText={setPassword}
-            />
-
-            <TouchableOpacity
-              onPress={() => setShowPass(!showPass)}
-              role="button"
-              accessibilityLabel={showPass ? 'Hide password' : 'Show password'}
-            >
-              <Ionicons
-                name={showPass ? 'eye-off-outline' : 'eye-outline'}
-                size={22}
-                color="#cfd3e0"
-              />
-            </TouchableOpacity>
-          </InputBox>
+          <InputField
+            label="Password *"
+            placeholder="Password"
+            password
+            value={password}
+            onChangeText={setPassword}
+            accessibilityState={{ required: true }}
+          />
         </InputGroup>
 
         <RowWithLink>
@@ -142,8 +122,6 @@ export default function Login() {
   );
 }
 
-/* ---------------- styled components ---------------- */
-
 const Container = styled.View`
   flex: 1;
   padding-top: ${({ theme }) => theme.spacing.xxxl}px;
@@ -158,29 +136,6 @@ const MainArea = styled.View`
 
 const InputGroup = styled.View`
   margin-bottom: ${({ theme }) => theme.spacing.lg}px;
-`;
-
-const Label = styled.Text`
-  color: ${({ theme }) => theme.colors.inactive};
-  margin-bottom: ${({ theme }) => theme.spacing.xs}px;
-  ${({ theme }) => theme.text.corpo.corpoTexto};
-`;
-
-const InputBox = styled.View`
-  background-color: ${({ theme }) => theme.colors.grayNavbar};
-  border-radius: ${({ theme }) => theme.borderRadius.medium}px;
-  padding: ${({ theme }) => theme.spacing.md}px;
-  flex-direction: row;
-  align-items: center;
-`;
-
-const Input = styled.TextInput`
-  flex: 1;
-  color: ${({ theme }) => theme.colors.white};
-  ${({ theme }) => theme.text.corpo.corpoTexto};
-  include-font-padding: false;
-  padding-vertical: 0px;
-  line-height: ${({ theme }) => theme.text.corpo.corpoTexto.lineHeight}px;
 `;
 
 const RowWithLink = styled.View`
@@ -218,9 +173,4 @@ const ErrorText = styled.Text`
   text-align: center;
   font-weight: bold;
   ${({ theme }) => theme.text.corpo.corpoTexto};
-`;
-
-const RequiredAsterisk = styled.Text`
-  color: #ff5252;
-  font-weight: bold;
 `;

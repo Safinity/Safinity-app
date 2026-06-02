@@ -1,13 +1,23 @@
+import { useEffect } from 'react';
 import { router, Stack } from 'expo-router';
 import styled from 'styled-components/native';
 import { ImageBackground } from 'react-native';
 import { StaticImages } from '../assets/images/landing';
 import Head from 'expo-router/head';
+import { useAuth } from '@clerk/expo';
 import PrimaryButton from '../components/PrimaryButton';
 import SecondaryButton from '../components/SecondaryButton';
 import TertiaryButton from '../components/TertiaryButton';
 
 export default function Landing() {
+  const { isLoaded, isSignedIn } = useAuth();
+
+  useEffect(() => {
+    if (isLoaded && isSignedIn) {
+      router.replace('/(tabs)');
+    }
+  }, [isLoaded, isSignedIn]);
+
   return (
     <Background source={StaticImages.landingBg} accessible={false}>
       <Head>

@@ -75,25 +75,11 @@ export default function EventsListScreen() {
     const fetchEvents = async () => {
       try {
         const token = await getToken();
-        console.log('=== DEBUG EVENTS ===');
-        console.log('Token exists:', !!token);
-        console.log('Token value:', token);
 
         const response = await api.get('/events', {
           headers: token ? { Authorization: `Bearer ${token}` } : undefined,
         });
-
-        console.log('Status HTTP:', response.status);
-        console.log('Tipo de response.data:', typeof response.data);
-        console.log('É array:', Array.isArray(response.data));
-        console.log('Response.data raw:', JSON.stringify(response.data, null, 2));
-
         const data = Array.isArray(response.data) ? response.data : [response.data];
-
-        console.log('Total eventos recebidos:', data.length);
-        console.log('Categorias na BD:', data.map((e: any) => `"${e.category}"`).join(', '));
-        console.log('Primeiro evento completo:', JSON.stringify(data[0], null, 2));
-        console.log('=== FIM DEBUG ===');
 
         setEvents(data);
       } catch (error: any) {

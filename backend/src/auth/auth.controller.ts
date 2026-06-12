@@ -13,6 +13,6 @@ export class AuthController {
   @Get('me')
   @UseGuards(AuthRequiredGuard)
   me(@Req() request: RequestWithUser) {
-    return this.authService.getAuthenticatedProfile(request.user!.id);
+    return this.authService.getAuthenticatedProfile(request.user!.clerk_id);
   }
 }

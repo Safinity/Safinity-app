@@ -1,5 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { AddFriendFromQrDto } from './dto/add-friend-from-qr.dto';
 import {
   FriendResponseDto,
   FriendsGroupedDto,
@@ -23,6 +28,10 @@ type FriendsSearchQuery = {
   sortOrder?: 'asc' | 'desc';
 };
 
+const FRIEND_QR_TYPE = 'safinity.friend';
+const ACCEPTED_STATE = 'ACCEPTED';
+const PENDING_STATE = 'PENDING';
+
 @Injectable()
 export class FriendsService {
   constructor(private prisma: PrismaService) {}
@@ -44,6 +53,64 @@ export class FriendsService {
     return parsed;
   }
 
+  private toBase64Image(image: Uint8Array | null) {
+    return image ? Buffer.from(image).toString('base64') : null;
+  }
+
+  private generateBigIntId() {
+    return (
+      BigInt(Date.now()) * BigInt(1000) +
+      BigInt(Math.floor(Math.random() * 1000))
+    );
+  }
+
+  private parseQrFriendUserId(body: AddFriendFromQrDto) {
+    if (body.userId?.trim()) {
+      return body.userId.trim();
+    }
+
+    const payload = body.payload?.trim();
+
+    if (!payload) {
+      throw new BadRequestException('QR payload or userId is required');
+    }
+
+    try {
+      const parsed = JSON.parse(payload) as {
+        type?: unknown;
+        userId?: unknown;
+      };
+
+      if (
+        parsed.type === FRIEND_QR_TYPE &&
+        typeof parsed.userId === 'string' &&
+        parsed.userId.trim()
+      ) {
+        return parsed.userId.trim();
+      }
+    } catch {
+      // Try URL formats below.
+    }
+
+    try {
+      const url = new URL(payload);
+      const userId =
+        url.searchParams.get('userId') ?? url.searchParams.get('friendId');
+
+      if (userId?.trim()) {
+        return userId.trim();
+      }
+    } catch {
+      // Fall through to plain id support.
+    }
+
+    if (/^[0-9a-fA-F-]{36}$/.test(payload)) {
+      return payload;
+    }
+
+    throw new BadRequestException('Invalid friend QR payload');
+  }
+
   async getFriendsGroupedByEvent(
     userId: string,
     query?: FriendsListQuery,
@@ -58,7 +125,7 @@ export class FriendsService {
 
     const friendships = await this.prisma.friendship.findMany({
       where: {
-        state: 'ACCEPTED',
+        state: { in: [ACCEPTED_STATE, ACCEPTED_STATE.toLowerCase()] },
         OR: [{ user1_id: userId }, { user2_id: userId }],
       },
       include: {
@@ -90,9 +157,7 @@ export class FriendsService {
         id: friendData.id,
         name: friendData.name || '',
         username: friendData.username || '',
-        image: friendData.image
-          ? Buffer.from(friendData.image).toString('base64')
-          : null,
+        image: this.toBase64Image(friendData.image),
         isOnSameEvent: isAtSameEvent,
       };
 
@@ -185,8 +250,35 @@ export class FriendsService {
 
     return users.map((u) => ({
       ...u,
-      image: u.image ? Buffer.from(u.image).toString('base64') : null,
+      image: this.toBase64Image(u.image),
     }));
+  }
+
+  async getFriendQrCode(userId: string) {
+    const user = await this.prisma.users.findUnique({
+      where: { id: userId },
+      select: { id: true, name: true, username: true, image: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Authenticated user not found');
+    }
+
+    const payload = JSON.stringify({
+      type: FRIEND_QR_TYPE,
+      version: 1,
+      userId: user.id,
+    });
+
+    return {
+      payload,
+      user: {
+        id: user.id,
+        name: user.name || '',
+        username: user.username || '',
+        image: this.toBase64Image(user.image),
+      },
+    };
   }
 
   async toggleFriendship(userId: string, friendId: string) {
@@ -205,12 +297,89 @@ export class FriendsService {
 
     return this.prisma.friendship.create({
       data: {
-        id: BigInt(Date.now()),
+        id: this.generateBigIntId(),
         user1_id: userId,
         user2_id: friendId,
-        state: 'PENDING',
+        state: PENDING_STATE,
       },
     });
+  }
+
+  async previewFriendFromQrCode(userId: string, body: AddFriendFromQrDto) {
+    const friendId = this.parseQrFriendUserId(body);
+
+    if (friendId === userId) {
+      throw new BadRequestException('You cannot add yourself as a friend');
+    }
+
+    const friend = await this.prisma.users.findUnique({
+      where: { id: friendId },
+      select: { id: true, name: true, username: true, image: true },
+    });
+
+    if (!friend) {
+      throw new NotFoundException('Friend not found');
+    }
+
+    return {
+      friend: {
+        id: friend.id,
+        name: friend.name || '',
+        username: friend.username || '',
+        image: this.toBase64Image(friend.image),
+      },
+    };
+  }
+
+  async addFriendFromQrCode(userId: string, body: AddFriendFromQrDto) {
+    const friendId = this.parseQrFriendUserId(body);
+
+    if (friendId === userId) {
+      throw new BadRequestException('You cannot add yourself as a friend');
+    }
+
+    const friend = await this.prisma.users.findUnique({
+      where: { id: friendId },
+      select: { id: true, name: true, username: true, image: true },
+    });
+
+    if (!friend) {
+      throw new NotFoundException('Friend not found');
+    }
+
+    const existing = await this.prisma.friendship.findFirst({
+      where: {
+        OR: [
+          { user1_id: userId, user2_id: friendId },
+          { user1_id: friendId, user2_id: userId },
+        ],
+      },
+    });
+
+    const friendship = existing
+      ? await this.prisma.friendship.update({
+          where: { id: existing.id },
+          data: { state: ACCEPTED_STATE },
+        })
+      : await this.prisma.friendship.create({
+          data: {
+            id: this.generateBigIntId(),
+            user1_id: userId,
+            user2_id: friendId,
+            state: ACCEPTED_STATE,
+          },
+        });
+
+    return {
+      state: friendship.state,
+      friendshipId: friendship.id.toString(),
+      friend: {
+        id: friend.id,
+        name: friend.name || '',
+        username: friend.username || '',
+        image: this.toBase64Image(friend.image),
+      },
+    };
   }
 
   async acceptFriendship(userId: string, friendId: string) {
@@ -218,7 +387,7 @@ export class FriendsService {
       where: {
         user1_id: friendId,
         user2_id: userId,
-        state: 'PENDING',
+        state: PENDING_STATE,
       },
     });
 
@@ -226,7 +395,7 @@ export class FriendsService {
 
     return this.prisma.friendship.update({
       where: { id: request.id },
-      data: { state: 'ACCEPTED' },
+      data: { state: ACCEPTED_STATE },
     });
   }
 
@@ -234,7 +403,7 @@ export class FriendsService {
     const requests = await this.prisma.friendship.findMany({
       where: {
         user2_id: userId,
-        state: 'PENDING',
+        state: PENDING_STATE,
       },
       include: {
         users_friendship_user1_idTousers: true,
@@ -251,9 +420,7 @@ export class FriendsService {
           id: sender.id,
           name: sender.name,
           username: sender.username,
-          image: sender.image
-            ? Buffer.from(sender.image).toString('base64')
-            : null,
+          image: this.toBase64Image(sender.image),
         },
       };
     });
@@ -284,7 +451,7 @@ export class FriendsService {
       id: friend.id,
       name: friend.name || '',
       username: friend.username || '',
-      image: friend.image ? Buffer.from(friend.image).toString('base64') : null,
+      image: this.toBase64Image(friend.image),
       totalEventsCount: friend.user_tickets.length,
       commonEvents: commonEvents,
     };

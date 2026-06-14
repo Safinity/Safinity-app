@@ -1,4 +1,8 @@
 // app/_layout.tsx
+import 'react-native-url-polyfill/auto';
+
+import { ClerkProvider } from '@clerk/expo';
+import { tokenCache } from '@clerk/expo/token-cache';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import styled, { ThemeProvider } from 'styled-components/native';
@@ -21,6 +25,12 @@ const Container = styled.View`
   background-color: ${({ theme }) => theme.colors.background};
 `;
 
+const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
+
+if (!publishableKey) {
+  throw new Error('Add your Clerk publishable key to frontend/.env');
+}
+
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
     PlusJakartaSans_200ExtraLight,
@@ -35,14 +45,16 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <UserProvider>
-        <ThemeProvider theme={theme}>
-          <Container>
-            <Stack screenOptions={{ headerShown: false }} />
-          </Container>
-          <StatusBar style="light" />
-        </ThemeProvider>
-      </UserProvider>
+      <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+        <UserProvider>
+          <ThemeProvider theme={theme}>
+            <Container>
+              <Stack screenOptions={{ headerShown: false }} />
+            </Container>
+            <StatusBar style="light" />
+          </ThemeProvider>
+        </UserProvider>
+      </ClerkProvider>
     </GestureHandlerRootView>
   );
 }

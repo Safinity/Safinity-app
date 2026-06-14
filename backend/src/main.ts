@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import { OptionalAuthGuard } from './auth/auth.guards';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
@@ -45,6 +46,19 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api', app, document);
+
+  // Register OptionalAuthGuard globally so requests with a Clerk token
+  // populate `request.user` before route-level guards run.
+  try {
+    const optionalAuth = app.get(OptionalAuthGuard);
+    app.useGlobalGuards(optionalAuth);
+  } catch (err: unknown) {
+    // If for some reason the guard provider isn't available at bootstrap,
+    // continue without breaking the server — controllers can still add guards.
+    const errorMessage = err instanceof Error ? err.message : String(err);
+
+    console.warn('OptionalAuthGuard not available at bootstrap:', errorMessage);
+  }
 
   await app.listen(process.env.PORT ?? 3000);
 }

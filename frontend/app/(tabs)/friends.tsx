@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import styled from 'styled-components/native';
 import { TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
@@ -6,20 +6,14 @@ import { Ionicons } from '@expo/vector-icons';
 import Head from 'expo-router/head';
 import users from '@/data/users.json';
 import { userImages } from '../../assets/images/Users/userImages';
-import auth from '@/data/auth.json';
 import Header from '@/components/ui/header';
 import FindFriendButton from '@/components/FindFriendButton';
 import PingFriend from '@/components/VibrateButton';
 import FriendActionButton from '@/components/FriendActionButton';
+import { useUser } from '@/context/UserContext';
 
 export default function FriendsScreen() {
-  const [currentUser, setCurrentUser] = useState<any>(null);
-
-  useEffect(() => {
-    const currentId = auth.currentUserId;
-    const foundUser = users.find(u => u.id === currentId);
-    setCurrentUser(foundUser);
-  }, []);
+  const { currentUser, removeFriend } = useUser();
 
   if (!currentUser) {
     return (
@@ -33,13 +27,6 @@ export default function FriendsScreen() {
   const friends = users.filter(u => friendIds.includes(u.id));
   const onSameEvent = friends.filter(f => f.currentEventId === currentUser.currentEventId);
   const otherFriends = friends.filter(f => f.currentEventId !== currentUser.currentEventId);
-
-  const removeFriend = (friendId: string) => {
-    setCurrentUser((prev: any) => ({
-      ...prev,
-      friends: prev.friends.filter((id: string) => id !== friendId),
-    }));
-  };
 
   const handleAddFriend = () => router.push('/addfriend');
 
@@ -88,7 +75,7 @@ export default function FriendsScreen() {
               }}
             >
               <Avatar
-                source={userImages[friend.image]}
+                source={userImages[friend.image] || userImages.default}
                 role="image"
                 accessibilityLabel={`Profile picture of ${friend.name}`}
               />
@@ -135,7 +122,7 @@ export default function FriendsScreen() {
               }}
             >
               <Avatar
-                source={userImages[friend.image]}
+                source={userImages[friend.image] || userImages.default}
                 role="image"
                 accessibilityLabel={`Profile picture of ${friend.name}`}
               />

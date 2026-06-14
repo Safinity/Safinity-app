@@ -27,7 +27,7 @@
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
-    "plugins": ["expo-router", "expo-font", "expo-camera"],
+    "plugins": ["expo-router", "expo-font", "expo-camera", "expo-secure-store", "@clerk/expo"],
     "updates": {
       "url": "https://u.expo.dev/c6d74fda-161d-47df-afad-75b5aa15930c"
     },

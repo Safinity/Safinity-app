@@ -1,6 +1,7 @@
 export type AuthenticatedUser = {
-  id: string;
-  email: string;
+  id: string; // your DB user id
+  clerk_id: string; // Clerk identity id
+  email: string | null;
   role: string;
 };
 

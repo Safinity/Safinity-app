@@ -231,14 +231,19 @@ export class FriendsService {
     const page = this.parsePositiveInt(query.page, 1);
     const pageSize = Math.min(this.parsePositiveInt(query.pageSize, 15), 100);
     const skip = (page - 1) * pageSize;
+    const search = query.query?.trim();
 
     const users = await this.prisma.users.findMany({
       where: {
         id: { not: currentUserId },
-        OR: [
-          { name: { contains: query.query, mode: 'insensitive' } },
-          { username: { contains: query.query, mode: 'insensitive' } },
-        ],
+        ...(search
+          ? {
+              OR: [
+                { name: { contains: search, mode: 'insensitive' } },
+                { username: { contains: search, mode: 'insensitive' } },
+              ],
+            }
+          : {}),
       },
       select: { id: true, name: true, username: true, image: true },
       orderBy: {

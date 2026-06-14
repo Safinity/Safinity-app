@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { ScrollView, View, TouchableOpacity } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { Spacing, BorderRadius, Colors, Height, Fonts, TextStyles } from '../../constants/theme';
 import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
 import Head from 'expo-router/head';
 import calendarData from '../../data/calendar.json';
+import { navigateToPreviousRoute } from '../../utils/navigationHistory';
 
 // --- Styled Components ---
 
@@ -145,7 +145,6 @@ const LocationText = styled.Text`
 // --- Screen ---
 
 export default function MyCalendarScreen() {
-  const router = useRouter();
   const [selectedDate, setSelectedDate] = useState('10');
 
   const dates = [
@@ -166,7 +165,7 @@ export default function MyCalendarScreen() {
       {/* HEADER REGION */}
       <ContentWrapper role="banner">
         <BackButton
-          onPress={() => router.push('/(tabs)/calendar')}
+          onPress={() => navigateToPreviousRoute()}
           accessible
           role="button"
           accessibilityLabel="Go back to calendar"

@@ -2,8 +2,9 @@ import React, { useMemo } from 'react';
 import { Dimensions, FlatList, Platform, ScrollView } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import Head from 'expo-router/head';
+import { navigateToPreviousRoute } from '@/utils/navigationHistory';
 
 // --- Dados e Assets ---
 import users from '@/data/users.json';
@@ -145,7 +146,7 @@ export default function FriendProfileScreen() {
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header */}
         <HeaderNav>
-          <BackButton onPress={() => router.back()}>
+          <BackButton onPress={() => navigateToPreviousRoute()}>
             <Ionicons name="arrow-back" size={theme.width.iconHeader} color={theme.colors.white} />
           </BackButton>
           <UsernameText>@{friendData.username}</UsernameText>

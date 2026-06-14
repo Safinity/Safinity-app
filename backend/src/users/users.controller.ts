@@ -11,7 +11,7 @@ export class UsersController {
   @Get('me')
   @UseGuards(AuthRequiredGuard)
   async getMe(@Req() req: RequestWithUser) {
-    return this.authService.getAuthenticatedProfile(req.user!.id);
+    return this.authService.getAuthenticatedProfile(req.user!.clerk_id);
   }
 
   @Patch('me/edit-profile')

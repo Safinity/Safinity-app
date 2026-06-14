@@ -1,35 +1,104 @@
-import React, { useMemo } from 'react';
-import { Dimensions, FlatList, ScrollView, Platform, AccessibilityInfo } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Dimensions, FlatList, Platform, ScrollView } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import Head from 'expo-router/head';
-
-// --- Dados e Assets ---
-import users from '@/data/users.json';
-import allEvents from '@/data/events.json';
-import { userImages } from '../../../assets/images/Users/userImages';
+import { useAuth } from '@clerk/expo';
 
 import { EventCard } from '@/components/EventCard';
 import FriendActionButton from '@/components/FriendActionButton';
+import { getFriendProfile, type FriendProfileResponse } from '@/utils/friends';
+import { navigateToPreviousRoute } from '@/utils/navigationHistory';
+import { userImages } from '../../../assets/images/Users/userImages';
 
 const { width } = Dimensions.get('window');
+
+function getAvatarSource(friend: FriendProfileResponse) {
+  if (friend.image) {
+    return { uri: `data:image/jpeg;base64,${friend.image}` };
+  }
+
+  return userImages.default;
+}
 
 export default function FriendProfile() {
   const theme = useTheme();
   const { id } = useLocalSearchParams();
+  const { isLoaded, isSignedIn, getToken } = useAuth();
+  const friendId = Array.isArray(id) ? id[0] : id;
+  const [friendData, setFriendData] = useState<FriendProfileResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const friendData = useMemo(
-    () => users.find(u => u.id === id) || users.find(u => u.id === 'u6'),
-    [id],
-  );
+  useEffect(() => {
+    let isActive = true;
 
-  const userPastEvents = useMemo(() => {
-    const past = friendData?.pastEvents || [];
-    return allEvents.events.filter(event => past.includes(event.id));
-  }, [friendData]);
+    async function loadFriendProfile() {
+      if (!isLoaded || !friendId) return;
 
-  if (!friendData) return null;
+      if (!isSignedIn) {
+        setError('Please sign in to view this profile.');
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        setError('');
+        const token = await getToken();
+        const profile = await getFriendProfile(token, friendId);
+
+        if (isActive) {
+          setFriendData(profile);
+        }
+      } catch (profileError) {
+        console.error('Failed to load friend profile', profileError);
+        if (isActive) {
+          setFriendData(null);
+          setError('Friend profile not found.');
+        }
+      } finally {
+        if (isActive) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadFriendProfile();
+
+    return () => {
+      isActive = false;
+    };
+  }, [friendId, getToken, isLoaded, isSignedIn]);
+
+  if (isLoading || !isLoaded) {
+    return (
+      <Container accessibilityLabel="Friend profile screen" role="summary">
+        <LoadingState>
+          <ActivityIndicator color="white" />
+          <LoadingText>Loading...</LoadingText>
+        </LoadingState>
+      </Container>
+    );
+  }
+
+  if (error || !friendData) {
+    return (
+      <Container accessibilityLabel="Friend profile screen" role="summary">
+        <HeaderNav role="header" accessibilityLabel="Top navigation">
+          <BackButton
+            onPress={() => navigateToPreviousRoute()}
+            role="button"
+            accessibilityLabel="Go back"
+          >
+            <Ionicons name="arrow-back" size={theme.width.iconHeader} color={theme.colors.white} />
+          </BackButton>
+        </HeaderNav>
+        <EmptyState>{error || 'Friend profile not found.'}</EmptyState>
+      </Container>
+    );
+  }
 
   return (
     <Container accessibilityLabel="Friend profile screen" role="summary">
@@ -40,7 +109,7 @@ export default function FriendProfile() {
         {/* Navegação Superior */}
         <HeaderNav role="header" accessibilityLabel="Top navigation">
           <BackButton
-            onPress={() => router.push('/friends')}
+            onPress={() => navigateToPreviousRoute()}
             role="button"
             accessibilityLabel="Go back to friends list"
           >
@@ -55,7 +124,7 @@ export default function FriendProfile() {
         {/* Perfil */}
         <ProfileHeader role="summary" accessibilityLabel="User profile information">
           <AvatarImage
-            source={userImages[friendData.image]}
+            source={getAvatarSource(friendData)}
             role="image"
             accessibilityLabel={`Profile picture of ${friendData.name}`}
           />
@@ -63,8 +132,8 @@ export default function FriendProfile() {
           <InfoSection>
             <DisplayName role="header">{friendData.name}</DisplayName>
 
-            <StatsText accessibilityLabel={`${friendData.pastEvents?.length || 0} events attended`}>
-              Been in {friendData.pastEvents?.length || 0} events
+            <StatsText accessibilityLabel={`${friendData.totalEventsCount} events attended`}>
+              Been in {friendData.totalEventsCount} events
             </StatsText>
           </InfoSection>
 
@@ -73,13 +142,13 @@ export default function FriendProfile() {
 
         {/* Eventos */}
         <SectionTitle role="header" accessibilityLabel="Events section">
-          {userPastEvents.length} Events in common
+          {friendData.commonEvents.length} Events in common
         </SectionTitle>
 
         <FlatList
           role="list"
           accessibilityLabel="List of events in common"
-          data={userPastEvents}
+          data={friendData.commonEvents}
           horizontal
           showsHorizontalScrollIndicator={false}
           keyExtractor={item => item.id}
@@ -87,7 +156,7 @@ export default function FriendProfile() {
           decelerationRate="fast"
           contentContainerStyle={{ paddingRight: theme.spacing.margemLateral }}
           renderItem={({ item }) => (
-            <EventCard event={item} role="button" accessibilityLabel={`Event ${item.title}`} />
+            <EventCard event={item} role="button" accessibilityLabel={`Event ${item.name}`} />
           )}
         />
       </ScrollView>
@@ -98,6 +167,27 @@ export default function FriendProfile() {
 const Container = styled.View`
   flex: 1;
   background-color: ${({ theme }) => theme.colors.background};
+`;
+
+const LoadingState = styled.View`
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+`;
+
+const LoadingText = styled.Text`
+  color: ${({ theme }) => theme.colors.white};
+  font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
+  font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
+  margin-top: ${({ theme }) => theme.spacing.sm}px;
+`;
+
+const EmptyState = styled.Text`
+  color: ${({ theme }) => theme.colors.white};
+  font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
+  font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
+  padding-horizontal: ${({ theme }) => theme.spacing.margemLateral}px;
+  margin-top: ${({ theme }) => theme.spacing.xl}px;
 `;
 
 const HeaderNav = styled.View`

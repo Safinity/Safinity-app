@@ -1,5 +1,6 @@
 import { Stack, router } from 'expo-router';
 import OnboardingScreen from '@/components/OnboardingScreen';
+import { navigateToPreviousRoute } from '@/utils/navigationHistory';
 
 export default function Onboarding2() {
   return (
@@ -13,7 +14,7 @@ export default function Onboarding2() {
         image={require('@/assets/images/onboarding/onboarding-img2.png')}
         imageAlt="Navigation route from my location to friend."
         onNext={() => router.push('/onboarding/step3')}
-        onPrev={() => router.back()}
+        onPrev={() => navigateToPreviousRoute('/onboarding/step1')}
         onSkip={() => router.replace('/(tabs)')}
       />
     </>

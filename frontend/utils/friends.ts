@@ -41,6 +41,29 @@ export type FriendsGroupedResponse = {
   otherFriends: FriendListItem[];
 };
 
+export type FriendSearchItem = AddFriendQrResponse['friend'];
+
+export type FriendProfileResponse = AddFriendQrResponse['friend'] & {
+  totalEventsCount: number;
+  commonEvents: Array<{
+    id: string;
+    name?: string | null;
+    title?: string | null;
+    image?: string | null;
+    category?: string | null;
+    start_date?: string | null;
+    end_date?: string | null;
+    start_time?: string | null;
+    end_time?: string | null;
+    duration?: string | null;
+    location?: string | null;
+    status?: string | null;
+    validity?: string | null;
+    description?: string | null;
+    time_left?: string | null;
+  }>;
+};
+
 function authHeaders(token: string | null) {
   return token ? { Authorization: `Bearer ${token}` } : undefined;
 }
@@ -56,6 +79,26 @@ export async function getFriends(token: string | null) {
 
 export async function toggleFriendship(token: string | null, friendId: string) {
   const response = await friendsApi.post(`/friends/toggle/${friendId}`, undefined, {
+    headers: authHeaders(token),
+  });
+
+  return response.data;
+}
+
+export async function searchUsers(token: string | null, query: string) {
+  const response = await friendsApi.get<FriendSearchItem[]>('/friends/search', {
+    headers: authHeaders(token),
+    params: {
+      q: query,
+      pageSize: 20,
+    },
+  });
+
+  return response.data;
+}
+
+export async function getFriendProfile(token: string | null, friendId: string) {
+  const response = await friendsApi.get<FriendProfileResponse>(`/friends/profile/${friendId}`, {
     headers: authHeaders(token),
   });
 

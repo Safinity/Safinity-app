@@ -1,36 +1,112 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '@clerk/expo';
 import { Stack, router } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import { Alert } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Alert, Modal, type ImageSourcePropType } from 'react-native';
 import styled from 'styled-components/native';
 import Camera from '../../../assets/Icons/camera.png';
-import { userImages } from '../../../assets/images/Users/userImages';
 import InputField from '../../../components/InputField';
 import Header from '../../../components/ui/header';
 import { Colors, Fonts } from '../../../constants/theme';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useUser } from '../../../context/UserContext';
+import { getMyProfile, updateMyProfile, type AuthenticatedProfile } from '../../../utils/profile';
+
+function getProfileImageSource(image: string | null | undefined): ImageSourcePropType | null {
+  if (!image || image === 'default' || image.includes('.')) {
+    return null;
+  }
+
+  if (image.startsWith('data:image') || image.startsWith('http')) {
+    return { uri: image };
+  }
+
+  return { uri: `data:image/jpeg;base64,${image}` };
+}
+
+function getApiErrorMessage(error: unknown) {
+  if (!error || typeof error !== 'object') {
+    return 'Failed to update profile';
+  }
+
+  const maybeError = error as {
+    response?: {
+      data?: {
+        message?: string | string[];
+      };
+    };
+  };
+  const message = maybeError.response?.data?.message;
+
+  if (Array.isArray(message)) {
+    return message.join('\n');
+  }
+
+  return message || 'Failed to update profile';
+}
 
 export default function EditProfile() {
-  const { currentUser: user } = useUser();
+  const { isLoaded, isSignedIn, getToken } = useAuth();
+  const [user, setUser] = useState<AuthenticatedProfile | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     username: '',
   });
-  const [profileImage, setProfileImage] = useState<any>(null);
+  const [profileImage, setProfileImage] = useState<ImageSourcePropType | null>(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSuccessModalVisible, setIsSuccessModalVisible] = useState(false);
+  const getTokenRef = useRef(getToken);
+  getTokenRef.current = getToken;
 
   useEffect(() => {
-    if (user) {
-      setFormData({
-        name: user.name || '',
-        username: user.username || '',
-      });
+    let isActive = true;
 
-      const userImage = userImages[user.image] || userImages.default;
-      setProfileImage(userImage);
+    async function loadProfile() {
+      if (!isLoaded) {
+        return;
+      }
+
+      if (!isSignedIn) {
+        setIsLoadingProfile(false);
+        Alert.alert('Authentication required', 'Please sign in to edit your profile');
+        router.replace('/landing');
+        return;
+      }
+
+      try {
+        setIsLoadingProfile(true);
+        const token = await getTokenRef.current();
+        const profile = await getMyProfile(token);
+
+        if (!isActive) {
+          return;
+        }
+
+        setUser(profile);
+        setFormData({
+          name: profile.name || '',
+          username: profile.username || '',
+        });
+        setProfileImage(getProfileImageSource(profile.image));
+      } catch (error) {
+        console.error('Failed to load profile for editing', error);
+        if (isActive) {
+          Alert.alert('Error', 'Failed to load profile');
+          router.back();
+        }
+      } finally {
+        if (isActive) {
+          setIsLoadingProfile(false);
+        }
+      }
     }
-  }, [user]);
+
+    loadProfile();
+
+    return () => {
+      isActive = false;
+    };
+  }, [isLoaded, isSignedIn]);
 
   const handleChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -40,45 +116,42 @@ export default function EditProfile() {
   };
 
   const takePhoto = async () => {
+    Alert.alert('Not available yet', 'Profile photo editing is not available yet');
+  };
+
+  const handleSave = async () => {
+    const name = formData.name.trim();
+    const username = formData.username.trim();
+
+    if (!name || !username) {
+      Alert.alert('Missing fields', 'Name and username are required');
+      return;
+    }
+
     try {
-      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      setIsLoading(true);
+      const token = await getTokenRef.current();
+      await updateMyProfile(token, { name, username });
 
-      if (status !== 'granted') {
-        Alert.alert('Permission Required', 'Camera permission is required to take photos');
-        return;
-      }
-
-      const result = await ImagePicker.launchCameraAsync({
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
-      });
-
-      if (!result.canceled && result.assets[0]) {
-        setProfileImage({ uri: result.assets[0].uri });
-      }
+      setIsSuccessModalVisible(true);
     } catch (error) {
-      console.error('Error taking photo:', error);
-      Alert.alert('Error', 'Failed to take photo');
+      console.error('Failed to update profile', error);
+      Alert.alert('Error', getApiErrorMessage(error));
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleSave = () => {
-    setIsLoading(true);
-
-    setTimeout(() => {
-      setIsLoading(false);
-      Alert.alert('Success', 'Profile updated successfully!', [
-        {
-          text: 'OK',
-          onPress: () => router.back(),
-        },
-      ]);
-    }, 1500);
-  };
-
-  if (!user) {
-    return null;
+  if (isLoadingProfile || !user) {
+    return (
+      <Container>
+        <Header variant="back" title="Edit Profile" />
+        <LoadingState>
+          <ActivityIndicator color="white" />
+          <LoadingText>Loading...</LoadingText>
+        </LoadingState>
+      </Container>
+    );
   }
 
   return (
@@ -93,6 +166,33 @@ export default function EditProfile() {
 
       <Header variant="back" title="Edit Profile" />
 
+      <Modal
+        visible={isSuccessModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setIsSuccessModalVisible(false)}
+        accessibilityViewIsModal
+      >
+        <ModalOverlay>
+          <ModalContent role="alert">
+            <SuccessIcon name="checkmark-circle" />
+            <ModalTitle role="header">Changes saved</ModalTitle>
+            <ModalDescription>Your profile has been updated successfully.</ModalDescription>
+
+            <ModalButton
+              onPress={() => {
+                setIsSuccessModalVisible(false);
+                router.replace('/perfil/profile');
+              }}
+              role="button"
+              accessibilityLabel="Close success message"
+            >
+              <ModalButtonText>OK</ModalButtonText>
+            </ModalButton>
+          </ModalContent>
+        </ModalOverlay>
+      </Modal>
+
       <PaddedContent>
         <ProfileImageSection>
           <ProfileImageContainer>
@@ -106,7 +206,7 @@ export default function EditProfile() {
                 accessible={true}
                 accessibilityLabel="No profile picture set"
               >
-                <Ionicons name="person" size={80} color={Colors.white} accessible={false} />
+                <DefaultAvatarIcon accessible={false} />
               </DefaultImagePlaceholder>
             )}
 
@@ -168,6 +268,19 @@ const Container = styled.View`
   background-color: ${({ theme }) => theme.colors.background};
 `;
 
+const LoadingState = styled.View`
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+`;
+
+const LoadingText = styled.Text`
+  color: ${({ theme }) => theme.colors.white};
+  font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
+  font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
+  margin-top: ${({ theme }) => theme.spacing.sm}px;
+`;
+
 const PaddedContent = styled.View`
   padding: 20px ${({ theme }) => theme.spacing.margemLateral}px;
   padding-top: 100px;
@@ -195,10 +308,17 @@ const DefaultImagePlaceholder = styled.View`
   width: 250px;
   height: 250px;
   border-radius: 125px;
-  background-color: ${Colors.palette.primary.normal};
+  background-color: ${({ theme }) => theme.colors.background};
   align-items: center;
   justify-content: center;
   margin-bottom: 20px;
+`;
+
+const DefaultAvatarIcon = styled(Ionicons).attrs({
+  name: 'person',
+  size: 72,
+})`
+  color: ${({ theme }) => theme.colors.palette.neutral.neutral80};
 `;
 
 const CameraButton = styled.TouchableOpacity`
@@ -231,4 +351,60 @@ const ButtonText = styled.Text`
   color: ${Colors.white};
   font-size: 16px;
   font-family: ${Fonts.weights.medium};
+`;
+
+const ModalOverlay = styled.View`
+  flex: 1;
+  background-color: rgba(0, 0, 0, 0.72);
+  align-items: center;
+  justify-content: center;
+  padding: ${({ theme }) => theme.spacing.margemLateral}px;
+`;
+
+const ModalContent = styled.View`
+  width: 100%;
+  max-width: 340px;
+  background-color: ${({ theme }) => theme.colors.grayNavbar};
+  border-radius: ${({ theme }) => theme.borderRadius.large}px;
+  padding: ${({ theme }) => theme.spacing.xl}px;
+  align-items: center;
+`;
+
+const SuccessIcon = styled(Ionicons).attrs({
+  size: 54,
+})`
+  color: ${({ theme }) => theme.colors.primary};
+  margin-bottom: ${({ theme }) => theme.spacing.md}px;
+`;
+
+const ModalTitle = styled.Text`
+  color: ${({ theme }) => theme.colors.white};
+  font-family: ${({ theme }) => theme.text.titulo.h1.fontFamily};
+  font-size: ${({ theme }) => theme.text.titulo.h1.fontSize}px;
+  text-align: center;
+`;
+
+const ModalDescription = styled.Text`
+  color: ${({ theme }) => theme.colors.inactive};
+  font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
+  font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
+  text-align: center;
+  margin-top: ${({ theme }) => theme.spacing.sm}px;
+  margin-bottom: ${({ theme }) => theme.spacing.xl}px;
+`;
+
+const ModalButton = styled.TouchableOpacity`
+  height: 48px;
+  min-width: 140px;
+  padding: 0 ${({ theme }) => theme.spacing.xl}px;
+  align-items: center;
+  justify-content: center;
+  background-color: ${({ theme }) => theme.colors.primary};
+  border-radius: ${({ theme }) => theme.borderRadius.large}px;
+`;
+
+const ModalButtonText = styled.Text`
+  color: ${({ theme }) => theme.colors.white};
+  font-family: ${Fonts.weights.medium};
+  font-size: 16px;
 `;

@@ -216,7 +216,7 @@ const LogoutText = styled.Text`
 
 const DeleteAccountButton = styled.TouchableOpacity`
   border-width: 1px;
-  border-color: #ef4444;
+  background-color: ${({ theme }) => theme.colors.palette.primary.light80};
   border-radius: ${({ theme }) => theme.borderRadius.large}px;
   padding: 12px 20px;
   margin-bottom: ${({ theme }) => theme.spacing.xxl}px;
@@ -224,7 +224,7 @@ const DeleteAccountButton = styled.TouchableOpacity`
 `;
 
 const DeleteAccountText = styled.Text`
-  color: #ef4444;
+  color: ${({ theme }) => theme.colors.primary};
   font-family: ${Fonts.weights.medium};
   font-size: 16px;
 `;

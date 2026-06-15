@@ -6,16 +6,18 @@ type Props = {
   center: { lat: number; lng: number };
   width: number;
   height: number;
+  zoom?: number;
   theme: 'light' | 'dark';
   onPress?: () => void;
 };
 
-export function StaticMapPreview({ center, width, height, theme, onPress }: Props) {
+export function StaticMapPreview({ center, width, height, zoom, theme, onPress }: Props) {
   const STATIC_WIDTH = 1024;
   const STATIC_HEIGHT = 1024;
 
   const mapUrl = getStaticMapUrl({
     center,
+    zoom,
     width: STATIC_WIDTH,
     height: STATIC_HEIGHT,
     theme,

@@ -78,8 +78,9 @@ export class EventsController {
 
   // GET /events/:id/mapa
   @Get(':id/mapa')
-  getMap(@Param('id') id: string) {
-    return this.eventsService.getMap(id);
+  @UseGuards(AuthRequiredGuard)
+  getMap(@Param('id') id: string, @Req() request: RequestWithUser) {
+    return this.eventsService.getMap(id, request.user!.id);
   }
 
   // GET /events/:id/activities

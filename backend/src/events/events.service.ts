@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import type { Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 export type AddFavouriteBody = {
@@ -29,6 +29,56 @@ type ActivitiesListQuery = {
   search?: string;
   sortBy?: 'start_time' | 'end_time' | 'name';
   sortOrder?: 'asc' | 'desc';
+};
+
+type GeoPoint = {
+  lat: number;
+  lng: number;
+};
+
+type MapBounds = {
+  north: number;
+  south: number;
+  west: number;
+  east: number;
+};
+
+type MapPinDefinition = {
+  id?: string | number;
+  name?: string;
+  type?: string;
+  point_interest_id?: string | number;
+  lat?: number;
+  lng?: number;
+  friendId?: string;
+};
+
+type MapStageDefinition = {
+  id?: string | number;
+  name?: string;
+  point_interest_id?: string | number;
+  rotation?: number;
+  width?: number;
+  height?: number;
+  lat?: number;
+  lng?: number;
+};
+
+type EventMapConfig = {
+  zoom?: number;
+  bounds?: MapBounds;
+  currentLocation?: GeoPoint;
+  pins?: MapPinDefinition[];
+  stages?: MapStageDefinition[];
+};
+
+type MapFriendLocationRow = {
+  friend_id: string;
+  name: string | null;
+  username: string | null;
+  image: string | null;
+  lat: number | null;
+  lng: number | null;
 };
 
 @Injectable()
@@ -85,6 +135,114 @@ export class EventsService {
     }
 
     return parsed;
+  }
+
+  private parseGeoPoint(lat: unknown, lng: unknown): GeoPoint | null {
+    if (typeof lat !== 'number' || typeof lng !== 'number') {
+      return null;
+    }
+
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+      return null;
+    }
+
+    return { lat, lng };
+  }
+
+  private getMapConfig(others: unknown): EventMapConfig {
+    if (!others || typeof others !== 'object') {
+      return {};
+    }
+
+    const map = (others as { map?: unknown }).map;
+
+    if (!map || typeof map !== 'object') {
+      return {};
+    }
+
+    return map;
+  }
+
+  private buildFallbackBounds(center: GeoPoint): MapBounds {
+    const latitudeDelta = 0.0045;
+    const longitudeDelta = 0.0045;
+
+    return {
+      north: center.lat + latitudeDelta,
+      south: center.lat - latitudeDelta,
+      west: center.lng - longitudeDelta,
+      east: center.lng + longitudeDelta,
+    };
+  }
+
+  private async getLatestLocationForUser(
+    userId: string,
+  ): Promise<GeoPoint | null> {
+    const [row] = await this.prisma.$queryRaw<
+      Array<{ lat: number | null; lng: number | null }>
+    >(Prisma.sql`
+      SELECT
+        COALESCE(
+          ST_Y(latest_location.location::geometry),
+          ST_Y(u.location::geometry)
+        ) AS lat,
+        COALESCE(
+          ST_X(latest_location.location::geometry),
+          ST_X(u.location::geometry)
+        ) AS lng
+      FROM users u
+      LEFT JOIN LATERAL (
+        SELECT location
+        FROM user_locations
+        WHERE user_id = u.id
+        ORDER BY timestamp DESC
+        LIMIT 1
+      ) latest_location ON true
+      WHERE u.id = ${userId}::uuid
+      LIMIT 1
+    `);
+
+    return this.parseGeoPoint(row?.lat, row?.lng);
+  }
+
+  private async getFriendsAtEventWithLocations(
+    userId: string,
+    eventId: bigint,
+  ): Promise<MapFriendLocationRow[]> {
+    return await this.prisma.$queryRaw<MapFriendLocationRow[]>(Prisma.sql`
+      SELECT
+        u.id AS friend_id,
+        u.name,
+        u.username,
+        encode(u.image, 'base64') AS image,
+        COALESCE(
+          ST_Y(latest_location.location::geometry),
+          ST_Y(u.location::geometry)
+        ) AS lat,
+        COALESCE(
+          ST_X(latest_location.location::geometry),
+          ST_X(u.location::geometry)
+        ) AS lng
+      FROM friendship f
+      JOIN users u
+        ON u.id = CASE
+          WHEN f.user1_id = ${userId}::uuid THEN f.user2_id
+          ELSE f.user1_id
+        END
+      JOIN user_tickets ut
+        ON ut.user_id = u.id
+       AND ut.event_id = ${eventId}
+      LEFT JOIN LATERAL (
+        SELECT location
+        FROM user_locations
+        WHERE user_id = u.id
+        ORDER BY timestamp DESC
+        LIMIT 1
+      ) latest_location ON true
+      WHERE f.state IN ('ACCEPTED', 'accepted')
+        AND (f.user1_id = ${userId}::uuid OR f.user2_id = ${userId}::uuid)
+      ORDER BY u.name ASC NULLS LAST, u.username ASC NULLS LAST
+    `);
   }
 
   async getAllEvents(query?: EventsListQuery) {
@@ -207,41 +365,70 @@ export class EventsService {
     return this.serialize(pointsInterest);
   }
 
-  async getMap(id: string) {
+  async getMap(id: string, userId?: string) {
     const eventId = this.parseEventId(id);
-    const event = await this.prisma.event.findUnique({
-      where: { id: eventId },
-      select: {
-        id: true,
-        name: true,
-        venue_name: true,
-        status: true,
-        category: true,
-        start_date: true,
-        end_date: true,
-      },
-    });
-
-    if (!event) {
-      throw new NotFoundException(`Event with ID ${id} not found`);
-    }
-
-    const [pointsInterest, activities] = await Promise.all([
-      this.prisma.points_interest.findMany({
-        where: { event_id: eventId },
-        select: {
-          id: true,
-          event_id: true,
-          name: true,
-          coordinates: {
-            select: {
-              id: true,
-              point_id: true,
-            },
-          },
-        },
-        orderBy: { id: 'asc' },
-      }),
+    const [eventRows, pointsInterestRows, activities] = await Promise.all([
+      this.prisma.$queryRaw<
+        Array<{
+          id: bigint;
+          name: string | null;
+          venue_name: string | null;
+          status: string | null;
+          category: string | null;
+          start_date: Date | null;
+          end_date: Date | null;
+          others: unknown;
+          center_lat: number | null;
+          center_lng: number | null;
+        }>
+      >(Prisma.sql`
+        SELECT
+          id,
+          name,
+          venue_name,
+          status,
+          category,
+          start_date,
+          end_date,
+          others,
+          CASE
+            WHEN location IS NULL THEN NULL
+            ELSE ST_Y(location::geometry)
+          END AS center_lat,
+          CASE
+            WHEN location IS NULL THEN NULL
+            ELSE ST_X(location::geometry)
+          END AS center_lng
+        FROM event
+        WHERE id = ${eventId}
+        LIMIT 1
+      `),
+      this.prisma.$queryRaw<
+        Array<{
+          point_id: bigint;
+          point_name: string | null;
+          coordinate_id: bigint | null;
+          lat: number | null;
+          lng: number | null;
+        }>
+      >(Prisma.sql`
+        SELECT DISTINCT ON (pi.id)
+          pi.id AS point_id,
+          pi.name AS point_name,
+          c.id AS coordinate_id,
+          CASE
+            WHEN c.location IS NULL THEN NULL
+            ELSE ST_Y(c.location::geometry)
+          END AS lat,
+          CASE
+            WHEN c.location IS NULL THEN NULL
+            ELSE ST_X(c.location::geometry)
+          END AS lng
+        FROM points_interest pi
+        LEFT JOIN coordinates c ON c.point_id = pi.id
+        WHERE pi.event_id = ${eventId}
+        ORDER BY pi.id ASC, c.id ASC
+      `),
       this.prisma.event_activities.findMany({
         where: { event_id: eventId },
         select: {
@@ -256,9 +443,141 @@ export class EventsService {
       }),
     ]);
 
+    const event = eventRows[0];
+
+    if (!event) {
+      throw new NotFoundException(`Event with ID ${id} not found`);
+    }
+
+    const mapConfig = this.getMapConfig(event.others);
+    const parsedCenter = this.parseGeoPoint(event.center_lat, event.center_lng);
+    let center = parsedCenter;
+
+    if (!center) {
+      center = mapConfig.currentLocation ?? { lat: 0, lng: 0 };
+    }
+    const bounds = mapConfig.bounds ?? this.buildFallbackBounds(center);
+    const pointsById = new Map(
+      pointsInterestRows.map((point) => [String(point.point_id), point]),
+    );
+
+    const friendLocations = userId
+      ? await this.getFriendsAtEventWithLocations(userId, eventId)
+      : [];
+    const currentUserLocation = userId
+      ? await this.getLatestLocationForUser(userId)
+      : null;
+
+    const staticPins = (mapConfig.pins ?? [])
+      .filter((definition) => definition.type !== 'friend')
+      .map((definition) => {
+        const pointId = definition.point_interest_id;
+        const point =
+          pointId !== undefined && pointId !== null
+            ? pointsById.get(String(pointId))
+            : undefined;
+        const resolvedPoint = this.parseGeoPoint(
+          point?.lat ?? definition.lat,
+          point?.lng ?? definition.lng,
+        );
+
+        if (!resolvedPoint) {
+          return null;
+        }
+
+        const resolvedId =
+          definition.id ??
+          definition.point_interest_id ??
+          definition.name ??
+          `${resolvedPoint.lat}-${resolvedPoint.lng}`;
+
+        return {
+          id: String(resolvedId),
+          name: definition.name ?? point?.point_name ?? 'Point of interest',
+          type: definition.type ?? 'point',
+          lat: resolvedPoint.lat,
+          lng: resolvedPoint.lng,
+          point_interest_id:
+            pointId !== undefined && pointId !== null ? String(pointId) : null,
+          friendId: definition.friendId ?? null,
+        };
+      })
+      .filter((pin): pin is NonNullable<typeof pin> => pin !== null);
+
+    const friendPins = friendLocations
+      .map((friend) => {
+        const resolvedPoint = this.parseGeoPoint(friend.lat, friend.lng);
+
+        if (!resolvedPoint) {
+          return null;
+        }
+
+        return {
+          id: friend.friend_id,
+          friendId: friend.friend_id,
+          name: friend.name ?? friend.username ?? 'Friend',
+          type: 'friend',
+          lat: resolvedPoint.lat,
+          lng: resolvedPoint.lng,
+          image: friend.image,
+        };
+      })
+      .filter((pin): pin is NonNullable<typeof pin> => pin !== null);
+
+    const stages = (mapConfig.stages ?? [])
+      .map((definition) => {
+        const pointId = definition.point_interest_id;
+        const point =
+          pointId !== undefined && pointId !== null
+            ? pointsById.get(String(pointId))
+            : undefined;
+        const resolvedPoint = this.parseGeoPoint(
+          point?.lat ?? definition.lat,
+          point?.lng ?? definition.lng,
+        );
+
+        if (!resolvedPoint) {
+          return null;
+        }
+
+        const resolvedId =
+          definition.id ??
+          definition.point_interest_id ??
+          definition.name ??
+          `${resolvedPoint.lat}-${resolvedPoint.lng}`;
+
+        return {
+          id: String(resolvedId),
+          name: definition.name ?? point?.point_name ?? 'Stage',
+          lat: resolvedPoint.lat,
+          lng: resolvedPoint.lng,
+          rotation: definition.rotation ?? 0,
+          width: definition.width ?? 90,
+          height: definition.height ?? 60,
+        };
+      })
+      .filter((stage): stage is NonNullable<typeof stage> => stage !== null);
+
+    let resolvedCurrentLocation = currentUserLocation;
+
+    if (!resolvedCurrentLocation) {
+      resolvedCurrentLocation = mapConfig.currentLocation ?? center;
+    }
+
     return this.serialize({
-      event,
-      points_interest: pointsInterest,
+      event: {
+        ...event,
+        location: center,
+      },
+      map: {
+        center,
+        zoom: mapConfig.zoom ?? 16,
+        bounds,
+        currentLocation: resolvedCurrentLocation,
+        pins: [...staticPins, ...friendPins],
+        stages,
+      },
+      points_interest: pointsInterestRows,
       activities,
     });
   }

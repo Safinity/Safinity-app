@@ -5,10 +5,8 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import Svg, { Polyline } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, router, Stack } from 'expo-router';
 
-import users from '@/data/users.json';
-import { userImages } from '../../assets/images/Users/userImages';
 import Header from '../../components/ui/header';
 import SearchInput from '../../components/ui/SearchInput';
 import FilterTags from '../../components/ui/FilterTags';
@@ -19,9 +17,41 @@ import { MapCallout } from '../../components/maps/MapCallout';
 import { UserMarker } from '../../components/maps/UserMarker';
 import { Colors, Spacing } from '../../constants/theme';
 import mapData from '../../data/mapdata.json';
+import api from '../../utils/api';
 import { latLngToPixelFromBounds } from '../../utils/coordinates';
-import { router, Stack } from 'expo-router';
 import Head from 'expo-router/head';
+
+type MapPinItem = {
+  id: string | number;
+  name: string;
+  type: string;
+  lat: number;
+  lng: number;
+  friendId?: string | null;
+  point_interest_id?: string | null;
+};
+
+type MapStageItem = {
+  id: string | number;
+  name: string;
+  lat: number;
+  lng: number;
+  rotation: number;
+  width?: number;
+  height?: number;
+};
+
+type LoadedMapPayload = {
+  event?: { id?: string; name?: string | null };
+  map?: {
+    center?: { lat: number; lng: number };
+    zoom?: number;
+    bounds?: { north: number; south: number; west: number; east: number };
+    currentLocation?: { lat: number; lng: number };
+    pins?: MapPinItem[];
+    stages?: MapStageItem[];
+  };
+};
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const IMAGE_WIDTH = screenWidth * 2.5;
@@ -118,18 +148,14 @@ const TAG_TO_PIN_TYPE: Record<string, string[]> = {
   Stages: ['stage'],
   Entrance: ['entrance'],
 };
-const getDisplayName = (item: any) => {
-  if (item.type === 'friend' && item.friendId) {
-    const user = users.find(u => u.id === item.friendId);
-    return user ? user.name : item.name;
-  }
-  return item.name;
+const getDisplayName = (item: { name?: string }) => {
+  return item.name || 'Unnamed Item';
 };
-const matchesSearch = (item: any, query: string) => {
+const matchesSearch = (item: { name?: string; type?: string }, query: string) => {
   if (!query) return true;
   const q = query.toLowerCase();
   const name = getDisplayName(item).toLowerCase();
-  return name.includes(q) || item.type?.toLowerCase().includes(q);
+  return name.includes(q) || (item.type || '').toLowerCase().includes(q);
 };
 
 // --- MapScreen Component ---
@@ -143,10 +169,96 @@ export default function MapScreen() {
   const [selectedPin, setSelectedPin] = useState<any>(null);
   const [activeRoute, setActiveRoute] = useState<{ x: number; y: number }[] | null>(null);
   const [destinationName, setDestinationName] = useState('');
+  const [mapPayload, setMapPayload] = useState<LoadedMapPayload | null>(null);
+  const [mapLoading, setMapLoading] = useState(true);
+  const [mapError, setMapError] = useState<string | null>(null);
 
-  const { universityCoords, pins, stages, bounds } = mapData;
+  const mapSource = mapPayload?.map;
+  const universityCoords = mapSource?.center ?? mapData.universityCoords;
+  const pins = mapSource?.pins ?? mapData.pins;
+  const stages = mapSource?.stages ?? mapData.stages;
+  const bounds = mapSource?.bounds ?? mapData.bounds;
   const tags = ['Exits', 'Friends', 'Stages', 'Food', 'Entrance'];
   const { focusId } = useLocalSearchParams();
+
+  // Log para monitorizar o estado das variáveis críticas de renderização a cada ciclo
+  console.log('[MAP_DEBUG] Component Render State:', {
+    hasPayload: !!mapPayload,
+    pinsCount: pins?.length ?? 0,
+    stagesCount: stages?.length ?? 0,
+    mapLoading,
+    hasError: !!mapError,
+  });
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadMap = async () => {
+      try {
+        console.log('[MAP_DEBUG] Iniciando o carregamento dos dados do mapa...');
+        setMapLoading(true);
+        setMapError(null);
+
+        console.log('[MAP_DEBUG] Fazendo chamada para /events/present-event...');
+        const presentEventResponse = await api.get('/events/present-event');
+        const presentEvent = presentEventResponse.data;
+        console.log('[MAP_DEBUG] Resposta de present-event:', presentEvent);
+
+        if (!presentEvent?.id) {
+          console.warn(
+            '[MAP_DEBUG] Nenhum evento ativo (presentEvent.id) foi retornado pelo backend.',
+          );
+          if (mounted) {
+            setMapPayload(null);
+            setMapError('No active event found for the current user');
+          }
+          return;
+        }
+
+        // Alterado para /map para sincronizar com as rotas padrão do NestJS
+        const mapUrl = `/events/${presentEvent.id}/mapa`;
+        console.log(`[MAP_DEBUG] Buscando a infraestrutura do mapa no endpoint: ${mapUrl}`);
+        const mapResponse = await api.get(mapUrl);
+
+        console.log(
+          '[MAP_DEBUG] Resposta do mapa com sucesso. Estrutura das chaves:',
+          Object.keys(mapResponse.data || {}),
+        );
+        if (mapResponse.data?.map) {
+          console.log('[MAP_DEBUG] Detalhes do mapa recebido:', {
+            center: mapResponse.data.map.center,
+            pinsReceived: mapResponse.data.map.pins?.length ?? 0,
+            stagesReceived: mapResponse.data.map.stages?.length ?? 0,
+            bounds: mapResponse.data.map.bounds,
+          });
+        }
+
+        if (mounted) {
+          setMapPayload(mapResponse.data);
+        }
+      } catch (error: any) {
+        console.error('[MAP_DEBUG] Erro crítico capturado no bloco loadMap:', {
+          message: error?.message,
+          status: error?.response?.status,
+          data: error?.response?.data,
+        });
+        if (mounted) {
+          setMapPayload(null);
+          setMapError('Unable to load event map');
+        }
+      } finally {
+        if (mounted) {
+          setMapLoading(false);
+        }
+      }
+    };
+
+    loadMap();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   // --- GESTURES ---
   const panGesture = Gesture.Pan().onChange(e => {
@@ -172,7 +284,24 @@ export default function MapScreen() {
   // --- FUNÇÕES ---
   const handlePinPress = useCallback(
     (pin: any, showRoute = false) => {
+      console.log('[MAP_DEBUG] Pino pressionado:', {
+        id: pin.id,
+        name: pin.name,
+        lat: pin.lat,
+        lng: pin.lng,
+        showRoute,
+      });
+
+      if (pin.lat === undefined || pin.lng === undefined || !bounds) {
+        console.error('[MAP_DEBUG] Impossível calcular projeção: lat, lng ou bounds indefinidos.', {
+          pin,
+          bounds,
+        });
+        return;
+      }
+
       const pos = latLngToPixelFromBounds(pin.lat, pin.lng, bounds, IMAGE_WIDTH, IMAGE_HEIGHT);
+      console.log('[MAP_DEBUG] Coordenadas convertidas para píxeis locais:', pos);
 
       setSelectedPin({
         ...pin,
@@ -186,6 +315,7 @@ export default function MapScreen() {
       translateY.value = withTiming(screenHeight / 2 - pos.y * scale.value);
 
       if (showRoute) {
+        console.log('[MAP_DEBUG] Calculando rota até o destino solicitado...');
         const start = latLngToPixelFromBounds(
           CURRENT_LOCATION.lat,
           CURRENT_LOCATION.lng,
@@ -199,33 +329,43 @@ export default function MapScreen() {
         setSelectedPin(null);
       }
     },
-    [bounds],
+    [bounds, scale, translateX, translateY],
   );
 
   const handleCancelRoute = () => {
+    console.log('[MAP_DEBUG] Rota cancelada pelo utilizador.');
     setActiveRoute(null);
     setDestinationName('');
   };
 
-  const visiblePins =
+  const visiblePins: MapPinItem[] =
     selectedTags.length === 0
-      ? pins.filter(pin => matchesSearch(pin, searchValue))
+      ? pins.filter((pin: MapPinItem) => matchesSearch(pin, searchValue))
       : pins.filter(
-          pin =>
+          (pin: MapPinItem) =>
             selectedTags.some(tag => TAG_TO_PIN_TYPE[tag]?.includes(pin.type)) &&
             matchesSearch(pin, searchValue),
         );
 
-  const visibleStages =
+  const visibleStages: MapStageItem[] =
     selectedTags.length === 0 || selectedTags.includes('Stages')
-      ? stages.filter(stage => matchesSearch(stage, searchValue))
+      ? stages.filter((stage: MapStageItem) => matchesSearch(stage, searchValue))
       : [];
 
   useEffect(() => {
     if (focusId) {
-      const targetPin = pins.find(p => p.friendId === focusId);
+      console.log(
+        `[MAP_DEBUG] focusId detetado via URL params: ${focusId}. Procurando pino do amigo...`,
+      );
+      const targetPin = pins.find((p: MapPinItem) => p.friendId === focusId);
       if (targetPin) {
-        setTimeout(() => handlePinPress(targetPin, true), 300);
+        console.log('[MAP_DEBUG] Amigo encontrado! Disparando centralização automática em 300ms.');
+        const timer = setTimeout(() => handlePinPress(targetPin, true), 300);
+        return () => clearTimeout(timer);
+      } else {
+        console.warn(
+          `[MAP_DEBUG] focusId ${focusId} ativo, mas não corresponde a nenhum pino na lista.`,
+        );
       }
     }
   }, [focusId, pins, handlePinPress]);
@@ -237,12 +377,7 @@ export default function MapScreen() {
       </Head>
       <Stack.Screen options={{ title: 'Map | Safinity', headerShown: false }} />
 
-      <GestureDetector
-        gesture={composedGesture}
-        role="main"
-        accessibilityLabel="Map interaction area"
-        accessibilityHint="Use pinch to zoom and drag to pan the map"
-      >
+      <GestureDetector gesture={composedGesture}>
         <Animated.View
           style={[{ width: IMAGE_WIDTH, height: IMAGE_HEIGHT }, animatedStyle]}
           accessible={false}
@@ -251,6 +386,7 @@ export default function MapScreen() {
             center={universityCoords}
             width={IMAGE_WIDTH}
             height={IMAGE_HEIGHT}
+            zoom={mapSource?.zoom}
             theme="dark"
           />
 
@@ -272,13 +408,17 @@ export default function MapScreen() {
           </Svg>
 
           {visiblePins.map(pin => {
-            const friendData =
-              pin.type === 'friend' ? users.find(u => u.id === pin.friendId) : null;
+            // Log de salvaguarda caso o banco devolva coordenadas corrompidas para este pino
+            if (pin.lat === null || pin.lng === null || pin.lat === undefined) {
+              console.warn(
+                `[MAP_DEBUG] Omitindo renderização do pino ${pin.id} (${pin.name}) devido a coordenadas nulas.`,
+              );
+              return null;
+            }
             return (
               <MapPin
-                key={pin.id}
+                key={String(pin.id)}
                 pin={pin}
-                avatar={friendData ? userImages[friendData.image] : null}
                 bounds={bounds}
                 width={IMAGE_WIDTH}
                 height={IMAGE_HEIGHT}
@@ -290,19 +430,24 @@ export default function MapScreen() {
             );
           })}
 
-          {visibleStages.map(stage => (
-            <MapStage
-              key={stage.id}
-              stage={stage}
-              bounds={bounds}
-              width={IMAGE_WIDTH}
-              height={IMAGE_HEIGHT}
-              onPress={() => handlePinPress(stage)}
-              accessible
-              role="button"
-              accessibilityLabel={`Stage: ${getDisplayName(stage)}`}
-            />
-          ))}
+          {visibleStages.map(stage => {
+            if (stage.lat === null || stage.lng === null || stage.lat === undefined) {
+              return null;
+            }
+            return (
+              <MapStage
+                key={String(stage.id)}
+                stage={stage}
+                bounds={bounds}
+                width={IMAGE_WIDTH}
+                height={IMAGE_HEIGHT}
+                onPress={() => handlePinPress(stage)}
+                accessible
+                role="button"
+                accessibilityLabel={`Stage: ${getDisplayName(stage)}`}
+              />
+            );
+          })}
 
           {selectedPin && (
             <MapCallout
@@ -314,7 +459,7 @@ export default function MapScreen() {
           )}
 
           <UserMarker
-            location={CURRENT_LOCATION}
+            location={mapSource?.currentLocation ?? CURRENT_LOCATION}
             bounds={bounds}
             width={IMAGE_WIDTH}
             height={IMAGE_HEIGHT}
@@ -327,8 +472,16 @@ export default function MapScreen() {
       <OverlayContent pointerEvents="box-none">
         <PageHeader>
           <Ionicons name="location" size={28} color={Colors.palette.primary.light50} />
-          <PageTitle accessibilityRole="header">University of Aveiro</PageTitle>
+          <PageTitle accessibilityRole="header">
+            {mapPayload?.event?.name ?? 'University of Aveiro'}
+          </PageTitle>
         </PageHeader>
+
+        {mapError && !mapLoading && (
+          <PaddingSearchInput>
+            <DestinationText style={{ color: Colors.error }}>{mapError}</DestinationText>
+          </PaddingSearchInput>
+        )}
 
         <PaddingSearchInput>
           <SearchInput
@@ -353,10 +506,7 @@ export default function MapScreen() {
       </OverlayContent>
 
       {activeRoute && (
-        <NavigationFooter
-          accessibilityRole="contentinfo"
-          accessibilityLabel={`Active navigation route to ${destinationName}`}
-        >
+        <NavigationFooter accessibilityLabel={`Active navigation route to ${destinationName}`}>
           <LongCancelButton
             onPress={handleCancelRoute}
             accessible

@@ -213,28 +213,43 @@ INSERT INTO Organizations (id, name, email, website) VALUES
 (1, 'Safinity Core', 'admin@safinity.com', 'https://safinity.com'),
 (2, 'Tech Events Inc', 'contact@techevents.pt', 'https://techevents.pt');
 
--- Eventos
-INSERT INTO Event (id, organization_id, name, venue_name, status, category, start_date, end_date, location) VALUES 
+INSERT INTO Event (id , organization_id, name, venue_name, status, category, start_date, end_date, location) VALUES 
 (1, 1, 'Web Summit 2026', 'Altice Arena', 'active', 'Tech', '2026-11-02 09:00:00', '2026-11-05 18:00:00', ST_GeogFromText('SRID=4326;POINT(-9.093 38.767)')),
-(2, 2, 'Music Festival', 'Parque das Nações', 'planned', 'Music', '2026-07-20 14:00:00', '2026-07-22 23:00:00', ST_GeogFromText('SRID=4326;POINT(-9.092 38.765)'));
+(2, 2, 'Music Festival', 'Parque das Nações', 'planned', 'Music', '2026-07-20 14:00:00', '2026-07-22 23:00:00', ST_GeogFromText('SRID=4326;POINT(-9.092 38.765)')),
+(3, 1, 'Campus Connect Live', 'Lisbon Tech Park', 'active', 'Tech', '2026-06-14 09:00:00', '2026-06-16 22:00:00', ST_GeogFromText('SRID=4326;POINT(-9.1393 38.7223)'));
 
 -- Utilizadores
 INSERT INTO users (id, clerk_id, name, username, role, email, location) VALUES 
-(gen_random_uuid(), 'clerk_user_1', 'João Silva', 'jsilva', 'user', 'joao@mail.com', ST_GeogFromText('SRID=4326;POINT(-9.093 38.767)')),
-(gen_random_uuid(), 'clerk_user_2', 'Maria Costa', 'mcosta', 'staff', 'maria@staff.pt', ST_GeogFromText('SRID=4326;POINT(-9.091 38.766)'));
+('11111111-1111-1111-1111-111111111111', 'clerk_user_1', 'João Silva', 'jsilva', 'user', 'joao@mail.com', ST_GeogFromText('SRID=4326;POINT(-9.1397 38.7226)')),
+('22222222-2222-2222-2222-222222222222', 'clerk_user_2', 'Maria Costa', 'mcosta', 'staff', 'maria@staff.pt', ST_GeogFromText('SRID=4326;POINT(-9.1389 38.7221)')),
+('33333333-3333-3333-3333-333333333333', 'clerk_user_3', 'Pedro Almeida', 'pedroalmeida', 'user', 'pedro@mail.com', ST_GeogFromText('SRID=4326;POINT(-9.1391 38.7218)'));
 
 -- Sensores
 INSERT INTO Sensor (id, event_id, location, sensor_type, last_reading_value, last_reading_time) VALUES 
 (1, 1, ST_GeogFromText('SRID=4326;POINT(-9.093 38.767)'), 'crowd_counter', 85.5, now()),
 (2, 1, ST_GeogFromText('SRID=4326;POINT(-9.094 38.768)'), 'crowd_counter', 42.0, now()),
-(3, 1, ST_GeogFromText('SRID=4326;POINT(-9.092 38.766)'), 'noise_level', 65.2, now());
+(3, 1, ST_GeogFromText('SRID=4326;POINT(-9.092 38.766)'), 'noise_level', 65.2, now()),
+(4, 3, ST_GeogFromText('SRID=4326;POINT(-9.1395 38.7227)'), 'crowd_counter', 64.0, now()),
+(5, 3, ST_GeogFromText('SRID=4326;POINT(-9.1388 38.7219)'), 'noise_level', 48.4, now());
 
 -- Pontos de Interesse e Atividades
 INSERT INTO Points_interest (id, event_id, name) VALUES (1, 1, 'Palco Principal'), (2, 1, 'Posto Médico');
 
-INSERT INTO Event_activities (id, event_id, name, start_time, end_time, description, speaker, point_interest_id) VALUES 
-(1, 1, 'Keynote Principal', '2026-11-02 10:00:00', '2026-11-02 11:00:00', 'Abertura do evento', 'John Doe', 1),
-(2, 1, 'Workshop IA', '2026-11-02 14:00:00', '2026-11-02 16:00:00', 'Hands-on com IA', 1);
+INSERT INTO Points_interest (id, event_id, name) VALUES
+(3, 3, 'Main Stage'),
+(4, 3, 'Food Court'),
+(5, 3, 'Medical Point');
+
+INSERT INTO Coordinates (id, point_id, location) VALUES
+(1, 3, ST_GeogFromText('SRID=4326;POINT(-9.1393 38.7225)')),
+(2, 4, ST_GeogFromText('SRID=4326;POINT(-9.1386 38.7222)')),
+(3, 5, ST_GeogFromText('SRID=4326;POINT(-9.1398 38.7217)'));
+
+INSERT INTO Event_activities (id, event_id, name, start_time, end_time, description, speakers, point_interest_id) VALUES 
+(1, 1, 'Keynote Principal', '2026-11-02 10:00:00', '2026-11-02 11:00:00', 'Abertura do evento', NULL, 1),
+(2, 1, 'Workshop IA', '2026-11-02 14:00:00', '2026-11-02 16:00:00', 'Hands-on com IA', {"speaker1": "Jane Smith"}, 1),
+(3, 3, 'Opening Keynote', '2026-06-15 10:00:00', '2026-06-15 11:00:00', 'Abertura do evento atual', {"speaker1": "Ana Ribeiro"}, 3),
+(4, 3, 'Lunch Networking', '2026-06-15 13:00:00', '2026-06-15 14:00:00', 'Networking no food court', {"speaker1": "Miguel Santos"}, 4);
 
 -- SOS e Alertas
 INSERT INTO SOS (id, user_id, location, description, tag_selected, time) 
@@ -244,13 +259,94 @@ INSERT INTO Alerts (id, sos_id, event_id, title, description, category, location
 VALUES (1, 1, 1, 'Emergência Médica', 'Assistência solicitada', 'Medical', ST_GeogFromText('SRID=4326;POINT(-9.093 38.767)'), 'pending');
 INSERT INTO Event_Tickets_Master (id, event_id, ticket_code, is_already_linked) VALUES 
 (1, 1, 'TICKET-ABC-123', false),
-(2, 1, 'TICKET-XYZ-789', false);
+(2, 1, 'TICKET-XYZ-789', false),
+(3, 3, 'TICKET-CAMPUS-001', false),
+(4, 3, 'TICKET-CAMPUS-002', false),
+(5, 3, 'TICKET-CAMPUS-003', false);
+
+INSERT INTO User_Tickets (id, user_id, event_id, ticket_code, linked_at) VALUES
+
+(3, '0339bc70-bc90-4918-90ef-d11c5b6c3881', 3, 'TICKET-CAMPUS-003', now());
+
+INSERT INTO User_locations (id, user_id, location, timestamp) VALUES
+(1, '11111111-1111-1111-1111-111111111111', ST_GeogFromText('SRID=4326;POINT(-9.1392 38.7224)'), now() - interval '5 minutes'),
+(2, '22222222-2222-2222-2222-222222222222', ST_GeogFromText('SRID=4326;POINT(-9.1387 38.7220)'), now() - interval '2 minutes'),
+(3, '0339bc70-bc90-4918-90ef-d11c5b6c3881', ST_GeogFromText('SRID=4326;POINT(-9.1398 38.7218)'), now() - interval '8 minutes');
+
+
+UPDATE Event_Tickets_Master SET is_already_linked = true WHERE ticket_code IN ('TICKET-CAMPUS-001', 'TICKET-CAMPUS-002', 'TICKET-CAMPUS-003');
 
 INSERT INTO Friendship (id, user1_id, user2_id, state) 
 VALUES 
-(1, (SELECT id FROM users LIMIT 1), (SELECT id FROM users OFFSET 1 LIMIT 1), 'accepted');
+(1, '11111111-1111-1111-1111-111111111111', '22222222-2222-2222-2222-222222222222', 'accepted');
 
 INSERT INTO User_Favorites (id, user_id, activity_id) 
 VALUES 
-(1, (SELECT id FROM users LIMIT 1), 1),
-(2, (SELECT id FROM users LIMIT 1), 2);
+(1, '11111111-1111-1111-1111-111111111111', 1),
+(2, '11111111-1111-1111-1111-111111111111', 2),
+(3, '11111111-1111-1111-1111-111111111111', 3);
+
+UPDATE event
+SET others = jsonb_build_object(
+  'map', jsonb_build_object(
+    'zoom', 17,
+    'bounds', jsonb_build_object(
+      'north', 38.7231,
+      'south', 38.7214,
+      'west', -9.1402,
+      'east', -9.1378
+    ),
+    'currentLocation', jsonb_build_object(
+      'lat', 38.7223,
+      'lng', -9.1393
+    ),
+    'pins', jsonb_build_array(
+      jsonb_build_object(
+        'id', 'main-stage',
+        'name', 'Main Stage',
+        'type', 'stage',
+        'point_interest_id', 3
+      ),
+      jsonb_build_object(
+        'id', 'food-court',
+        'name', 'Food Court',
+        'type', 'food',
+        'point_interest_id', 4
+      ),
+      jsonb_build_object(
+        'id', 'medical-point',
+        'name', 'Medical Point',
+        'type', 'wc',
+        'point_interest_id', 5
+      ),
+      jsonb_build_object(
+        'id', 'friend-pedro',
+        'name', 'Maria Costa',
+        'type', 'friend',
+        'friendId', '22222222-2222-2222-2222-222222222222',
+        'lat', 38.7219,
+        'lng', -9.1387
+      )
+    ),
+    'stages', jsonb_build_array(
+      jsonb_build_object(
+        'id', 'main-stage',
+        'name', 'Main Stage',
+        'point_interest_id', 3,
+        'rotation', 12,
+        'width', 112,
+        'height', 72
+      ),
+      jsonb_build_object(
+        'id', 'side-stage',
+        'name', 'Side Stage',
+        'point_interest_id', 4,
+        'rotation', -18,
+        'width', 98,
+        'height', 62
+      )
+    )
+  )
+) WHERE id = 3;
+
+UPDATE USERS SET id = '0339bc70-bc90-4918-90ef-d11c5b6c3881' WHERE username = 'olaola';

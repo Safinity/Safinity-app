@@ -39,7 +39,7 @@ const StageText = styled.Text`
 interface StageProps {
   stage: {
     id: string | number;
-    name: string;
+    name?: string;
     lat: number;
     lng: number;
     rotation: number;
@@ -50,9 +50,21 @@ interface StageProps {
   width: number; // Map width
   height: number; // Map height
   onPress: () => void;
+  accessible?: boolean;
+  role?: string;
+  accessibilityLabel?: string;
 }
 
-export const MapStage = ({ stage, bounds, width, height, onPress }: StageProps) => {
+export const MapStage = ({
+  stage,
+  bounds,
+  width,
+  height,
+  onPress,
+  accessible,
+  role,
+  accessibilityLabel,
+}: StageProps) => {
   const pos = latLngToPixelFromBounds(stage.lat, stage.lng, bounds, width, height);
 
   // Logic: Use JSON size if provided, otherwise fallback to standard defaults
@@ -68,6 +80,9 @@ export const MapStage = ({ stage, bounds, width, height, onPress }: StageProps) 
       $rotation={stage.rotation}
       onPress={onPress}
       activeOpacity={0.7}
+      accessible={accessible}
+      accessibilityRole={role as any}
+      accessibilityLabel={accessibilityLabel}
     >
       <StageText>{stage.name}</StageText>
     </StageBox>

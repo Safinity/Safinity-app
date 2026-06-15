@@ -1,20 +1,34 @@
-import { FlatList, ScrollView, Pressable, View } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, ScrollView, View } from 'react-native';
 import { Stack, router } from 'expo-router';
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components/native';
-//import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useClerk } from '@clerk/expo';
+import { useAuth, useClerk } from '@clerk/expo';
 
-import { userImages } from '../../../assets/images/Users/userImages';
 import { EventCard } from '../../../components/EventCard';
 import { Fonts } from '../../../constants/theme';
-import eventsData from '../../../data/events.json';
-import users from '../../../data/users.json';
 
 import EditIcon from '../../../assets/Icons/edit.png';
 import Header from '../../../components/ui/header'; // import do header customizado
-import { useUser } from '../../../context/UserContext';
+import { getMyProfile, type AuthenticatedProfile } from '../../../utils/profile';
+
+function getProfileImageSource(user: AuthenticatedProfile | null) {
+  if (user?.image) {
+    return { uri: `data:image/jpeg;base64,${user.image}` };
+  }
+
+  return null;
+}
+
+function withTimeout<T>(promise: Promise<T>, timeoutMs = 12000) {
+  return Promise.race<T>([
+    promise,
+    new Promise<T>((_, reject) => {
+      setTimeout(() => reject(new Error('Profile request timed out')), timeoutMs);
+    }),
+  ]);
+}
 
 const Container = styled(ScrollView).attrs({
   showsVerticalScrollIndicator: false,
@@ -55,6 +69,13 @@ const AvatarCircle = styled.View`
 const Avatar = styled.Image`
   width: 100%;
   height: 100%;
+`;
+
+const DefaultAvatarIcon = styled(Ionicons).attrs({
+  name: 'person',
+  size: 72,
+})`
+  color: ${({ theme }) => theme.colors.palette.neutral.neutral80};
 `;
 
 const EditButtonContainer = styled.TouchableOpacity`
@@ -172,27 +193,142 @@ const LogoutText = styled.Text`
   font-size: 16px;
 `;
 
+const LoadingState = styled.View`
+  flex: 1;
+  min-height: 400px;
+  align-items: center;
+  justify-content: center;
+`;
+
+const LoadingText = styled.Text`
+  color: ${({ theme }) => theme.colors.white};
+  font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
+  font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
+  margin-top: ${({ theme }) => theme.spacing.sm}px;
+`;
+
+const EmptyText = styled.Text`
+  color: ${({ theme }) => theme.colors.inactive};
+  font-family: ${({ theme }) => theme.text.textoPequeno.fontFamily};
+  font-size: ${({ theme }) => theme.text.textoPequeno.fontSize}px;
+  padding-left: ${({ theme }) => theme.spacing.margemLateral}px;
+`;
+
 export default function Profile() {
-  const { currentUser: user } = useUser();
+  const { isLoaded, isSignedIn, getToken } = useAuth();
   const { signOut } = useClerk();
+  const [user, setUser] = useState<AuthenticatedProfile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+  const getTokenRef = useRef(getToken);
+  getTokenRef.current = getToken;
 
-  const imageSource = user?.image
-    ? userImages[user.image] || userImages.default
-    : userImages.default;
+  useEffect(() => {
+    if (isLoaded) {
+      return;
+    }
 
-  if (!user || !imageSource) return null;
+    setIsLoading(true);
 
-  const userPastEvents = eventsData.events.filter(event =>
-    (user.pastEvents ?? []).includes(event.id),
-  );
+    const timeoutId = setTimeout(() => {
+      setError('Authentication is taking too long.');
+      setIsLoading(false);
+    }, 12000);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [isLoaded]);
+
+  useEffect(() => {
+    let isActive = true;
+
+    async function loadProfile() {
+      if (!isLoaded) {
+        return;
+      }
+
+      if (!isSignedIn) {
+        setUser(null);
+        setError('Please sign in to view your profile.');
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        setError('');
+        const token = await withTimeout(getTokenRef.current());
+        const profile = await withTimeout(getMyProfile(token));
+
+        if (isActive) {
+          setUser(profile);
+        }
+      } catch (profileError) {
+        console.error('Failed to load profile', profileError);
+        if (isActive) {
+          setUser(null);
+          setError('Unable to load profile.');
+        }
+      } finally {
+        if (isActive) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadProfile();
+
+    return () => {
+      isActive = false;
+    };
+  }, [isLoaded, isSignedIn]);
+
+  const imageSource = getProfileImageSource(user);
+  const userPastEvents = user?.user_tickets?.map(ticket => ticket.event).filter(Boolean) ?? [];
 
   const handleLogout = async () => {
     await signOut();
     router.replace('/landing');
   };
 
+  if (isLoading) {
+    return (
+      <Container>
+        <Header
+          variant="back"
+          title="Profile"
+          rightIcon="wallet"
+          onRightPress={() => router.push('/perfil/wallet')}
+        />
+        <LoadingState>
+          <ActivityIndicator color="white" />
+          <LoadingText>Loading...</LoadingText>
+        </LoadingState>
+      </Container>
+    );
+  }
+
+  if (error || !user) {
+    return (
+      <Container>
+        <Header
+          variant="back"
+          title="Profile"
+          rightIcon="wallet"
+          onRightPress={() => router.push('/perfil/wallet')}
+        />
+        <LoadingState>
+          <LoadingText>{error || 'Unable to load profile.'}</LoadingText>
+        </LoadingState>
+      </Container>
+    );
+  }
+
   return (
     <Container>
+      <Stack.Screen options={{ title: 'Profile' }} />
+
       {/* Header Customizado */}
       <Header
         variant="back"
@@ -211,7 +347,11 @@ export default function Profile() {
       <PaddedContent style={{ marginTop: 120 }}>
         <AvatarContainer>
           <AvatarCircle>
-            <Avatar source={imageSource} accessibilityLabel={`Profile picture of ${user.name}`} />
+            {imageSource ? (
+              <Avatar source={imageSource} accessibilityLabel={`Profile picture of ${user.name}`} />
+            ) : (
+              <DefaultAvatarIcon accessibilityLabel="Default profile picture" />
+            )}
           </AvatarCircle>
           <EditButtonContainer
             onPress={() => router.push('/perfil/edit-profile')}
@@ -224,8 +364,8 @@ export default function Profile() {
           </EditButtonContainer>
         </AvatarContainer>
 
-        <Name>{user.name}</Name>
-        <Username>@{user.username}</Username>
+        <Name>{user.name || user.email || 'Safinity user'}</Name>
+        <Username>@{user.username || 'user'}</Username>
 
         <LinkButton role="button" accessibilityLabel="Link my ticket">
           <LinkButtonText>Link my ticket</LinkButtonText>
@@ -254,6 +394,7 @@ export default function Profile() {
         keyExtractor={item => item.id}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingLeft: 40, paddingRight: 40 }}
+        ListEmptyComponent={<EmptyText>No past events yet</EmptyText>}
         role="list"
         accessibilityLabel="Past events"
       />

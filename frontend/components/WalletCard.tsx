@@ -52,15 +52,16 @@ const TitleText = styled.Text`
 interface WalletCardProps {
   event: {
     id: string;
-    name: string;
-    image?: string;
-    start_date: string;
-    end_date: string;
+    name: string | null;
+    image?: string | null;
+    start_date: string | null;
+    end_date: string | null;
     [key: string]: any;
   };
+  ticketId?: string;
 }
 
-export const WalletCard = ({ event }: WalletCardProps) => {
+export const WalletCard = ({ event, ticketId }: WalletCardProps) => {
   const router = useRouter();
 
   const imageSource = require('../assets/images/bg-card-wallet.png');
@@ -68,11 +69,11 @@ export const WalletCard = ({ event }: WalletCardProps) => {
   const handlePress = () => {
     router.push({
       pathname: '/(tabs)/perfil/ticket',
-      params: { eventId: event.id },
+      params: { eventId: event.id, ticketId },
     });
   };
 
-  const formatEventDate = (start: string, end: string) => {
+  const formatEventDate = (start: string | null, end: string | null) => {
     if (!start || !end) return 'Date TBD';
     try {
       const startDate = new Date(start);
@@ -86,7 +87,7 @@ export const WalletCard = ({ event }: WalletCardProps) => {
         return `${startDay}-${endDay} ${month} ${year}`;
       }
       return `${startDay} ${startDate.toLocaleString('en-GB', { month: 'short' })} - ${endDay} ${endDate.toLocaleString('en-GB', { month: 'short' })} ${year}`;
-    } catch (e) {
+    } catch {
       return 'Invalid Date';
     }
   };
@@ -96,7 +97,7 @@ export const WalletCard = ({ event }: WalletCardProps) => {
       onPress={handlePress}
       accessibilityRole="button"
       accessible={true}
-      accessibilityLabel={`Evento: ${event.name}. Data: ${formatEventDate(event.start_date, event.end_date)}`}
+      accessibilityLabel={`Evento: ${event.name || 'Untitled Event'}. Data: ${formatEventDate(event.start_date, event.end_date)}`}
     >
       <BackgroundImage source={imageSource}>
         <GradientLayer>

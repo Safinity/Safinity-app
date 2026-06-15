@@ -40,6 +40,10 @@ export class AuthService {
     private readonly clerkService: ClerkService,
   ) {}
 
+  private toBase64Image(image: Uint8Array | null) {
+    return image ? Buffer.from(image).toString('base64') : null;
+  }
+
   /**
    * Development helper:
    * Ensures a Clerk user exists in your DB.
@@ -102,7 +106,22 @@ export class AuthService {
     const user = await this.prisma.users.findUnique({
       where: { id: userId },
       include: {
-        user_tickets: true,
+        user_tickets: {
+          include: {
+            event: {
+              select: {
+                id: true,
+                name: true,
+                venue_name: true,
+                description: true,
+                status: true,
+                category: true,
+                start_date: true,
+                end_date: true,
+              },
+            },
+          },
+        },
         user_favorites: {
           include: {
             event_activities: true,
@@ -120,7 +139,7 @@ export class AuthService {
       clerk_id: user.clerk_id,
       name: user.name,
       username: user.username,
-      image: user.image as unknown as string | null,
+      image: this.toBase64Image(user.image),
       role: user.role,
       email: user.email,
       emergency_contact: user.emergency_contact,

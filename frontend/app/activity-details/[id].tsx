@@ -76,6 +76,49 @@ const Avatar = styled.Image`
   margin-right: -${({ theme }) => theme.spacing.md}px;
 `;
 
+function formatActivityDate(value?: string | null) {
+  if (!value) return 'Date TBD';
+
+  try {
+    return new Date(value).toLocaleDateString('en-GB', {
+      weekday: 'long',
+      day: '2-digit',
+      month: 'short',
+    });
+  } catch {
+    return 'Invalid date';
+  }
+}
+
+function formatActivityTime(value?: string | null) {
+  if (!value) return '--:--';
+
+  try {
+    return new Date(value).toLocaleTimeString('en-GB', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  } catch {
+    return '--:--';
+  }
+}
+
+function normalizeActivity(activity: any) {
+  const specifications = activity.specifications || {};
+
+  return {
+    ...activity,
+    title: activity.title || activity.name || 'Untitled activity',
+    category: activity.category || specifications.category || 'Stages',
+    image: activity.image || specifications.image || '1.jpg',
+    location: activity.location || activity.points_interest?.name || 'Location TBD',
+    date: activity.date || formatActivityDate(activity.start_time),
+    startTime: activity.startTime || formatActivityTime(activity.start_time),
+    endTime: activity.endTime || formatActivityTime(activity.end_time),
+    featuring: activity.featuring || specifications.featuring || [],
+  };
+}
+
 // --- Screen ---
 
 export default function ActivityDetailsScreen() {
@@ -96,7 +139,7 @@ export default function ActivityDetailsScreen() {
       try {
         const res = await api.get(`/events/activities/${id}`);
         if (!mounted) return;
-        setActivity(res.data);
+        setActivity(normalizeActivity(res.data));
       } catch (err: any) {
         console.error('Erro ao carregar activity:', err);
         if (!mounted) return;
@@ -148,7 +191,7 @@ export default function ActivityDetailsScreen() {
         role="main"
         accessibilityLabel="Activity details"
       >
-        <HeroBanner event={activity} isDetail />
+        <HeroBanner event={activity} isDetail detailType="activity" />
 
         <ContentCard>
           <SectionTitle accessibilityRole="header">Description</SectionTitle>

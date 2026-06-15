@@ -63,3 +63,11 @@ export async function updateMyProfile(token: string | null, payload: UpdateProfi
 
   return response.data;
 }
+
+export async function deleteMyAccount(token: string | null) {
+  const response = await profileApi.delete('/users/me', {
+    headers: authHeaders(token),
+  });
+
+  return response.data;
+}

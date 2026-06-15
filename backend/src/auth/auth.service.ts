@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 
@@ -197,5 +198,71 @@ export class AuthService {
         username: username ?? undefined,
       },
     });
+  }
+
+  async deleteAccount(userId: string) {
+    const user = await this.prisma.users.findUnique({
+      where: { id: userId },
+      select: { id: true, clerk_id: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Authenticated user not found');
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      const [userTickets, userSos, staffDetails] = await Promise.all([
+        tx.user_tickets.findMany({
+          where: { user_id: user.id },
+          select: { ticket_code: true },
+        }),
+        tx.sos.findMany({
+          where: { user_id: user.id },
+          select: { id: true },
+        }),
+        tx.staff_details.findUnique({
+          where: { user_id: user.id },
+          select: { id: true },
+        }),
+      ]);
+
+      const ticketCodes = userTickets.map((ticket) => ticket.ticket_code);
+      const sosIds = userSos.map((sos) => sos.id);
+
+      if (staffDetails) {
+        await tx.alerts.deleteMany({ where: { staff_id: staffDetails.id } });
+      }
+
+      if (sosIds.length > 0) {
+        await tx.alerts.deleteMany({ where: { sos_id: { in: sosIds } } });
+      }
+
+      await Promise.all([
+        tx.user_notification_status.deleteMany({ where: { user_id: user.id } }),
+        tx.user_favorites.deleteMany({ where: { user_id: user.id } }),
+        tx.friendship.deleteMany({
+          where: {
+            OR: [{ user1_id: user.id }, { user2_id: user.id }],
+          },
+        }),
+        tx.user_locations.deleteMany({ where: { user_id: user.id } }),
+      ]);
+
+      if (ticketCodes.length > 0) {
+        await tx.event_tickets_master.updateMany({
+          where: { ticket_code: { in: ticketCodes } },
+          data: { is_already_linked: false },
+        });
+      }
+
+      await tx.user_tickets.deleteMany({ where: { user_id: user.id } });
+      await tx.staff_details.deleteMany({ where: { user_id: user.id } });
+      await tx.sos.deleteMany({ where: { user_id: user.id } });
+      await tx.users.delete({ where: { id: user.id } });
+    });
+
+    await this.clerkService.client.users.deleteUser(user.clerk_id);
+
+    return { message: 'Account deleted successfully.' };
   }
 }

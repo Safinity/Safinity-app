@@ -1,6 +1,7 @@
 import { create } from 'axios';
 import Constants from 'expo-constants';
 import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
 
 const API_PORT = '3000';
 const LOCALHOST_API_URL = `http://localhost:${API_PORT}`;
@@ -19,10 +20,18 @@ export const API_BASE =
 const api = create({ baseURL: API_BASE });
 
 api.interceptors.request.use(async config => {
-  const token = await SecureStore.getItemAsync('clerk-token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  if (Platform.OS !== 'web') {
+    try {
+      const token = await SecureStore.getItemAsync('clerk-token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    } catch {
+      // SecureStore is not always available in every Expo runtime.
+      // Requests can still use explicit Authorization headers from Clerk.
+    }
   }
+
   return config;
 });
 

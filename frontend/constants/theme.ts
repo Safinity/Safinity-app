@@ -68,7 +68,7 @@ export const Colors = {
 export const BorderRadius = {
   small: scale(8),
   medium: scale(16),
-  large: scale(24),
+  large: scale(20),
   xlarge: scale(32),
   round: scale(999),
 };

@@ -1,4 +1,13 @@
-import { ActivityIndicator, FlatList, Pressable, ScrollView, View } from 'react-native';
+import {
+  ActivityIndicator,
+  FlatList,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  View,
+} from 'react-native';
+import * as SecureStore from 'expo-secure-store';
 import { Stack, router } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components/native';
@@ -11,7 +20,7 @@ import { Fonts } from '../../../constants/theme';
 
 import EditIcon from '../../../assets/Icons/edit.png';
 import Header from '../../../components/ui/header'; // import do header customizado
-import { getMyProfile, type AuthenticatedProfile } from '../../../utils/profile';
+import { deleteMyAccount, getMyProfile, type AuthenticatedProfile } from '../../../utils/profile';
 
 function getProfileImageSource(user: AuthenticatedProfile | null) {
   if (user?.image) {
@@ -28,6 +37,18 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs = 12000) {
       setTimeout(() => reject(new Error('Profile request timed out')), timeoutMs);
     }),
   ]);
+}
+
+async function clearCachedAuthToken() {
+  if (Platform.OS === 'web') {
+    return;
+  }
+
+  try {
+    await SecureStore.deleteItemAsync('clerk-token');
+  } catch {
+    // Best effort cleanup; Clerk signOut is still the source of truth.
+  }
 }
 
 const Container = styled(ScrollView).attrs({
@@ -183,7 +204,7 @@ const LogoutButton = styled.TouchableOpacity`
   border-radius: ${({ theme }) => theme.borderRadius.large}px;
   padding: 12px 20px;
   margin-top: 24px;
-  margin-bottom: ${({ theme }) => theme.spacing.xxl}px;
+  margin-bottom: ${({ theme }) => theme.spacing.md}px;
   align-self: center;
 `;
 
@@ -191,6 +212,83 @@ const LogoutText = styled.Text`
   color: white;
   font-family: ${Fonts.weights.medium};
   font-size: 16px;
+`;
+
+const DeleteAccountButton = styled.TouchableOpacity`
+  border-width: 1px;
+  background-color: ${({ theme }) => theme.colors.palette.primary.light80};
+  border-radius: ${({ theme }) => theme.borderRadius.large}px;
+  padding: 12px 20px;
+  margin-bottom: ${({ theme }) => theme.spacing.xxl}px;
+  align-self: center;
+`;
+
+const DeleteAccountText = styled.Text`
+  color: ${({ theme }) => theme.colors.primary};
+  font-family: ${Fonts.weights.medium};
+  font-size: 16px;
+`;
+
+const ModalOverlay = styled.View`
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  background-color: rgba(0, 0, 0, 0.7);
+`;
+
+const ModalContent = styled.View`
+  width: 100%;
+  max-width: 360px;
+  background-color: ${({ theme }) => theme.colors.grayNavbar};
+  border-radius: ${({ theme }) => theme.borderRadius.large}px;
+  padding: ${({ theme }) => theme.spacing.xl}px;
+`;
+
+const ModalTitle = styled.Text`
+  color: ${({ theme }) => theme.colors.white};
+  font-family: ${({ theme }) => theme.text.titulo.h3.fontFamily};
+  font-size: ${({ theme }) => theme.text.titulo.h3.fontSize}px;
+  margin-bottom: ${({ theme }) => theme.spacing.sm}px;
+`;
+
+const ModalDescription = styled.Text`
+  color: ${({ theme }) => theme.colors.inactive};
+  font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
+  font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
+  line-height: ${({ theme }) => theme.text.corpo.corpoTexto.lineHeight}px;
+`;
+
+const ModalError = styled.Text`
+  color: #fca5a5;
+  font-family: ${({ theme }) => theme.text.textoPequeno.fontFamily};
+  font-size: ${({ theme }) => theme.text.textoPequeno.fontSize}px;
+  margin-top: ${({ theme }) => theme.spacing.md}px;
+`;
+
+const ModalActions = styled.View`
+  flex-direction: row;
+  justify-content: flex-end;
+  gap: ${({ theme }) => theme.spacing.sm}px;
+  margin-top: ${({ theme }) => theme.spacing.xl}px;
+`;
+
+const ModalButton = styled.TouchableOpacity<{ variant?: 'danger' | 'secondary' }>`
+  min-width: 96px;
+  align-items: center;
+  justify-content: center;
+  background-color: ${({ theme, variant }) =>
+    variant === 'danger' ? '#ef4444' : theme.colors.background};
+  border-radius: ${({ theme }) => theme.borderRadius.medium}px;
+  padding: ${({ theme }) => theme.spacing.sm}px ${({ theme }) => theme.spacing.md}px;
+  opacity: ${({ disabled }) => (disabled ? 0.6 : 1)};
+`;
+
+const ModalButtonText = styled.Text<{ variant?: 'danger' | 'secondary' }>`
+  color: ${({ theme, variant }) =>
+    variant === 'danger' ? theme.colors.white : theme.colors.white};
+  font-family: ${Fonts.weights.medium};
+  font-size: 14px;
 `;
 
 const LoadingState = styled.View`
@@ -219,6 +317,9 @@ export default function Profile() {
   const { signOut } = useClerk();
   const [user, setUser] = useState<AuthenticatedProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [deleteAccountError, setDeleteAccountError] = useState('');
   const [error, setError] = useState('');
   const getTokenRef = useRef(getToken);
   getTokenRef.current = getToken;
@@ -289,7 +390,27 @@ export default function Profile() {
 
   const handleLogout = async () => {
     await signOut();
+    await clearCachedAuthToken();
+    setUser(null);
     router.replace('/landing');
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      setIsDeletingAccount(true);
+      setDeleteAccountError('');
+      const token = await withTimeout(getTokenRef.current());
+      await withTimeout(deleteMyAccount(token));
+      await signOut();
+      await clearCachedAuthToken();
+      setUser(null);
+      router.replace('/landing');
+    } catch (deleteError) {
+      console.error('Failed to delete account', deleteError);
+      setDeleteAccountError('Unable to delete account. Please try again.');
+    } finally {
+      setIsDeletingAccount(false);
+    }
   };
 
   if (isLoading) {
@@ -328,6 +449,48 @@ export default function Profile() {
   return (
     <Container>
       <Stack.Screen options={{ title: 'Profile' }} />
+      <Modal
+        animationType="fade"
+        transparent
+        visible={isDeleteModalVisible}
+        onRequestClose={() => {
+          if (!isDeletingAccount) {
+            setIsDeleteModalVisible(false);
+          }
+        }}
+      >
+        <ModalOverlay>
+          <ModalContent role="alert" accessibilityLabel="Delete account confirmation">
+            <ModalTitle>Delete account?</ModalTitle>
+            <ModalDescription>
+              This will permanently delete your Safinity account, friends, tickets and saved data.
+            </ModalDescription>
+            {deleteAccountError ? <ModalError>{deleteAccountError}</ModalError> : null}
+            <ModalActions>
+              <ModalButton
+                variant="secondary"
+                disabled={isDeletingAccount}
+                onPress={() => setIsDeleteModalVisible(false)}
+                accessibilityRole="button"
+                accessibilityLabel="Cancel account deletion"
+              >
+                <ModalButtonText variant="secondary">Cancel</ModalButtonText>
+              </ModalButton>
+              <ModalButton
+                variant="danger"
+                disabled={isDeletingAccount}
+                onPress={handleDeleteAccount}
+                accessibilityRole="button"
+                accessibilityLabel="Confirm account deletion"
+              >
+                <ModalButtonText variant="danger">
+                  {isDeletingAccount ? 'Deleting...' : 'Delete'}
+                </ModalButtonText>
+              </ModalButton>
+            </ModalActions>
+          </ModalContent>
+        </ModalOverlay>
+      </Modal>
 
       {/* Header Customizado */}
       <Header
@@ -435,6 +598,16 @@ export default function Profile() {
         <LogoutButton onPress={handleLogout} role="button" accessibilityLabel="Log out of the app">
           <LogoutText>Log out</LogoutText>
         </LogoutButton>
+        <DeleteAccountButton
+          onPress={() => {
+            setDeleteAccountError('');
+            setIsDeleteModalVisible(true);
+          }}
+          role="button"
+          accessibilityLabel="Delete account"
+        >
+          <DeleteAccountText>Delete account</DeleteAccountText>
+        </DeleteAccountButton>
       </PaddedContent>
     </Container>
   );

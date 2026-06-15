@@ -96,6 +96,7 @@ export const HeroBanner = ({
   description,
   hideMap = false,
   isDetail = false,
+  detailType,
 }: any) => {
   const router = useRouter();
   const [isFavorite, setIsFavorite] = useState(false);
@@ -129,8 +130,9 @@ export const HeroBanner = ({
 
   const imageSource = getSource();
 
-  const isCalendar = isDetail && event?.title;
-  const isEventDetail = isDetail && event?.name;
+  const isCalendar = isDetail && (detailType === 'activity' || (!detailType && event?.title));
+  const isEventDetail =
+    isDetail && (detailType === 'event' || (!detailType && event?.name && !event?.title));
   const isList = !isDetail && title;
   const isHome = !isDetail && !title && event;
 
@@ -185,14 +187,12 @@ export const HeroBanner = ({
             <InfoRow>
               <InfoItem>
                 <Ionicons name="calendar-outline" size={20} color="white" />
-                <InfoText>{event.start_date}</InfoText>
+                <InfoText>{event.displayDate || event.start_date}</InfoText>
               </InfoItem>
 
               <InfoItem>
                 <Ionicons name="time-outline" size={20} color="white" />
-                <InfoText>
-                  {event.start_time} - {event.end_time}
-                </InfoText>
+                <InfoText>{event.displayTime || 'Time TBD'}</InfoText>
               </InfoItem>
             </InfoRow>
           </>

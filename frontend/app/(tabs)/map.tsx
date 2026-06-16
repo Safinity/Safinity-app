@@ -1,9 +1,17 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Dimensions } from 'react-native';
 import styled from 'styled-components/native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import Svg, { Polyline } from 'react-native-svg';
+import Svg, {
+  Circle,
+  Defs,
+  LinearGradient,
+  Polyline,
+  RadialGradient,
+  Rect,
+  Stop,
+} from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, router, Stack } from 'expo-router';
 import { useAuth } from '@clerk/expo'; // Gancho nativo para controlo assíncrono do token
@@ -18,7 +26,7 @@ import { MapCallout } from '../../components/maps/MapCallout';
 import { UserMarker } from '../../components/maps/UserMarker';
 import { Colors, Spacing } from '../../constants/theme';
 import mapData from '../../data/mapdata.json';
-import api from '../../utils/api';
+import api, { API_BASE } from '../../utils/api';
 import { latLngToPixelFromBounds } from '../../utils/coordinates';
 import Head from 'expo-router/head';
 
@@ -30,6 +38,7 @@ type MapPinItem = {
   lng: number;
   friendId?: string | null;
   point_interest_id?: string | null;
+  image?: string | null;
 };
 
 type MapStageItem = {
@@ -54,10 +63,19 @@ type LoadedMapPayload = {
   };
 };
 
+type DensitySensor = {
+  id: string | number;
+  event_id?: string | number | null;
+  sensor_type?: string | null;
+  density?: number | null;
+  last_reading_time?: string | null;
+  lat: number;
+  lng: number;
+};
+
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const IMAGE_WIDTH = screenWidth * 2.5;
 const IMAGE_HEIGHT = screenHeight * 1.6;
-const CURRENT_LOCATION = mapData.currentLocation;
 
 const MIN_SCALE = 0.7;
 const MAX_SCALE = 3;
@@ -110,6 +128,60 @@ const SOSButtonText = styled.Text`
   font-weight: bold;
 `;
 
+const HeatmapToggle = styled.Pressable<{ active: boolean }>`
+  align-self: flex-start;
+  margin-left: ${Spacing.margemLateral}px;
+  margin-top: ${Spacing.md}px;
+  padding: 10px 14px;
+  border-radius: 22px;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  background-color: ${({ active }: { active: boolean }) =>
+    active ? Colors.primary : Colors.grayNavbar};
+`;
+
+const HeatmapToggleText = styled.Text`
+  color: ${Colors.white};
+  font-size: 13px;
+  font-weight: bold;
+`;
+
+const HeatmapLegend = styled.View`
+  position: absolute;
+  left: ${Spacing.margemLateral}px;
+  bottom: ${Spacing.xxl}px;
+  z-index: 950;
+  height: 90px;
+  padding: 6px 7px;
+  border-radius: 8px;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  background-color: rgba(20, 24, 34, 0.8);
+`;
+
+const HeatmapLegendBar = styled.View`
+  width: 8px;
+  height: 75px;
+  border-radius: 5px;
+  overflow: hidden;
+`;
+
+const HeatmapLegendLabels = styled.View`
+  height: 75px;
+  flex-direction: column;
+  justify-content: space-between;
+`;
+
+const HeatmapLegendLabel = styled.Text`
+  color: ${Colors.white};
+  font-family: ${({ theme }) => theme.text.label.fontFamily};
+  font-size: ${({ theme }) => theme.text.label.fontSize}px;
+  line-height: ${({ theme }) => theme.text.label.lineHeight}px;
+  opacity: 0.82;
+`;
+
 const NavigationFooter = styled.View`
   position: absolute;
   bottom: ${Spacing.xxl}px;
@@ -148,10 +220,38 @@ const TAG_TO_PIN_TYPE: Record<string, string[]> = {
   Exits: ['exit'],
   Stages: ['stage'],
   Entrance: ['entrance'],
+  Medical: ['medical'],
+  Points: ['point'],
 };
 
 const getDisplayName = (item: { name?: string }) => {
   return item.name || 'Unnamed Item';
+};
+
+const HEAT_GREEN = { r: 15, g: 214, b: 191 };
+const HEAT_ORANGE = { r: 255, g: 152, b: 42 };
+const HEAT_RED = { r: 200, g: 50, b: 50 };
+
+const getHeatColor = (density?: number | null, alpha = 1) => {
+  const densityRatio = Math.max(0, Math.min(100, Number(density ?? 0))) / 100;
+  const startColor = densityRatio <= 0.5 ? HEAT_GREEN : HEAT_ORANGE;
+  const endColor = densityRatio <= 0.5 ? HEAT_ORANGE : HEAT_RED;
+  const segmentRatio = densityRatio <= 0.5 ? densityRatio * 2 : (densityRatio - 0.5) * 2;
+  const r = Math.round(startColor.r + (endColor.r - startColor.r) * segmentRatio);
+  const g = Math.round(startColor.g + (endColor.g - startColor.g) * segmentRatio);
+  const b = Math.round(startColor.b + (endColor.b - startColor.b) * segmentRatio);
+
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
+
+const getHeatSize = (density?: number | null) => {
+  const value = Math.max(0, Math.min(100, Number(density ?? 0)));
+  return 135 + value * 1.55;
+};
+
+const getHeatOpacity = (density?: number | null) => {
+  const value = Math.max(0, Math.min(100, Number(density ?? 0)));
+  return 0.13 + (value / 100) * 0.32;
 };
 
 const matchesSearch = (item: { name?: string; type?: string }, query: string) => {
@@ -164,6 +264,7 @@ const matchesSearch = (item: { name?: string; type?: string }, query: string) =>
 // --- MapScreen Component ---
 export default function MapScreen() {
   const { isLoaded, isSignedIn, getToken } = useAuth();
+  const getTokenRef = useRef(getToken);
 
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
@@ -177,33 +278,44 @@ export default function MapScreen() {
   const [mapPayload, setMapPayload] = useState<LoadedMapPayload | null>(null);
   const [mapLoading, setMapLoading] = useState(true);
   const [mapError, setMapError] = useState<string | null>(null);
+  const [heatmapEnabled, setHeatmapEnabled] = useState(false);
+  const [densitySensors, setDensitySensors] = useState<DensitySensor[]>([]);
+
+  useEffect(() => {
+    getTokenRef.current = getToken;
+  }, [getToken]);
 
   const mapSource = mapPayload?.map;
+  const mapImageUrl = mapPayload?.event?.id
+    ? `${API_BASE}/events/${mapPayload.event.id}/static-map?theme=dark&width=1024&height=1024`
+    : undefined;
   const universityCoords = mapSource?.center ?? mapData.universityCoords;
-  const pins = mapSource?.pins ?? mapData.pins;
-  const stages = mapSource?.stages ?? mapData.stages;
+  const pins = useMemo(() => mapSource?.pins ?? [], [mapSource?.pins]);
+  const stages = useMemo(() => mapSource?.stages ?? [], [mapSource?.stages]);
   const bounds = mapSource?.bounds ?? mapData.bounds;
-  const tags = ['Exits', 'Friends', 'Stages', 'Food', 'Entrance'];
+  const currentLocation = mapSource?.currentLocation ?? universityCoords;
+  const tags = ['Exits', 'Friends', 'Stages', 'Food', 'WC', 'Medical', 'Entrance', 'Points'];
   const { focusId } = useLocalSearchParams();
 
+  const clampMapTranslation = useCallback(() => {
+    'worklet';
+
+    const scaledWidth = IMAGE_WIDTH * scale.value;
+    const scaledHeight = IMAGE_HEIGHT * scale.value;
+    const minX = Math.min(0, screenWidth - scaledWidth);
+    const minY = Math.min(0, screenHeight - scaledHeight);
+
+    translateX.value = Math.min(0, Math.max(minX, translateX.value));
+    translateY.value = Math.min(0, Math.max(minY, translateY.value));
+  }, [scale, translateX, translateY]);
+
   // Monitorização de mutações de estado e re-renderizações locais
-  console.log('[MAP_DEBUG] Component Render State:', {
-    hasPayload: !!mapPayload,
-    pinsCount: pins?.length ?? 0,
-    stagesCount: stages?.length ?? 0,
-    mapLoading,
-    hasError: !!mapError,
-  });
 
   useEffect(() => {
     let mounted = true;
 
     const loadMap = async () => {
       // Bloqueia a execução imediata se a infraestrutura do Clerk ainda estiver fria
-      if (!isLoaded) {
-        console.log('[MAP_DEBUG] Clerk está a verificar sessões ativas no telemóvel...');
-        return;
-      }
 
       if (!isSignedIn) {
         console.warn('[MAP_DEBUG] Pedido abortado: Utilizador sem sessão iniciada.');
@@ -215,12 +327,10 @@ export default function MapScreen() {
       }
 
       try {
-        console.log('[MAP_DEBUG] Começando carregamento com ciclo assíncrono controlado.');
         setMapLoading(true);
         setMapError(null);
 
-        console.log('[MAP_DEBUG] Extraindo token JWT do storage interno do Clerk...');
-        const token = await getToken();
+        const token = await getTokenRef.current();
 
         if (!token) {
           throw new Error('Could not retrieve a valid session token from Clerk.');
@@ -233,11 +343,8 @@ export default function MapScreen() {
           },
         };
 
-        console.log('[MAP_DEBUG] Disparando HTTP GET -> /events/present-event');
         const presentEventResponse = await api.get('/events/present-event', requestConfig);
         const presentEvent = presentEventResponse.data;
-
-        console.log('[MAP_DEBUG] Resposta de present-event processada:', presentEvent);
 
         if (!presentEvent?.id) {
           console.warn('[MAP_DEBUG] Evento nulo ou inexistente retornado do banco para este ID.');
@@ -250,21 +357,7 @@ export default function MapScreen() {
 
         // Rota preservada em conformidade exata com o @Get(':id/mapa') do NestJS
         const mapUrl = `/events/${presentEvent.id}/mapa`;
-        console.log(`[MAP_DEBUG] Disparando HTTP GET -> ${mapUrl}`);
         const mapResponse = await api.get(mapUrl, requestConfig);
-
-        console.log(
-          '[MAP_DEBUG] Payload do mapa obtido. Chaves encontradas:',
-          Object.keys(mapResponse.data || {}),
-        );
-
-        if (mapResponse.data?.map) {
-          console.log('[MAP_DEBUG] Auditoria estrutural dos dados gráficos extraídos:', {
-            center: mapResponse.data.map.center,
-            pinsCount: mapResponse.data.map.pins?.length ?? 0,
-            stagesCount: mapResponse.data.map.stages?.length ?? 0,
-          });
-        }
 
         if (mounted) {
           setMapPayload(mapResponse.data);
@@ -293,15 +386,60 @@ export default function MapScreen() {
     };
   }, [isLoaded, isSignedIn]); // Dispara novamente assim que as permissões do dispositivo mudarem de estado
 
+  useEffect(() => {
+    let mounted = true;
+    let intervalId: ReturnType<typeof setInterval> | null = null;
+
+    const loadSensors = async () => {
+      if (!isLoaded || !isSignedIn || !mapPayload?.event?.id) {
+        return;
+      }
+
+      try {
+        const token = await getTokenRef.current();
+        const response = await api.get(`/events/${mapPayload.event.id}/sensors`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const sensors = Array.isArray(response.data) ? response.data : [];
+
+        if (mounted) {
+          setDensitySensors(
+            sensors.filter(
+              (sensor: DensitySensor) =>
+                typeof sensor.lat === 'number' && typeof sensor.lng === 'number',
+            ),
+          );
+        }
+      } catch (error: any) {
+        console.error('[MAP_DEBUG] Erro ao carregar sensores:', {
+          message: error?.message,
+          status: error?.response?.status,
+        });
+      }
+    };
+
+    loadSensors();
+    intervalId = setInterval(loadSensors, 10_000);
+
+    return () => {
+      mounted = false;
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [isLoaded, isSignedIn, mapPayload?.event?.id]);
+
   // --- GESTURES ---
   const panGesture = Gesture.Pan().onChange(e => {
     translateX.value += e.changeX;
     translateY.value += e.changeY;
+    clampMapTranslation();
   });
 
   const pinchGesture = Gesture.Pinch().onChange(e => {
     const newScale = scale.value * e.scaleChange;
     scale.value = Math.min(MAX_SCALE, Math.max(MIN_SCALE, newScale));
+    clampMapTranslation();
   });
 
   const composedGesture = Gesture.Simultaneous(panGesture, pinchGesture);
@@ -317,12 +455,6 @@ export default function MapScreen() {
   // --- FUNÇÕES ---
   const handlePinPress = useCallback(
     (pin: any, showRoute = false) => {
-      console.log('[MAP_DEBUG] Evento Triggered: Clique sobre marcador físico.', {
-        id: pin.id,
-        name: pin.name,
-        showRoute,
-      });
-
       if (pin.lat === undefined || pin.lng === undefined || !bounds) {
         console.error(
           '[MAP_DEBUG] Erro de projeção espacial: Atributos lat/lng ausentes nos bounds.',
@@ -348,10 +480,9 @@ export default function MapScreen() {
       translateY.value = withTiming(screenHeight / 2 - pos.y * scale.value);
 
       if (showRoute) {
-        console.log('[MAP_DEBUG] Montando vetor bidimensional para caminhos dinâmicos no SVG...');
         const start = latLngToPixelFromBounds(
-          CURRENT_LOCATION.lat,
-          CURRENT_LOCATION.lng,
+          currentLocation.lat,
+          currentLocation.lng,
           bounds,
           IMAGE_WIDTH,
           IMAGE_HEIGHT,
@@ -362,11 +493,10 @@ export default function MapScreen() {
         setSelectedPin(null);
       }
     },
-    [bounds, scale, translateX, translateY],
+    [bounds, currentLocation.lat, currentLocation.lng, scale, translateX, translateY],
   );
 
   const handleCancelRoute = () => {
-    console.log('[MAP_DEBUG] Instrução de descarte de rota invocada.');
     setActiveRoute(null);
     setDestinationName('');
   };
@@ -387,7 +517,6 @@ export default function MapScreen() {
 
   useEffect(() => {
     if (focusId) {
-      console.log(`[MAP_DEBUG] Focagem externa pendente para entidade de id: ${focusId}`);
       const targetPin = pins.find((p: MapPinItem) => p.friendId === focusId);
       if (targetPin) {
         const timer = setTimeout(() => handlePinPress(targetPin, true), 300);
@@ -409,11 +538,10 @@ export default function MapScreen() {
           accessible={false}
         >
           <StaticMapPreview
-            center={universityCoords}
             width={IMAGE_WIDTH}
             height={IMAGE_HEIGHT}
-            zoom={mapSource?.zoom}
             theme="dark"
+            imageUrl={mapImageUrl}
           />
 
           <Svg
@@ -422,6 +550,63 @@ export default function MapScreen() {
             style={{ position: 'absolute' }}
             pointerEvents="none"
           >
+            {heatmapEnabled && (
+              <>
+                <Defs>
+                  {densitySensors.map(sensor => {
+                    const alpha = getHeatOpacity(sensor.density);
+                    const gradientId = `heat-${String(sensor.id).replace(/[^a-zA-Z0-9_-]/g, '-')}`;
+
+                    return (
+                      <RadialGradient key={gradientId} id={gradientId} cx="50%" cy="50%" r="50%">
+                        <Stop
+                          offset="0%"
+                          stopColor={getHeatColor(sensor.density, alpha)}
+                          stopOpacity={0.3}
+                        />
+                        <Stop
+                          offset="36%"
+                          stopColor={getHeatColor(sensor.density, alpha * 0.68)}
+                          stopOpacity={0.15}
+                        />
+                        <Stop
+                          offset="68%"
+                          stopColor={getHeatColor(sensor.density, alpha * 0.32)}
+                          stopOpacity={0.1}
+                        />
+                        <Stop
+                          offset="100%"
+                          stopColor={getHeatColor(sensor.density, 0)}
+                          stopOpacity={0}
+                        />
+                      </RadialGradient>
+                    );
+                  })}
+                </Defs>
+
+                {densitySensors.map(sensor => {
+                  const { x, y } = latLngToPixelFromBounds(
+                    sensor.lat,
+                    sensor.lng,
+                    bounds,
+                    IMAGE_WIDTH,
+                    IMAGE_HEIGHT,
+                  );
+                  const gradientId = `heat-${String(sensor.id).replace(/[^a-zA-Z0-9_-]/g, '-')}`;
+
+                  return (
+                    <Circle
+                      key={`circle-${gradientId}`}
+                      cx={x}
+                      cy={y}
+                      r={getHeatSize(sensor.density)}
+                      fill={`url(#${gradientId})`}
+                    />
+                  );
+                })}
+              </>
+            )}
+
             {activeRoute && (
               <Polyline
                 points={activeRoute.map(p => `${p.x},${p.y}`).join(' ')}
@@ -441,6 +626,11 @@ export default function MapScreen() {
               <MapPin
                 key={String(pin.id)}
                 pin={pin}
+                avatar={
+                  pin.type === 'friend' && pin.image
+                    ? { uri: `data:image/jpeg;base64,${pin.image}` }
+                    : undefined
+                }
                 bounds={bounds}
                 width={IMAGE_WIDTH}
                 height={IMAGE_HEIGHT}
@@ -481,7 +671,7 @@ export default function MapScreen() {
           )}
 
           <UserMarker
-            location={mapSource?.currentLocation ?? CURRENT_LOCATION}
+            location={currentLocation}
             bounds={bounds}
             width={IMAGE_WIDTH}
             height={IMAGE_HEIGHT}
@@ -525,7 +715,39 @@ export default function MapScreen() {
           variant="mapa"
           style={{ marginTop: Spacing.md }}
         />
+
+        <HeatmapToggle
+          active={heatmapEnabled}
+          onPress={() => setHeatmapEnabled(prev => !prev)}
+          accessible
+          role="button"
+          accessibilityLabel={heatmapEnabled ? 'Disable heatmap filter' : 'Enable heatmap filter'}
+        >
+          <Ionicons name="flame" size={16} color={Colors.white} />
+          <HeatmapToggleText>Heatmap</HeatmapToggleText>
+        </HeatmapToggle>
       </OverlayContent>
+
+      {heatmapEnabled && (
+        <HeatmapLegend pointerEvents="none">
+          <HeatmapLegendBar>
+            <Svg width={8} height={75}>
+              <Defs>
+                <LinearGradient id="heatmap-legend-gradient" x1="0" y1="0" x2="0" y2="1">
+                  <Stop offset="0%" stopColor={getHeatColor(100, 1)} />
+                  <Stop offset="50%" stopColor={getHeatColor(50, 1)} />
+                  <Stop offset="100%" stopColor={getHeatColor(0, 1)} />
+                </LinearGradient>
+              </Defs>
+              <Rect width={8} height={75} rx={4} fill="url(#heatmap-legend-gradient)" />
+            </Svg>
+          </HeatmapLegendBar>
+          <HeatmapLegendLabels>
+            <HeatmapLegendLabel>High</HeatmapLegendLabel>
+            <HeatmapLegendLabel>Low</HeatmapLegendLabel>
+          </HeatmapLegendLabels>
+        </HeatmapLegend>
+      )}
 
       {activeRoute && (
         <NavigationFooter accessibilityLabel={`Active navigation route to ${destinationName}`}>

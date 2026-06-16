@@ -72,6 +72,12 @@ type EventMapConfig = {
   stages?: MapStageDefinition[];
 };
 
+type StaticMapOptions = {
+  width?: string;
+  height?: string;
+  theme?: 'light' | 'dark';
+};
+
 type MapFriendLocationRow = {
   friend_id: string;
   name: string | null;
@@ -163,6 +169,44 @@ export class EventsService {
     return map;
   }
 
+  private inferPointType(name?: string | null) {
+    const normalized = name?.toLowerCase() ?? '';
+
+    if (normalized.includes('palco') || normalized.includes('stage')) {
+      return 'stage';
+    }
+
+    if (normalized.includes('food') || normalized.includes('bar')) {
+      return 'food';
+    }
+
+    if (normalized.includes('wc') || normalized.includes('restroom')) {
+      return 'wc';
+    }
+
+    if (normalized.includes('entrada') || normalized.includes('entrance')) {
+      return 'entrance';
+    }
+
+    if (
+      normalized.includes('saída') ||
+      normalized.includes('saida') ||
+      normalized.includes('exit')
+    ) {
+      return 'exit';
+    }
+
+    if (
+      normalized.includes('médico') ||
+      normalized.includes('medico') ||
+      normalized.includes('medical')
+    ) {
+      return 'medical';
+    }
+
+    return 'point';
+  }
+
   private buildFallbackBounds(center: GeoPoint): MapBounds {
     const latitudeDelta = 0.0045;
     const longitudeDelta = 0.0045;
@@ -172,6 +216,105 @@ export class EventsService {
       south: center.lat - latitudeDelta,
       west: center.lng - longitudeDelta,
       east: center.lng + longitudeDelta,
+    };
+  }
+
+  private getMapboxToken() {
+    return process.env.MAPBOX_TOKEN ?? process.env.EXPO_PUBLIC_MAPBOX_TOKEN;
+  }
+
+  private getMapboxStaticUrl({
+    center,
+    zoom = 16,
+    width = 1024,
+    height = 1024,
+    theme = 'dark',
+  }: {
+    center: GeoPoint;
+    zoom?: number;
+    width?: number;
+    height?: number;
+    theme?: 'light' | 'dark';
+  }) {
+    const token = this.getMapboxToken();
+
+    if (!token) {
+      throw new BadRequestException('Mapbox token is not configured');
+    }
+
+    const style = theme === 'dark' ? 'mapbox/dark-v11' : 'mapbox/streets-v12';
+    const normalizedWidth = Math.min(Math.max(width, 1), 1280);
+    const normalizedHeight = Math.min(Math.max(height, 1), 1280);
+
+    return (
+      `https://api.mapbox.com/styles/v1/${style}/static/` +
+      `${center.lng},${center.lat},${zoom}/${normalizedWidth}x${normalizedHeight}` +
+      `?access_token=${token}`
+    );
+  }
+
+  private async getEventMapCenterAndConfig(id: string) {
+    const eventId = this.parseEventId(id);
+    const [event] = await this.prisma.$queryRaw<
+      Array<{
+        id: bigint;
+        others: unknown;
+        center_lat: number | null;
+        center_lng: number | null;
+      }>
+    >(Prisma.sql`
+      SELECT
+        id,
+        others,
+        CASE
+          WHEN location IS NULL THEN NULL
+          ELSE ST_Y(location::geometry)
+        END AS center_lat,
+        CASE
+          WHEN location IS NULL THEN NULL
+          ELSE ST_X(location::geometry)
+        END AS center_lng
+      FROM event
+      WHERE id = ${eventId}
+      LIMIT 1
+    `);
+
+    if (!event) {
+      throw new NotFoundException(`Event with ID ${id} not found`);
+    }
+
+    const mapConfig = this.getMapConfig(event.others);
+    const center = this.parseGeoPoint(event.center_lat, event.center_lng) ??
+      mapConfig.currentLocation ?? { lat: 0, lng: 0 };
+
+    return { center, mapConfig };
+  }
+
+  async getStaticMapImage(id: string, options?: StaticMapOptions) {
+    const { center, mapConfig } = await this.getEventMapCenterAndConfig(id);
+    const width = this.parsePositiveInt(options?.width, 1024);
+    const height = this.parsePositiveInt(options?.height, 1024);
+    const theme = options?.theme === 'light' ? 'light' : 'dark';
+    const mapUrl = this.getMapboxStaticUrl({
+      center,
+      zoom: mapConfig.zoom ?? 16,
+      width,
+      height,
+      theme,
+    });
+
+    const response = await fetch(mapUrl);
+
+    if (!response.ok) {
+      throw new BadRequestException(
+        `Mapbox request failed: ${response.status}`,
+      );
+    }
+
+    return {
+      buffer: Buffer.from(await response.arrayBuffer()),
+      contentType: response.headers.get('content-type') ?? 'image/png',
+      cacheControl: 'public, max-age=300',
     };
   }
 
@@ -503,6 +646,35 @@ export class EventsService {
         };
       })
       .filter((pin): pin is NonNullable<typeof pin> => pin !== null);
+    const staticPointIds = new Set(
+      staticPins
+        .map((pin) => pin.point_interest_id)
+        .filter((pointId): pointId is string => Boolean(pointId)),
+    );
+    const pointInterestPins = pointsInterestRows
+      .map((point) => {
+        if (staticPointIds.has(String(point.point_id))) {
+          return null;
+        }
+
+        const resolvedPoint = this.parseGeoPoint(point.lat, point.lng);
+        const inferredType = this.inferPointType(point.point_name);
+
+        if (!resolvedPoint || inferredType === 'stage') {
+          return null;
+        }
+
+        return {
+          id: `poi-${String(point.point_id)}`,
+          name: point.point_name ?? 'Point of interest',
+          type: inferredType,
+          lat: resolvedPoint.lat,
+          lng: resolvedPoint.lng,
+          point_interest_id: String(point.point_id),
+          friendId: null,
+        };
+      })
+      .filter((pin): pin is NonNullable<typeof pin> => pin !== null);
 
     const friendPins = friendLocations
       .map((friend) => {
@@ -557,6 +729,35 @@ export class EventsService {
         };
       })
       .filter((stage): stage is NonNullable<typeof stage> => stage !== null);
+    const stagePointIds = new Set(
+      stages.map((stage) => String(stage.id).replace(/^poi-/, '')),
+    );
+    const pointInterestStages = pointsInterestRows
+      .map((point) => {
+        if (
+          stagePointIds.has(String(point.point_id)) ||
+          this.inferPointType(point.point_name) !== 'stage'
+        ) {
+          return null;
+        }
+
+        const resolvedPoint = this.parseGeoPoint(point.lat, point.lng);
+
+        if (!resolvedPoint) {
+          return null;
+        }
+
+        return {
+          id: `poi-${String(point.point_id)}`,
+          name: point.point_name ?? 'Stage',
+          lat: resolvedPoint.lat,
+          lng: resolvedPoint.lng,
+          rotation: 0,
+          width: 100,
+          height: 62,
+        };
+      })
+      .filter((stage): stage is NonNullable<typeof stage> => stage !== null);
 
     let resolvedCurrentLocation = currentUserLocation;
 
@@ -574,8 +775,8 @@ export class EventsService {
         zoom: mapConfig.zoom ?? 16,
         bounds,
         currentLocation: resolvedCurrentLocation,
-        pins: [...staticPins, ...friendPins],
-        stages,
+        pins: [...staticPins, ...pointInterestPins, ...friendPins],
+        stages: [...stages, ...pointInterestStages],
       },
       points_interest: pointsInterestRows,
       activities,

@@ -21,6 +21,8 @@ import { UserTicketsController } from './tickets/user-tickets.controller';
 import { UserTicketsService } from './tickets/user-tickets.service';
 import { FriendsController } from './friends/friends.controller';
 import { FriendsService } from './friends/friends.service';
+import { SensorsController } from './sensors/sensors.controller';
+import { SensorsService } from './sensors/sensors.service';
 
 @Module({
   imports: [PrismaModule, AuthModule],
@@ -35,6 +37,7 @@ import { FriendsService } from './friends/friends.service';
     SosController,
     UserTicketsController,
     FriendsController,
+    SensorsController,
   ],
   providers: [
     AppService,
@@ -47,6 +50,7 @@ import { FriendsService } from './friends/friends.service';
     SosService,
     UserTicketsService,
     FriendsService,
+    SensorsService,
   ],
 })
 export class AppModule {}

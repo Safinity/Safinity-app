@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Image, Platform, Pressable } from 'react-native';
+import { Image, Platform, Pressable } from 'react-native';
 import { latLngToPixelFromBounds } from '../../utils/coordinates';
 import { PIN_ICONS } from './constants';
 

@@ -6,6 +6,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-na
 import Svg, { Polyline } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, router, Stack } from 'expo-router';
+import { useAuth } from '@clerk/expo'; // Gancho nativo para controlo assíncrono do token
 
 import Header from '../../components/ui/header';
 import SearchInput from '../../components/ui/SearchInput';
@@ -148,9 +149,11 @@ const TAG_TO_PIN_TYPE: Record<string, string[]> = {
   Stages: ['stage'],
   Entrance: ['entrance'],
 };
+
 const getDisplayName = (item: { name?: string }) => {
   return item.name || 'Unnamed Item';
 };
+
 const matchesSearch = (item: { name?: string; type?: string }, query: string) => {
   if (!query) return true;
   const q = query.toLowerCase();
@@ -160,6 +163,8 @@ const matchesSearch = (item: { name?: string; type?: string }, query: string) =>
 
 // --- MapScreen Component ---
 export default function MapScreen() {
+  const { isLoaded, isSignedIn, getToken } = useAuth();
+
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
   const scale = useSharedValue(1);
@@ -181,7 +186,7 @@ export default function MapScreen() {
   const tags = ['Exits', 'Friends', 'Stages', 'Food', 'Entrance'];
   const { focusId } = useLocalSearchParams();
 
-  // Log para monitorizar o estado das variáveis críticas de renderização a cada ciclo
+  // Monitorização de mutações de estado e re-renderizações locais
   console.log('[MAP_DEBUG] Component Render State:', {
     hasPayload: !!mapPayload,
     pinsCount: pins?.length ?? 0,
@@ -194,20 +199,48 @@ export default function MapScreen() {
     let mounted = true;
 
     const loadMap = async () => {
+      // Bloqueia a execução imediata se a infraestrutura do Clerk ainda estiver fria
+      if (!isLoaded) {
+        console.log('[MAP_DEBUG] Clerk está a verificar sessões ativas no telemóvel...');
+        return;
+      }
+
+      if (!isSignedIn) {
+        console.warn('[MAP_DEBUG] Pedido abortado: Utilizador sem sessão iniciada.');
+        if (mounted) {
+          setMapLoading(false);
+          setMapError('Please sign in to view the event map.');
+        }
+        return;
+      }
+
       try {
-        console.log('[MAP_DEBUG] Iniciando o carregamento dos dados do mapa...');
+        console.log('[MAP_DEBUG] Começando carregamento com ciclo assíncrono controlado.');
         setMapLoading(true);
         setMapError(null);
 
-        console.log('[MAP_DEBUG] Fazendo chamada para /events/present-event...');
-        const presentEventResponse = await api.get('/events/present-event');
+        console.log('[MAP_DEBUG] Extraindo token JWT do storage interno do Clerk...');
+        const token = await getToken();
+        
+        if (!token) {
+          throw new Error('Could not retrieve a valid session token from Clerk.');
+        }
+
+        // Injeção explícita de cabeçalho local isolado de interceptores globais flutuantes
+        const requestConfig = {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        };
+
+        console.log('[MAP_DEBUG] Disparando HTTP GET -> /events/present-event');
+        const presentEventResponse = await api.get('/events/present-event', requestConfig);
         const presentEvent = presentEventResponse.data;
-        console.log('[MAP_DEBUG] Resposta de present-event:', presentEvent);
+        
+        console.log('[MAP_DEBUG] Resposta de present-event processada:', presentEvent);
 
         if (!presentEvent?.id) {
-          console.warn(
-            '[MAP_DEBUG] Nenhum evento ativo (presentEvent.id) foi retornado pelo backend.',
-          );
+          console.warn('[MAP_DEBUG] Evento nulo ou inexistente retornado do banco para este ID.');
           if (mounted) {
             setMapPayload(null);
             setMapError('No active event found for the current user');
@@ -215,21 +248,21 @@ export default function MapScreen() {
           return;
         }
 
-        // Alterado para /map para sincronizar com as rotas padrão do NestJS
+        // Rota preservada em conformidade exata com o @Get(':id/mapa') do NestJS
         const mapUrl = `/events/${presentEvent.id}/mapa`;
-        console.log(`[MAP_DEBUG] Buscando a infraestrutura do mapa no endpoint: ${mapUrl}`);
-        const mapResponse = await api.get(mapUrl);
+        console.log(`[MAP_DEBUG] Disparando HTTP GET -> ${mapUrl}`);
+        const mapResponse = await api.get(mapUrl, requestConfig);
 
         console.log(
-          '[MAP_DEBUG] Resposta do mapa com sucesso. Estrutura das chaves:',
+          '[MAP_DEBUG] Payload do mapa obtido. Chaves encontradas:',
           Object.keys(mapResponse.data || {}),
         );
+        
         if (mapResponse.data?.map) {
-          console.log('[MAP_DEBUG] Detalhes do mapa recebido:', {
+          console.log('[MAP_DEBUG] Auditoria estrutural dos dados gráficos extraídos:', {
             center: mapResponse.data.map.center,
-            pinsReceived: mapResponse.data.map.pins?.length ?? 0,
-            stagesReceived: mapResponse.data.map.stages?.length ?? 0,
-            bounds: mapResponse.data.map.bounds,
+            pinsCount: mapResponse.data.map.pins?.length ?? 0,
+            stagesCount: mapResponse.data.map.stages?.length ?? 0,
           });
         }
 
@@ -237,14 +270,14 @@ export default function MapScreen() {
           setMapPayload(mapResponse.data);
         }
       } catch (error: any) {
-        console.error('[MAP_DEBUG] Erro crítico capturado no bloco loadMap:', {
+        console.error('[MAP_DEBUG] Exceção intercetada no fluxo loadMap:', {
           message: error?.message,
           status: error?.response?.status,
           data: error?.response?.data,
         });
         if (mounted) {
           setMapPayload(null);
-          setMapError('Unable to load event map');
+          setMapError(error?.response?.data?.message || 'Unable to load event map');
         }
       } finally {
         if (mounted) {
@@ -258,7 +291,7 @@ export default function MapScreen() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [isLoaded, isSignedIn]); // Dispara novamente assim que as permissões do dispositivo mudarem de estado
 
   // --- GESTURES ---
   const panGesture = Gesture.Pan().onChange(e => {
@@ -284,16 +317,14 @@ export default function MapScreen() {
   // --- FUNÇÕES ---
   const handlePinPress = useCallback(
     (pin: any, showRoute = false) => {
-      console.log('[MAP_DEBUG] Pino pressionado:', {
+      console.log('[MAP_DEBUG] Evento Triggered: Clique sobre marcador físico.', {
         id: pin.id,
         name: pin.name,
-        lat: pin.lat,
-        lng: pin.lng,
         showRoute,
       });
 
       if (pin.lat === undefined || pin.lng === undefined || !bounds) {
-        console.error('[MAP_DEBUG] Impossível calcular projeção: lat, lng ou bounds indefinidos.', {
+        console.error('[MAP_DEBUG] Erro de projeção espacial: Atributos lat/lng ausentes nos bounds.', {
           pin,
           bounds,
         });
@@ -301,7 +332,6 @@ export default function MapScreen() {
       }
 
       const pos = latLngToPixelFromBounds(pin.lat, pin.lng, bounds, IMAGE_WIDTH, IMAGE_HEIGHT);
-      console.log('[MAP_DEBUG] Coordenadas convertidas para píxeis locais:', pos);
 
       setSelectedPin({
         ...pin,
@@ -310,12 +340,12 @@ export default function MapScreen() {
         py: pos.y,
       });
 
-      // Centraliza o mapa no pin
+      // Centralização interpolada do viewport do utilizador baseado no ponto alvo
       translateX.value = withTiming(screenWidth / 2 - pos.x * scale.value);
       translateY.value = withTiming(screenHeight / 2 - pos.y * scale.value);
 
       if (showRoute) {
-        console.log('[MAP_DEBUG] Calculando rota até o destino solicitado...');
+        console.log('[MAP_DEBUG] Montando vetor bidimensional para caminhos dinâmicos no SVG...');
         const start = latLngToPixelFromBounds(
           CURRENT_LOCATION.lat,
           CURRENT_LOCATION.lng,
@@ -333,7 +363,7 @@ export default function MapScreen() {
   );
 
   const handleCancelRoute = () => {
-    console.log('[MAP_DEBUG] Rota cancelada pelo utilizador.');
+    console.log('[MAP_DEBUG] Instrução de descarte de rota invocada.');
     setActiveRoute(null);
     setDestinationName('');
   };
@@ -354,18 +384,11 @@ export default function MapScreen() {
 
   useEffect(() => {
     if (focusId) {
-      console.log(
-        `[MAP_DEBUG] focusId detetado via URL params: ${focusId}. Procurando pino do amigo...`,
-      );
+      console.log(`[MAP_DEBUG] Focagem externa pendente para entidade de id: ${focusId}`);
       const targetPin = pins.find((p: MapPinItem) => p.friendId === focusId);
       if (targetPin) {
-        console.log('[MAP_DEBUG] Amigo encontrado! Disparando centralização automática em 300ms.');
         const timer = setTimeout(() => handlePinPress(targetPin, true), 300);
         return () => clearTimeout(timer);
-      } else {
-        console.warn(
-          `[MAP_DEBUG] focusId ${focusId} ativo, mas não corresponde a nenhum pino na lista.`,
-        );
       }
     }
   }, [focusId, pins, handlePinPress]);
@@ -408,11 +431,7 @@ export default function MapScreen() {
           </Svg>
 
           {visiblePins.map(pin => {
-            // Log de salvaguarda caso o banco devolva coordenadas corrompidas para este pino
             if (pin.lat === null || pin.lng === null || pin.lat === undefined) {
-              console.warn(
-                `[MAP_DEBUG] Omitindo renderização do pino ${pin.id} (${pin.name}) devido a coordenadas nulas.`,
-              );
               return null;
             }
             return (

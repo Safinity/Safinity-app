@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import { useAuth } from '@clerk/expo';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, StatusBar, Platform, ScrollView } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -37,6 +38,58 @@ const localImages: { [key: string]: any } = {
   '14.jpg': img14,
 };
 
+function formatActivityDate(value?: string | null) {
+  if (!value) return 'Date TBD';
+
+  try {
+    return new Date(value).toLocaleDateString('en-GB', {
+      weekday: 'long',
+      day: '2-digit',
+      month: 'short',
+    });
+  } catch {
+    return 'Invalid date';
+  }
+}
+
+function formatActivityTime(value?: string | null) {
+  if (!value) return '--:--';
+
+  try {
+    return new Date(value).toLocaleTimeString('en-GB', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  } catch {
+    return '--:--';
+  }
+}
+
+function normalizeActivity(activity: any) {
+  const specifications = activity.specifications || {};
+
+  return {
+    ...activity,
+    title: activity.title || activity.name || 'Untitled activity',
+    category: activity.category || specifications.category || 'Stages',
+    image: activity.image || specifications.image || '1.jpg',
+    location: activity.location || activity.points_interest?.name || 'Location TBD',
+    date: activity.date || formatActivityDate(activity.start_time),
+    startTime: activity.startTime || formatActivityTime(activity.start_time),
+    endTime: activity.endTime || formatActivityTime(activity.end_time),
+  };
+}
+
+function authHeaders(token: string | null) {
+  return token ? { Authorization: `Bearer ${token}` } : undefined;
+}
+
+function getEventsList(data: any) {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.results)) return data.results;
+  return [];
+}
+
 // --- Styled Components ---
 const Container = styled.View`
   flex: 1;
@@ -49,6 +102,7 @@ const ScrollContent = styled(ScrollView).attrs({
   flex: 1;
   padding-horizontal: ${({ theme }) => theme.spacing.margemLateral}px;
   padding-bottom: ${({ theme }) => theme.spacing.xxl}px;
+  padding-top: ${({ theme }) => theme.spacing.xl}px;
 `;
 
 const EventSelector = styled.TouchableOpacity`
@@ -109,47 +163,128 @@ export default function CalendarScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { isLoaded, isSignedIn, getToken } = useAuth();
+  const getTokenRef = useRef(getToken);
 
   const [searchValue, setSearchValue] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('Stages');
+  const [selectedCategory, setSelectedCategory] = useState('All');
   const [presentEvent, setPresentEvent] = useState<any>(null);
+  const [events, setEvents] = useState<any[]>([]);
   const [activities, setActivities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const categories = ['Stages', 'Workshops', 'Podcasts', 'Business'];
+  const categories = ['All', 'Stages', 'Workshops', 'Podcasts', 'Business'];
+
+  getTokenRef.current = getToken;
+
+  const loadEventActivities = async (event: any) => {
+    setPresentEvent(event);
+    setSelectedCategory('All');
+    setActivities([]);
+
+    if (!event?.id) {
+      return;
+    }
+
+    const activitiesResponse = await api.get(`/events/${event.id}/activities`);
+    const data = Array.isArray(activitiesResponse.data)
+      ? activitiesResponse.data
+      : activitiesResponse.data?.results || [];
+
+    setActivities(data.map(normalizeActivity));
+  };
 
   useEffect(() => {
+    let isActive = true;
+
     const loadActivities = async () => {
+      if (!isLoaded) {
+        return;
+      }
+
       try {
-        // Restaurada a tua rota dinâmica original para ir buscar o evento atualizado
-        const eventResponse = await api.get('/events/present-event');
-        const event = eventResponse.data;
+        const token = isSignedIn ? await getTokenRef.current() : null;
+        let event = null;
+
+        if (isSignedIn) {
+          try {
+            const eventResponse = await api.get('/events/present-event', {
+              headers: authHeaders(token),
+            });
+            event = eventResponse.data;
+          } catch (presentEventError) {
+            console.error('Erro ao buscar evento atual:', presentEventError);
+          }
+        }
+
+        const eventsResponse = await api.get('/events', {
+          params: { pageSize: 100, sortBy: 'start_date', sortOrder: 'asc' },
+        });
+        const eventsList = getEventsList(eventsResponse.data);
+
+        if (!event) {
+          event = eventsList[0] ?? null;
+        }
+
+        if (!isActive) {
+          return;
+        }
+
+        setEvents(eventsList);
         setPresentEvent(event);
+        setSelectedCategory('All');
 
         if (event?.id) {
-          // Procura as atividades associadas dinamicamente ao ID do evento retornado
           const activitiesResponse = await api.get(`/events/${event.id}/activities`);
-          const data = Array.isArray(activitiesResponse.data)
-            ? activitiesResponse.data
-            : activitiesResponse.data?.results || [];
+          const data = getEventsList(activitiesResponse.data);
 
-          setActivities(data);
+          if (!isActive) return;
+          setActivities(data.map(normalizeActivity));
         }
       } catch (error) {
         console.error('Erro ao buscar evento e atividades:', error);
       } finally {
-        setLoading(false);
+        if (isActive) {
+          setLoading(false);
+        }
       }
     };
 
     loadActivities();
-  }, []);
+
+    return () => {
+      isActive = false;
+    };
+  }, [isLoaded, isSignedIn]);
+
+  const handleChangeEvent = async () => {
+    if (events.length === 0 || loading) {
+      return;
+    }
+
+    const currentIndex = events.findIndex(event => event.id === presentEvent?.id);
+    const nextEvent = events[(currentIndex + 1) % events.length];
+
+    try {
+      setLoading(true);
+      await loadEventActivities(nextEvent);
+    } catch (error) {
+      console.error('Erro ao trocar evento:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredActivities = activities.filter(activity => {
-    const matchesCategory = activity.category === selectedCategory;
-    const matchesSearch = activity.title?.toLowerCase().includes(searchValue.toLowerCase());
+    const search = searchValue.trim().toLowerCase();
+    const matchesCategory = selectedCategory === 'All' || activity.category === selectedCategory;
+    const matchesSearch = !search || activity.title?.toLowerCase().includes(search);
     return matchesCategory && matchesSearch;
   });
+  const emptyMessage =
+    activities.length === 0
+      ? 'No activities found for this event'
+      : 'No activities match this filter';
 
   return (
     <Container>
@@ -174,6 +309,7 @@ export default function CalendarScreen() {
       >
         <EventSelector
           activeOpacity={0.7}
+          onPress={handleChangeEvent}
           accessible
           accessibilityRole="button"
           accessibilityLabel="Select event"
@@ -232,9 +368,7 @@ export default function CalendarScreen() {
               );
             })
           : !loading && (
-              <DateHeader style={{ textAlign: 'center', marginTop: 50 }}>
-                No events found
-              </DateHeader>
+              <DateHeader style={{ textAlign: 'center', marginTop: 50 }}>{emptyMessage}</DateHeader>
             )}
 
         <SpaceBottom />

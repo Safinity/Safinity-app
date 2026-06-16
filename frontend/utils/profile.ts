@@ -1,6 +1,6 @@
 import { create } from 'axios';
 
-const API_BASE = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
+import { API_BASE } from './api';
 
 const profileApi = create({
   baseURL: API_BASE,
@@ -58,6 +58,14 @@ export async function getMyProfile(token: string | null) {
 
 export async function updateMyProfile(token: string | null, payload: UpdateProfilePayload) {
   const response = await profileApi.patch('/users/me/edit-profile', payload, {
+    headers: authHeaders(token),
+  });
+
+  return response.data;
+}
+
+export async function deleteMyAccount(token: string | null) {
+  const response = await profileApi.delete('/users/me', {
     headers: authHeaders(token),
   });
 

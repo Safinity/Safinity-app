@@ -1,17 +1,29 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
 import { router, Stack } from 'expo-router';
 import Head from 'expo-router/head';
-import { useAuth, useSignIn } from '@clerk/expo';
+import { useAuth, useClerk, useSignIn } from '@clerk/expo';
 
 import InputField from '@/components/InputField';
 import PrimaryButton from '@/components/PrimaryButton';
 import Header from '@/components/ui/header';
+import { getMyProfile } from '@/utils/profile';
+
+function wait(ms: number) {
+  return new Promise(resolve => {
+    setTimeout(resolve, ms);
+  });
+}
 
 export default function Login() {
-  const { isLoaded, isSignedIn } = useAuth();
-  const { signIn, setActive } = useSignIn();
+  const { isLoaded, isSignedIn, getToken } = useAuth();
+  const clerk = useClerk();
+  const { signOut } = clerk;
+  // REMOVIDO: o setActive daqui, pois vamos usar o clerk.setActive que é 100% fiável
+  const { signIn } = useSignIn();
+  const getTokenRef = useRef(getToken);
+  const signOutRef = useRef(signOut);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,26 +33,167 @@ export default function Login() {
     'email_code' | 'phone_code' | 'totp' | 'backup_code' | null
   >(null);
   const [secondFactorHint, setSecondFactorHint] = useState('');
+  const [isCompletingLogin, setIsCompletingLogin] = useState(false);
   const [error, setError] = useState('');
+  const isSyncingProfileRef = useRef(false);
 
+  getTokenRef.current = getToken;
+  signOutRef.current = signOut;
+
+  // Monitora o estado global de autenticação do app
   useEffect(() => {
-    if (isLoaded && isSignedIn) {
-      router.replace('/(tabs)');
+    
+    if (!isLoaded || !isSignedIn || isSyncingProfileRef.current) {
+      return;
     }
+
+    let isActive = true;
+
+    async function completeAuthenticatedLogin() {
+      try {
+        isSyncingProfileRef.current = true;
+        setIsCompletingLogin(true);
+        setError('');
+        
+        await syncProfileWithBackend();
+
+        if (isActive) {
+          router.replace('/(tabs)');
+        }
+      } catch (syncError: any) {
+        console.error('[Clerk-Auth] Erro ao sincronizar perfil no useEffect:', syncError);
+        isSyncingProfileRef.current = false;
+        setIsCompletingLogin(false);
+
+        if (isActive) {
+          setError('Autenticado com sucesso. A redirecionar...');
+          setTimeout(() => {
+            if (isActive) router.replace('/(tabs)');
+          }, 1000);
+        }
+      }
+    }
+
+    completeAuthenticatedLogin();
+
+    return () => {
+      isActive = false;
+    };
   }, [isLoaded, isSignedIn]);
 
-  async function activateSessionIfAvailable(signInAttempt: any) {
-    const createdSessionId =
-      signInAttempt?.createdSessionId ??
-      pendingSignIn?.createdSessionId ??
-      signIn?.createdSessionId;
+  async function syncProfileWithBackend() {
+    let lastError: unknown = null;
+    await wait(400);
 
-    if (!createdSessionId || !setActive) {
+    for (let attempt = 0; attempt < 4; attempt += 1) {
+      try {
+        const token = await getTokenRef.current();
+
+        if (token) {
+          await getMyProfile(token);
+          return;
+        }
+      } catch (syncError) {
+        console.warn('[Clerk-Auth] Falha temporária na API de perfil:', syncError);
+        lastError = syncError;
+      }
+      await wait(500);
+    }
+    throw lastError || new Error('Unable to sync authenticated profile');
+  }
+
+  async function activateSessionIfAvailable(signInAttempt: any) {
+
+    const createdSessionId = signInAttempt?.createdSessionId || signIn?.createdSessionId;
+
+    if (!createdSessionId) {
       return false;
     }
 
-    await setActive({ session: createdSessionId });
-    router.replace('/(tabs)');
+    // CORREÇÃO: Usamos o clerk.setActive do hook useClerk que nunca falha
+    if (!clerk || typeof clerk.setActive !== 'function') {
+      console.error('[Clerk-Auth] Erro: Método clerk.setActive global indisponível.');
+      return false;
+    }
+
+    setIsCompletingLogin(true);
+    
+    try {
+      await clerk.setActive({ session: createdSessionId });
+      
+      router.replace('/(tabs)');
+      return true;
+    } catch (syncError: any) {
+      console.error('[Clerk-Auth] Erro crítico ao rodar o clerk.setActive:', syncError);
+      setIsCompletingLogin(false);
+      setError(syncError?.message || 'Erro ao ativar a sessão.');
+      return false;
+    }
+  }
+
+  async function attemptPasswordSignIn() {
+    return signIn.create({
+      identifier: email.trim(),
+      password,
+    } as any);
+  }
+
+  async function prepareSecondFactor(signInAttempt: any, factor: any) {
+    if (factor.strategy === 'email_code') {
+      const prepared = await signInAttempt.prepareSecondFactor({
+        strategy: 'email_code',
+        emailAddressId: factor.emailAddressId,
+      });
+      setPendingSignIn(prepared);
+      setSecondFactorStrategy('email_code');
+      return;
+    }
+
+    if (factor.strategy === 'phone_code') {
+      const prepared = await signInAttempt.prepareSecondFactor({
+        strategy: 'phone_code',
+        phoneNumberId: factor.phoneNumberId,
+      });
+      setPendingSignIn(prepared);
+      setSecondFactorStrategy('phone_code');
+      return;
+    }
+
+    setPendingSignIn(signInAttempt);
+    setSecondFactorStrategy(factor.strategy);
+  }
+
+  async function verifySecondFactor() {
+    return pendingSignIn.attemptSecondFactor({
+      strategy: secondFactorStrategy,
+      code: verificationCode.trim(),
+    });
+  }
+
+  async function enterSecondFactorFlow(signInAttempt?: any) {
+    const currentSignIn = signInAttempt ?? signIn;
+    const factors = currentSignIn?.supportedSecondFactors ?? signIn.supportedSecondFactors ?? [];
+    const factor =
+      factors.find((item: any) => item.strategy === 'email_code') ??
+      factors.find((item: any) => item.strategy === 'phone_code') ??
+      factors.find((item: any) => item.strategy === 'totp') ??
+      factors.find((item: any) => item.strategy === 'backup_code');
+
+    if (!factor) {
+      setError('This account requires an unsupported second factor.');
+      return true;
+    }
+
+    await prepareSecondFactor(currentSignIn, factor);
+    setSecondFactorHint(
+      factor.strategy === 'email_code'
+        ? `Enter the code sent to ${factor.safeIdentifier || 'your email'}`
+        : factor.strategy === 'phone_code'
+          ? `Enter the code sent to ${factor.safeIdentifier || 'your phone'}`
+          : factor.strategy === 'totp'
+            ? 'Enter the code from your authenticator app'
+            : 'Enter one of your backup codes',
+    );
     return true;
   }
 
@@ -64,18 +217,25 @@ export default function Login() {
       .join(', ');
   }
 
-  async function continueSignIn(signInAttempt: any, depth = 0) {
+  async function continueSignIn(signInAttempt: any, depth = 0): Promise<boolean> {
     if (await activateSessionIfAvailable(signInAttempt)) {
       return true;
     }
 
+    const status = signInAttempt.status;
     const firstFactorVerified = signInAttempt.firstFactorVerification?.status === 'verified';
+    const supportedSecondFactors = signInAttempt.supportedSecondFactors ?? [];
     const inferredStatus =
-      firstFactorVerified && signInAttempt.supportedSecondFactors?.length
+      status === 'needs_second_factor' || (firstFactorVerified && supportedSecondFactors.length)
         ? 'needs_second_factor'
-        : signInAttempt.status;
+        : status;
 
     if (inferredStatus === 'needs_first_factor' && !firstFactorVerified) {
+      if (!signInAttempt.attemptFirstFactor) {
+        setError('Unable to complete sign in. Please try again.');
+        return true;
+      }
+
       const firstFactorAttempt = await signInAttempt.attemptFirstFactor({
         strategy: 'password',
         password,
@@ -85,48 +245,7 @@ export default function Login() {
     }
 
     if (inferredStatus === 'needs_second_factor') {
-      const factors = signInAttempt.supportedSecondFactors ?? [];
-      const factor =
-        factors.find((item: any) => item.strategy === 'email_code') ??
-        factors.find((item: any) => item.strategy === 'phone_code') ??
-        factors.find((item: any) => item.strategy === 'totp') ??
-        factors.find((item: any) => item.strategy === 'backup_code');
-
-      if (!factor) {
-        setError('This account requires an unsupported second factor.');
-        return true;
-      }
-
-      if (factor.strategy === 'email_code') {
-        const prepared = await signInAttempt.prepareSecondFactor({
-          strategy: 'email_code',
-          emailAddressId: factor.emailAddressId,
-        });
-        setPendingSignIn(prepared);
-        setSecondFactorStrategy('email_code');
-        setSecondFactorHint(`Enter the code sent to ${factor.safeIdentifier || 'your email'}`);
-        return true;
-      }
-
-      if (factor.strategy === 'phone_code') {
-        const prepared = await signInAttempt.prepareSecondFactor({
-          strategy: 'phone_code',
-          phoneNumberId: factor.phoneNumberId,
-        });
-        setPendingSignIn(prepared);
-        setSecondFactorStrategy('phone_code');
-        setSecondFactorHint(`Enter the code sent to ${factor.safeIdentifier || 'your phone'}`);
-        return true;
-      }
-
-      setPendingSignIn(signInAttempt);
-      setSecondFactorStrategy(factor.strategy);
-      setSecondFactorHint(
-        factor.strategy === 'totp'
-          ? 'Enter the code from your authenticator app'
-          : 'Enter one of your backup codes',
-      );
-      return true;
+      return enterSecondFactorFlow(signInAttempt);
     }
 
     if (firstFactorVerified && depth < 2 && typeof signInAttempt.reload === 'function') {
@@ -155,23 +274,31 @@ export default function Login() {
     }
 
     try {
-      const signInAttempt = await signIn.create({
-        identifier: email.trim(),
-        password,
-      } as any);
+      const signInAttempt = await attemptPasswordSignIn();
 
       if (await continueSignIn(signInAttempt)) {
         return;
       }
 
       const statusMessage = getSignInStatusMessage(signInAttempt);
+      if (statusMessage.includes('needs_second_factor')) {
+        await enterSecondFactorFlow(signInAttempt);
+        return;
+      }
+
+      setError(`Unable to complete sign in. Current ${statusMessage || 'status: unknown'}`);
+    } catch (err: any) {
+      console.error('[Clerk-Auth] Erro capturado no catch do handleLogin:', err);
+      if (signIn.status === 'needs_second_factor') {
+        await enterSecondFactorFlow(signIn);
+        return;
+      }
+
       setError(
-        statusMessage.includes('first factor: verified')
-          ? `Password verified, but Clerk did not return a session. ${statusMessage}`
-          : `Unable to complete sign in. Current ${statusMessage || 'status: unknown'}`,
+        err.errors?.[0]?.message ||
+          err.message ||
+          'Unable to sync your account. Please try again.',
       );
-    } catch (error: any) {
-      setError(error.errors?.[0]?.message || error.message || 'Invalid email or password');
     }
   }
 
@@ -189,10 +316,7 @@ export default function Login() {
     }
 
     try {
-      const signInAttempt = await pendingSignIn.attemptSecondFactor({
-        strategy: secondFactorStrategy,
-        code: verificationCode.trim(),
-      });
+      const signInAttempt = await verifySecondFactor();
 
       if (await activateSessionIfAvailable(signInAttempt)) {
         return;
@@ -201,8 +325,12 @@ export default function Login() {
       setError(
         `Unable to complete sign in. Current ${getSignInStatusMessage(signInAttempt) || 'status: unknown'}`,
       );
-    } catch (error: any) {
-      setError(error.errors?.[0]?.message || error.message || 'Invalid verification code');
+    } catch (err: any) {
+      setError(
+        err.errors?.[0]?.message ||
+          err.message ||
+          'Unable to sync your account. Please try again.',
+      );
     }
   }
 
@@ -277,9 +405,13 @@ export default function Login() {
 
         <PrimaryButton
           accessibilityLabel="Log In"
-          title={pendingSignIn ? 'Verify and continue' : 'Log In'}
+          title={
+            isCompletingLogin ? 'Logging in...' : pendingSignIn ? 'Verify and continue' : 'Log In'
+          }
           disabled={
-            !isLoaded || (pendingSignIn ? verificationCode === '' : email === '' || password === '')
+            isCompletingLogin ||
+            !isLoaded ||
+            (pendingSignIn ? verificationCode === '' : email === '' || password === '')
           }
           onPress={pendingSignIn ? handleVerifySecondFactor : handleLogin}
         />

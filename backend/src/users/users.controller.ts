@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Patch, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Patch,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthRequiredGuard } from '../auth/auth.guards';
 import { AuthService } from '../auth/auth.service';
 import type { RequestWithUser } from '../auth/auth.types';
@@ -21,5 +29,11 @@ export class UsersController {
     @Body() body: UpdateProfileDto,
   ) {
     return this.authService.updateProfile(request.user!.id, body);
+  }
+
+  @Delete('me')
+  @UseGuards(AuthRequiredGuard)
+  deleteAccount(@Req() request: RequestWithUser) {
+    return this.authService.deleteAccount(request.user!.id);
   }
 }

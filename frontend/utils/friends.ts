@@ -1,6 +1,6 @@
 import { create } from 'axios';
 
-const API_BASE = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
+import { API_BASE } from './api';
 
 const friendsApi = create({
   baseURL: API_BASE,

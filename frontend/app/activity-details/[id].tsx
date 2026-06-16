@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Header from '../../components/ui/header';
 import { HeroBanner } from '../../components/HeroBanner';
 import api from '../../utils/api';
+import { useActivityFavourites } from '../../context/ActivityFavouritesContext';
 
 const Container = styled.View`
   flex: 1;
@@ -124,6 +125,12 @@ function normalizeActivity(activity: any) {
 export default function ActivityDetailsScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
+  const {
+    favouriteActivityIds,
+    updatingActivityIds,
+    loadEventFavourites,
+    toggleFavouriteActivity,
+  } = useActivityFavourites();
   const [activity, setActivity] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -155,6 +162,14 @@ export default function ActivityDetailsScreen() {
       mounted = false;
     };
   }, [id]);
+
+  useEffect(() => {
+    if (activity?.event_id) {
+      loadEventFavourites(activity.event_id).catch(error => {
+        console.error('Erro ao carregar favoritos da atividade:', error);
+      });
+    }
+  }, [activity?.event_id, loadEventFavourites]);
 
   if (loading) {
     return (
@@ -191,7 +206,16 @@ export default function ActivityDetailsScreen() {
         role="main"
         accessibilityLabel="Activity details"
       >
-        <HeroBanner event={activity} isDetail detailType="activity" />
+        <HeroBanner
+          event={activity}
+          isDetail
+          detailType="activity"
+          isFavorite={favouriteActivityIds.has(String(activity.id))}
+          isFavoriteUpdating={updatingActivityIds.has(String(activity.id))}
+          onToggleFavorite={(activityToToggle: any, shouldBeFavorite: boolean) =>
+            toggleFavouriteActivity(activityToToggle, activity.event_id, shouldBeFavorite)
+          }
+        />
 
         <ContentCard>
           <SectionTitle accessibilityRole="header">Description</SectionTitle>

@@ -97,9 +97,13 @@ export const HeroBanner = ({
   hideMap = false,
   isDetail = false,
   detailType,
+  isFavorite: controlledIsFavorite,
+  onToggleFavorite,
+  isFavoriteUpdating = false,
 }: any) => {
   const router = useRouter();
   const [isFavorite, setIsFavorite] = useState(false);
+  const displayedIsFavorite = controlledIsFavorite ?? isFavorite;
 
   // ⭐ MAPA ID → SLUG (igual ao EventCard)
   const eventIdToSlug: Record<string, string> = {
@@ -155,12 +159,36 @@ export const HeroBanner = ({
 
               <AddCalendarButton
                 activeOpacity={0.8}
-                onPress={() => setIsFavorite(prev => !prev)}
+                onPress={async () => {
+                  if (isFavoriteUpdating) return;
+
+                  const nextValue = !displayedIsFavorite;
+
+                  if (controlledIsFavorite === undefined) {
+                    setIsFavorite(nextValue);
+                  }
+
+                  try {
+                    await onToggleFavorite?.(event, nextValue);
+                  } catch (error) {
+                    if (controlledIsFavorite === undefined) {
+                      setIsFavorite(!nextValue);
+                    }
+                    console.error('Erro ao atualizar favorito:', error);
+                  }
+                }}
                 accessible={true}
                 accessibilityRole="button"
-                accessibilityLabel={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                accessibilityLabel={
+                  displayedIsFavorite ? 'Remove from favorites' : 'Add to favorites'
+                }
+                disabled={isFavoriteUpdating}
               >
-                <Ionicons name={isFavorite ? 'heart' : 'heart-outline'} size={30} color="#9333EA" />
+                <Ionicons
+                  name={displayedIsFavorite ? 'heart' : 'heart-outline'}
+                  size={30}
+                  color="#9333EA"
+                />
               </AddCalendarButton>
             </TitleRow>
 

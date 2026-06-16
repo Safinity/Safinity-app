@@ -1,4 +1,5 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 type ProfileViewer = {
@@ -7,6 +8,11 @@ type ProfileViewer = {
 };
 
 type ProfileMode = 'self' | 'friend' | 'public';
+
+type UpdateLocationInput = {
+  lat?: number;
+  lng?: number;
+};
 
 type UserProfile = {
   id: string;
@@ -57,6 +63,16 @@ export class UsersService {
 
   private normalizeViewerId(viewer?: ProfileViewer) {
     return viewer?.id ?? viewer?.sub;
+  }
+
+  private parseCoordinate(value: unknown, label: string) {
+    const parsed = Number(value);
+
+    if (!Number.isFinite(parsed)) {
+      throw new BadRequestException(`${label} must be a valid number`);
+    }
+
+    return parsed;
   }
 
   private async resolveProfileMode(
@@ -179,5 +195,44 @@ export class UsersService {
         username: true,
       },
     });
+  }
+
+  async updateMyLocation(userId: string, body: UpdateLocationInput) {
+    const lat = this.parseCoordinate(body.lat, 'lat');
+    const lng = this.parseCoordinate(body.lng, 'lng');
+
+    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+      throw new BadRequestException('Invalid location coordinates');
+    }
+
+    const [location] = await this.prisma.$queryRaw<
+      Array<{ id: bigint; lat: number; lng: number; timestamp: Date }>
+    >(Prisma.sql`
+      WITH next_id AS (
+        SELECT COALESCE(MAX(id), 0) + 1 AS id
+        FROM user_locations
+      ),
+      inserted AS (
+        INSERT INTO user_locations (id, user_id, location, timestamp)
+        SELECT
+          next_id.id,
+          ${userId}::uuid,
+          ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)::geography,
+          now()
+        FROM next_id
+        RETURNING id, location, timestamp
+      )
+      UPDATE users
+      SET location = inserted.location
+      FROM inserted
+      WHERE users.id = ${userId}::uuid
+      RETURNING
+        inserted.id,
+        ST_Y(inserted.location::geometry) AS lat,
+        ST_X(inserted.location::geometry) AS lng,
+        inserted.timestamp
+    `);
+
+    return this.serialize(location);
   }
 }

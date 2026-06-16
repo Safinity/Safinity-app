@@ -21,7 +21,7 @@ CREATE TABLE Event (
   description varchar(255),
   status varchar(32),
   category varchar(24),
-  image bytea,
+  image varchar(512),
   start_date timestamp,
   end_date timestamp,
   location geography(Point, 4326), -- Alterado para PostGIS
@@ -266,12 +266,12 @@ INSERT INTO Event_Tickets_Master (id, event_id, ticket_code, is_already_linked) 
 
 INSERT INTO User_Tickets (id, user_id, event_id, ticket_code, linked_at) VALUES
 
-(3, '0339bc70-bc90-4918-90ef-d11c5b6c3881', 3, 'TICKET-CAMPUS-003', now());
+(3, '8c8fcc27-685e-4b8a-8f8a-218f4a39ae1b', 3, 'TICKET-CAMPUS-003', now());
 
 INSERT INTO User_locations (id, user_id, location, timestamp) VALUES
 (1, '11111111-1111-1111-1111-111111111111', ST_GeogFromText('SRID=4326;POINT(-9.1392 38.7224)'), now() - interval '5 minutes'),
 (2, '22222222-2222-2222-2222-222222222222', ST_GeogFromText('SRID=4326;POINT(-9.1387 38.7220)'), now() - interval '2 minutes'),
-(3, '0339bc70-bc90-4918-90ef-d11c5b6c3881', ST_GeogFromText('SRID=4326;POINT(-9.1398 38.7218)'), now() - interval '8 minutes');
+(3, '8c8fcc27-685e-4b8a-8f8a-218f4a39ae1b', ST_GeogFromText('SRID=4326;POINT(-9.1398 38.7218)'), now() - interval '8 minutes');
 
 
 UPDATE Event_Tickets_Master SET is_already_linked = true WHERE ticket_code IN ('TICKET-CAMPUS-001', 'TICKET-CAMPUS-002', 'TICKET-CAMPUS-003');
@@ -349,4 +349,188 @@ SET others = jsonb_build_object(
   )
 ) WHERE id = 3;
 
-UPDATE USERS SET id = '0339bc70-bc90-4918-90ef-d11c5b6c3881' WHERE username = 'olaola';
+UPDATE USERS SET id = '8c8fcc27-685e-4b8a-8f8a-218f4a39ae1b' WHERE username = 'olaola';
+-- Inserir os 4 novos eventos culturais
+INSERT INTO Event (id, organization_id, name, venue_name, description, status, category, image, start_date, end_date, location) VALUES 
+(
+  4, 1, 'Arraial de Belém', 'Jardins de Belém, Lisboa', 'Os santos populares no coração de Belém', 'active', 'Cultural', 
+  'https://fpjkgpjjdamydkpjexbx.supabase.co/storage/v1/object/public/safinity/Event/cultural/arraial-belem.webp', 
+  '2026-06-12 18:00:00', '2026-06-14 02:00:00', ST_GeogFromText('SRID=4326;POINT(-9.2023 38.6967)')
+),
+(
+  5, 1, 'Festival dos Canais', 'Cais da Fonte Nova, Aveiro', 'Arte, música e cultura nos canais de Aveiro', 'active', 'Cultural', 
+  'https://fpjkgpjjdamydkpjexbx.supabase.co/storage/v1/object/public/safinity/Event/cultural/Festival-dos-Canais.jpg', 
+  '2026-07-15 10:00:00', '2026-07-19 23:30:00', ST_GeogFromText('SRID=4326;POINT(-8.6432 40.6401)')
+),
+(
+  6, 1, 'Festival do Marisco', 'Jardim do Pescador, Olhão', 'O maior festival de marisco do Algarve', 'planned', 'Cultural', 
+  'https://fpjkgpjjdamydkpjexbx.supabase.co/storage/v1/object/public/safinity/Event/cultural/olhao.webp', 
+  '2026-08-10 19:00:00', '2026-08-15 01:00:00', ST_GeogFromText('SRID=4326;POINT(-7.8415 37.0248)')
+),
+(
+  7, 1, 'Santos Populares do Porto', 'Fontainhas, Porto', 'A grande noite de São João e tradições nortenhas', 'active', 'Cultural', 
+  'https://fpjkgpjjdamydkpjexbx.supabase.co/storage/v1/object/public/safinity/Event/cultural/santos-populares.webp', 
+  '2026-06-23 18:00:00', '2026-06-24 06:00:00', ST_GeogFromText('SRID=4326;POINT(-8.6019 41.1436)')
+);
+
+-- Estrutura de Mapa para: Arraial de Belém (ID 4)
+UPDATE Event SET others = jsonb_build_object(
+  'map', jsonb_build_object(
+    'zoom', 17,
+    'currentLocation', jsonb_build_object('lat', 38.6967, 'lng', -9.2023),
+    'bounds', jsonb_build_object('north', 38.6975, 'south', 38.6958, 'west', -9.2035, 'east', -9.2011),
+    'pins', jsonb_build_array(
+      jsonb_build_object('id', 'palco-belem', 'name', 'Palco Sardinha', 'type', 'stage'),
+      jsonb_build_object('id', 'manjericos', 'name', 'Bancas de Jogos', 'type', 'food')
+    ),
+    'stages', jsonb_build_array(
+      jsonb_build_object('id', 'palco-belem', 'name', 'Palco Sardinha', 'rotation', 0, 'width', 80, 'height', 50)
+    )
+  )
+) WHERE id = 4;
+
+-- Estrutura de Mapa para: Festival dos Canais (ID 5)
+UPDATE Event SET others = jsonb_build_object(
+  'map', jsonb_build_object(
+    'zoom', 16,
+    'currentLocation', jsonb_build_object('lat', 40.6401, 'lng', -8.6432),
+    'bounds', jsonb_build_object('north', 40.6415, 'south', 40.6385, 'west', -8.6455, 'east', -8.6410),
+    'pins', jsonb_build_array(
+      jsonb_build_object('id', 'palco-canais', 'name', 'Palco Fonte Nova', 'type', 'stage'),
+      jsonb_build_object('id', 'artesanato', 'name', 'Mercado de Artes', 'type', 'entrance')
+    ),
+    'stages', jsonb_build_array(
+      jsonb_build_object('id', 'palco-canais', 'name', 'Palco Fonte Nova', 'rotation', 45, 'width', 90, 'height', 60)
+    )
+  )
+) WHERE id = 5;
+
+-- Estrutura de Mapa para: Festival do Marisco (ID 6)
+UPDATE Event SET others = jsonb_build_object(
+  'map', jsonb_build_object(
+    'zoom', 17,
+    'currentLocation', jsonb_build_object('lat', 37.0248, 'lng', -7.8415),
+    'bounds', jsonb_build_object('north', 37.0258, 'south', 37.0238, 'west', -7.8428, 'east', -7.8402),
+    'pins', jsonb_build_array(
+      jsonb_build_object('id', 'palco-marisco', 'name', 'Palco Principal', 'type', 'stage'),
+      jsonb_build_object('id', 'zona-marisco', 'name', 'Praça da Alimentação', 'type', 'food')
+    ),
+    'stages', jsonb_build_array(
+      jsonb_build_object('id', 'palco-marisco', 'name', 'Palco Principal', 'rotation', -10, 'width', 100, 'height', 55)
+    )
+  )
+) WHERE id = 6;
+
+-- Estrutura de Mapa para: Santos Populares do Porto (ID 7)
+UPDATE Event SET others = jsonb_build_object(
+  'map', jsonb_build_object(
+    'zoom', 17,
+    'currentLocation', jsonb_build_object('lat', 41.1436, 'lng', -8.6019),
+    'bounds', jsonb_build_object('north', 41.1446, 'south', 41.1426, 'west', -8.6032, 'east', -8.6006),
+    'pins', jsonb_build_array(
+      jsonb_build_object('id', 'palco-fontainhas', 'name', 'Palco Bailarico', 'type', 'stage'),
+      jsonb_build_object('id', 'barraquinhas', 'name', 'Zona dos Martelos', 'type', 'entrance')
+    ),
+    'stages', jsonb_build_array(
+      jsonb_build_object('id', 'palco-fontainhas', 'name', 'Palco Bailarico', 'rotation', 15, 'width', 85, 'height', 50)
+    )
+  )
+) WHERE id = 7;
+
+-- ======================================================
+-- 1. ATUALIZAÇÃO DO WEB SUMMIT EXISTENTE (ID 1)
+-- ======================================================
+UPDATE Event 
+SET image = 'https://fpjkgpjjdamydkpjexbx.supabase.co/storage/v1/object/public/safinity/Event/tech/web-summit.png'
+WHERE id = 1;
+
+
+-- ======================================================
+-- 2. INSERÇÃO DOS NOVOS EVENTOS MUSICAIS E TECH
+-- ======================================================
+INSERT INTO Event (id, organization_id, name, venue_name, description, status, category, image, start_date, end_date, location) VALUES 
+-- --- CATEGORIA: MUSIC ---
+(
+  8, 1, 'MEO Marés Vivas', 'Vila Nova de Gaia', 'O grande festival junto à foz do Douro', 'planned', 'Music', 
+  'https://fpjkgpjjdamydkpjexbx.supabase.co/storage/v1/object/public/safinity/Event/music/meo-mares-vivas.jpg', 
+  '2026-07-17 17:00:00', '2026-07-19 02:00:00', ST_GeogFromText('SRID=4326;POINT(-8.6534 41.1347)')
+),
+(
+  9, 1, 'MEO Sudoeste', 'Zambujeira do Mar', 'A maior semana de campismo e música eletrónica', 'planned', 'Music', 
+  'https://fpjkgpjjdamydkpjexbx.supabase.co/storage/v1/object/public/safinity/Event/music/meo_sudoeste.jpg', 
+  '2026-08-05 16:00:00', '2026-08-09 06:00:00', ST_GeogFromText('SRID=4326;POINT(-8.7842 37.5458)')
+),
+(
+  10, 1, 'NOS Alive', 'Passeio Marítimo de Algés', 'O melhor cartaz de indie e rock à beira-rio', 'active', 'Music', 
+  'https://fpjkgpjjdamydkpjexbx.supabase.co/storage/v1/object/public/safinity/Event/music/NOS-Alive.jpg', 
+  '2026-07-09 15:00:00', '2026-07-12 04:00:00', ST_GeogFromText('SRID=4326;POINT(-9.2304 38.6963)')
+),
+(
+  11, 1, 'Super Bock Super Rock', 'Herdade do Cabeço da Flauta, Meco', 'Música autêntica com o espírito icónico do Meco', 'planned', 'Music', 
+  'https://fpjkgpjjdamydkpjexbx.supabase.co/storage/v1/object/public/safinity/Event/music/super-bock-super-rock.jpg', 
+  '2026-07-16 16:00:00', '2026-07-19 03:00:00', ST_GeogFromText('SRID=4326;POINT(-9.1384 38.5173)')
+),
+
+-- --- CATEGORIA: TECH ---
+(
+  12, 1, 'Future Tech Expo', 'Europarque, Santa Maria da Feira', 'Descobre o amanhã da inteligência artificial', 'active', 'Tech', 
+  'https://fpjkgpjjdamydkpjexbx.supabase.co/storage/v1/object/public/safinity/Event/tech/future-tech.webp', 
+  '2026-09-22 09:00:00', '2026-09-24 18:00:00', ST_GeogFromText('SRID=4326;POINT(-8.5645 40.9274)')
+),
+(
+  13, 1, 'Portugal Tech Week', 'Vários Espaços, Lisboa', 'O festival descentralizado do ecossistema tecnológico', 'planned', 'Tech', 
+  'https://fpjkgpjjdamydkpjexbx.supabase.co/storage/v1/object/public/safinity/Event/tech/Portugal-Tech-Week.png', 
+  '2026-10-10 09:00:00', '2026-10-17 20:00:00', ST_GeogFromText('SRID=4326;POINT(-9.1393 38.7223)')
+),
+(
+  14, 1, 'Tech Business Summit', 'FIL, Lisboa', 'Onde os negócios encontram a inovação corporativa', 'active', 'Tech', 
+  'https://fpjkgpjjdamydkpjexbx.supabase.co/storage/v1/object/public/safinity/Event/tech/tech-business-summit.jpg', 
+  '2026-05-28 08:30:00', '2026-05-30 19:00:00', ST_GeogFromText('SRID=4326;POINT(-9.0945 38.7725)')
+);
+
+-- MEO Marés Vivas (ID 8)
+UPDATE Event SET others = jsonb_build_object('map', jsonb_build_object('zoom', 16, 'currentLocation', jsonb_build_object('lat', 41.1347, 'lng', -8.6534), 'bounds', jsonb_build_object('north', 41.1360, 'south', 41.1330, 'west', -8.6550, 'east', -8.6510), 'pins', jsonb_build_array(), 'stages', jsonb_build_array())) WHERE id = 8;
+
+-- MEO Sudoeste (ID 9)
+UPDATE Event SET others = jsonb_build_object('map', jsonb_build_object('zoom', 15, 'currentLocation', jsonb_build_object('lat', 37.5458, 'lng', -8.7842), 'bounds', jsonb_build_object('north', 37.5480, 'south', 37.5430, 'west', -8.7870, 'east', -8.7810), 'pins', jsonb_build_array(), 'stages', jsonb_build_array())) WHERE id = 9;
+
+-- NOS Alive (ID 10)
+UPDATE Event SET others = jsonb_build_object('map', jsonb_build_object('zoom', 16, 'currentLocation', jsonb_build_object('lat', 38.6963, 'lng', -9.2304), 'bounds', jsonb_build_object('north', 38.6980, 'south', 38.6950, 'west', -9.2330, 'east', -9.2280), 'pins', jsonb_build_array(jsonb_build_object('id', 'palco-nos', 'name', 'Palco NOS', 'type', 'stage')), 'stages', jsonb_build_array(jsonb_build_object('id', 'palco-nos', 'name', 'Palco NOS', 'rotation', 5, 'width', 110, 'height', 65)))) WHERE id = 10;
+
+-- Super Bock Super Rock (ID 11)
+UPDATE Event SET others = jsonb_build_object('map', jsonb_build_object('zoom', 16, 'currentLocation', jsonb_build_object('lat', 38.5173, 'lng', -9.1384), 'bounds', jsonb_build_object('north', 38.5190, 'south', 38.5150, 'west', -9.1410, 'east', -9.1350), 'pins', jsonb_build_array(), 'stages', jsonb_build_array())) WHERE id = 11;
+
+-- Future Tech Expo (ID 12)
+UPDATE Event SET others = jsonb_build_object('map', jsonb_build_object('zoom', 16, 'currentLocation', jsonb_build_object('lat', 40.9274, 'lng', -8.5645), 'bounds', jsonb_build_object('north', 40.9290, 'south', 40.9250, 'west', -8.5670, 'east', -8.5620), 'pins', jsonb_build_array(), 'stages', jsonb_build_array())) WHERE id = 12;
+
+-- Portugal Tech Week (ID 13)
+UPDATE Event SET others = jsonb_build_object('map', jsonb_build_object('zoom', 17, 'currentLocation', jsonb_build_object('lat', 38.7223, 'lng', -9.1393), 'bounds', jsonb_build_object('north', 38.7235, 'south', 38.7210, 'west', -9.1410, 'east', -9.1370), 'pins', jsonb_build_array(), 'stages', jsonb_build_array())) WHERE id = 13;
+
+-- Tech Business Summit (ID 14)
+UPDATE Event SET others = jsonb_build_object('map', jsonb_build_object('zoom', 16, 'currentLocation', jsonb_build_object('lat', 38.7725, 'lng', -9.0945), 'bounds', jsonb_build_object('north', 38.7740, 'south', 38.7710, 'west', -9.0970, 'east', -9.0920), 'pins', jsonb_build_array(), 'stages', jsonb_build_array())) WHERE id = 14;
+
+-- ======================================================
+-- 1. CRIAR OS BILHETES MESTRES (EVENT_TICKETS_MASTER)
+-- ======================================================
+INSERT INTO Event_Tickets_Master (id, event_id, ticket_code, is_already_linked) VALUES 
+(6, 10, 'TICKET-ALIVE-999', true),      -- NOS Alive
+(7, 8, 'TICKET-MARES-888', true),       -- MEO Marés Vivas
+(8, 12, 'TICKET-FUTURE-777', true);     -- Future Tech Expo
+
+
+-- ======================================================
+-- 2. VINCULAR OS BILHETES AO TEU UTILIZADOR (USER_TICKETS)
+-- ======================================================
+INSERT INTO User_Tickets (id, user_id, event_id, ticket_code, linked_at) VALUES
+(4, '8c8fcc27-685e-4b8a-8f8a-218f4a39ae1b', 10, 'TICKET-ALIVE-999', now()),
+(5, '8c8fcc27-685e-4b8a-8f8a-218f4a39ae1b', 8, 'TICKET-MARES-888', now()),
+(6, '8c8fcc27-685e-4b8a-8f8a-218f4a39ae1b', 12, 'TICKET-FUTURE-777', now());
+ id | organization_id |          name          |            venue_name             |                      description                      |  status  | category |                                                                                                               image                                                                                                                |         start_date         |          end_date          |                      location                      |                                                                                                                                                                                                      others                                                                                                                                                                                                      
+----+-----------------+------------------------+-----------------------------------+-------------------------------------------------------+----------+----------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------+----------------------------+----------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  3 |               1 | Conference Lisboa 2025 | MEO Arena                         | Evento de teste já terminado                          | finished | Tech     |                                                                                                                                                                                                                                    | 2025-09-10 09:00:00        | 2025-09-10 18:00:00        | 0101000020E6100000560E2DB29D2F22C01904560E2D624340 | 
+ 14 |               1 | Tech Business Summit   | FIL, Lisboa                       | Onde os negócios encontram a inovação corporativa     | active   | Tech     | \x68747470733a2f2f66706a6b67706a6a64616d79646b706a657862782e73757061626173652e636f2f73746f726167652f76312f6f62--M6a6563742f7075626c69632f736166696e6974792f4576656e742f746563682f746563682d627573696e6573732d73756d6d69742e6a7067     | 2026-05-28 08:30:00        | 2026-05-30 19:00:00        | 0101000020E6100000AAF1D24D623022C07B14AE47E1624340 | {"map": {"pins": [], "zoom": 16, "bounds": {"east": -9.0920, "west": -9.0970, "north": 38.7740, "south": 38.7710}, "stages": [], "currentLocation": {"lat": 38.7725, "lng": -9.0945}}}
+  2 |               2 | Music Festival Lisboa  | Altice Arena                      |                                                       | planned  | Music    |                                                                                                                                                                                                                                    | 2026-07-20 14:00:00        | 2026-07-22 23:00:00        | 0101000020E6100000E3A59BC4203022C051DA1B7C61624340 | {"map": {"zoom": 16, "bounds": {"east": -9.089500, "west": -9.098300, "north": 38.771500, "south": 38.765500}, "currentLocation": {"lat": 38.768050, "lng": -9.094050}}}
+  8 |               1 | MEO Marés Vivas        | Vila Nova de Gaia                 | O grande festival junto à foz do Douro             --   | planned  | Music    | \x68747470733a2f2f66706a6b67706a6a64616d79646b706a657862782e73757061626173652e636f2f73746f726167652f76312f6f626a6563742f7075626c69632f736166696e6974792f4576656e742f6d757369632f6d656f2d6d617265732d76697661732e6a7067             | 2026-07-17 17:00:00        | 2026-07-19 02:00:00        | 0101000020E6100000AD69DE718A4E21C0B7627FD93D914440 | {"map": {"pins": [], "zoom": 16, "bounds": {"east": -8.6510, "west": -8.6550, "north": 41.1360, "south": 41.1330}, "stages": [], "currentLocation": {"lat": 41.1347, "lng": -8.6534}}}
+  9 |               1 | MEO Sudoeste           | Zambujeira do Mar                 | A maior semana de campismo e música eletrónica        | planned  | --Music    | \x68747470733a2f2f66706a6b67706a6a64616d79646b706a657862782e73757061626173652e636f2f73746f726167652f76312f6f626a6563742f7075626c69632f736166696e6974792f4576656e742f6d757369632f6d656f5f7375646f657374652e6a7067                   | 2026-08-05 16:00:00        | 2026-08-09 06:00:00        | 0101000020E6100000E10B93A9829121C012143FC6DCC54240 | {"map": {"pins": [], "zoom": 15, "bounds": {"east": -8.7810, "west": -8.7870, "north": 37.5480, "south": 37.5430}, "stages": [], "currentLocation": {"lat": 37.5458, "lng": -8.7842}}}
+ 11 |               1 | Super Bock Super Rock  | Herdade do Cabeço da Flauta, Meco | Música autêntica com o espírito icónico do Meco       | planned --Mor | Music    | \x68747470733a2f2f66706a6b67706a6a64616d79646b706a657862782e73757061626173652e636f2f73746f726167652f76312f6f626a6563742f7075626c69632f736166696e6974792f4576656e742f6d757369632f73757065722d626f636b2d73757065722d726f636b2e6a7067 | 2026-07-16 16:00:00        | 2026-07-19 03:00:00        | 0101000020E61000006688635DDC4622C0431CEBE236424340 | {"map": {"pins": [], "zoom": 16, "bounds": {"east": -9.1350, "west": -9.1410, "north": 38.5190, "south": 38.5150}, "stages": [], "currentLocation": {"lat": 38.5173, "lng": -9.1384}}}
+ 12 |               1 | Future Tech Expo       | Europarque, Santa Maria da Feira  | Descobre o amanhã da inteligência artificial          | active   | --Tech     | \x68747470733a2f2f66706a6b67706a6a64616d79646b706a657862782e73757061626173652e636f2f73746f726167652f76312f6f626a6563742f7075626c69632f736166696--More-- 

@@ -11,6 +11,7 @@ import users from '@/data/users.json';
 import allEvents from '@/data/events.json';
 import { userImages } from '../../../assets/images/Users/userImages';
 import { eventImages } from '../../../assets/images/Events';
+import { getEventImageSource } from '../../../utils/eventImages';
 
 const { width } = Dimensions.get('window');
 
@@ -181,7 +182,12 @@ export default function FriendProfileScreen() {
           }}
           renderItem={({ item }) => (
             <EventCard>
-              <EventImageOverlay source={eventImages[item.image]}>
+              <EventImageOverlay
+                source={
+                  eventImages[item.image] ??
+                  getEventImageSource(item.image, eventImages['banner-lista-eventos'])
+                }
+              >
                 <GradientOverlay />
                 <EventDate>{item.date}</EventDate>
                 <EventTitle>{item.title}</EventTitle>

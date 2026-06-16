@@ -7,15 +7,12 @@ import { Colors, Spacing, BorderRadius, TextStyles } from '../../../constants/th
 import Header from '../../../components/ui/header';
 import PrimaryButton from '../../../components/PrimaryButton';
 import { deleteUserTicket, getUserTickets, type UserTicket } from '../../../utils/tickets';
+import { getEventImageSource as resolveEventImageSource } from '../../../utils/eventImages';
 
 const fallbackTicketImage = require('../../../assets/images/bg-card-wallet.png');
 
 function getEventImageSource(ticket: UserTicket | null) {
-  if (ticket?.event?.image) {
-    return { uri: `data:image/jpeg;base64,${ticket.event.image}` };
-  }
-
-  return fallbackTicketImage;
+  return resolveEventImageSource(ticket?.event?.image, fallbackTicketImage);
 }
 
 function formatEventDate(start?: string | null, end?: string | null) {

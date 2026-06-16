@@ -10,10 +10,6 @@ import { LinkUserTicketDto } from './dto/link-user-ticket.dto';
 export class UserTicketsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  private toBase64Image(image: Uint8Array | null) {
-    return image ? Buffer.from(image).toString('base64') : null;
-  }
-
   private serializeTicket(ticket: {
     id: bigint;
     user_id: string;
@@ -27,7 +23,7 @@ export class UserTicketsService {
       description: string | null;
       status: string | null;
       category: string | null;
-      image: Uint8Array | null;
+      image: string | null;
       start_date: Date | null;
       end_date: Date | null;
     };
@@ -46,7 +42,7 @@ export class UserTicketsService {
             description: ticket.event.description,
             status: ticket.event.status,
             category: ticket.event.category,
-            image: this.toBase64Image(ticket.event.image),
+            image: ticket.event.image,
             start_date: ticket.event.start_date,
             end_date: ticket.event.end_date,
           }

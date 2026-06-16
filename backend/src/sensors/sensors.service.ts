@@ -93,17 +93,21 @@ export class SensorsService implements OnModuleInit, OnModuleDestroy {
       }>
     >(Prisma.sql`
       SELECT
-        id,
-        event_id,
-        sensor_type,
-        last_reading_value AS density,
-        last_reading_time,
-        ST_Y(location::geometry) AS lat,
-        ST_X(location::geometry) AS lng
+        sensor.id,
+        sensor.event_id,
+        sensor.sensor_type,
+        sensor.last_reading_value AS density,
+        sensor.last_reading_time,
+        ST_Y(sensor.location::geometry) AS lat,
+        ST_X(sensor.location::geometry) AS lng
       FROM sensor
-      WHERE event_id = ${eventId}
-        AND COALESCE(sensor_type, '') IN ('crowd_density', 'crowd_counter')
-      ORDER BY id ASC
+      JOIN event ON event.id = sensor.event_id
+      WHERE sensor.event_id = ${eventId}
+        AND COALESCE(sensor.sensor_type, '') IN ('crowd_density', 'crowd_counter')
+        AND lower(COALESCE(event.status, '')) = 'active'
+        AND event.start_date <= now()
+        AND (event.end_date IS NULL OR event.end_date >= now())
+      ORDER BY sensor.id ASC
     `);
 
     return this.serialize(sensors);
@@ -133,18 +137,23 @@ export class SensorsService implements OnModuleInit, OnModuleDestroy {
         sensor_type = ${sensorType},
         last_reading_value = ${density},
         last_reading_time = now()
-      WHERE id = ${sensorId}
+      FROM event
+      WHERE sensor.id = ${sensorId}
+        AND event.id = sensor.event_id
+        AND lower(COALESCE(event.status, '')) = 'active'
+        AND event.start_date <= now()
+        AND (event.end_date IS NULL OR event.end_date >= now())
       RETURNING
-        id,
-        event_id,
-        sensor_type,
-        last_reading_value AS density,
-        last_reading_time
+        sensor.id,
+        sensor.event_id,
+        sensor.sensor_type,
+        sensor.last_reading_value AS density,
+        sensor.last_reading_time
     `);
 
     if (!updatedSensor) {
       throw new BadRequestException(
-        `Sensor with ID ${sensorId.toString()} not found`,
+        `Sensor with ID ${sensorId.toString()} not found or event is not active`,
       );
     }
 
@@ -168,6 +177,14 @@ export class SensorsService implements OnModuleInit, OnModuleDestroy {
         ),
         last_reading_time = now()
       WHERE COALESCE(sensor_type, '') IN ('crowd_density', 'crowd_counter')
+        AND EXISTS (
+          SELECT 1
+          FROM event
+          WHERE event.id = sensor.event_id
+            AND lower(COALESCE(event.status, '')) = 'active'
+            AND event.start_date <= now()
+            AND (event.end_date IS NULL OR event.end_date >= now())
+        )
     `);
   }
 }

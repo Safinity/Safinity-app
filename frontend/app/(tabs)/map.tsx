@@ -13,6 +13,7 @@ import Svg, {
   Stop,
 } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
+import * as Location from 'expo-location';
 import { useLocalSearchParams, router, Stack } from 'expo-router';
 import { useAuth } from '@clerk/expo'; // Gancho nativo para controlo assíncrono do token
 
@@ -41,6 +42,11 @@ type MapPinItem = {
   image?: string | null;
 };
 
+type GeoPoint = {
+  lat: number;
+  lng: number;
+};
+
 type MapStageItem = {
   id: string | number;
   name: string;
@@ -57,7 +63,7 @@ type LoadedMapPayload = {
     center?: { lat: number; lng: number };
     zoom?: number;
     bounds?: { north: number; south: number; west: number; east: number };
-    currentLocation?: { lat: number; lng: number };
+    currentLocation?: GeoPoint;
     pins?: MapPinItem[];
     stages?: MapStageItem[];
   };
@@ -280,6 +286,7 @@ export default function MapScreen() {
   const [mapError, setMapError] = useState<string | null>(null);
   const [heatmapEnabled, setHeatmapEnabled] = useState(false);
   const [densitySensors, setDensitySensors] = useState<DensitySensor[]>([]);
+  const [realUserLocation, setRealUserLocation] = useState<GeoPoint | null>(null);
 
   useEffect(() => {
     getTokenRef.current = getToken;
@@ -289,11 +296,10 @@ export default function MapScreen() {
   const mapImageUrl = mapPayload?.event?.id
     ? `${API_BASE}/events/${mapPayload.event.id}/static-map?theme=dark&width=1024&height=1024`
     : undefined;
-  const universityCoords = mapSource?.center ?? mapData.universityCoords;
   const pins = useMemo(() => mapSource?.pins ?? [], [mapSource?.pins]);
   const stages = useMemo(() => mapSource?.stages ?? [], [mapSource?.stages]);
   const bounds = mapSource?.bounds ?? mapData.bounds;
-  const currentLocation = mapSource?.currentLocation ?? universityCoords;
+  const currentLocation = realUserLocation;
   const tags = ['Exits', 'Friends', 'Stages', 'Food', 'WC', 'Medical', 'Entrance', 'Points'];
   const { focusId } = useLocalSearchParams();
 
@@ -308,6 +314,19 @@ export default function MapScreen() {
     translateX.value = Math.min(0, Math.max(minX, translateX.value));
     translateY.value = Math.min(0, Math.max(minY, translateY.value));
   }, [scale, translateX, translateY]);
+
+  const getClampedMapTranslation = useCallback((targetX: number, targetY: number) => {
+    const scaledWidth = IMAGE_WIDTH * scale.value;
+    const scaledHeight = IMAGE_HEIGHT * scale.value;
+    const minX = Math.min(0, screenWidth - scaledWidth);
+    const minY = Math.min(0, screenHeight - scaledHeight);
+
+    return {
+      x: Math.min(0, Math.max(minX, targetX)),
+      y: Math.min(0, Math.max(minY, targetY)),
+    };
+  }, [scale]);
+
 
   // Monitorização de mutações de estado e re-renderizações locais
 
@@ -385,6 +404,94 @@ export default function MapScreen() {
       mounted = false;
     };
   }, [isLoaded, isSignedIn]); // Dispara novamente assim que as permissões do dispositivo mudarem de estado
+
+  useEffect(() => {
+    let mounted = true;
+    let subscription: Location.LocationSubscription | null = null;
+
+    const persistLocation = async (location: GeoPoint) => {
+      if (!isSignedIn) {
+        return;
+      }
+
+      try {
+        const token = await getTokenRef.current();
+
+        if (!token) {
+          return;
+        }
+
+        await api.patch('/users/me/location', location, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      } catch (error: any) {
+        console.error('[MAP_DEBUG] Erro ao guardar localização real:', {
+          message: error?.message,
+          status: error?.response?.status,
+        });
+      }
+    };
+
+    const loadRealLocation = async () => {
+      if (!isLoaded || !isSignedIn) {
+        setRealUserLocation(null);
+        return;
+      }
+
+      const permission = await Location.requestForegroundPermissionsAsync();
+
+      if (permission.status !== Location.PermissionStatus.GRANTED) {
+        if (mounted) {
+          setRealUserLocation(null);
+        }
+        return;
+      }
+
+      const initialPosition = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+      const initialLocation = {
+        lat: initialPosition.coords.latitude,
+        lng: initialPosition.coords.longitude,
+      };
+
+      if (mounted) {
+        setRealUserLocation(initialLocation);
+      }
+      persistLocation(initialLocation);
+
+      subscription = await Location.watchPositionAsync(
+        {
+          accuracy: Location.Accuracy.Balanced,
+          timeInterval: 10_000,
+          distanceInterval: 5,
+        },
+        position => {
+          const nextLocation = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+
+          if (mounted) {
+            setRealUserLocation(nextLocation);
+          }
+          persistLocation(nextLocation);
+        },
+      );
+    };
+
+    loadRealLocation().catch((error: any) => {
+      console.error('[MAP_DEBUG] Erro ao obter localização real:', error?.message);
+      if (mounted) {
+        setRealUserLocation(null);
+      }
+    });
+
+    return () => {
+      mounted = false;
+      subscription?.remove();
+    };
+  }, [isLoaded, isSignedIn]);
 
   useEffect(() => {
     let mounted = true;
@@ -475,11 +582,20 @@ export default function MapScreen() {
         py: pos.y,
       });
 
-      // Centralização interpolada do viewport do utilizador baseado no ponto alvo
-      translateX.value = withTiming(screenWidth / 2 - pos.x * scale.value);
-      translateY.value = withTiming(screenHeight / 2 - pos.y * scale.value);
+      const targetTranslation = getClampedMapTranslation(
+        screenWidth / 2 - pos.x * scale.value,
+        screenHeight / 2 - pos.y * scale.value,
+      );
+
+      translateX.value = withTiming(targetTranslation.x);
+      translateY.value = withTiming(targetTranslation.y);
 
       if (showRoute) {
+        if (!currentLocation) {
+          setSelectedPin(null);
+          return;
+        }
+
         const start = latLngToPixelFromBounds(
           currentLocation.lat,
           currentLocation.lng,
@@ -493,7 +609,7 @@ export default function MapScreen() {
         setSelectedPin(null);
       }
     },
-    [bounds, currentLocation.lat, currentLocation.lng, scale, translateX, translateY],
+    [bounds, currentLocation, getClampedMapTranslation, scale, translateX, translateY],
   );
 
   const handleCancelRoute = () => {
@@ -670,12 +786,14 @@ export default function MapScreen() {
             />
           )}
 
-          <UserMarker
-            location={currentLocation}
-            bounds={bounds}
-            width={IMAGE_WIDTH}
-            height={IMAGE_HEIGHT}
-          />
+          {currentLocation && (
+            <UserMarker
+              location={currentLocation}
+              bounds={bounds}
+              width={IMAGE_WIDTH}
+              height={IMAGE_HEIGHT}
+            />
+          )}
         </Animated.View>
       </GestureDetector>
 

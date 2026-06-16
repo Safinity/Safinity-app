@@ -221,7 +221,7 @@ export default function MapScreen() {
 
         console.log('[MAP_DEBUG] Extraindo token JWT do storage interno do Clerk...');
         const token = await getToken();
-        
+
         if (!token) {
           throw new Error('Could not retrieve a valid session token from Clerk.');
         }
@@ -236,7 +236,7 @@ export default function MapScreen() {
         console.log('[MAP_DEBUG] Disparando HTTP GET -> /events/present-event');
         const presentEventResponse = await api.get('/events/present-event', requestConfig);
         const presentEvent = presentEventResponse.data;
-        
+
         console.log('[MAP_DEBUG] Resposta de present-event processada:', presentEvent);
 
         if (!presentEvent?.id) {
@@ -257,7 +257,7 @@ export default function MapScreen() {
           '[MAP_DEBUG] Payload do mapa obtido. Chaves encontradas:',
           Object.keys(mapResponse.data || {}),
         );
-        
+
         if (mapResponse.data?.map) {
           console.log('[MAP_DEBUG] Auditoria estrutural dos dados gráficos extraídos:', {
             center: mapResponse.data.map.center,
@@ -324,10 +324,13 @@ export default function MapScreen() {
       });
 
       if (pin.lat === undefined || pin.lng === undefined || !bounds) {
-        console.error('[MAP_DEBUG] Erro de projeção espacial: Atributos lat/lng ausentes nos bounds.', {
-          pin,
-          bounds,
-        });
+        console.error(
+          '[MAP_DEBUG] Erro de projeção espacial: Atributos lat/lng ausentes nos bounds.',
+          {
+            pin,
+            bounds,
+          },
+        );
         return;
       }
 

@@ -42,7 +42,6 @@ export default function Login() {
 
   // Monitora o estado global de autenticação do app
   useEffect(() => {
-    
     if (!isLoaded || !isSignedIn || isSyncingProfileRef.current) {
       return;
     }
@@ -54,7 +53,7 @@ export default function Login() {
         isSyncingProfileRef.current = true;
         setIsCompletingLogin(true);
         setError('');
-        
+
         await syncProfileWithBackend();
 
         if (isActive) {
@@ -103,7 +102,6 @@ export default function Login() {
   }
 
   async function activateSessionIfAvailable(signInAttempt: any) {
-
     const createdSessionId = signInAttempt?.createdSessionId || signIn?.createdSessionId;
 
     if (!createdSessionId) {
@@ -117,10 +115,10 @@ export default function Login() {
     }
 
     setIsCompletingLogin(true);
-    
+
     try {
       await clerk.setActive({ session: createdSessionId });
-      
+
       router.replace('/(tabs)');
       return true;
     } catch (syncError: any) {
@@ -295,9 +293,7 @@ export default function Login() {
       }
 
       setError(
-        err.errors?.[0]?.message ||
-          err.message ||
-          'Unable to sync your account. Please try again.',
+        err.errors?.[0]?.message || err.message || 'Unable to sync your account. Please try again.',
       );
     }
   }
@@ -327,9 +323,7 @@ export default function Login() {
       );
     } catch (err: any) {
       setError(
-        err.errors?.[0]?.message ||
-          err.message ||
-          'Unable to sync your account. Please try again.',
+        err.errors?.[0]?.message || err.message || 'Unable to sync your account. Please try again.',
       );
     }
   }

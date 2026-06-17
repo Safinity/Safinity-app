@@ -8,6 +8,7 @@ import styled, { ThemeProvider } from 'styled-components/native';
 import { theme } from '../constants/theme';
 import { NotificationsProvider } from '@/context/NotificationsContext';
 import { UserProvider } from '@/context/UserContext';
+import { ActivityFavouritesProvider } from '@/context/ActivityFavouritesContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { NavigationHistoryTracker } from '@/components/NavigationHistoryTracker';
 
@@ -48,6 +49,7 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
         <UserProvider>
+          <ActivityFavouritesProvider>
           <NotificationsProvider>
             <ThemeProvider theme={theme}>
               <Container>
@@ -62,6 +64,7 @@ export default function RootLayout() {
               </Container>
               <StatusBar style="light" />
             </ThemeProvider>
+          </ActivityFavouritesProvider>
           </NotificationsProvider>
         </UserProvider>
       </ClerkProvider>

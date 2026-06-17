@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { ScrollView, StatusBar, View, Modal, Text } from 'react-native';
-import { useLocalSearchParams, useRouter, useNavigation, Stack } from 'expo-router';
+import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import Head from 'expo-router/head';
 import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -12,10 +12,63 @@ import { HeroBanner } from '../../components/HeroBanner';
 import usersData from '../../data/users.json';
 import { userImages } from '../../assets/images/Users/userImages';
 
+function formatEventDateRange(start?: string | null, end?: string | null) {
+  if (!start) return 'Date TBD';
+
+  const startDate = new Date(start);
+  const endDate = end ? new Date(end) : null;
+
+  if (Number.isNaN(startDate.getTime())) return 'Date TBD';
+
+  const dateFormatter = new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+
+  if (!endDate || Number.isNaN(endDate.getTime())) {
+    return dateFormatter.format(startDate);
+  }
+
+  const isSameDay = startDate.toDateString() === endDate.toDateString();
+  if (isSameDay) {
+    return dateFormatter.format(startDate);
+  }
+
+  return `${dateFormatter.format(startDate)} - ${dateFormatter.format(endDate)}`;
+}
+
+function formatEventTimeRange(start?: string | null, end?: string | null) {
+  if (!start) return 'Time TBD';
+
+  const startDate = new Date(start);
+  const endDate = end ? new Date(end) : null;
+
+  if (Number.isNaN(startDate.getTime())) return 'Time TBD';
+
+  const timeFormatter = new Intl.DateTimeFormat('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
+  if (!endDate || Number.isNaN(endDate.getTime())) {
+    return timeFormatter.format(startDate);
+  }
+
+  return `${timeFormatter.format(startDate)} - ${timeFormatter.format(endDate)}`;
+}
+
+function normalizeEvent(event: any) {
+  return {
+    ...event,
+    displayDate: formatEventDateRange(event.start_date, event.end_date),
+    displayTime: formatEventTimeRange(event.start_date, event.end_date),
+  };
+}
+
 export default function EventDetailsScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
-  const navigation = useNavigation();
 
   const [modalVisible, setModalVisible] = useState(false);
   const [event, setEvent] = useState<any>(null);
@@ -32,7 +85,7 @@ export default function EventDetailsScreen() {
     async function loadEvent() {
       try {
         const response = await api.get(`/events/${id}`);
-        setEvent(response.data);
+        setEvent(normalizeEvent(response.data));
       } catch (error) {
         console.log('Erro ao carregar evento:', error);
       } finally {
@@ -127,7 +180,7 @@ export default function EventDetailsScreen() {
 
       {/* Conteúdo */}
       <ScrollView bounces={false} showsVerticalScrollIndicator={false} role="main">
-        <HeroBanner event={event} isDetail />
+        <HeroBanner event={event} isDetail detailType="event" />
         <Header variant="pageDetails" />
 
         <ContentCard>

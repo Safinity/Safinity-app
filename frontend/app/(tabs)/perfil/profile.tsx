@@ -1,20 +1,55 @@
-import { FlatList, ScrollView, Pressable, View } from 'react-native';
+import {
+  ActivityIndicator,
+  FlatList,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  View,
+} from 'react-native';
+import * as SecureStore from 'expo-secure-store';
 import { Stack, router } from 'expo-router';
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components/native';
-//import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useClerk } from '@clerk/expo';
+import { useAuth, useClerk } from '@clerk/expo';
 
-import { userImages } from '../../../assets/images/Users/userImages';
 import { EventCard } from '../../../components/EventCard';
 import { Fonts } from '../../../constants/theme';
-import eventsData from '../../../data/events.json';
-import users from '../../../data/users.json';
 
 import EditIcon from '../../../assets/Icons/edit.png';
 import Header from '../../../components/ui/header'; // import do header customizado
-import { useUser } from '../../../context/UserContext';
+import { deleteMyAccount, getMyProfile, type AuthenticatedProfile } from '../../../utils/profile';
+
+function getProfileImageSource(user: AuthenticatedProfile | null) {
+  if (user?.image) {
+    return { uri: `data:image/jpeg;base64,${user.image}` };
+  }
+
+  return null;
+}
+
+function withTimeout<T>(promise: Promise<T>, timeoutMs = 12000) {
+  return Promise.race<T>([
+    promise,
+    new Promise<T>((_, reject) => {
+      setTimeout(() => reject(new Error('Profile request timed out')), timeoutMs);
+    }),
+  ]);
+}
+
+async function clearCachedAuthToken() {
+  if (Platform.OS === 'web') {
+    return;
+  }
+
+  try {
+    await SecureStore.deleteItemAsync('clerk-token');
+  } catch {
+    // Best effort cleanup; Clerk signOut is still the source of truth.
+  }
+}
 
 const Container = styled(ScrollView).attrs({
   showsVerticalScrollIndicator: false,
@@ -55,6 +90,13 @@ const AvatarCircle = styled.View`
 const Avatar = styled.Image`
   width: 100%;
   height: 100%;
+`;
+
+const DefaultAvatarIcon = styled(Ionicons).attrs({
+  name: 'person',
+  size: 72,
+})`
+  color: ${({ theme }) => theme.colors.palette.neutral.neutral80};
 `;
 
 const EditButtonContainer = styled.TouchableOpacity`
@@ -162,7 +204,7 @@ const LogoutButton = styled.TouchableOpacity`
   border-radius: ${({ theme }) => theme.borderRadius.large}px;
   padding: 12px 20px;
   margin-top: 24px;
-  margin-bottom: ${({ theme }) => theme.spacing.xxl}px;
+  margin-bottom: ${({ theme }) => theme.spacing.md}px;
   align-self: center;
 `;
 
@@ -172,27 +214,284 @@ const LogoutText = styled.Text`
   font-size: 16px;
 `;
 
+const DeleteAccountButton = styled.TouchableOpacity`
+  border-width: 1px;
+  background-color: ${({ theme }) => theme.colors.palette.primary.light80};
+  border-radius: ${({ theme }) => theme.borderRadius.large}px;
+  padding: 12px 20px;
+  margin-bottom: ${({ theme }) => theme.spacing.xxl}px;
+  align-self: center;
+`;
+
+const DeleteAccountText = styled.Text`
+  color: ${({ theme }) => theme.colors.primary};
+  font-family: ${Fonts.weights.medium};
+  font-size: 16px;
+`;
+
+const ModalOverlay = styled.View`
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  background-color: rgba(0, 0, 0, 0.7);
+`;
+
+const ModalContent = styled.View`
+  width: 100%;
+  max-width: 360px;
+  background-color: ${({ theme }) => theme.colors.grayNavbar};
+  border-radius: ${({ theme }) => theme.borderRadius.large}px;
+  padding: ${({ theme }) => theme.spacing.xl}px;
+`;
+
+const ModalTitle = styled.Text`
+  color: ${({ theme }) => theme.colors.white};
+  font-family: ${({ theme }) => theme.text.titulo.h3.fontFamily};
+  font-size: ${({ theme }) => theme.text.titulo.h3.fontSize}px;
+  margin-bottom: ${({ theme }) => theme.spacing.sm}px;
+`;
+
+const ModalDescription = styled.Text`
+  color: ${({ theme }) => theme.colors.inactive};
+  font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
+  font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
+  line-height: ${({ theme }) => theme.text.corpo.corpoTexto.lineHeight}px;
+`;
+
+const ModalError = styled.Text`
+  color: #fca5a5;
+  font-family: ${({ theme }) => theme.text.textoPequeno.fontFamily};
+  font-size: ${({ theme }) => theme.text.textoPequeno.fontSize}px;
+  margin-top: ${({ theme }) => theme.spacing.md}px;
+`;
+
+const ModalActions = styled.View`
+  flex-direction: row;
+  justify-content: flex-end;
+  gap: ${({ theme }) => theme.spacing.sm}px;
+  margin-top: ${({ theme }) => theme.spacing.xl}px;
+`;
+
+const ModalButton = styled.TouchableOpacity<{ variant?: 'danger' | 'secondary' }>`
+  min-width: 96px;
+  align-items: center;
+  justify-content: center;
+  background-color: ${({ theme, variant }) =>
+    variant === 'danger' ? '#ef4444' : theme.colors.background};
+  border-radius: ${({ theme }) => theme.borderRadius.medium}px;
+  padding: ${({ theme }) => theme.spacing.sm}px ${({ theme }) => theme.spacing.md}px;
+  opacity: ${({ disabled }) => (disabled ? 0.6 : 1)};
+`;
+
+const ModalButtonText = styled.Text<{ variant?: 'danger' | 'secondary' }>`
+  color: ${({ theme, variant }) =>
+    variant === 'danger' ? theme.colors.white : theme.colors.white};
+  font-family: ${Fonts.weights.medium};
+  font-size: 14px;
+`;
+
+const LoadingState = styled.View`
+  flex: 1;
+  min-height: 400px;
+  align-items: center;
+  justify-content: center;
+`;
+
+const LoadingText = styled.Text`
+  color: ${({ theme }) => theme.colors.white};
+  font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
+  font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
+  margin-top: ${({ theme }) => theme.spacing.sm}px;
+`;
+
+const EmptyText = styled.Text`
+  color: ${({ theme }) => theme.colors.inactive};
+  font-family: ${({ theme }) => theme.text.textoPequeno.fontFamily};
+  font-size: ${({ theme }) => theme.text.textoPequeno.fontSize}px;
+  padding-left: ${({ theme }) => theme.spacing.margemLateral}px;
+`;
+
 export default function Profile() {
-  const { currentUser: user } = useUser();
+  const { isLoaded, isSignedIn, getToken } = useAuth();
   const { signOut } = useClerk();
+  const [user, setUser] = useState<AuthenticatedProfile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [deleteAccountError, setDeleteAccountError] = useState('');
+  const [error, setError] = useState('');
+  const getTokenRef = useRef(getToken);
+  getTokenRef.current = getToken;
 
-  const imageSource = user?.image
-    ? userImages[user.image] || userImages.default
-    : userImages.default;
+  useEffect(() => {
+    if (isLoaded) {
+      return;
+    }
 
-  if (!user || !imageSource) return null;
+    setIsLoading(true);
 
-  const userPastEvents = eventsData.events.filter(event =>
-    (user.pastEvents ?? []).includes(event.id),
-  );
+    const timeoutId = setTimeout(() => {
+      setError('Authentication is taking too long.');
+      setIsLoading(false);
+    }, 12000);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [isLoaded]);
+
+  useEffect(() => {
+    let isActive = true;
+
+    async function loadProfile() {
+      if (!isLoaded) {
+        return;
+      }
+
+      if (!isSignedIn) {
+        setUser(null);
+        setError('Please sign in to view your profile.');
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        setError('');
+        const token = await withTimeout(getTokenRef.current());
+        const profile = await withTimeout(getMyProfile(token));
+
+        if (isActive) {
+          setUser(profile);
+        }
+      } catch (profileError) {
+        console.error('Failed to load profile', profileError);
+        if (isActive) {
+          setUser(null);
+          setError('Unable to load profile.');
+        }
+      } finally {
+        if (isActive) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadProfile();
+
+    return () => {
+      isActive = false;
+    };
+  }, [isLoaded, isSignedIn]);
+
+  const imageSource = getProfileImageSource(user);
+  const userPastEvents = user?.user_tickets?.map(ticket => ticket.event).filter(Boolean) ?? [];
 
   const handleLogout = async () => {
     await signOut();
+    await clearCachedAuthToken();
+    setUser(null);
     router.replace('/landing');
   };
 
+  const handleDeleteAccount = async () => {
+    try {
+      setIsDeletingAccount(true);
+      setDeleteAccountError('');
+      const token = await withTimeout(getTokenRef.current());
+      await withTimeout(deleteMyAccount(token));
+      await signOut();
+      await clearCachedAuthToken();
+      setUser(null);
+      router.replace('/landing');
+    } catch (deleteError) {
+      console.error('Failed to delete account', deleteError);
+      setDeleteAccountError('Unable to delete account. Please try again.');
+    } finally {
+      setIsDeletingAccount(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <Container>
+        <Header
+          variant="back"
+          title="Profile"
+          rightIcon="wallet"
+          onRightPress={() => router.push('/perfil/wallet')}
+        />
+        <LoadingState>
+          <ActivityIndicator color="white" />
+          <LoadingText>Loading...</LoadingText>
+        </LoadingState>
+      </Container>
+    );
+  }
+
+  if (error || !user) {
+    return (
+      <Container>
+        <Header
+          variant="back"
+          title="Profile"
+          rightIcon="wallet"
+          onRightPress={() => router.push('/perfil/wallet')}
+        />
+        <LoadingState>
+          <LoadingText>{error || 'Unable to load profile.'}</LoadingText>
+        </LoadingState>
+      </Container>
+    );
+  }
+
   return (
     <Container>
+      <Stack.Screen options={{ title: 'Profile' }} />
+      <Modal
+        animationType="fade"
+        transparent
+        visible={isDeleteModalVisible}
+        onRequestClose={() => {
+          if (!isDeletingAccount) {
+            setIsDeleteModalVisible(false);
+          }
+        }}
+      >
+        <ModalOverlay>
+          <ModalContent role="alert" accessibilityLabel="Delete account confirmation">
+            <ModalTitle>Delete account?</ModalTitle>
+            <ModalDescription>
+              This will permanently delete your Safinity account, friends, tickets and saved data.
+            </ModalDescription>
+            {deleteAccountError ? <ModalError>{deleteAccountError}</ModalError> : null}
+            <ModalActions>
+              <ModalButton
+                variant="secondary"
+                disabled={isDeletingAccount}
+                onPress={() => setIsDeleteModalVisible(false)}
+                accessibilityRole="button"
+                accessibilityLabel="Cancel account deletion"
+              >
+                <ModalButtonText variant="secondary">Cancel</ModalButtonText>
+              </ModalButton>
+              <ModalButton
+                variant="danger"
+                disabled={isDeletingAccount}
+                onPress={handleDeleteAccount}
+                accessibilityRole="button"
+                accessibilityLabel="Confirm account deletion"
+              >
+                <ModalButtonText variant="danger">
+                  {isDeletingAccount ? 'Deleting...' : 'Delete'}
+                </ModalButtonText>
+              </ModalButton>
+            </ModalActions>
+          </ModalContent>
+        </ModalOverlay>
+      </Modal>
+
       {/* Header Customizado */}
       <Header
         variant="back"
@@ -211,7 +510,11 @@ export default function Profile() {
       <PaddedContent style={{ marginTop: 120 }}>
         <AvatarContainer>
           <AvatarCircle>
-            <Avatar source={imageSource} accessibilityLabel={`Profile picture of ${user.name}`} />
+            {imageSource ? (
+              <Avatar source={imageSource} accessibilityLabel={`Profile picture of ${user.name}`} />
+            ) : (
+              <DefaultAvatarIcon accessibilityLabel="Default profile picture" />
+            )}
           </AvatarCircle>
           <EditButtonContainer
             onPress={() => router.push('/perfil/edit-profile')}
@@ -224,8 +527,8 @@ export default function Profile() {
           </EditButtonContainer>
         </AvatarContainer>
 
-        <Name>{user.name}</Name>
-        <Username>@{user.username}</Username>
+        <Name>{user.name || user.email || 'Safinity user'}</Name>
+        <Username>@{user.username || 'user'}</Username>
 
         <LinkButton role="button" accessibilityLabel="Link my ticket">
           <LinkButtonText>Link my ticket</LinkButtonText>
@@ -254,6 +557,7 @@ export default function Profile() {
         keyExtractor={item => item.id}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingLeft: 40, paddingRight: 40 }}
+        ListEmptyComponent={<EmptyText>No past events yet</EmptyText>}
         role="list"
         accessibilityLabel="Past events"
       />
@@ -294,6 +598,16 @@ export default function Profile() {
         <LogoutButton onPress={handleLogout} role="button" accessibilityLabel="Log out of the app">
           <LogoutText>Log out</LogoutText>
         </LogoutButton>
+        <DeleteAccountButton
+          onPress={() => {
+            setDeleteAccountError('');
+            setIsDeleteModalVisible(true);
+          }}
+          role="button"
+          accessibilityLabel="Delete account"
+        >
+          <DeleteAccountText>Delete account</DeleteAccountText>
+        </DeleteAccountButton>
       </PaddedContent>
     </Container>
   );

@@ -1,19 +1,69 @@
-import React, { useState } from 'react';
+import { useAuth, useUser as useClerkUser } from '@clerk/expo';
+import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components/native';
-import { ScrollView, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { Stack } from 'expo-router';
 import Header from '../../../components/ui/header';
 import { Colors, Spacing, Fonts } from '../../../constants/theme';
 import InputField from '../../../components/InputField';
+import { getMyProfile } from '../../../utils/profile';
 
 const SecurityScreen = () => {
-  const [email, setEmail] = useState('user@example.com');
+  const { isLoaded, isSignedIn, getToken } = useAuth();
+  const { user: clerkUser } = useClerkUser();
+  const [email, setEmail] = useState('');
+  const [isLoadingEmail, setIsLoadingEmail] = useState(true);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [repeatPassword, setRepeatPassword] = useState('');
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showRepeatPassword, setShowRepeatPassword] = useState(false);
+  const getTokenRef = useRef(getToken);
+  getTokenRef.current = getToken;
+
+  useEffect(() => {
+    let isActive = true;
+
+    async function loadEmail() {
+      if (!isLoaded) {
+        return;
+      }
+
+      const clerkEmail = clerkUser?.primaryEmailAddress?.emailAddress ?? '';
+
+      if (!isSignedIn) {
+        setEmail('');
+        setIsLoadingEmail(false);
+        return;
+      }
+
+      try {
+        setIsLoadingEmail(true);
+        const token = await getTokenRef.current();
+        const profile = await getMyProfile(token);
+
+        if (isActive) {
+          setEmail(profile.email || clerkEmail);
+        }
+      } catch (error) {
+        console.error('Failed to load security email', error);
+        if (isActive) {
+          setEmail(clerkEmail);
+        }
+      } finally {
+        if (isActive) {
+          setIsLoadingEmail(false);
+        }
+      }
+    }
+
+    loadEmail();
+
+    return () => {
+      isActive = false;
+    };
+  }, [clerkUser?.primaryEmailAddress?.emailAddress, isLoaded, isSignedIn]);
 
   return (
     <Container>
@@ -32,12 +82,12 @@ const SecurityScreen = () => {
             <Section>
               <InputField
                 label="Email Address"
-                value={email}
-                onChangeText={setEmail}
+                value={isLoadingEmail ? 'Loading...' : email}
+                editable={false}
                 placeholder="Enter your email"
                 keyboardType="email-address"
                 icon="mail-outline"
-                accessibilityHint="Enter the email address associated with your account"
+                accessibilityHint="Email address associated with your account"
               />
             </Section>
 
@@ -114,14 +164,6 @@ const SectionTitle = styled.Text`
   margin-bottom: ${Spacing.md}px;
 `;
 
-const SectionDescription = styled.Text`
-  color: ${Colors.inactive};
-  font-family: ${Fonts.weights.light};
-  font-size: 14px;
-  line-height: 18px;
-  margin-bottom: ${Spacing.md}px;
-`;
-
 const SaveButton = styled.TouchableOpacity`
   background-color: ${Colors.palette.primary.normal};
   border-radius: ${Spacing.md}px;
@@ -134,26 +176,4 @@ const SaveButtonText = styled.Text`
   color: ${Colors.white};
   font-family: ${Fonts.weights.semibold};
   font-size: 16px;
-`;
-
-const PasswordRequirements = styled.View`
-  background-color: rgba(255, 255, 255, 0.05);
-  border-radius: ${Spacing.sm}px;
-  padding: ${Spacing.md}px;
-  margin-bottom: ${Spacing.md}px;
-`;
-
-const RequirementTitle = styled.Text`
-  color: ${Colors.white};
-  font-family: ${Fonts.weights.medium};
-  font-size: 14px;
-  margin-bottom: ${Spacing.sm}px;
-`;
-
-const Requirement = styled.Text<{ fulfilled: boolean }>`
-  color: ${({ fulfilled }) => (fulfilled ? Colors.palette.primary.light50 : Colors.inactive)};
-  font-family: ${Fonts.weights.light};
-  font-size: 12px;
-  margin-left: ${Spacing.sm}px;
-  margin-bottom: ${Spacing.xs}px;
 `;

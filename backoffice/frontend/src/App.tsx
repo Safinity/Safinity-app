@@ -13,6 +13,7 @@ import Loading from './pages/Loading';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import AccessibilityDeclaration from './pages/AccessibilityDeclaration';
 import { Layout } from './layout/Layout';
 import { theme } from './theme/theme';
 
@@ -85,6 +86,14 @@ export default function App() {
             element={
               <Layout title="Manage Events | Safinity">
                 <ManageEventMap />
+              </Layout>
+            }
+          />
+          <Route
+            path="/accessibility-declaration"
+            element={
+              <Layout title="Accessibility Declaration | Safinity">
+                <AccessibilityDeclaration />
               </Layout>
             }
           />

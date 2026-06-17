@@ -74,8 +74,8 @@ export class OptionalAuthGuard implements CanActivate {
         return true;
       }
 
-      console.error('Clerk token verification failed:', error);
-      throw new UnauthorizedException('Invalid or expired token');
+      console.warn('Clerk token verification failed:', error);
+      return true;
     }
   }
 }

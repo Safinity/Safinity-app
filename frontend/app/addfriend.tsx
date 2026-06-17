@@ -1,44 +1,152 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components/native';
 import { useRouter, Stack } from 'expo-router';
-import { useUser } from '@/context/UserContext';
 import { userImages } from '../assets/images/Users/userImages';
-import users from '@/data/users.json';
 import SearchBarQR from '@/components/SearchBarQR';
 import FriendActionButton from '@/components/FriendActionButton';
-import { TouchableOpacity } from 'react-native';
+import { ActivityIndicator, Alert, TouchableOpacity } from 'react-native';
 import Head from 'expo-router/head';
 import Header from '@/components/ui/header';
+import { useAuth } from '@clerk/expo';
+import { getFriends, searchUsers, toggleFriendship, type FriendSearchItem } from '@/utils/friends';
+import { Ionicons } from '@expo/vector-icons';
+
+function getAvatarSource(user: FriendSearchItem) {
+  if (user.image) {
+    return { uri: `data:image/jpeg;base64,${user.image}` };
+  }
+
+  return userImages.default;
+}
 
 export default function AddFriendScreen() {
-  const { currentUser, addFriend, removeFriend } = useUser();
+  const { isLoaded, isSignedIn, getToken } = useAuth();
   const [search, setSearch] = useState('');
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [results, setResults] = useState<FriendSearchItem[]>([]);
+  const [friendIds, setFriendIds] = useState<string[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [isLoadingFriends, setIsLoadingFriends] = useState(true);
+  const [togglingUserId, setTogglingUserId] = useState<string | null>(null);
+  const [searchError, setSearchError] = useState('');
   const router = useRouter();
+  const trimmedSearch = search.trim();
+  const getTokenRef = useRef(getToken);
+  getTokenRef.current = getToken;
 
-  if (!currentUser) return null;
+  useEffect(() => {
+    let isActive = true;
+
+    async function loadFriends() {
+      if (!isLoaded) return;
+
+      if (!isSignedIn) {
+        setFriendIds([]);
+        setIsLoadingFriends(false);
+        return;
+      }
+
+      try {
+        setIsLoadingFriends(true);
+        const token = await getTokenRef.current();
+        const friends = await getFriends(token);
+        const ids = [...friends.onSameEvent, ...friends.otherFriends].map(friend => friend.id);
+
+        if (isActive) {
+          setFriendIds(ids);
+        }
+      } catch (error) {
+        console.error('Failed to load friends for search', error);
+      } finally {
+        if (isActive) {
+          setIsLoadingFriends(false);
+        }
+      }
+    }
+
+    loadFriends();
+
+    return () => {
+      isActive = false;
+    };
+  }, [isLoaded, isSignedIn]);
+
+  useEffect(() => {
+    let isActive = true;
+
+    if (!isLoaded || !isSignedIn || trimmedSearch.length === 0) {
+      setResults([]);
+      setIsSearching(false);
+      setSearchError('');
+      return () => {
+        isActive = false;
+      };
+    }
+
+    setIsSearching(true);
+    setSearchError('');
+
+    const timeoutId = setTimeout(async () => {
+      try {
+        const token = await getTokenRef.current();
+        const users = await searchUsers(token, trimmedSearch);
+
+        if (isActive) {
+          setResults(users);
+          setSearchError('');
+        }
+      } catch (error) {
+        console.error('Failed to search users', error);
+        if (isActive) {
+          setResults([]);
+          setSearchError('Unable to search users.');
+        }
+      } finally {
+        if (isActive) {
+          setIsSearching(false);
+        }
+      }
+    }, 300);
+
+    return () => {
+      isActive = false;
+      clearTimeout(timeoutId);
+    };
+  }, [isLoaded, isSignedIn, trimmedSearch]);
+
+  const friendIdSet = useMemo(() => new Set(friendIds), [friendIds]);
 
   const handleSubmitSearch = () => {
-    if (search.trim().length > 0) {
+    if (trimmedSearch.length > 0) {
       setRecentSearches(prev => {
-        const updated = [search, ...prev.filter(item => item !== search)];
+        const updated = [trimmedSearch, ...prev.filter(item => item !== trimmedSearch)];
         return updated.slice(0, 5);
       });
     }
   };
 
-  const filteredUsers =
-    search.length === 0
-      ? []
-      : users.filter(u => {
-          const text = search.toLowerCase();
-          return (
-            u.id !== currentUser.id &&
-            (u.name.toLowerCase().includes(text) || u.username.toLowerCase().includes(text))
-          );
-        });
+  const isFriend = (id: string) => friendIdSet.has(id);
 
-  const isFriend = (id: string) => currentUser.friends.includes(id);
+  const removeRecentSearch = (item: string) => {
+    setRecentSearches(prev => prev.filter(searchItem => searchItem !== item));
+  };
+
+  const handleToggleFriend = async (user: FriendSearchItem) => {
+    try {
+      setTogglingUserId(user.id);
+      const token = await getTokenRef.current();
+      await toggleFriendship(token, user.id);
+
+      setFriendIds(prev =>
+        prev.includes(user.id) ? prev.filter(friendId => friendId !== user.id) : [...prev, user.id],
+      );
+    } catch (error) {
+      console.error('Failed to toggle friendship', error);
+      Alert.alert('Unable to update friend', 'Please try again.');
+    } finally {
+      setTogglingUserId(null);
+    }
+  };
 
   return (
     <Container>
@@ -67,7 +175,13 @@ export default function AddFriendScreen() {
           accessibilityLabel="Search friends by name or username"
         />
 
-        {search.length === 0 ? (
+        {!isLoaded || isLoadingFriends ? (
+          <LoadingArea>
+            <ActivityIndicator color="white" />
+          </LoadingArea>
+        ) : null}
+
+        {trimmedSearch.length === 0 ? (
           <>
             <Subtitle role="header" accessibilityLevel={2}>
               Recent searches
@@ -84,6 +198,16 @@ export default function AddFriendScreen() {
                   accessibilityLabel={`Search again for ${item}`}
                 >
                   <RecentText>{item}</RecentText>
+                  <RemoveRecentButton
+                    onPress={event => {
+                      event.stopPropagation();
+                      removeRecentSearch(item);
+                    }}
+                    role="button"
+                    accessibilityLabel={`Remove recent search ${item}`}
+                  >
+                    <Ionicons name="close" size={22} color="white" />
+                  </RemoveRecentButton>
                 </RecentItem>
               ))
             )}
@@ -94,7 +218,17 @@ export default function AddFriendScreen() {
               Results
             </Subtitle>
 
-            {filteredUsers.map(user => (
+            {isSearching ? (
+              <LoadingArea>
+                <ActivityIndicator color="white" />
+              </LoadingArea>
+            ) : null}
+
+            {!isSearching && results.length === 0 ? (
+              <EmptyText>{searchError || 'No users found'}</EmptyText>
+            ) : null}
+
+            {results.map(user => (
               <TouchableOpacity
                 key={user.id}
                 onPress={() => router.push(`/friends/${user.id}`)}
@@ -109,21 +243,22 @@ export default function AddFriendScreen() {
                 }}
               >
                 <Avatar
-                  source={userImages[user.image]}
+                  source={getAvatarSource(user)}
                   role="image"
                   accessibilityLabel={`Profile picture of ${user.name}`}
                 />
 
                 <Info>
-                  <Name>{user.name}</Name>
+                  <Name>{user.name || 'Safinity user'}</Name>
 
-                  <Username>@{user.username}</Username>
+                  <Username>@{user.username || 'user'}</Username>
                 </Info>
 
                 {isFriend(user.id) ? (
                   <FriendActionButton
                     variant="remove"
-                    onPress={() => removeFriend(user.id)}
+                    onPress={() => handleToggleFriend(user)}
+                    disabled={togglingUserId === user.id}
                     role="button"
                     accessibilityLabel={`Remove ${user.name} from friends`}
                     accessibilityHint="Removes this user from your friend list"
@@ -131,7 +266,8 @@ export default function AddFriendScreen() {
                 ) : (
                   <FriendActionButton
                     variant="add"
-                    onPress={() => addFriend(user.id)}
+                    onPress={() => handleToggleFriend(user)}
+                    disabled={togglingUserId === user.id}
                     role="button"
                     accessibilityLabel={`Add ${user.name} as a friend`}
                     accessibilityHint="Adds this user to your friend list"
@@ -179,15 +315,31 @@ const EmptyText = styled.Text`
   margin-bottom: 20px;
 `;
 
+const LoadingArea = styled.View`
+  align-items: center;
+  justify-content: center;
+  padding-vertical: 20px;
+`;
+
 const RecentItem = styled.TouchableOpacity`
   flex-direction: row;
   align-items: center;
+  justify-content: space-between;
   padding-vertical: 10px;
 `;
 
 const RecentText = styled.Text`
+  flex: 1;
   color: ${({ theme }) => theme.colors.white};
   font-size: 16px;
+`;
+
+const RemoveRecentButton = styled.TouchableOpacity`
+  width: 36px;
+  height: 36px;
+  border-radius: 18px;
+  align-items: center;
+  justify-content: center;
 `;
 
 const Avatar = styled.Image`

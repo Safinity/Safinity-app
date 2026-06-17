@@ -9,6 +9,7 @@ import styled, { ThemeProvider } from 'styled-components/native';
 import { theme } from '../constants/theme';
 import { UserProvider } from '@/context/UserContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { NavigationHistoryTracker } from '@/components/NavigationHistoryTracker';
 
 import {
   useFonts,
@@ -49,7 +50,14 @@ export default function RootLayout() {
         <UserProvider>
           <ThemeProvider theme={theme}>
             <Container>
-              <Stack screenOptions={{ headerShown: false }} />
+              <NavigationHistoryTracker />
+              <Stack
+                screenOptions={{
+                  headerShown: false,
+                  animation: 'slide_from_right',
+                  animationTypeForReplace: 'pop',
+                }}
+              />
             </Container>
             <StatusBar style="light" />
           </ThemeProvider>

@@ -5,6 +5,7 @@ import { Platform, StatusBar } from 'react-native';
 import styled from 'styled-components/native';
 
 import { Colors, Spacing, Height, Width, BorderRadius, TextStyles } from '../../constants/theme';
+import { navigateToPreviousRoute } from '../../utils/navigationHistory';
 
 export type HeaderVariant = 'default' | 'back' | 'pageDetails';
 
@@ -72,7 +73,11 @@ const Header: React.FC<HeaderProps> = ({
         {variant === 'back' && (
           <BackContainer hasText={hasText}>
             <BackButtonRow>
-              <BackButton onPress={() => router.back()} accessibilityLabel="Go back" role="button">
+              <BackButton
+                onPress={() => navigateToPreviousRoute()}
+                accessibilityLabel="Go back"
+                role="button"
+              >
                 <Ionicons name="arrow-back" size={Width.iconHeader} color={Colors.white} />
               </BackButton>
 
@@ -97,7 +102,7 @@ const Header: React.FC<HeaderProps> = ({
         {variant === 'pageDetails' && (
           <DetailsRow>
             <BackButtonDetails
-              onPress={() => router.back()}
+              onPress={() => navigateToPreviousRoute()}
               accessibilityLabel="Go back"
               role="button"
             >

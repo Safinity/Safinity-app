@@ -131,9 +131,6 @@ export class EventsController {
     @Param('activityId') activityId: string,
     @Req() request: RequestWithUser,
   ) {
-    return this.eventsService.removeFavourite(
-      request.user!.id,
-      eventId,
-    );
+    return this.eventsService.removeFavourite(request.user!.id, activityId);
   }
 }

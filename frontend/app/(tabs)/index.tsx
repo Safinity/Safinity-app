@@ -5,20 +5,20 @@ import { useRouter, Stack } from 'expo-router';
 import Head from 'expo-router/head';
 import api from '../../utils/api';
 
-interface Event {
-  id: string;
-  name: string;
-  status: 'live' | 'upcoming' | 'past';
-  category: string;
-  image?: string;
-  [key: string]: any;
-}
-
 import Header from '../../components/ui/header';
 import SearchInput from '../../components/ui/SearchInput';
 import FilterTags from '../../components/ui/FilterTags';
 import { HeroBanner } from '../../components/HeroBanner';
 import { EventCard } from '../../components/EventCard';
+
+interface Event {
+  id: string;
+  name: string;
+  status: 'active' | 'upcoming' | 'past';
+  category: string;
+  image?: string;
+  [key: string]: any;
+}
 
 export default function HomeScreen() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -56,7 +56,7 @@ export default function HomeScreen() {
     );
   }
 
-  const liveEvent = events.find(e => e.status === 'live');
+  const liveEvent = events.find(e => e.status === 'active');
 
   const upcomingEvents = events.filter(
     e =>

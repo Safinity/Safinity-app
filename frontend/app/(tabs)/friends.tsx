@@ -1,34 +1,178 @@
-import React from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import styled from 'styled-components/native';
-import { TouchableOpacity } from 'react-native';
-import { router } from 'expo-router';
+import { ActivityIndicator, Alert, RefreshControl, TouchableOpacity } from 'react-native';
+import { router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Head from 'expo-router/head';
-import users from '@/data/users.json';
+import { isAxiosError } from 'axios';
 import { userImages } from '../../assets/images/Users/userImages';
 import Header from '@/components/ui/header';
 import FindFriendButton from '@/components/FindFriendButton';
 import PingFriend from '@/components/VibrateButton';
 import FriendActionButton from '@/components/FriendActionButton';
-import { useUser } from '@/context/UserContext';
+import { useAuth } from '@clerk/expo';
+import {
+  getFriends,
+  toggleFriendship,
+  type FriendListItem,
+  type FriendsGroupedResponse,
+} from '@/utils/friends';
+
+const emptyFriends: FriendsGroupedResponse = {
+  onSameEvent: [],
+  otherFriends: [],
+};
+
+function getAvatarSource(friend: FriendListItem) {
+  if (friend.image) {
+    return { uri: `data:image/jpeg;base64,${friend.image}` };
+  }
+
+  return userImages.default;
+}
+
+function getErrorMessage(error: unknown) {
+  if (isAxiosError(error)) {
+    if (error.response?.status) {
+      return `Request failed with status ${error.response.status}.`;
+    }
+
+    if (error.message) {
+      return error.message;
+    }
+  }
+
+  return 'Please try again.';
+}
 
 export default function FriendsScreen() {
-  const { currentUser, removeFriend } = useUser();
+  const { isLoaded, isSignedIn, getToken } = useAuth();
+  const [friends, setFriends] = useState<FriendsGroupedResponse>(emptyFriends);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [removingFriendId, setRemovingFriendId] = useState<string | null>(null);
+  const hasLoadedOnce = useRef(false);
+  const getTokenRef = useRef(getToken);
+  getTokenRef.current = getToken;
 
-  if (!currentUser) {
+  const loadFriends = useCallback(
+    async (showRefresh = false) => {
+      if (!isLoaded) return;
+
+      if (!isSignedIn) {
+        setFriends(emptyFriends);
+        setIsLoading(false);
+        setIsRefreshing(false);
+        return;
+      }
+
+      if (showRefresh) {
+        setIsRefreshing(true);
+      } else if (!hasLoadedOnce.current) {
+        setIsLoading(true);
+      }
+
+      try {
+        const token = await getTokenRef.current();
+        const response = await getFriends(token);
+        setFriends(response);
+        hasLoadedOnce.current = true;
+      } catch (error) {
+        console.error('Failed to load friends', error);
+        Alert.alert('Unable to load friends', getErrorMessage(error));
+      } finally {
+        setIsLoading(false);
+        setIsRefreshing(false);
+      }
+    },
+    [isLoaded, isSignedIn],
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      loadFriends();
+    }, [loadFriends]),
+  );
+
+  if (!isLoaded || isLoading) {
     return (
       <Container>
-        <LoadingText role="text">Loading...</LoadingText>
+        <Header variant="default" title="Friends" showBottomDivider={false} />
+        <LoadingState>
+          <ActivityIndicator color="white" />
+          <LoadingText role="text">Loading...</LoadingText>
+        </LoadingState>
       </Container>
     );
   }
 
-  const friendIds = currentUser.friends;
-  const friends = users.filter(u => friendIds.includes(u.id));
-  const onSameEvent = friends.filter(f => f.currentEventId === currentUser.currentEventId);
-  const otherFriends = friends.filter(f => f.currentEventId !== currentUser.currentEventId);
-
   const handleAddFriend = () => router.push('/addfriend');
+
+  const handleRemoveFriend = async (friend: FriendListItem) => {
+    try {
+      setRemovingFriendId(friend.id);
+      const token = await getTokenRef.current();
+      await toggleFriendship(token, friend.id);
+      setFriends(previous => ({
+        onSameEvent: previous.onSameEvent.filter(item => item.id !== friend.id),
+        otherFriends: previous.otherFriends.filter(item => item.id !== friend.id),
+      }));
+    } catch (error) {
+      console.error('Failed to remove friend', error);
+      Alert.alert('Unable to remove friend', getErrorMessage(error));
+    } finally {
+      setRemovingFriendId(null);
+    }
+  };
+
+  const renderFriend = (friend: FriendListItem, action: 'event' | 'remove') => (
+    <TouchableOpacity
+      key={friend.id}
+      onPress={() => router.push(`/friends/${friend.id}`)}
+      accessible={true}
+      role="button"
+      accessibilityLabel={`${friend.name}, username ${friend.username}. Tap to view profile.`}
+    >
+      <FriendRow>
+        <Avatar
+          source={getAvatarSource(friend)}
+          role="image"
+          accessibilityLabel={`Profile picture of ${friend.name}`}
+        />
+        <Info>
+          <Name>{friend.name}</Name>
+          <Username>@{friend.username}</Username>
+        </Info>
+        <Buttons>
+          {action === 'event' ? (
+            <>
+              <PingFriend
+                onPress={() => console.log('Buzz amigo')}
+                role="button"
+                accessibilityLabel={`Buzz ${friend.name}`}
+                accessibilityHint={`Send a buzz to ${friend.name}`}
+              />
+              <FindFriendButton
+                onPress={() => router.push({ pathname: '/map', params: { focusId: friend.id } })}
+                role="button"
+                accessibilityLabel={`Locate ${friend.name} on the map`}
+                accessibilityHint="Shows the location of the friend on the map"
+              />
+            </>
+          ) : (
+            <FriendActionButton
+              variant="remove"
+              onPress={() => handleRemoveFriend(friend)}
+              disabled={removingFriendId === friend.id}
+              role="button"
+              accessibilityLabel={`Remove ${friend.name}`}
+              accessibilityHint="Remove this friend from your list"
+            />
+          )}
+        </Buttons>
+      </FriendRow>
+    </TouchableOpacity>
+  );
 
   return (
     <Container>
@@ -38,7 +182,17 @@ export default function FriendsScreen() {
 
       <Header variant="default" title="Friends" showBottomDivider={false} />
 
-      <ScrollArea importantForAccessibility="yes" accessibilityLabel="Lista de amigos">
+      <ScrollArea
+        importantForAccessibility="yes"
+        accessibilityLabel="Lista de amigos"
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={() => loadFriends(true)}
+            tintColor="white"
+          />
+        }
+      >
         {/* Region: Friends Header */}
         <RegionContainer role="region" accessibilityLabel="Cabeçalho de amigos">
           <SectionTitle role="header" accessibilityLevel={1}>
@@ -60,45 +214,11 @@ export default function FriendsScreen() {
           <SectionSubtitle role="header" accessibilityLevel={2}>
             On the same event
           </SectionSubtitle>
-          {onSameEvent.map(friend => (
-            <TouchableOpacity
-              key={friend.id}
-              onPress={() => router.push(`/friends/${friend.id}`)}
-              accessible={true}
-              role="button"
-              accessibilityLabel={`${friend.name}, username ${friend.username}. Tap to view profile.`}
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                marginTop: 8,
-                marginBottom: 16,
-              }}
-            >
-              <Avatar
-                source={userImages[friend.image] || userImages.default}
-                role="image"
-                accessibilityLabel={`Profile picture of ${friend.name}`}
-              />
-              <Info>
-                <Name>{friend.name}</Name>
-                <Username>@{friend.username}</Username>
-              </Info>
-              <Buttons>
-                <PingFriend
-                  onPress={() => console.log('Buzz amigo')}
-                  role="button"
-                  accessibilityLabel={`Buzz ${friend.name}`}
-                  accessibilityHint={`Send a buzz to ${friend.name}`}
-                />
-                <FindFriendButton
-                  onPress={() => router.push({ pathname: '/map', params: { focusId: friend.id } })}
-                  role="button"
-                  accessibilityLabel={`Locate ${friend.name} on the map`}
-                  accessibilityHint="Shows the location of the friend on the map"
-                />
-              </Buttons>
-            </TouchableOpacity>
-          ))}
+          {friends.onSameEvent.length ? (
+            friends.onSameEvent.map(friend => renderFriend(friend, 'event'))
+          ) : (
+            <EmptyText>No friends on the same event.</EmptyText>
+          )}
         </RegionContainer>
 
         {/* Region: Other Friends */}
@@ -107,40 +227,11 @@ export default function FriendsScreen() {
           <SectionSubtitle role="header" accessibilityLevel={2}>
             Other Friends
           </SectionSubtitle>
-          {otherFriends.map(friend => (
-            <TouchableOpacity
-              key={friend.id}
-              onPress={() => router.push(`/friends/${friend.id}`)}
-              accessible={true}
-              role="button"
-              accessibilityLabel={`${friend.name}, username ${friend.username}. Tap to view profile.`}
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                marginTop: 8,
-                marginBottom: 16,
-              }}
-            >
-              <Avatar
-                source={userImages[friend.image] || userImages.default}
-                role="image"
-                accessibilityLabel={`Profile picture of ${friend.name}`}
-              />
-              <Info>
-                <Name>{friend.name}</Name>
-                <Username>@{friend.username}</Username>
-              </Info>
-              <Buttons>
-                <FriendActionButton
-                  variant="remove"
-                  onPress={() => removeFriend(friend.id)}
-                  role="button"
-                  accessibilityLabel={`Remove ${friend.name}`}
-                  accessibilityHint="Remove this friend from your list"
-                />
-              </Buttons>
-            </TouchableOpacity>
-          ))}
+          {friends.otherFriends.length ? (
+            friends.otherFriends.map(friend => renderFriend(friend, 'remove'))
+          ) : (
+            <EmptyText>No other friends yet.</EmptyText>
+          )}
         </RegionContainer>
       </ScrollArea>
     </Container>
@@ -172,9 +263,23 @@ const RegionContainer = styled.View`
 `;
 
 const LoadingText = styled.Text`
-  margin-top: ${({ theme }) => theme.spacing.xl}px;
+  margin-top: ${({ theme }) => theme.spacing.sm}px;
   text-align: center;
   font-size: ${({ theme }) => theme.fonts.sizes.base}px;
+  color: ${({ theme }) => theme.colors.white};
+`;
+
+const LoadingState = styled.View`
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+`;
+
+const EmptyText = styled.Text`
+  margin-top: ${({ theme }) => theme.spacing.xs}px;
+  margin-bottom: ${({ theme }) => theme.spacing.sm}px;
+  font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
+  font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
   color: ${({ theme }) => theme.colors.white};
 `;
 

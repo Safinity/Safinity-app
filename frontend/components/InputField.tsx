@@ -12,6 +12,8 @@ export default function InputField({
   value,
   onChangeText,
   style,
+  editable = true,
+  accessibilityHint,
 }: any) {
   const [show, setShow] = useState(false);
 
@@ -25,7 +27,7 @@ export default function InputField({
         {label.includes('*') && <RequiredAsterisk aria-hidden="true"> *</RequiredAsterisk>}
       </Label>
 
-      <Box>
+      <Box $editable={editable}>
         <Input
           value={value}
           onChangeText={onChangeText}
@@ -34,7 +36,9 @@ export default function InputField({
           secureTextEntry={password && !show}
           keyboardType={keyboardType}
           autoCapitalize="none"
+          editable={editable}
           accessibilityLabel={`${label}`}
+          accessibilityHint={accessibilityHint}
         />
 
         {password ? (
@@ -61,12 +65,14 @@ const Label = styled.Text`
   ${({ theme }) => theme.text.corpo.corpoTexto};
 `;
 
-const Box = styled.View`
-  background-color: ${({ theme }) => theme.colors.grayNavbar};
+const Box = styled.View<{ $editable?: boolean }>`
+  background-color: ${({ $editable, theme }) =>
+    $editable ? theme.colors.grayNavbar : theme.colors.background};
   border-radius: ${({ theme }) => theme.borderRadius.medium}px;
   padding: ${({ theme }) => theme.spacing.md}px;
   flex-direction: row;
   align-items: center;
+  opacity: ${({ $editable }) => ($editable ? 1 : 0.86)};
 `;
 
 const Input = styled.TextInput`

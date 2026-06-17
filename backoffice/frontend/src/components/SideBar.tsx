@@ -42,6 +42,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
           <MenuItem to="/notifications" onClick={onClose}>
             Notifications
           </MenuItem>
+          <MenuItem to="/accessibility-declaration" onClick={onClose}>
+            Accessibility Declaration
+          </MenuItem>
         </Menu>
       </Wrapper>
 

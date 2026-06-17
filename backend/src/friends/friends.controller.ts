@@ -1,8 +1,20 @@
-import { Controller, Get, Post, Param, Query, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { FriendsService } from './friends.service';
+import { AuthRequiredGuard } from '../auth/auth.guards';
 import type { RequestWithUser } from '../auth/auth.types';
+import { AddFriendFromQrDto } from './dto/add-friend-from-qr.dto';
 
 @Controller('friends')
+@UseGuards(AuthRequiredGuard)
 export class FriendsController {
   constructor(private readonly friendsService: FriendsService) {}
 
@@ -73,5 +85,26 @@ export class FriendsController {
   @Get('requests/pending')
   async getPending(@Req() req: RequestWithUser) {
     return this.friendsService.getPendingRequests(req.user!.id);
+  }
+
+  @Get('qr/me')
+  async getMyQrCode(@Req() req: RequestWithUser) {
+    return this.friendsService.getFriendQrCode(req.user!.id);
+  }
+
+  @Post('qr/preview')
+  async previewFromQrCode(
+    @Body() body: AddFriendFromQrDto,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.friendsService.previewFriendFromQrCode(req.user!.id, body);
+  }
+
+  @Post('qr/add')
+  async addFromQrCode(
+    @Body() body: AddFriendFromQrDto,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.friendsService.addFriendFromQrCode(req.user!.id, body);
   }
 }

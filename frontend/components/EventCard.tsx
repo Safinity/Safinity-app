@@ -4,6 +4,7 @@ import styled from 'styled-components/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { eventImages } from '../assets/images/Events';
 import { useRouter } from 'expo-router';
+import { getEventImageSource } from '../utils/eventImages';
 
 const CardContainer = styled.TouchableOpacity<{ isCompact?: boolean }>`
   width: ${({ theme }) => theme.height.lg}px;
@@ -73,17 +74,7 @@ const TitleText = styled.Text`
 export const EventCard = ({ event, variant }: any) => {
   const router = useRouter();
   const isCompact = variant === 'compact';
-
-  // MAPA ID → SLUG (porque não podes mexer na BD)
-  const eventIdToSlug: Record<string, string> = {
-    '1': 'music-festival',
-    '2': 'meo-mares-vivas-2025',
-    '3': 'superbock-superrock-2025',
-    '4': 'meo-sudoeste-2025',
-  };
-
-  const slug = eventIdToSlug[String(event.id)];
-  const imageSource = eventImages[slug] || eventImages['banner-lista-eventos'];
+  const imageSource = getEventImageSource(event?.image, eventImages['banner-lista-eventos']);
 
   const handlePress = () => {
     router.push(`/event-details/${event.id}`);

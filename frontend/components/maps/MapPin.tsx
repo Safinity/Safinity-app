@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Image, Platform, Pressable } from 'react-native';
+import { Image, Platform, Pressable } from 'react-native';
 import { latLngToPixelFromBounds } from '../../utils/coordinates';
 import { PIN_ICONS } from './constants';
 
@@ -10,6 +10,9 @@ export const MapPin = ({
   width,
   height,
   onPress,
+  accessible,
+  role,
+  accessibilityLabel,
 }: {
   pin: any;
   avatar?: any;
@@ -17,6 +20,9 @@ export const MapPin = ({
   width: number;
   height: number;
   onPress: (pin: any) => void;
+  accessible?: boolean;
+  role?: string;
+  accessibilityLabel?: string;
 }) => {
   const { x, y } = latLngToPixelFromBounds(pin.lat, pin.lng, bounds, width, height);
 
@@ -24,6 +30,9 @@ export const MapPin = ({
     <Pressable
       key={pin.id}
       onPress={() => onPress(pin)}
+      accessible={accessible}
+      role={role as any}
+      accessibilityLabel={accessibilityLabel}
       style={{
         position: 'absolute',
         left: x - 14,

@@ -3,7 +3,9 @@ import { ValidationPipe } from '@nestjs/common';
 import { OptionalAuthGuard } from './auth/auth.guards';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import type { Server as HttpServer } from 'http';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+import { NotificationsRealtimeService } from './notifications/notifications-realtime.service';
 
 // Fix BigInt serialization
 declare global {
@@ -59,6 +61,10 @@ async function bootstrap() {
 
     console.warn('OptionalAuthGuard not available at bootstrap:', errorMessage);
   }
+
+  const realtimeNotifications = app.get(NotificationsRealtimeService);
+  const httpServer = app.getHttpServer() as unknown as HttpServer;
+  realtimeNotifications.attach(httpServer);
 
   await app.listen(process.env.PORT ?? 3000);
 }

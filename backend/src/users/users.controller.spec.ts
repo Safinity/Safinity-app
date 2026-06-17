@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from '../auth/auth.service';
 import { UsersController } from './users.controller';
+import { UsersService } from './users.service';
 
 describe('UsersController', () => {
   let controller: UsersController;
@@ -16,6 +17,12 @@ describe('UsersController', () => {
             getAuthenticatedProfile: jest.fn(),
             updateProfile: jest.fn(),
             updateCredentials: jest.fn(),
+          },
+        },
+        {
+          provide: UsersService,
+          useValue: {
+            updateMyLocation: jest.fn(),
           },
         },
       ],

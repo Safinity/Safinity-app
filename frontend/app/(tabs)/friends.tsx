@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components/native';
 import { ActivityIndicator, Alert, RefreshControl, TouchableOpacity } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
@@ -10,6 +10,7 @@ import Header from '@/components/ui/header';
 import FindFriendButton from '@/components/FindFriendButton';
 import PingFriend from '@/components/VibrateButton';
 import FriendActionButton from '@/components/FriendActionButton';
+import { useNotifications } from '@/context/NotificationsContext';
 import { useAuth } from '@clerk/expo';
 import {
   getFriends,
@@ -47,6 +48,7 @@ function getErrorMessage(error: unknown) {
 
 export default function FriendsScreen() {
   const { isLoaded, isSignedIn, getToken } = useAuth();
+  const { realtimeVersion } = useNotifications();
   const [friends, setFriends] = useState<FriendsGroupedResponse>(emptyFriends);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -93,6 +95,12 @@ export default function FriendsScreen() {
       loadFriends();
     }, [loadFriends]),
   );
+
+  useEffect(() => {
+    if (!hasLoadedOnce.current) return;
+
+    loadFriends();
+  }, [loadFriends, realtimeVersion]);
 
   if (!isLoaded || isLoading) {
     return (
@@ -194,7 +202,7 @@ export default function FriendsScreen() {
         }
       >
         {/* Region: Friends Header */}
-        <RegionContainer role="region" accessibilityLabel="Cabeçalho de amigos">
+        <RegionContainer role="region" accessibilityLabel="CabeÃ§alho de amigos">
           <SectionTitle role="header" accessibilityLevel={1}>
             <Title>Friends</Title>
             <TouchableOpacity

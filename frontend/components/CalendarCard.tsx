@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Image, Platform, View } from 'react-native';
 import styled from 'styled-components/native';
 import { Spacing, BorderRadius, Colors, TextStyles } from '../constants/theme';
@@ -7,9 +7,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { calendarImages } from '../assets/images/Calendar/index';
 
-export const CalendarCard = ({ item }: any) => {
+export const CalendarCard = ({ item, onToggleFavorite, isFavoriteUpdating = false }: any) => {
   const [isFavorite, setIsFavorite] = useState(item?.isFavorite ?? false);
   const router = useRouter();
+
+  useEffect(() => {
+    setIsFavorite(item?.isFavorite ?? false);
+  }, [item?.id, item?.isFavorite]);
 
   const handlePress = () => {
     if (item.id) {
@@ -17,12 +21,25 @@ export const CalendarCard = ({ item }: any) => {
     }
   };
 
-  const handleToggleFavorite = (e: any) => {
+  const handleToggleFavorite = async (e: any) => {
     // Evita que o clique no coração também ative o clique do card inteiro (Bubbling/Propagation)
     if (e && e.stopPropagation) {
       e.stopPropagation();
     }
-    setIsFavorite((prev: boolean) => !prev);
+
+    if (isFavoriteUpdating) {
+      return;
+    }
+
+    const nextValue = !isFavorite;
+    setIsFavorite(nextValue);
+
+    try {
+      await onToggleFavorite?.(item, nextValue);
+    } catch (error) {
+      setIsFavorite(!nextValue);
+      console.error('Erro ao atualizar favorito:', error);
+    }
   };
 
   const getImageSource = () => {
@@ -73,6 +90,7 @@ export const CalendarCard = ({ item }: any) => {
                 : `Adicionar ${item.title} aos favoritos`
             }
             accessibilityHint="Marca ou desmarca esta atividade como favorita"
+            disabled={isFavoriteUpdating}
           >
             <Ionicons name={isFavorite ? 'heart' : 'heart-outline'} size={20} color="white" />
           </FavoriteButton>

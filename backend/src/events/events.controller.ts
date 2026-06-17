@@ -7,8 +7,11 @@ import {
   Post,
   Query,
   Req,
+  Res,
+  StreamableFile,
   UseGuards,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { AuthRequiredGuard } from '../auth/auth.guards';
 import type { RequestWithUser } from '../auth/auth.types';
 import { EventsService } from './events.service';
@@ -78,8 +81,32 @@ export class EventsController {
 
   // GET /events/:id/mapa
   @Get(':id/mapa')
-  getMap(@Param('id') id: string) {
-    return this.eventsService.getMap(id);
+  @UseGuards(AuthRequiredGuard)
+  getMap(@Param('id') id: string, @Req() request: RequestWithUser) {
+    return this.eventsService.getMap(id, request.user!.id);
+  }
+
+  // GET /events/:id/static-map
+  @Get(':id/static-map')
+  async getStaticMap(
+    @Param('id') id: string,
+    @Query('width') width: string | undefined,
+    @Query('height') height: string | undefined,
+    @Query('theme') theme: 'light' | 'dark' | undefined,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const mapImage = await this.eventsService.getStaticMapImage(id, {
+      width,
+      height,
+      theme,
+    });
+
+    response.set({
+      'Content-Type': mapImage.contentType,
+      'Cache-Control': mapImage.cacheControl,
+    });
+
+    return new StreamableFile(mapImage.buffer);
   }
 
   // GET /events/:id/activities

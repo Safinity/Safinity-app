@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import styled from 'styled-components/native';
 import { useRouter, Stack } from 'expo-router';
+import { ActivityIndicator, Alert } from 'react-native';
+import { useAuth } from '@clerk/expo';
+import * as Location from 'expo-location';
 import tags from '../data/tags.json';
 import Head from 'expo-router/head';
 import Header from '@/components/ui/header';
+import api from '@/utils/api';
 
 /* ---------------------- STYLES ---------------------- */
 
@@ -122,22 +126,68 @@ const ButtonTextConfirm = styled.Text`
 
 export default function SOSForm() {
   const router = useRouter();
+  const { isLoaded, isSignedIn, getToken } = useAuth();
   const [selected, setSelected] = useState<number[]>([]);
   const [notes, setNotes] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const toggleTag = (id: number) => {
     setSelected(prev => (prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]));
   };
 
   const handleSubmit = async () => {
-    const payload = { tags: selected, notes: notes.trim() };
-    try {
-      console.log('Payload pronto para enviar:', payload);
-      // enviar para backend aqui
-    } catch (error) {
-      console.error(error);
+    if (!isLoaded || !isSignedIn) {
+      Alert.alert('Unable to send SOS', 'Please sign in before sending an SOS request.');
+      return;
     }
-    router.back();
+
+    try {
+      setIsSubmitting(true);
+      const permission = await Location.requestForegroundPermissionsAsync();
+
+      if (permission.status !== Location.PermissionStatus.GRANTED) {
+        Alert.alert(
+          'Location required',
+          'Please allow location access so the safety team and your friends know where you are.',
+        );
+        return;
+      }
+
+      const position =
+        (await Location.getLastKnownPositionAsync()) ||
+        (await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+        }));
+      const selectedLabels = tags.tags
+        .filter(tag => selected.includes(tag.id))
+        .map(tag => tag.label);
+      const payload = {
+        location: {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        },
+        description: notes.trim() || undefined,
+        tag_selected: selectedLabels[0]?.slice(0, 32),
+        options: {
+          tags: selected,
+          labels: selectedLabels,
+          notes: notes.trim(),
+        },
+      };
+      const token = await getToken({ skipCache: true });
+
+      console.log('Payload pronto para enviar:', payload);
+      await api.post('/sos', payload, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
+      Alert.alert('SOS sent', 'Your request was sent successfully.');
+      router.back();
+    } catch (error) {
+      console.error('Failed to send SOS:', error);
+      Alert.alert('Unable to send SOS', 'Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleCancel = () => {
@@ -181,8 +231,12 @@ export default function SOSForm() {
             <ButtonTextCancel>Cancel</ButtonTextCancel>
           </CancelButton>
 
-          <ConfirmButton onPress={handleSubmit}>
-            <ButtonTextConfirm>Confirm</ButtonTextConfirm>
+          <ConfirmButton onPress={handleSubmit} disabled={isSubmitting}>
+            {isSubmitting ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <ButtonTextConfirm>Confirm</ButtonTextConfirm>
+            )}
           </ConfirmButton>
         </ButtonRow>
       </ContentWrapper>

@@ -1,4 +1,3 @@
-// app/_layout.tsx
 import 'react-native-url-polyfill/auto';
 
 import { ClerkProvider } from '@clerk/expo';
@@ -7,7 +6,9 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import styled, { ThemeProvider } from 'styled-components/native';
 import { theme } from '../constants/theme';
+import { NotificationsProvider } from '@/context/NotificationsContext';
 import { UserProvider } from '@/context/UserContext';
+import { ActivityFavouritesProvider } from '@/context/ActivityFavouritesContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { NavigationHistoryTracker } from '@/components/NavigationHistoryTracker';
 
@@ -48,19 +49,23 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
         <UserProvider>
-          <ThemeProvider theme={theme}>
-            <Container>
-              <NavigationHistoryTracker />
-              <Stack
-                screenOptions={{
-                  headerShown: false,
-                  animation: 'slide_from_right',
-                  animationTypeForReplace: 'pop',
-                }}
-              />
-            </Container>
-            <StatusBar style="light" />
-          </ThemeProvider>
+          <ActivityFavouritesProvider>
+            <NotificationsProvider>
+              <ThemeProvider theme={theme}>
+                <Container>
+                  <NavigationHistoryTracker />
+                  <Stack
+                    screenOptions={{
+                      headerShown: false,
+                      animation: 'slide_from_right',
+                      animationTypeForReplace: 'pop',
+                    }}
+                  />
+                </Container>
+                <StatusBar style="light" />
+              </ThemeProvider>
+            </NotificationsProvider>
+          </ActivityFavouritesProvider>
         </UserProvider>
       </ClerkProvider>
     </GestureHandlerRootView>

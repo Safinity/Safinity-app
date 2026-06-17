@@ -10,10 +10,6 @@ import { LinkUserTicketDto } from './dto/link-user-ticket.dto';
 export class UserTicketsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  private toBase64Image(image: Uint8Array | null) {
-    return image ? Buffer.from(image).toString('base64') : null;
-  }
-
   private serializeTicket(ticket: {
     id: bigint;
     user_id: string;
@@ -27,7 +23,7 @@ export class UserTicketsService {
       description: string | null;
       status: string | null;
       category: string | null;
-      image: Uint8Array | null;
+      image: string | null;
       start_date: Date | null;
       end_date: Date | null;
     };
@@ -46,7 +42,7 @@ export class UserTicketsService {
             description: ticket.event.description,
             status: ticket.event.status,
             category: ticket.event.category,
-            image: this.toBase64Image(ticket.event.image),
+            image: ticket.event.image,
             start_date: ticket.event.start_date,
             end_date: ticket.event.end_date,
           }
@@ -55,9 +51,10 @@ export class UserTicketsService {
   }
 
   async linkTicket(dto: LinkUserTicketDto, userId: string) {
+    const ticketCode = dto.ticket_code.trim().toUpperCase();
     const masterTicket = await this.prisma.event_tickets_master.findUnique({
       where: {
-        ticket_code: dto.ticket_code,
+        ticket_code: ticketCode,
       },
     });
 
@@ -65,9 +62,19 @@ export class UserTicketsService {
       throw new BadRequestException('Invalid ticket code.');
     }
 
+    if (masterTicket.is_already_linked) {
+      throw new BadRequestException('This ticket is already linked.');
+    }
+
+    if (dto.event_id && masterTicket.event_id.toString() !== dto.event_id) {
+      throw new BadRequestException(
+        'This ticket does not belong to this event.',
+      );
+    }
+
     const existingUserTicket = await this.prisma.user_tickets.findUnique({
       where: {
-        ticket_code: dto.ticket_code,
+        ticket_code: ticketCode,
       },
     });
 
@@ -75,24 +82,58 @@ export class UserTicketsService {
       throw new BadRequestException('This ticket is already linked.');
     }
 
-    const newUserTicket = await this.prisma.user_tickets.create({
-      data: {
-        id: BigInt(Date.now()),
-        user_id: userId,
-        event_id: masterTicket.event_id,
-        ticket_code: dto.ticket_code,
+    const existingEventTicketForUser = await this.prisma.user_tickets.findFirst(
+      {
+        where: {
+          user_id: userId,
+          event_id: masterTicket.event_id,
+        },
+        select: { id: true },
       },
+    );
+
+    if (existingEventTicketForUser) {
+      throw new BadRequestException(
+        'You already have a ticket linked for this event.',
+      );
+    }
+
+    const newUserTicket = await this.prisma.$transaction(async (tx) => {
+      const createdTicket = await tx.user_tickets.create({
+        data: {
+          id: BigInt(Date.now()),
+          user_id: userId,
+          event_id: masterTicket.event_id,
+          ticket_code: ticketCode,
+        },
+        include: {
+          event: {
+            select: {
+              id: true,
+              name: true,
+              venue_name: true,
+              description: true,
+              status: true,
+              category: true,
+              image: true,
+              start_date: true,
+              end_date: true,
+            },
+          },
+        },
+      });
+
+      await tx.event_tickets_master.update({
+        where: { ticket_code: ticketCode },
+        data: { is_already_linked: true },
+      });
+
+      return createdTicket;
     });
 
     return {
       message: 'Ticket linked successfully.',
-      data: {
-        id: newUserTicket.id.toString(),
-        user_id: newUserTicket.user_id,
-        event_id: newUserTicket.event_id.toString(),
-        ticket_code: newUserTicket.ticket_code,
-        linked_at: newUserTicket.linked_at,
-      },
+      data: this.serializeTicket(newUserTicket),
     };
   }
 

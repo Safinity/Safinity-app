@@ -6,6 +6,7 @@ import { useRouter } from 'expo-router';
 
 import { eventImages } from '../assets/images/Events';
 import { calendarImages } from '../assets/images/Calendar';
+import { getEventImageSource } from '../utils/eventImages';
 
 const BannerContainer = styled.ImageBackground.attrs({
   resizeMode: 'cover',
@@ -97,17 +98,13 @@ export const HeroBanner = ({
   hideMap = false,
   isDetail = false,
   detailType,
+  isFavorite: controlledIsFavorite,
+  onToggleFavorite,
+  isFavoriteUpdating = false,
 }: any) => {
   const router = useRouter();
   const [isFavorite, setIsFavorite] = useState(false);
-
-  // ⭐ MAPA ID → SLUG (igual ao EventCard)
-  const eventIdToSlug: Record<string, string> = {
-    '1': 'music-festival',
-    '2': 'meo-mares-vivas-2025',
-    '3': 'superbock-superrock-2025',
-    '4': 'meo-sudoeste-2025',
-  };
+  const displayedIsFavorite = controlledIsFavorite ?? isFavorite;
 
   const getSource = () => {
     if (!event) return null;
@@ -115,17 +112,7 @@ export const HeroBanner = ({
     // Se for calendário (usa calendarImages)
     if (calendarImages[event.image]) return calendarImages[event.image];
 
-    // ⭐ Se for evento → usar slug
-    const slug = eventIdToSlug[String(event.id)];
-    if (slug && eventImages[slug]) return eventImages[slug];
-
-    // Se vier URL externa (não é o caso, mas mantemos)
-    if (typeof event.image === 'string' && event.image.startsWith('http')) {
-      return { uri: event.image };
-    }
-
-    // fallback
-    return eventImages['banner-lista-eventos'];
+    return getEventImageSource(event.image, eventImages['banner-lista-eventos']);
   };
 
   const imageSource = getSource();
@@ -155,12 +142,36 @@ export const HeroBanner = ({
 
               <AddCalendarButton
                 activeOpacity={0.8}
-                onPress={() => setIsFavorite(prev => !prev)}
+                onPress={async () => {
+                  if (isFavoriteUpdating) return;
+
+                  const nextValue = !displayedIsFavorite;
+
+                  if (controlledIsFavorite === undefined) {
+                    setIsFavorite(nextValue);
+                  }
+
+                  try {
+                    await onToggleFavorite?.(event, nextValue);
+                  } catch (error) {
+                    if (controlledIsFavorite === undefined) {
+                      setIsFavorite(!nextValue);
+                    }
+                    console.error('Erro ao atualizar favorito:', error);
+                  }
+                }}
                 accessible={true}
                 accessibilityRole="button"
-                accessibilityLabel={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                accessibilityLabel={
+                  displayedIsFavorite ? 'Remove from favorites' : 'Add to favorites'
+                }
+                disabled={isFavoriteUpdating}
               >
-                <Ionicons name={isFavorite ? 'heart' : 'heart-outline'} size={30} color="#9333EA" />
+                <Ionicons
+                  name={displayedIsFavorite ? 'heart' : 'heart-outline'}
+                  size={30}
+                  color="#9333EA"
+                />
               </AddCalendarButton>
             </TitleRow>
 

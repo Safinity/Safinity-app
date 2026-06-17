@@ -20,6 +20,21 @@ export const API_BASE =
 const api = create({ baseURL: API_BASE });
 
 api.interceptors.request.use(async config => {
+  const headers = config.headers as
+    | {
+        Authorization?: string;
+        authorization?: string;
+        get?: (name: string) => unknown;
+      }
+    | undefined;
+  const hasExplicitAuthorization = Boolean(
+    headers?.Authorization || headers?.authorization || headers?.get?.('Authorization'),
+  );
+
+  if (hasExplicitAuthorization) {
+    return config;
+  }
+
   if (Platform.OS !== 'web') {
     try {
       const token = await SecureStore.getItemAsync('clerk-token');

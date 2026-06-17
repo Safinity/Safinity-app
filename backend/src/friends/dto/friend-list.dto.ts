@@ -1,11 +1,10 @@
-// src/friends/dto/friend-list.dto.ts
-
 export class FriendResponseDto {
   id!: string;
   name!: string;
   username!: string;
   image: string | null = null;
   isOnSameEvent!: boolean;
+  friendshipState?: string | null = null;
 }
 
 export class FriendsGroupedDto {
@@ -18,6 +17,7 @@ export class FriendProfileDto {
   name!: string;
   username!: string;
   image: string | null = null;
+  friendshipState?: string | null = null;
   totalEventsCount!: number;
   commonEvents: any[] = [];
 }

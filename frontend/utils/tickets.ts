@@ -40,6 +40,26 @@ export async function getUserTickets(token: string | null) {
   return response.data;
 }
 
+export async function linkUserTicket(
+  token: string | null,
+  ticketCode: string,
+  eventId?: string | string[],
+) {
+  const normalizedEventId = Array.isArray(eventId) ? eventId[0] : eventId;
+  const response = await ticketsApi.post<{ message: string; data: UserTicket }>(
+    '/user-tickets',
+    {
+      ticket_code: ticketCode.trim().toUpperCase(),
+      ...(normalizedEventId ? { event_id: normalizedEventId } : {}),
+    },
+    {
+      headers: authHeaders(token),
+    },
+  );
+
+  return response.data;
+}
+
 export async function deleteUserTicket(token: string | null, ticketId: string) {
   const response = await ticketsApi.delete<{ message: string }>(`/user-tickets/${ticketId}`, {
     headers: authHeaders(token),

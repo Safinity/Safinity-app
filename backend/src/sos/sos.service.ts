@@ -182,7 +182,8 @@ export class SosService {
 
     ticketedFriends.forEach((ticket) => {
       const eventKey = ticket.event_id.toString();
-      const currentTargets = targetsByEventId.get(eventKey) ?? new Set<string>();
+      const currentTargets =
+        targetsByEventId.get(eventKey) ?? new Set<string>();
       currentTargets.add(ticket.user_id);
       targetsByEventId.set(eventKey, currentTargets);
     });

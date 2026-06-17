@@ -11,7 +11,8 @@ export class LinkUserTicketDto {
   ticket_code!: string;
 
   @ApiProperty({
-    description: 'Optional event id to validate the ticket against a specific event',
+    description:
+      'Optional event id to validate the ticket against a specific event',
     required: false,
     example: '1',
   })

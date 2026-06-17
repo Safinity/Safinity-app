@@ -15,7 +15,7 @@ import Svg, {
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { useLocalSearchParams, router, Stack } from 'expo-router';
-import { useAuth } from '@clerk/expo'; // Gancho nativo para controlo assÃ­ncrono do token
+import { useAuth } from '@clerk/expo'; // Gancho nativo para controlo assíncrono do token
 
 import Header from '../../components/ui/header';
 import SearchInput from '../../components/ui/SearchInput';
@@ -343,16 +343,16 @@ export default function MapScreen() {
   }, [scale]);
 
 
-  // MonitorizaÃ§Ã£o de mutaÃ§Ãµes de estado e re-renderizaÃ§Ãµes locais
+  // Monitorização de mutações de estado e re-renderizações locais
 
   useEffect(() => {
     let mounted = true;
 
     const loadMap = async () => {
-      // Bloqueia a execuÃ§Ã£o imediata se a infraestrutura do Clerk ainda estiver fria
+      // Bloqueia a execução imediata se a infraestrutura do Clerk ainda estiver fria
 
       if (!isSignedIn) {
-        console.warn('[MAP_DEBUG] Pedido abortado: Utilizador sem sessÃ£o iniciada.');
+        console.warn('[MAP_DEBUG] Pedido abortado: Utilizador sem sessão iniciada.');
         if (mounted) {
           setMapLoading(false);
           setMapError('Please sign in to view the event map.');
@@ -370,7 +370,7 @@ export default function MapScreen() {
           throw new Error('Could not retrieve a valid session token from Clerk.');
         }
 
-        // InjeÃ§Ã£o explÃ­cita de cabeÃ§alho local isolado de interceptores globais flutuantes
+        // Injeção explícita de cabeçalho local isolado de interceptores globais flutuantes
         const requestConfig = {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -402,7 +402,7 @@ export default function MapScreen() {
           setMapPayload(mapResponse.data);
         }
       } catch (error: any) {
-        console.error('[MAP_DEBUG] ExceÃ§Ã£o intercetada no fluxo loadMap:', {
+        console.error('[MAP_DEBUG] Exceção intercetada no fluxo loadMap:', {
           message: error?.message,
           status: error?.response?.status,
           data: error?.response?.data,
@@ -423,7 +423,7 @@ export default function MapScreen() {
     return () => {
       mounted = false;
     };
-  }, [isLoaded, isSignedIn, requestedEventId]); // Dispara novamente assim que as permissÃµes do dispositivo mudarem de estado
+  }, [isLoaded, isSignedIn, requestedEventId]); // Dispara novamente assim que as permissões do dispositivo mudarem de estado
 
   useEffect(() => {
     let mounted = true;
@@ -445,7 +445,7 @@ export default function MapScreen() {
           headers: { Authorization: `Bearer ${token}` },
         });
       } catch (error: any) {
-        console.error('[MAP_DEBUG] Erro ao guardar localizaÃ§Ã£o real:', {
+        console.error('[MAP_DEBUG] Erro ao guardar localização real:', {
           message: error?.message,
           status: error?.response?.status,
         });
@@ -501,7 +501,7 @@ export default function MapScreen() {
     };
 
     loadRealLocation().catch((error: any) => {
-      console.error('[MAP_DEBUG] Erro ao obter localizaÃ§Ã£o real:', error?.message);
+      console.error('[MAP_DEBUG] Erro ao obter localização real:', error?.message);
       if (mounted) {
         setRealUserLocation(null);
       }
@@ -579,12 +579,12 @@ export default function MapScreen() {
     ],
   }));
 
-  // --- FUNÃ‡Ã•ES ---
+  // --- FUNÇÕES ---
   const handlePinPress = useCallback(
     (pin: any, showRoute = false) => {
       if (pin.lat === undefined || pin.lng === undefined || !bounds) {
         console.error(
-          '[MAP_DEBUG] Erro de projeÃ§Ã£o espacial: Atributos lat/lng ausentes nos bounds.',
+          '[MAP_DEBUG] Erro de projeção espacial: Atributos lat/lng ausentes nos bounds.',
           {
             pin,
             bounds,

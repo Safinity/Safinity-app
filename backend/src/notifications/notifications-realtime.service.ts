@@ -40,7 +40,10 @@ export class NotificationsRealtimeService {
     });
   }
 
-  async emitNotificationCreated(notification: { id: bigint; event_id: bigint | null }) {
+  async emitNotificationCreated(notification: {
+    id: bigint;
+    event_id: bigint | null;
+  }) {
     if (!notification.event_id) {
       return;
     }
@@ -116,7 +119,8 @@ export class NotificationsRealtimeService {
   }
 
   private addClient(client: RealtimeClient) {
-    const currentClients = this.clients.get(client.userId) ?? new Set<WebSocket>();
+    const currentClients =
+      this.clients.get(client.userId) ?? new Set<WebSocket>();
     currentClients.add(client.socket);
     this.clients.set(client.userId, currentClients);
   }

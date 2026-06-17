@@ -67,7 +67,9 @@ export class UserTicketsService {
     }
 
     if (dto.event_id && masterTicket.event_id.toString() !== dto.event_id) {
-      throw new BadRequestException('This ticket does not belong to this event.');
+      throw new BadRequestException(
+        'This ticket does not belong to this event.',
+      );
     }
 
     const existingUserTicket = await this.prisma.user_tickets.findUnique({
@@ -80,16 +82,20 @@ export class UserTicketsService {
       throw new BadRequestException('This ticket is already linked.');
     }
 
-    const existingEventTicketForUser = await this.prisma.user_tickets.findFirst({
-      where: {
-        user_id: userId,
-        event_id: masterTicket.event_id,
+    const existingEventTicketForUser = await this.prisma.user_tickets.findFirst(
+      {
+        where: {
+          user_id: userId,
+          event_id: masterTicket.event_id,
+        },
+        select: { id: true },
       },
-      select: { id: true },
-    });
+    );
 
     if (existingEventTicketForUser) {
-      throw new BadRequestException('You already have a ticket linked for this event.');
+      throw new BadRequestException(
+        'You already have a ticket linked for this event.',
+      );
     }
 
     const newUserTicket = await this.prisma.$transaction(async (tx) => {

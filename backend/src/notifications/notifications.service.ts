@@ -252,7 +252,10 @@ export class NotificationsService {
           where: {
             user_id_notification_id: {
               user_id: userId,
-              notification_id: this.toBigInt(notification.id, 'notification_id'),
+              notification_id: this.toBigInt(
+                notification.id,
+                'notification_id',
+              ),
             },
           },
           update: { read_at: new Date() },

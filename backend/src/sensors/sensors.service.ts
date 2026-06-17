@@ -40,13 +40,16 @@ export class SensorsService implements OnModuleInit, OnModuleDestroy {
   }
 
   private serialize<T>(value: T): T {
-    return JSON.parse(
-      JSON.stringify(value, (_key, currentValue) =>
+    const serialized = JSON.stringify(
+      value,
+      (_key: string, currentValue: unknown) =>
         typeof currentValue === 'bigint'
           ? currentValue.toString()
           : currentValue,
-      ),
-    ) as T;
+    );
+    const parsed: unknown = JSON.parse(serialized);
+
+    return parsed as T;
   }
 
   private parseBigInt(value: string | number | undefined, label: string) {

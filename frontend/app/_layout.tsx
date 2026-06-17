@@ -1,4 +1,3 @@
-// app/_layout.tsx
 import 'react-native-url-polyfill/auto';
 
 import { ClerkProvider } from '@clerk/expo';
@@ -7,6 +6,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import styled, { ThemeProvider } from 'styled-components/native';
 import { theme } from '../constants/theme';
+import { NotificationsProvider } from '@/context/NotificationsContext';
 import { UserProvider } from '@/context/UserContext';
 import { ActivityFavouritesProvider } from '@/context/ActivityFavouritesContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -50,6 +50,7 @@ export default function RootLayout() {
       <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
         <UserProvider>
           <ActivityFavouritesProvider>
+          <NotificationsProvider>
             <ThemeProvider theme={theme}>
               <Container>
                 <NavigationHistoryTracker />
@@ -64,6 +65,7 @@ export default function RootLayout() {
               <StatusBar style="light" />
             </ThemeProvider>
           </ActivityFavouritesProvider>
+          </NotificationsProvider>
         </UserProvider>
       </ClerkProvider>
     </GestureHandlerRootView>

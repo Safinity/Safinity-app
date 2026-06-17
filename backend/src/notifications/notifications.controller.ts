@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  Patch,
   Post,
   Query,
   Req,
@@ -29,6 +30,13 @@ export class NotificationsController {
   @Get('me')
   getMyNotifications(@Req() request: RequestWithUser): Promise<unknown> {
     return this.notificationsService.findForTicketedEvents(request.user);
+  }
+
+  @ApiOperation({ summary: 'Mark all my notifications as read' })
+  @UseGuards(AuthRequiredGuard)
+  @Patch('me/read-all')
+  markMyNotificationsRead(@Req() request: RequestWithUser): Promise<unknown> {
+    return this.notificationsService.markAllRead(request.user);
   }
 
   @Get()

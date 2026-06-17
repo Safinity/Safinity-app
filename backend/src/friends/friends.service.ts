@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationsRealtimeService } from '../notifications/notifications-realtime.service';
 import { AddFriendFromQrDto } from './dto/add-friend-from-qr.dto';
 import {
   FriendResponseDto,
@@ -34,7 +35,10 @@ const PENDING_STATE = 'PENDING';
 
 @Injectable()
 export class FriendsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly realtime: NotificationsRealtimeService,
+  ) {}
 
   private parsePositiveInt(
     value: string | undefined,
@@ -115,13 +119,17 @@ export class FriendsService {
     userId: string,
     query?: FriendsListQuery,
   ): Promise<FriendsGroupedDto> {
-    const myTicket = await this.prisma.user_tickets.findFirst({
-      where: { user_id: userId },
+    const myActiveTickets = await this.prisma.user_tickets.findMany({
+      where: {
+        user_id: userId,
+        event: { status: { equals: 'active', mode: 'insensitive' } },
+      },
       select: { event_id: true },
-      orderBy: { linked_at: 'desc' },
     });
 
-    const myEventId = myTicket?.event_id;
+    const myActiveEventIds = new Set(
+      myActiveTickets.map((ticket) => ticket.event_id.toString()),
+    );
 
     const friendships = await this.prisma.friendship.findMany({
       where: {
@@ -130,10 +138,24 @@ export class FriendsService {
       },
       include: {
         users_friendship_user1_idTousers: {
-          include: { user_tickets: { select: { event_id: true } } },
+          include: {
+            user_tickets: {
+              where: {
+                event: { status: { equals: 'active', mode: 'insensitive' } },
+              },
+              select: { event_id: true },
+            },
+          },
         },
         users_friendship_user2_idTousers: {
-          include: { user_tickets: { select: { event_id: true } } },
+          include: {
+            user_tickets: {
+              where: {
+                event: { status: { equals: 'active', mode: 'insensitive' } },
+              },
+              select: { event_id: true },
+            },
+          },
         },
       },
     });
@@ -148,9 +170,8 @@ export class FriendsService {
 
       if (!friendData) return;
 
-      const isAtSameEvent = !!(
-        myEventId &&
-        friendData.user_tickets.some((t) => t.event_id === myEventId)
+      const isAtSameEvent = friendData.user_tickets.some((ticket) =>
+        myActiveEventIds.has(ticket.event_id.toString()),
       );
 
       const friendObj: FriendResponseDto = {
@@ -159,6 +180,7 @@ export class FriendsService {
         username: friendData.username || '',
         image: this.toBase64Image(friendData.image),
         isOnSameEvent: isAtSameEvent,
+        friendshipState: ACCEPTED_STATE,
       };
 
       allFriends.push(friendObj);
@@ -253,9 +275,36 @@ export class FriendsService {
       take: pageSize,
     });
 
+    const userIds = users.map((user) => user.id);
+    const friendships =
+      userIds.length > 0
+        ? await this.prisma.friendship.findMany({
+            where: {
+              OR: [
+                { user1_id: currentUserId, user2_id: { in: userIds } },
+                { user1_id: { in: userIds }, user2_id: currentUserId },
+              ],
+            },
+            select: {
+              user1_id: true,
+              user2_id: true,
+              state: true,
+            },
+          })
+        : [];
+    const friendshipStateByUserId = new Map(
+      friendships.map((friendship) => [
+        friendship.user1_id === currentUserId
+          ? friendship.user2_id
+          : friendship.user1_id,
+        friendship.state,
+      ]),
+    );
+
     return users.map((u) => ({
       ...u,
       image: this.toBase64Image(u.image),
+      friendshipState: friendshipStateByUserId.get(u.id) ?? null,
     }));
   }
 
@@ -297,10 +346,15 @@ export class FriendsService {
     });
 
     if (existing) {
-      return this.prisma.friendship.delete({ where: { id: existing.id } });
+      const deleted = await this.prisma.friendship.delete({
+        where: { id: existing.id },
+      });
+      this.realtime.emitFriendshipUpdated([deleted.user1_id, deleted.user2_id]);
+
+      return deleted;
     }
 
-    return this.prisma.friendship.create({
+    const friendship = await this.prisma.friendship.create({
       data: {
         id: this.generateBigIntId(),
         user1_id: userId,
@@ -308,6 +362,9 @@ export class FriendsService {
         state: PENDING_STATE,
       },
     });
+    this.realtime.emitFriendRequest(friendId, friendship.id.toString());
+
+    return friendship;
   }
 
   async previewFriendFromQrCode(userId: string, body: AddFriendFromQrDto) {
@@ -374,6 +431,7 @@ export class FriendsService {
             state: ACCEPTED_STATE,
           },
         });
+    this.realtime.emitFriendshipUpdated([userId, friendId]);
 
     return {
       state: friendship.state,
@@ -398,10 +456,13 @@ export class FriendsService {
 
     if (!request) throw new NotFoundException('Pedido não encontrado');
 
-    return this.prisma.friendship.update({
+    const friendship = await this.prisma.friendship.update({
       where: { id: request.id },
       data: { state: ACCEPTED_STATE },
     });
+    this.realtime.emitFriendshipUpdated([userId, friendId]);
+
+    return friendship;
   }
 
   async getPendingRequests(userId: string) {
@@ -446,6 +507,15 @@ export class FriendsService {
       where: { user_id: userId },
       select: { event_id: true },
     });
+    const friendship = await this.prisma.friendship.findFirst({
+      where: {
+        OR: [
+          { user1_id: userId, user2_id: friendId },
+          { user1_id: friendId, user2_id: userId },
+        ],
+      },
+      select: { state: true },
+    });
 
     const myEventIds = myTickets.map((t) => t.event_id);
     const commonEvents = friend.user_tickets
@@ -457,6 +527,7 @@ export class FriendsService {
       name: friend.name || '',
       username: friend.username || '',
       image: this.toBase64Image(friend.image),
+      friendshipState: friendship?.state ?? null,
       totalEventsCount: friend.user_tickets.length,
       commonEvents: commonEvents,
     };

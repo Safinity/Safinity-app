@@ -4,7 +4,7 @@ import { View, StatusBar, Platform, ScrollView } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRouter, Stack } from 'expo-router';
+import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import Head from 'expo-router/head';
 
 import Header from '../../components/ui/header';
@@ -14,7 +14,7 @@ import { CalendarCard } from '../../components/CalendarCard';
 import api from '../../utils/api'; // Reativado o teu cliente de API
 import { useActivityFavourites } from '../../context/ActivityFavouritesContext';
 
-// --- Imports estáticos de imagens para o mapeamento local ---
+// --- Imports estÃ¡ticos de imagens para o mapeamento local ---
 import img1 from '../../assets/images/Calendar/1.jpg';
 import img2 from '../../assets/images/Calendar/2.jpg';
 import img3 from '../../assets/images/Calendar/3.jpg';
@@ -89,6 +89,10 @@ function getEventsList(data: any) {
   if (Array.isArray(data)) return data;
   if (Array.isArray(data?.results)) return data.results;
   return [];
+}
+
+function getRouteParam(value?: string | string[]) {
+  return Array.isArray(value) ? value[0] : value;
 }
 
 // --- Styled Components ---
@@ -209,6 +213,8 @@ export default function CalendarScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { eventId } = useLocalSearchParams<{ eventId?: string }>();
+  const requestedEventId = getRouteParam(eventId);
   const { isLoaded, isSignedIn, getToken } = useAuth();
   const getTokenRef = useRef(getToken);
 
@@ -266,7 +272,16 @@ export default function CalendarScreen() {
         const token = isSignedIn ? await getTokenRef.current() : null;
         let event = null;
 
-        if (isSignedIn) {
+        if (requestedEventId) {
+          try {
+            const eventResponse = await api.get(`/events/${requestedEventId}`);
+            event = eventResponse.data;
+          } catch (requestedEventError) {
+            console.error('Erro ao buscar evento selecionado:', requestedEventError);
+          }
+        }
+
+        if (!event && isSignedIn) {
           try {
             const eventResponse = await api.get('/events/present-event', {
               headers: authHeaders(token),
@@ -456,7 +471,7 @@ export default function CalendarScreen() {
           ? filteredActivities.map((item, index) => {
               let resolvedImage;
 
-              // Interceta strings locais ("1.jpg", etc) vindas da base de dados e injeta o import estático
+              // Interceta strings locais ("1.jpg", etc) vindas da base de dados e injeta o import estÃ¡tico
               if (
                 item.image &&
                 (item.image.startsWith('http://') || item.image.startsWith('https://'))

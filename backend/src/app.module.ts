@@ -10,6 +10,7 @@ import { AdminEventsService } from './events/events.admin.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { NotificationsController } from './notifications/notifications.controller';
+import { NotificationsRealtimeService } from './notifications/notifications-realtime.service';
 import { NotificationsService } from './notifications/notifications.service';
 import { AlertsController } from './alerts/alerts.controller';
 import { AlertsService } from './alerts/alerts.service';
@@ -21,6 +22,8 @@ import { UserTicketsController } from './tickets/user-tickets.controller';
 import { UserTicketsService } from './tickets/user-tickets.service';
 import { FriendsController } from './friends/friends.controller';
 import { FriendsService } from './friends/friends.service';
+import { SensorsController } from './sensors/sensors.controller';
+import { SensorsService } from './sensors/sensors.service';
 
 @Module({
   imports: [PrismaModule, AuthModule],
@@ -35,6 +38,7 @@ import { FriendsService } from './friends/friends.service';
     SosController,
     UserTicketsController,
     FriendsController,
+    SensorsController,
   ],
   providers: [
     AppService,
@@ -43,10 +47,12 @@ import { FriendsService } from './friends/friends.service';
     AdminEventsService,
     AdminUsersService,
     NotificationsService,
+    NotificationsRealtimeService,
     AlertsService,
     SosService,
     UserTicketsService,
     FriendsService,
+    SensorsService,
   ],
 })
 export class AppModule {}

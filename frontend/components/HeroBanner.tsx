@@ -6,6 +6,7 @@ import { useRouter } from 'expo-router';
 
 import { eventImages } from '../assets/images/Events';
 import { calendarImages } from '../assets/images/Calendar';
+import { getEventImageSource } from '../utils/eventImages';
 
 const BannerContainer = styled.ImageBackground.attrs({
   resizeMode: 'cover',
@@ -105,31 +106,13 @@ export const HeroBanner = ({
   const [isFavorite, setIsFavorite] = useState(false);
   const displayedIsFavorite = controlledIsFavorite ?? isFavorite;
 
-  // ⭐ MAPA ID → SLUG (igual ao EventCard)
-  const eventIdToSlug: Record<string, string> = {
-    '1': 'music-festival',
-    '2': 'meo-mares-vivas-2025',
-    '3': 'superbock-superrock-2025',
-    '4': 'meo-sudoeste-2025',
-  };
-
   const getSource = () => {
     if (!event) return null;
 
     // Se for calendário (usa calendarImages)
     if (calendarImages[event.image]) return calendarImages[event.image];
 
-    // ⭐ Se for evento → usar slug
-    const slug = eventIdToSlug[String(event.id)];
-    if (slug && eventImages[slug]) return eventImages[slug];
-
-    // Se vier URL externa (não é o caso, mas mantemos)
-    if (typeof event.image === 'string' && event.image.startsWith('http')) {
-      return { uri: event.image };
-    }
-
-    // fallback
-    return eventImages['banner-lista-eventos'];
+    return getEventImageSource(event.image, eventImages['banner-lista-eventos']);
   };
 
   const imageSource = getSource();

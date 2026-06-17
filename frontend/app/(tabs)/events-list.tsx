@@ -55,13 +55,6 @@ const VerticalSpacer = styled.View`
   height: 120px;
 `;
 
-const DebugText = styled.Text`
-  color: #ff6b6b;
-  font-size: 12px;
-  margin: 10px 40px;
-  font-family: monospace;
-`;
-
 export default function EventsListScreen() {
   const { getToken } = useAuth();
   const [searchValue, setSearchValue] = useState('');
@@ -103,6 +96,17 @@ export default function EventsListScreen() {
       setSelectedCategories([...selectedCategories, category]);
     }
   };
+
+  const visibleCategories =
+    selectedCategories.length > 0
+      ? selectedCategories
+      : Array.from(
+          new Set(
+            events
+              .map((event: any) => (event.category ? String(event.category).trim() : ''))
+              .filter(Boolean),
+          ),
+        );
 
   return (
     <Container>
@@ -150,14 +154,9 @@ export default function EventsListScreen() {
               selectedCategories.every(
                 cat =>
                   !events.some((e: any) => e.category?.toLowerCase().trim() === cat.toLowerCase()),
-              ) && (
-                <DebugText>
-                  ⚠️ API enviou {events.length} eventos, mas as categorias não batem. Vê se no
-                  Postgres está: {events.map((e: any) => e.category).join(', ')}
-                </DebugText>
-              )}
+              ) }
 
-            {selectedCategories.map(category => {
+            {visibleCategories.map(category => {
               const sectionEvents = events.filter((e: any) => {
                 const apiCat = e.category ? String(e.category).trim().toLowerCase() : '';
                 return apiCat === category.toLowerCase();

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, Length } from 'class-validator';
+import { IsOptional, IsString, Length } from 'class-validator';
 
 export class LinkUserTicketDto {
   @ApiProperty({
@@ -9,4 +9,13 @@ export class LinkUserTicketDto {
   @IsString()
   @Length(6)
   ticket_code!: string;
+
+  @ApiProperty({
+    description: 'Optional event id to validate the ticket against a specific event',
+    required: false,
+    example: '1',
+  })
+  @IsOptional()
+  @IsString()
+  event_id?: string;
 }

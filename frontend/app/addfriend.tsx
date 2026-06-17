@@ -7,6 +7,7 @@ import FriendActionButton from '@/components/FriendActionButton';
 import { ActivityIndicator, Alert, TouchableOpacity } from 'react-native';
 import Head from 'expo-router/head';
 import Header from '@/components/ui/header';
+import { useNotifications } from '@/context/NotificationsContext';
 import { useAuth } from '@clerk/expo';
 import { getFriends, searchUsers, toggleFriendship, type FriendSearchItem } from '@/utils/friends';
 import { Ionicons } from '@expo/vector-icons';
@@ -21,10 +22,11 @@ function getAvatarSource(user: FriendSearchItem) {
 
 export default function AddFriendScreen() {
   const { isLoaded, isSignedIn, getToken } = useAuth();
+  const { realtimeVersion } = useNotifications();
   const [search, setSearch] = useState('');
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [results, setResults] = useState<FriendSearchItem[]>([]);
-  const [friendIds, setFriendIds] = useState<string[]>([]);
+  const [friendshipStates, setFriendshipStates] = useState<Record<string, string>>({});
   const [isSearching, setIsSearching] = useState(false);
   const [isLoadingFriends, setIsLoadingFriends] = useState(true);
   const [togglingUserId, setTogglingUserId] = useState<string | null>(null);
@@ -41,7 +43,7 @@ export default function AddFriendScreen() {
       if (!isLoaded) return;
 
       if (!isSignedIn) {
-        setFriendIds([]);
+        setFriendshipStates({});
         setIsLoadingFriends(false);
         return;
       }
@@ -50,10 +52,16 @@ export default function AddFriendScreen() {
         setIsLoadingFriends(true);
         const token = await getTokenRef.current();
         const friends = await getFriends(token);
-        const ids = [...friends.onSameEvent, ...friends.otherFriends].map(friend => friend.id);
+        const states = [...friends.onSameEvent, ...friends.otherFriends].reduce<Record<string, string>>(
+          (acc, friend) => {
+            acc[friend.id] = 'ACCEPTED';
+            return acc;
+          },
+          {},
+        );
 
         if (isActive) {
-          setFriendIds(ids);
+          setFriendshipStates(states);
         }
       } catch (error) {
         console.error('Failed to load friends for search', error);
@@ -69,7 +77,7 @@ export default function AddFriendScreen() {
     return () => {
       isActive = false;
     };
-  }, [isLoaded, isSignedIn]);
+  }, [isLoaded, isSignedIn, realtimeVersion]);
 
   useEffect(() => {
     let isActive = true;
@@ -93,6 +101,17 @@ export default function AddFriendScreen() {
 
         if (isActive) {
           setResults(users);
+          setFriendshipStates(prev => {
+            const next = { ...prev };
+            users.forEach(user => {
+              if (user.friendshipState) {
+                next[user.id] = user.friendshipState;
+              } else {
+                delete next[user.id];
+              }
+            });
+            return next;
+          });
           setSearchError('');
         }
       } catch (error) {
@@ -112,9 +131,9 @@ export default function AddFriendScreen() {
       isActive = false;
       clearTimeout(timeoutId);
     };
-  }, [isLoaded, isSignedIn, trimmedSearch]);
+  }, [isLoaded, isSignedIn, realtimeVersion, trimmedSearch]);
 
-  const friendIdSet = useMemo(() => new Set(friendIds), [friendIds]);
+  const friendshipStateById = useMemo(() => friendshipStates, [friendshipStates]);
 
   const handleSubmitSearch = () => {
     if (trimmedSearch.length > 0) {
@@ -125,7 +144,7 @@ export default function AddFriendScreen() {
     }
   };
 
-  const isFriend = (id: string) => friendIdSet.has(id);
+  const getFriendshipState = (id: string) => friendshipStateById[id]?.toUpperCase() ?? null;
 
   const removeRecentSearch = (item: string) => {
     setRecentSearches(prev => prev.filter(searchItem => searchItem !== item));
@@ -135,11 +154,21 @@ export default function AddFriendScreen() {
     try {
       setTogglingUserId(user.id);
       const token = await getTokenRef.current();
-      await toggleFriendship(token, user.id);
+      const response = await toggleFriendship(token, user.id);
+      const nextState = response?.state?.toUpperCase?.();
 
-      setFriendIds(prev =>
-        prev.includes(user.id) ? prev.filter(friendId => friendId !== user.id) : [...prev, user.id],
-      );
+      setFriendshipStates(prev => {
+        const currentState = prev[user.id]?.toUpperCase() ?? null;
+        const next = { ...prev };
+
+        if (currentState) {
+          delete next[user.id];
+        } else {
+          next[user.id] = nextState || 'PENDING';
+        }
+
+        return next;
+      });
     } catch (error) {
       console.error('Failed to toggle friendship', error);
       Alert.alert('Unable to update friend', 'Please try again.');
@@ -254,7 +283,16 @@ export default function AddFriendScreen() {
                   <Username>@{user.username || 'user'}</Username>
                 </Info>
 
-                {isFriend(user.id) ? (
+                {getFriendshipState(user.id) === 'PENDING' ? (
+                  <FriendActionButton
+                    variant="pending"
+                    onPress={() => handleToggleFriend(user)}
+                    disabled={togglingUserId === user.id}
+                    role="button"
+                    accessibilityLabel={`Cancel pending friend request to ${user.name}`}
+                    accessibilityHint="Cancels the pending friend request"
+                  />
+                ) : getFriendshipState(user.id) === 'ACCEPTED' ? (
                   <FriendActionButton
                     variant="remove"
                     onPress={() => handleToggleFriend(user)}

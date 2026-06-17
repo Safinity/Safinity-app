@@ -8,6 +8,7 @@ import {
 import type { Prisma } from '@prisma/client';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationsRealtimeService } from './notifications-realtime.service';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { CreateOrganizationNotificationDto } from './dto/create-organization-notification.dto';
 
@@ -23,7 +24,10 @@ type NotificationsListQuery = {
 
 @Injectable()
 export class NotificationsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly realtime: NotificationsRealtimeService,
+  ) {}
 
   private parsePositiveInt(
     value: string | undefined,
@@ -99,13 +103,33 @@ export class NotificationsService {
       return [];
     }
 
-    return await this.prisma.notifications.findMany({
+    const notifications = await this.prisma.notifications.findMany({
       where: {
         event_id: { in: eventIds },
+        OR: [
+          { category: null },
+          { category: { not: 'friend_sos' } },
+          {
+            category: 'friend_sos',
+            user_notification_status: {
+              some: { user_id: userId },
+            },
+          },
+        ],
       },
       orderBy: { time: 'desc' },
-      include: { event: true },
+      include: {
+        event: true,
+        user_notification_status: {
+          where: { user_id: userId },
+          select: { read_at: true },
+        },
+      },
     });
+
+    return notifications.map((notification) =>
+      this.serializeNotificationForUser(notification),
+    );
   }
 
   async create(input: CreateNotificationDto): Promise<unknown> {
@@ -116,7 +140,7 @@ export class NotificationsService {
         ? null
         : this.toBigInt(input.event_id, 'event_id');
 
-    return await this.prisma.notifications.create({
+    const notification = await this.prisma.notifications.create({
       data: {
         id,
         event_id: eventId,
@@ -126,6 +150,10 @@ export class NotificationsService {
       },
       include: { event: true },
     });
+
+    await this.realtime.emitNotificationCreated(notification);
+
+    return notification;
   }
 
   // Backoffice-related methods
@@ -185,7 +213,7 @@ export class NotificationsService {
     this.validateNotificationContent(input);
     const id = await this.nextId();
 
-    return await this.prisma.notifications.create({
+    const notification = await this.prisma.notifications.create({
       data: {
         id,
         event_id: eventId,
@@ -195,6 +223,51 @@ export class NotificationsService {
       },
       include: { event: true },
     });
+
+    await this.realtime.emitNotificationCreated(notification);
+
+    return notification;
+  }
+
+  async markAllRead(user: AuthenticatedUser | undefined) {
+    const userId = await this.resolveAppUserId(user);
+    const notifications = (await this.findForTicketedEvents(user)) as Array<{
+      id: string;
+      read: boolean;
+    }>;
+    const unreadNotifications = notifications.filter(
+      (notification) => !notification.read,
+    );
+
+    if (unreadNotifications.length === 0) {
+      this.realtime.emitReadAll(userId);
+      return { updated: 0 };
+    }
+
+    let nextStatusId = await this.nextNotificationStatusId();
+
+    await this.prisma.$transaction(
+      unreadNotifications.map((notification) =>
+        this.prisma.user_notification_status.upsert({
+          where: {
+            user_id_notification_id: {
+              user_id: userId,
+              notification_id: this.toBigInt(notification.id, 'notification_id'),
+            },
+          },
+          update: { read_at: new Date() },
+          create: {
+            id: nextStatusId++,
+            user_id: userId,
+            notification_id: this.toBigInt(notification.id, 'notification_id'),
+            read_at: new Date(),
+          },
+        }),
+      ),
+    );
+
+    this.realtime.emitReadAll(userId);
+    return { updated: unreadNotifications.length };
   }
 
   private async nextId(): Promise<bigint> {
@@ -203,6 +276,55 @@ export class NotificationsService {
     });
 
     return (result._max.id ?? BigInt(0)) + BigInt(1);
+  }
+
+  private async nextNotificationStatusId(): Promise<bigint> {
+    const result = await this.prisma.user_notification_status.aggregate({
+      _max: { id: true },
+    });
+
+    return (result._max.id ?? BigInt(0)) + BigInt(1);
+  }
+
+  private serializeNotificationForUser(notification: {
+    id: bigint;
+    event_id: bigint | null;
+    title: string | null;
+    description: string | null;
+    category: string | null;
+    time: Date | null;
+    event?: unknown;
+    user_notification_status?: Array<{ read_at: Date | null }>;
+  }) {
+    const readAt = notification.user_notification_status?.[0]?.read_at ?? null;
+
+    return {
+      id: notification.id.toString(),
+      event_id: notification.event_id?.toString() ?? null,
+      title: notification.title,
+      description: notification.description,
+      message: notification.description,
+      category: notification.category,
+      type: this.mapCategoryToType(notification.category),
+      time: notification.time,
+      read: Boolean(readAt),
+      read_at: readAt,
+      event: notification.event,
+    };
+  }
+
+  private mapCategoryToType(category?: string | null) {
+    const normalizedCategory = category?.toLowerCase() ?? '';
+
+    if (normalizedCategory.includes('activity')) return 'activity';
+    if (normalizedCategory.includes('crowd')) return 'crowd';
+    if (normalizedCategory.includes('hydrat')) return 'hydrate';
+    if (normalizedCategory.includes('security')) return 'security';
+    if (normalizedCategory.includes('sos')) return 'sos';
+    if (normalizedCategory.includes('emergency')) return 'emergency';
+    if (normalizedCategory.includes('friend')) return 'friend';
+
+    return 'event';
   }
 
   private validateInput(input: CreateNotificationDto) {

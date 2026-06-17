@@ -1,9 +1,9 @@
 import { useAuth } from '@clerk/expo';
 import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components/native';
-import { ActivityIndicator, Alert, ScrollView } from 'react-native';
+import { ActivityIndicator, Alert } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { Colors, Spacing, BorderRadius, TextStyles } from '../../../constants/theme';
+import { Colors, Spacing, TextStyles } from '../../../constants/theme';
 import Header from '../../../components/ui/header';
 import PrimaryButton from '../../../components/PrimaryButton';
 import { deleteUserTicket, getUserTickets, type UserTicket } from '../../../utils/tickets';
@@ -156,14 +156,7 @@ const TicketScreen = () => {
       <Stack.Screen options={{ title: 'Ticket' }} />
       <Header variant="back" title="Ticket" showBottomDivider={false} />
 
-      <ScrollView
-        contentContainerStyle={{
-          paddingTop: 120,
-          paddingHorizontal: Spacing.margemLateral,
-          paddingBottom: Spacing.xxl * 2,
-        }}
-        showsVerticalScrollIndicator={false}
-      >
+      <TicketBody>
         {isLoading ? (
           <LoadingState>
             <ActivityIndicator color="white" />
@@ -222,19 +215,17 @@ const TicketScreen = () => {
                 <BarcodeText>{formatBarcode(ticket.ticket_code)}</BarcodeText>
               </BarcodeSection>
             </TicketCard>
+
+            <DeleteButtonContainer>
+              <PrimaryButton
+                title={isDeleting ? 'Deleting...' : 'Delete Ticket'}
+                disabled={isDeleting}
+                onPress={handleDeleteTicket}
+              />
+            </DeleteButtonContainer>
           </Content>
         )}
-      </ScrollView>
-
-      {ticket ? (
-        <DeleteButtonContainer>
-          <PrimaryButton
-            title={isDeleting ? 'Deleting...' : 'Delete Ticket'}
-            disabled={isDeleting}
-            onPress={handleDeleteTicket}
-          />
-        </DeleteButtonContainer>
-      ) : null}
+      </TicketBody>
     </Container>
   );
 };
@@ -246,33 +237,40 @@ const Container = styled.View`
   background-color: ${Colors.background};
 `;
 
-const Content = styled.View`
+const TicketBody = styled.View`
   flex: 1;
+  padding-top: ${({ theme }) => theme.spacing.margemTop}px;
+  padding-horizontal: ${({ theme }) => theme.spacing.margemLateral}px;
+  justify-content: center;
+`;
+
+const Content = styled.View`
   align-items: center;
+  justify-content: center;
 `;
 
 const TicketCard = styled.View`
-  width: 100%;
-  max-width: 350px;
-  border-radius: ${BorderRadius.large}px;
+  width: 92%;
+  max-width: ${({ theme }) => theme.height.lg}px;
+  border-radius: ${({ theme }) => theme.borderRadius.large}px;
   background-color: ${Colors.white};
   overflow: hidden;
   shadow-color: #000;
-  shadow-offset: 0px 2px;
+  shadow-offset: 0px ${({ theme }) => theme.spacing.xxs}px;
   shadow-opacity: 0.1;
-  shadow-radius: 8px;
+  shadow-radius: ${({ theme }) => theme.spacing.sm}px;
   elevation: 5;
 `;
 
 const EventImage = styled.Image`
   width: 100%;
-  height: 187px;
+  height: ${({ theme }) => theme.height.card.compact * 0.48}px;
   background-color: ${Colors.background};
 `;
 
 const TicketStatusContainer = styled.View`
   align-items: center;
-  padding-vertical: ${Spacing.md}px;
+  padding-vertical: ${Spacing.sm}px;
   padding-horizontal: ${Spacing.lg}px;
 `;
 
@@ -293,17 +291,17 @@ const TicketStatusValue = styled.Text`
 
 const Divider = styled.View`
   width: 100%;
-  height: 8px;
+  height: ${({ theme }) => theme.spacing.sm}px;
   background-color: ${Colors.background};
 `;
 
 const TicketHeader = styled.View`
   border-bottom-width: 1px;
   border-bottom-color: ${Colors.grayNavbar};
-  padding-bottom: ${Spacing.md}px;
-  margin-bottom: ${Spacing.md}px;
+  padding-bottom: ${Spacing.sm}px;
+  margin-bottom: ${Spacing.sm}px;
   padding-horizontal: ${Spacing.lg}px;
-  padding-top: ${Spacing.md}px;
+  padding-top: ${Spacing.sm}px;
 `;
 
 const EventName = styled.Text`
@@ -314,9 +312,9 @@ const EventName = styled.Text`
 `;
 
 const TicketInfo = styled.View`
-  gap: ${Spacing.md}px;
+  gap: ${Spacing.sm}px;
   padding-horizontal: ${Spacing.lg}px;
-  padding-vertical: ${Spacing.md}px;
+  padding-vertical: ${Spacing.sm}px;
 `;
 
 const InfoRow = styled.View`
@@ -342,11 +340,11 @@ const InfoValue = styled.Text`
 
 const ButtonContainer = styled.View`
   padding-horizontal: ${Spacing.lg}px;
-  padding-vertical: ${Spacing.md}px;
+  padding-vertical: ${Spacing.sm}px;
 `;
 
 const BarcodeSection = styled.View`
-  height: 116px;
+  height: ${({ theme }) => theme.height.sm}px;
   background-color: ${Colors.white};
   align-items: center;
   justify-content: center;
@@ -370,13 +368,13 @@ const ErrorText = styled.Text`
 `;
 
 const LoadingState = styled.View`
+  flex: 1;
   align-items: center;
   justify-content: center;
-  padding-top: ${Spacing.xxl}px;
 `;
 
 const DeleteButtonContainer = styled.View`
-  padding-horizontal: ${Spacing.margemLateral}px;
-  padding-bottom: ${Spacing.xxl}px;
-  padding-top: ${Spacing.lg}px;
+  width: 92%;
+  max-width: ${({ theme }) => theme.height.lg}px;
+  padding-top: ${Spacing.md}px;
 `;

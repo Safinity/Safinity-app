@@ -15,7 +15,7 @@ import Svg, {
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { useLocalSearchParams, router, Stack } from 'expo-router';
-import { useAuth } from '@clerk/expo'; // Gancho nativo para controlo assíncrono do token
+import { useAuth } from '@clerk/expo'; // Gancho nativo para controlo assÃ­ncrono do token
 
 import Header from '../../components/ui/header';
 import SearchInput from '../../components/ui/SearchInput';
@@ -88,6 +88,12 @@ const MAX_SCALE = 3;
 
 const Container = styled.View`
   flex: 1;
+  background-color: ${Colors.background};
+`;
+
+const MapViewport = styled.View`
+  flex: 1;
+  overflow: hidden;
   background-color: ${Colors.background};
 `;
 
@@ -267,6 +273,10 @@ const matchesSearch = (item: { name?: string; type?: string }, query: string) =>
   return name.includes(q) || (item.type || '').toLowerCase().includes(q);
 };
 
+const getRouteParam = (value?: string | string[]) => {
+  return Array.isArray(value) ? value[0] : value;
+};
+
 // --- MapScreen Component ---
 export default function MapScreen() {
   const { isLoaded, isSignedIn, getToken } = useAuth();
@@ -301,43 +311,48 @@ export default function MapScreen() {
   const bounds = mapSource?.bounds ?? mapData.bounds;
   const currentLocation = realUserLocation;
   const tags = ['Exits', 'Friends', 'Stages', 'Food', 'WC', 'Medical', 'Entrance', 'Points'];
-  const { focusId } = useLocalSearchParams();
+  const { focusId, eventId } = useLocalSearchParams<{ focusId?: string; eventId?: string }>();
+  const requestedEventId = getRouteParam(eventId);
 
   const clampMapTranslation = useCallback(() => {
     'worklet';
 
     const scaledWidth = IMAGE_WIDTH * scale.value;
     const scaledHeight = IMAGE_HEIGHT * scale.value;
-    const minX = Math.min(0, screenWidth - scaledWidth);
-    const minY = Math.min(0, screenHeight - scaledHeight);
+    const minX = screenWidth - (IMAGE_WIDTH + scaledWidth) / 2;
+    const maxX = (scaledWidth - IMAGE_WIDTH) / 2;
+    const minY = screenHeight - (IMAGE_HEIGHT + scaledHeight) / 2;
+    const maxY = (scaledHeight - IMAGE_HEIGHT) / 2;
 
-    translateX.value = Math.min(0, Math.max(minX, translateX.value));
-    translateY.value = Math.min(0, Math.max(minY, translateY.value));
+    translateX.value = Math.min(maxX, Math.max(minX, translateX.value));
+    translateY.value = Math.min(maxY, Math.max(minY, translateY.value));
   }, [scale, translateX, translateY]);
 
   const getClampedMapTranslation = useCallback((targetX: number, targetY: number) => {
     const scaledWidth = IMAGE_WIDTH * scale.value;
     const scaledHeight = IMAGE_HEIGHT * scale.value;
-    const minX = Math.min(0, screenWidth - scaledWidth);
-    const minY = Math.min(0, screenHeight - scaledHeight);
+    const minX = screenWidth - (IMAGE_WIDTH + scaledWidth) / 2;
+    const maxX = (scaledWidth - IMAGE_WIDTH) / 2;
+    const minY = screenHeight - (IMAGE_HEIGHT + scaledHeight) / 2;
+    const maxY = (scaledHeight - IMAGE_HEIGHT) / 2;
 
     return {
-      x: Math.min(0, Math.max(minX, targetX)),
-      y: Math.min(0, Math.max(minY, targetY)),
+      x: Math.min(maxX, Math.max(minX, targetX)),
+      y: Math.min(maxY, Math.max(minY, targetY)),
     };
   }, [scale]);
 
 
-  // Monitorização de mutações de estado e re-renderizações locais
+  // MonitorizaÃ§Ã£o de mutaÃ§Ãµes de estado e re-renderizaÃ§Ãµes locais
 
   useEffect(() => {
     let mounted = true;
 
     const loadMap = async () => {
-      // Bloqueia a execução imediata se a infraestrutura do Clerk ainda estiver fria
+      // Bloqueia a execuÃ§Ã£o imediata se a infraestrutura do Clerk ainda estiver fria
 
       if (!isSignedIn) {
-        console.warn('[MAP_DEBUG] Pedido abortado: Utilizador sem sessão iniciada.');
+        console.warn('[MAP_DEBUG] Pedido abortado: Utilizador sem sessÃ£o iniciada.');
         if (mounted) {
           setMapLoading(false);
           setMapError('Please sign in to view the event map.');
@@ -355,17 +370,22 @@ export default function MapScreen() {
           throw new Error('Could not retrieve a valid session token from Clerk.');
         }
 
-        // Injeção explícita de cabeçalho local isolado de interceptores globais flutuantes
+        // InjeÃ§Ã£o explÃ­cita de cabeÃ§alho local isolado de interceptores globais flutuantes
         const requestConfig = {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         };
 
-        const presentEventResponse = await api.get('/events/present-event', requestConfig);
-        const presentEvent = presentEventResponse.data;
+        let targetEventId = requestedEventId;
 
-        if (!presentEvent?.id) {
+        if (!targetEventId) {
+          const presentEventResponse = await api.get('/events/present-event', requestConfig);
+          const presentEvent = presentEventResponse.data;
+          targetEventId = presentEvent?.id ? String(presentEvent.id) : undefined;
+        }
+
+        if (!targetEventId) {
           console.warn('[MAP_DEBUG] Evento nulo ou inexistente retornado do banco para este ID.');
           if (mounted) {
             setMapPayload(null);
@@ -375,14 +395,14 @@ export default function MapScreen() {
         }
 
         // Rota preservada em conformidade exata com o @Get(':id/mapa') do NestJS
-        const mapUrl = `/events/${presentEvent.id}/mapa`;
+        const mapUrl = `/events/${targetEventId}/mapa`;
         const mapResponse = await api.get(mapUrl, requestConfig);
 
         if (mounted) {
           setMapPayload(mapResponse.data);
         }
       } catch (error: any) {
-        console.error('[MAP_DEBUG] Exceção intercetada no fluxo loadMap:', {
+        console.error('[MAP_DEBUG] ExceÃ§Ã£o intercetada no fluxo loadMap:', {
           message: error?.message,
           status: error?.response?.status,
           data: error?.response?.data,
@@ -403,7 +423,7 @@ export default function MapScreen() {
     return () => {
       mounted = false;
     };
-  }, [isLoaded, isSignedIn]); // Dispara novamente assim que as permissões do dispositivo mudarem de estado
+  }, [isLoaded, isSignedIn, requestedEventId]); // Dispara novamente assim que as permissÃµes do dispositivo mudarem de estado
 
   useEffect(() => {
     let mounted = true;
@@ -425,7 +445,7 @@ export default function MapScreen() {
           headers: { Authorization: `Bearer ${token}` },
         });
       } catch (error: any) {
-        console.error('[MAP_DEBUG] Erro ao guardar localização real:', {
+        console.error('[MAP_DEBUG] Erro ao guardar localizaÃ§Ã£o real:', {
           message: error?.message,
           status: error?.response?.status,
         });
@@ -481,7 +501,7 @@ export default function MapScreen() {
     };
 
     loadRealLocation().catch((error: any) => {
-      console.error('[MAP_DEBUG] Erro ao obter localização real:', error?.message);
+      console.error('[MAP_DEBUG] Erro ao obter localizaÃ§Ã£o real:', error?.message);
       if (mounted) {
         setRealUserLocation(null);
       }
@@ -559,12 +579,12 @@ export default function MapScreen() {
     ],
   }));
 
-  // --- FUNÇÕES ---
+  // --- FUNÃ‡Ã•ES ---
   const handlePinPress = useCallback(
     (pin: any, showRoute = false) => {
       if (pin.lat === undefined || pin.lng === undefined || !bounds) {
         console.error(
-          '[MAP_DEBUG] Erro de projeção espacial: Atributos lat/lng ausentes nos bounds.',
+          '[MAP_DEBUG] Erro de projeÃ§Ã£o espacial: Atributos lat/lng ausentes nos bounds.',
           {
             pin,
             bounds,
@@ -583,8 +603,8 @@ export default function MapScreen() {
       });
 
       const targetTranslation = getClampedMapTranslation(
-        screenWidth / 2 - pos.x * scale.value,
-        screenHeight / 2 - pos.y * scale.value,
+        screenWidth / 2 - (IMAGE_WIDTH / 2 + (pos.x - IMAGE_WIDTH / 2) * scale.value),
+        screenHeight / 2 - (IMAGE_HEIGHT / 2 + (pos.y - IMAGE_HEIGHT / 2) * scale.value),
       );
 
       translateX.value = withTiming(targetTranslation.x);
@@ -649,16 +669,17 @@ export default function MapScreen() {
       <Stack.Screen options={{ title: 'Map | Safinity', headerShown: false }} />
 
       <GestureDetector gesture={composedGesture}>
-        <Animated.View
-          style={[{ width: IMAGE_WIDTH, height: IMAGE_HEIGHT }, animatedStyle]}
-          accessible={false}
-        >
-          <StaticMapPreview
-            width={IMAGE_WIDTH}
-            height={IMAGE_HEIGHT}
-            theme="dark"
-            imageUrl={mapImageUrl}
-          />
+        <MapViewport>
+          <Animated.View
+            style={[{ width: IMAGE_WIDTH, height: IMAGE_HEIGHT }, animatedStyle]}
+            accessible={false}
+          >
+            <StaticMapPreview
+              width={IMAGE_WIDTH}
+              height={IMAGE_HEIGHT}
+              theme="dark"
+              imageUrl={mapImageUrl}
+            />
 
           <Svg
             width={IMAGE_WIDTH}
@@ -786,15 +807,16 @@ export default function MapScreen() {
             />
           )}
 
-          {currentLocation && (
-            <UserMarker
-              location={currentLocation}
-              bounds={bounds}
-              width={IMAGE_WIDTH}
-              height={IMAGE_HEIGHT}
-            />
-          )}
-        </Animated.View>
+            {currentLocation && (
+              <UserMarker
+                location={currentLocation}
+                bounds={bounds}
+                width={IMAGE_WIDTH}
+                height={IMAGE_HEIGHT}
+              />
+            )}
+          </Animated.View>
+        </MapViewport>
       </GestureDetector>
 
       <Header />

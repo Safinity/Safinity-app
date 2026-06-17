@@ -55,13 +55,6 @@ const VerticalSpacer = styled.View`
   height: 120px;
 `;
 
-const DebugText = styled.Text`
-  color: #ff6b6b;
-  font-size: 12px;
-  margin: 10px 40px;
-  font-family: monospace;
-`;
-
 export default function EventsListScreen() {
   const { getToken } = useAuth();
   const [searchValue, setSearchValue] = useState('');

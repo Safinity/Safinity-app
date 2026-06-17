@@ -10,6 +10,7 @@ import { AdminEventsService } from './events/events.admin.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { NotificationsController } from './notifications/notifications.controller';
+import { NotificationsRealtimeService } from './notifications/notifications-realtime.service';
 import { NotificationsService } from './notifications/notifications.service';
 import { AlertsController } from './alerts/alerts.controller';
 import { AlertsService } from './alerts/alerts.service';
@@ -46,6 +47,7 @@ import { SensorsService } from './sensors/sensors.service';
     AdminEventsService,
     AdminUsersService,
     NotificationsService,
+    NotificationsRealtimeService,
     AlertsService,
     SosService,
     UserTicketsService,

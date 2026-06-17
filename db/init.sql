@@ -523,6 +523,6 @@ INSERT INTO Event_Tickets_Master (id, event_id, ticket_code, is_already_linked) 
 -- ======================================================
 INSERT INTO User_Tickets (id, user_id, event_id, ticket_code, linked_at) VALUES
 
-(4, '0339bc70-bc90-4918-90ef-d11c5b6c3881', 10, 'TICKET-ALIVE-999', now()),
-(5, '0339bc70-bc90-4918-90ef-d11c5b6c3881', 8, 'TICKET-MARES-888', now()),
-(6, '0339bc70-bc90-4918-90ef-d11c5b6c3881', 12, 'TICKET-FUTURE-777', now());
+(4, '8c8fcc27-685e-4b8a-8f8a-218f4a39ae1b', 10, 'TICKET-ALIVE-999', now()),
+(5, '8c8fcc27-685e-4b8a-8f8a-218f4a39ae1b', 8, 'TICKET-MARES-888', now()),
+(6, '8c8fcc27-685e-4b8a-8f8a-218f4a39ae1b', 12, 'TICKET-FUTURE-777', now()); 

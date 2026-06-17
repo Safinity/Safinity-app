@@ -11,10 +11,14 @@ import { AuthRequiredGuard } from '../auth/auth.guards';
 import { AuthService } from '../auth/auth.service';
 import type { RequestWithUser } from '../auth/auth.types';
 import { UpdateProfileDto } from '../auth/dto/update-profile.dto';
+import { UsersService } from './users.service';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly usersService: UsersService,
+  ) {}
 
   @Get('me')
   @UseGuards(AuthRequiredGuard)
@@ -29,6 +33,15 @@ export class UsersController {
     @Body() body: UpdateProfileDto,
   ) {
     return this.authService.updateProfile(request.user!.id, body);
+  }
+
+  @Patch('me/location')
+  @UseGuards(AuthRequiredGuard)
+  updateMyLocation(
+    @Req() request: RequestWithUser,
+    @Body() body: { lat?: number; lng?: number },
+  ) {
+    return this.usersService.updateMyLocation(request.user!.id, body);
   }
 
   @Delete('me')

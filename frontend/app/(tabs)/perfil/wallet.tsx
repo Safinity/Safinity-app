@@ -8,6 +8,7 @@ import Header from '../../../components/ui/header';
 import SearchInput from '../../../components/ui/SearchInput';
 import PrimaryButton from '../../../components/PrimaryButton';
 import { WalletCard } from '../../../components/WalletCard';
+import { LinkTicketModal } from '../../../components/LinkTicketModal';
 import { getMyProfile } from '../../../utils/profile';
 import { getUserTickets, type UserTicket } from '../../../utils/tickets';
 
@@ -18,6 +19,7 @@ const WalletScreen = () => {
   const [tickets, setTickets] = useState<UserTicket[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [linkModalVisible, setLinkModalVisible] = useState(false);
   const getTokenRef = useRef(getToken);
   getTokenRef.current = getToken;
 
@@ -102,7 +104,7 @@ const WalletScreen = () => {
 
           <Spacer />
 
-          <PrimaryButton title="Add new ticket" />
+          <PrimaryButton title="Add new ticket" onPress={() => setLinkModalVisible(true)} />
 
           <CardsSpacer />
 
@@ -128,6 +130,18 @@ const WalletScreen = () => {
           <BottomSpacer />
         </Content>
       </ScrollView>
+
+      <LinkTicketModal
+        visible={linkModalVisible}
+        onClose={() => setLinkModalVisible(false)}
+        onLinked={ticket => {
+          setError('');
+          setTickets(previousTickets => [
+            ticket,
+            ...previousTickets.filter(previousTicket => previousTicket.id !== ticket.id),
+          ]);
+        }}
+      />
     </Container>
   );
 };

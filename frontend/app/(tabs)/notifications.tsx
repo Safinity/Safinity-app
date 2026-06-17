@@ -1,17 +1,47 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { FlatList, ActivityIndicator } from 'react-native';
 import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@clerk/expo';
 import Header from '../../components/ui/header';
 import { userImages } from '../../assets/images/Users/userImages';
-import initialData from '../../data/notifications.json';
 import { Stack } from 'expo-router';
-import api from '../../utils/api';
+import { useNotifications } from '@/context/NotificationsContext';
+import api, { API_BASE } from '../../utils/api';
 
-const NOTIFICATIONS_FETCH_COOLDOWN_MS = 10000;
-let notificationsFetchInFlight = false;
-let notificationsLastFetchedAt = 0;
+type NotificationItem = {
+  id: string;
+  type: string;
+  title: string | null;
+  message: string | null;
+  description?: string | null;
+  time: string | null;
+  read: boolean;
+  avatar?: keyof typeof userImages;
+  imageUri?: string;
+  senderId?: string;
+  friendshipId?: string;
+  isDivider?: boolean;
+};
+
+function getRealtimeUrl(token: string) {
+  return `${API_BASE.replace(/^http/, 'ws')}/notifications/realtime?token=${encodeURIComponent(token)}`;
+}
+
+function formatNotificationTime(value?: string | null) {
+  if (!value) return '';
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return date.toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+  }) + `, ${date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`;
+}
 
 const Container = styled.View`
   flex: 1;
@@ -137,70 +167,152 @@ const ErrorText = styled.Text`
 `;
 
 export default function NotificationsPage() {
-  const [notifications, setNotifications] = useState(initialData);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { getToken } = useAuth();
+  const { isLoaded, isSignedIn, getToken } = useAuth();
+  const { refreshNotifications } = useNotifications();
+  const getTokenRef = useRef(getToken);
+
+  getTokenRef.current = getToken;
+
+  const getFreshToken = useCallback(async () => {
+    const getTokenWithOptions = getTokenRef.current as (options?: unknown) => Promise<string | null>;
+    return getTokenWithOptions({ skipCache: true });
+  }, []);
+
+  const fetchNotifications = useCallback(async (showLoading = false) => {
+    if (!isSignedIn) {
+      setNotifications([]);
+      setLoading(false);
+      setError('Please sign in to view notifications.');
+      return;
+    }
+
+    try {
+      if (showLoading) {
+        setLoading(true);
+      }
+      setError(null);
+      const token = await getFreshToken();
+      const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
+      const [notificationsResponse, pendingRequestsResponse] = await Promise.all([
+        api.get('/notifications/me', { headers }),
+        api.get('/friends/requests/pending', { headers }),
+      ]);
+      const eventNotifications = Array.isArray(notificationsResponse.data)
+        ? notificationsResponse.data
+        : [];
+      const pendingRequests = Array.isArray(pendingRequestsResponse.data)
+        ? pendingRequestsResponse.data.map(request => ({
+            id: `friend-${request.id}`,
+            friendshipId: request.id,
+            senderId: request.sender?.id,
+            title: 'Friendship request',
+            message: request.sender?.username ? `@${request.sender.username}` : request.sender?.name,
+            description: request.sender?.username ? `@${request.sender.username}` : request.sender?.name,
+            type: 'friend',
+            category: 'friend',
+            time: null,
+            read: false,
+            imageUri: request.sender?.image
+              ? `data:image/jpeg;base64,${request.sender.image}`
+              : undefined,
+          }))
+        : [];
+
+      setNotifications([...pendingRequests, ...eventNotifications]);
+    } catch (err: any) {
+      console.error('Failed to fetch notifications:', err);
+      setError(err.response?.data?.message || 'Failed to load notifications');
+      setNotifications([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [getFreshToken, isSignedIn]);
 
   useEffect(() => {
-    let isActive = true;
+    if (!isLoaded) {
+      return;
+    }
 
-    const fetchNotifications = async () => {
-      const now = Date.now();
+    fetchNotifications(true);
+  }, [fetchNotifications, isLoaded]);
 
-      if (notificationsFetchInFlight) {
-        return;
-      }
+  useEffect(() => {
+    let socket: WebSocket | null = null;
+    let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
+    let isMounted = true;
 
-      // Prevent duplicate requests from rapid remounts or double-invoked effects in dev.
-      if (now - notificationsLastFetchedAt < NOTIFICATIONS_FETCH_COOLDOWN_MS) {
-        if (isActive) {
-          setLoading(false);
-        }
-        return;
-      }
-
-      notificationsFetchInFlight = true;
-
-      try {
-        if (isActive) {
-          setLoading(true);
-          setError(null);
-        }
-
-        const token = await getToken();
-
-        const response = await api.get('/notifications/me', {
-          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-        });
-
-        if (isActive) {
-          setNotifications(response.data || []);
-        }
-
-        notificationsLastFetchedAt = Date.now();
-      } catch (err: any) {
-        console.error('Failed to fetch notifications:', err);
-
-        if (isActive) {
-          setError(err.response?.data?.message || 'Failed to load notifications');
-          setNotifications(initialData);
-        }
-      } finally {
-        notificationsFetchInFlight = false;
-
-        if (isActive) {
-          setLoading(false);
-        }
+    const clearReconnect = () => {
+      if (reconnectTimeout) {
+        clearTimeout(reconnectTimeout);
+        reconnectTimeout = null;
       }
     };
 
-    fetchNotifications();
+    const scheduleReconnect = () => {
+      if (!isMounted || reconnectTimeout) return;
+      reconnectTimeout = setTimeout(() => {
+        reconnectTimeout = null;
+        connectRealtime();
+      }, 2500);
+    };
+
+    async function connectRealtime() {
+      if (!isLoaded || !isSignedIn) {
+        return;
+      }
+
+      const token = await getFreshToken();
+
+      if (!token || !isMounted) {
+        return;
+      }
+
+      socket?.close();
+      socket = new WebSocket(getRealtimeUrl(token));
+
+      socket.onopen = () => {
+        clearReconnect();
+      };
+
+      socket.onmessage = event => {
+        try {
+          const payload = JSON.parse(event.data);
+
+          if (
+            payload.type === 'notification.created' ||
+            payload.type === 'friend_request.created' ||
+            payload.type === 'friendship.updated'
+          ) {
+            fetchNotifications(false);
+            refreshNotifications().catch(() => undefined);
+          }
+
+          if (payload.type === 'notifications.read_all') {
+            setNotifications(currentNotifications =>
+              currentNotifications.map(notification => ({ ...notification, read: true })),
+            );
+            refreshNotifications().catch(() => undefined);
+          }
+        } catch {
+          // Ignore invalid realtime messages.
+        }
+      };
+
+      socket.onclose = scheduleReconnect;
+      socket.onerror = scheduleReconnect;
+    }
+
+    connectRealtime().catch(scheduleReconnect);
 
     return () => {
-      isActive = false;
+      isMounted = false;
+      clearReconnect();
+      socket?.close();
     };
-  }, [getToken]);
+  }, [fetchNotifications, getFreshToken, isLoaded, isSignedIn, refreshNotifications]);
 
   const newNotifications = notifications.filter(n => !n.read);
   const oldNotifications = notifications.filter(n => n.read);
@@ -213,6 +325,8 @@ export default function NotificationsPage() {
 
   const getIcon = (type: string) => {
     switch (type) {
+      case 'sos':
+        return <Ionicons name="alert-circle" size={32} color="#D34A4A" />;
       case 'emergency':
         return <Ionicons name="alert-circle" size={32} color="#D34A4A" />;
       case 'activity':
@@ -230,6 +344,8 @@ export default function NotificationsPage() {
 
   const getIconLabel = (type: string) => {
     switch (type) {
+      case 'sos':
+        return 'Friend SOS alert';
       case 'emergency':
         return 'Emergency alert';
       case 'activity':
@@ -245,14 +361,52 @@ export default function NotificationsPage() {
     }
   };
 
-  const handleMarkAllRead = () => {
-    setNotifications(notifications.map(n => ({ ...n, read: true })));
+  const handleMarkAllRead = async () => {
+    try {
+      const token = await getFreshToken();
+      await api.patch('/notifications/me/read-all', undefined, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
+      setNotifications(currentNotifications =>
+        currentNotifications.map(notification => ({ ...notification, read: true })),
+      );
+      await refreshNotifications();
+    } catch (markReadError: any) {
+      setError(markReadError.response?.data?.message || 'Unable to mark notifications as read');
+    }
   };
 
-  const renderItem = ({ item }: { item: any }) => {
+  const handleFriendRequest = async (item: NotificationItem, action: 'accept' | 'remove') => {
+    if (!item.senderId) {
+      return;
+    }
+
+    try {
+      const token = await getFreshToken();
+      const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
+      const endpoint =
+        action === 'accept' ? `/friends/accept/${item.senderId}` : `/friends/toggle/${item.senderId}`;
+
+      await api.post(endpoint, undefined, { headers });
+      await fetchNotifications(false);
+      await refreshNotifications();
+    } catch (friendRequestError: any) {
+      setError(friendRequestError.response?.data?.message || 'Unable to update friend request');
+    }
+  };
+
+  const renderItem = ({ item }: { item: NotificationItem }) => {
     if (item.isDivider) return <SectionLabel>Oldest</SectionLabel>;
 
-    const cardLabel = `${item.title}, ${item.time}. ${item.message}${item.read ? '' : ', new notification'}`;
+    const notificationTime = formatNotificationTime(item.time);
+    const notificationMessage = item.message || item.description || '';
+    const notificationTitle = item.title || 'Notification';
+    const friendAvatarSource = item.imageUri
+      ? { uri: item.imageUri }
+      : item.avatar
+        ? userImages[item.avatar]
+        : null;
+    const cardLabel = `${notificationTitle}, ${notificationTime}. ${notificationMessage}${item.read ? '' : ', new notification'}`;
 
     return (
       <NotificationCard
@@ -261,10 +415,10 @@ export default function NotificationsPage() {
         role="none"
         accessibilityLabel={cardLabel}
       >
-        {item.type === 'friend' ? (
+        {item.type === 'friend' && friendAvatarSource ? (
           <Avatar
-            source={userImages[item.avatar]}
-            accessibilityLabel={`Profile picture of ${item.title}`}
+            source={friendAvatarSource}
+            accessibilityLabel={`Profile picture of ${notificationTitle}`}
           />
         ) : (
           <IconCircle
@@ -278,24 +432,28 @@ export default function NotificationsPage() {
 
         <CardContent>
           <CardHeader>
-            <CardTitle style={item.type === 'emergency' ? { color: '#f67f7f' } : undefined}>
-              {item.title}
+            <CardTitle
+              style={item.type === 'emergency' || item.type === 'sos' ? { color: '#f67f7f' } : undefined}
+            >
+              {notificationTitle}
             </CardTitle>
-            <CardTime>{item.time}</CardTime>
+            <CardTime>{notificationTime}</CardTime>
           </CardHeader>
-          <CardMessage>{item.message}</CardMessage>
+          <CardMessage>{notificationMessage}</CardMessage>
 
           {item.type === 'friend' && (
             <ActionRow>
               <RemoveButton
+                onPress={() => handleFriendRequest(item, 'remove')}
                 role="button"
-                accessibilityLabel={`Remove friend request from ${item.title}`}
+                accessibilityLabel={`Remove friend request from ${notificationTitle}`}
               >
                 <MarkReadText style={{ color: '#E8CAFF' }}>Remove</MarkReadText>
               </RemoveButton>
               <AcceptButton
+                onPress={() => handleFriendRequest(item, 'accept')}
                 role="button"
-                accessibilityLabel={`Accept friend request from ${item.title}`}
+                accessibilityLabel={`Accept friend request from ${notificationTitle}`}
               >
                 <MarkReadText>Accept</MarkReadText>
               </AcceptButton>

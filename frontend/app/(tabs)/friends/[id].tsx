@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Dimensions, FlatList, Platform, ScrollView } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,7 +8,8 @@ import { useAuth } from '@clerk/expo';
 
 import { EventCard } from '@/components/EventCard';
 import FriendActionButton from '@/components/FriendActionButton';
-import { getFriendProfile, type FriendProfileResponse } from '@/utils/friends';
+import { useNotifications } from '@/context/NotificationsContext';
+import { getFriendProfile, toggleFriendship, type FriendProfileResponse } from '@/utils/friends';
 import { navigateToPreviousRoute } from '@/utils/navigationHistory';
 import { userImages } from '../../../assets/images/Users/userImages';
 
@@ -26,10 +27,15 @@ export default function FriendProfile() {
   const theme = useTheme();
   const { id } = useLocalSearchParams();
   const { isLoaded, isSignedIn, getToken } = useAuth();
+  const { realtimeVersion } = useNotifications();
+  const getTokenRef = useRef(getToken);
   const friendId = Array.isArray(id) ? id[0] : id;
   const [friendData, setFriendData] = useState<FriendProfileResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isUpdatingFriendship, setIsUpdatingFriendship] = useState(false);
   const [error, setError] = useState('');
+
+  getTokenRef.current = getToken;
 
   useEffect(() => {
     let isActive = true;
@@ -46,7 +52,7 @@ export default function FriendProfile() {
       try {
         setIsLoading(true);
         setError('');
-        const token = await getToken();
+        const token = await getTokenRef.current();
         const profile = await getFriendProfile(token, friendId);
 
         if (isActive) {
@@ -70,7 +76,41 @@ export default function FriendProfile() {
     return () => {
       isActive = false;
     };
-  }, [friendId, getToken, isLoaded, isSignedIn]);
+  }, [friendId, isLoaded, isSignedIn, realtimeVersion]);
+
+  const currentFriendshipState = friendData?.friendshipState?.toUpperCase() ?? null;
+  const friendshipButtonVariant =
+    currentFriendshipState === 'ACCEPTED'
+      ? 'remove'
+      : currentFriendshipState === 'PENDING'
+        ? 'pending'
+        : 'add';
+
+  const handleFriendshipAction = async () => {
+    if (!friendData) return;
+
+    try {
+      setIsUpdatingFriendship(true);
+      const token = await getTokenRef.current();
+      const response = await toggleFriendship(token, friendData.id);
+      const responseState = response?.state?.toUpperCase?.();
+
+      setFriendData(previous => {
+        if (!previous) return previous;
+
+        const previousState = previous.friendshipState?.toUpperCase() ?? null;
+        return {
+          ...previous,
+          friendshipState: previousState ? null : responseState || 'PENDING',
+        };
+      });
+    } catch (friendshipError) {
+      console.error('Failed to update friendship', friendshipError);
+      setError('Unable to update friendship.');
+    } finally {
+      setIsUpdatingFriendship(false);
+    }
+  };
 
   if (isLoading || !isLoaded) {
     return (
@@ -137,7 +177,13 @@ export default function FriendProfile() {
             </StatsText>
           </InfoSection>
 
-          <FriendActionButton />
+          <FriendActionButton
+            variant={friendshipButtonVariant}
+            onPress={handleFriendshipAction}
+            disabled={isUpdatingFriendship}
+            role="button"
+            accessibilityLabel={`${friendshipButtonVariant} ${friendData.name}`}
+          />
         </ProfileHeader>
 
         {/* Eventos */}

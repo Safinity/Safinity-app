@@ -41,9 +41,12 @@ export type FriendsGroupedResponse = {
   otherFriends: FriendListItem[];
 };
 
-export type FriendSearchItem = AddFriendQrResponse['friend'];
+export type FriendSearchItem = AddFriendQrResponse['friend'] & {
+  friendshipState?: string | null;
+};
 
 export type FriendProfileResponse = AddFriendQrResponse['friend'] & {
+  friendshipState?: string | null;
   totalEventsCount: number;
   commonEvents: Array<{
     id: string;

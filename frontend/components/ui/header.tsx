@@ -4,6 +4,7 @@ import React from 'react';
 import { Platform, StatusBar } from 'react-native';
 import styled from 'styled-components/native';
 
+import { useNotifications } from '@/context/NotificationsContext';
 import { Colors, Spacing, Height, Width, BorderRadius, TextStyles } from '../../constants/theme';
 import { navigateToPreviousRoute } from '../../utils/navigationHistory';
 
@@ -27,6 +28,7 @@ const Header: React.FC<HeaderProps> = ({
   onRightPress,
 }) => {
   const statusBarHeight = Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 24;
+  const { unreadCount } = useNotifications();
 
   const hasText = Boolean(title || subtitle);
 
@@ -56,6 +58,13 @@ const Header: React.FC<HeaderProps> = ({
                   size={Width.iconHeader}
                   color={Colors.white}
                 />
+                {unreadCount > 0 && (
+                  <NotificationBadge>
+                    <NotificationBadgeText>
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </NotificationBadgeText>
+                  </NotificationBadge>
+                )}
               </IconButton>
 
               <IconButton
@@ -189,7 +198,28 @@ const IconRow = styled.View`
   gap: ${Spacing.md}px;
 `;
 
-const IconButton = styled.Pressable``;
+const IconButton = styled.Pressable`
+  position: relative;
+`;
+
+const NotificationBadge = styled.View`
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  padding-horizontal: 4px;
+  background-color: ${Colors.primary};
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: -4px;
+  right: -5px;
+`;
+
+const NotificationBadgeText = styled.Text`
+  color: ${Colors.white};
+  font-size: 9px;
+  font-family: ${TextStyles.label.fontFamily};
+`;
 
 /* PAGE DETAILS */
 

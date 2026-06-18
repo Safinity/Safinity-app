@@ -7,9 +7,10 @@ import styled from 'styled-components/native';
 
 import { CalendarCard } from '../../components/CalendarCard';
 import { useActivityFavourites } from '../../context/ActivityFavouritesContext';
-import { BorderRadius, Colors, Fonts, Height, Spacing, TextStyles } from '../../constants/theme';
+import { Colors, Spacing, TextStyles } from '../../constants/theme';
 import { navigateToPreviousRoute } from '../../utils/navigationHistory';
 import api from '../../utils/api';
+import { useEventMode } from '../../context/EventModeContext';
 
 function authHeaders(token: string | null) {
   return token ? { Authorization: `Bearer ${token}` } : undefined;
@@ -67,21 +68,19 @@ function normalizeFavouriteActivity(activity: any) {
 
 export default function MyCalendarScreen() {
   const { isLoaded, isSignedIn, getToken } = useAuth();
+  const { activeEvent } = useEventMode();
   const getTokenRef = useRef(getToken);
   const {
     favouriteActivitiesByEvent,
     loadingEventIds,
     updatingActivityIds,
-    selectedCalendarEventId,
     setSelectedCalendarEventId,
     loadEventFavourites,
     toggleFavouriteActivity,
   } = useActivityFavourites();
 
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
-  const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isEventDropdownOpen, setIsEventDropdownOpen] = useState(false);
 
   getTokenRef.current = getToken;
 
@@ -110,7 +109,6 @@ export default function MyCalendarScreen() {
       }
 
       if (!isSignedIn) {
-        setEvents([]);
         setSelectedEvent(null);
         setLoading(false);
         return;
@@ -118,25 +116,19 @@ export default function MyCalendarScreen() {
 
       try {
         const token = await getTokenRef.current();
-        let event = null;
+        let event = activeEvent?.id ? activeEvent : null;
 
-        const eventsResponse = await api.get('/events', {
-          params: { pageSize: 100, sortBy: 'start_date', sortOrder: 'asc' },
-        });
-        const eventsList = getEventsList(eventsResponse.data);
-        const savedEvent = selectedCalendarEventId
-          ? eventsList.find(eventItem => String(eventItem.id) === String(selectedCalendarEventId))
-          : null;
-
-        if (savedEvent) {
-          event = savedEvent;
-        } else {
+        if (!event) {
           try {
             const presentEventResponse = await api.get('/events/present-event', {
               headers: authHeaders(token),
             });
             event = presentEventResponse.data;
           } catch {
+            const eventsResponse = await api.get('/events', {
+              params: { pageSize: 100, sortBy: 'start_date', sortOrder: 'asc' },
+            });
+            const eventsList = getEventsList(eventsResponse.data);
             event = eventsList[0] || null;
           }
         }
@@ -145,7 +137,6 @@ export default function MyCalendarScreen() {
           return;
         }
 
-        setEvents(eventsList);
         setSelectedEvent(event);
         setSelectedCalendarEventId(event?.id ? String(event.id) : null);
 
@@ -167,33 +158,12 @@ export default function MyCalendarScreen() {
       isActive = false;
     };
   }, [
+    activeEvent,
     isLoaded,
     isSignedIn,
     loadEventFavourites,
-    selectedCalendarEventId,
     setSelectedCalendarEventId,
   ]);
-
-  const handleToggleDropdown = () => {
-    if (events.length === 0 || loading) {
-      return;
-    }
-
-    setIsEventDropdownOpen(prev => !prev);
-  };
-
-  const handleSelectEvent = async (event: any) => {
-    setIsEventDropdownOpen(false);
-
-    if (!event?.id || event.id === selectedEvent?.id) {
-      return;
-    }
-
-    setSelectedEvent(event);
-    setSelectedCalendarEventId(String(event.id));
-
-    await loadEventFavourites(event.id, true);
-  };
 
   const handleToggleFavorite = async (activity: any, shouldBeFavorite: boolean) => {
     if (!selectedEventId) {
@@ -229,57 +199,7 @@ export default function MyCalendarScreen() {
 
         <Title role="header">Favourites activities</Title>
 
-        <DropdownWrapper>
-          <DropdownContainer
-            onPress={handleToggleDropdown}
-            activeOpacity={0.75}
-            accessible
-            role="button"
-            accessibilityLabel="Event selection"
-            accessibilityState={{ expanded: isEventDropdownOpen }}
-          >
-            <DropdownText numberOfLines={1}>{selectedEvent?.name || 'Select event'}</DropdownText>
-            <Ionicons
-              name={isEventDropdownOpen ? 'chevron-up' : 'chevron-down'}
-              size={22}
-              color="black"
-              accessibilityElementsHidden
-              importantForAccessibility="no"
-            />
-          </DropdownContainer>
 
-          {isEventDropdownOpen && (
-            <DropdownMenu>
-              <DropdownScroll nestedScrollEnabled showsVerticalScrollIndicator={events.length > 4}>
-                {events.map(event => {
-                  const isSelected = event.id === selectedEvent?.id;
-
-                  return (
-                    <DropdownOption
-                      key={event.id}
-                      onPress={() => handleSelectEvent(event)}
-                      activeOpacity={0.75}
-                      accessibilityRole="button"
-                      accessibilityLabel={`Select ${event.name}`}
-                      accessibilityState={{ selected: isSelected }}
-                    >
-                      <DropdownOptionText numberOfLines={1} selected={isSelected}>
-                        {event.name}
-                      </DropdownOptionText>
-                      {isSelected && (
-                        <Ionicons
-                          name="checkmark"
-                          size={18}
-                          color={Colors.palette.primary.dark50}
-                        />
-                      )}
-                    </DropdownOption>
-                  );
-                })}
-              </DropdownScroll>
-            </DropdownMenu>
-          )}
-        </DropdownWrapper>
       </ContentWrapper>
 
       <ScrollView
@@ -342,66 +262,6 @@ const Title = styled.Text`
   ${TextStyles.titulo.h};
   font-weight: bold;
   margin-bottom: ${Spacing.lg}px;
-`;
-
-const DropdownWrapper = styled.View`
-  margin-bottom: ${Spacing.xl}px;
-  position: relative;
-  z-index: 10;
-  elevation: 10;
-`;
-
-const DropdownContainer = styled.TouchableOpacity`
-  background-color: ${Colors.white};
-  border-radius: ${BorderRadius.medium}px;
-  padding: ${Spacing.sm}px ${Spacing.md}px;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  height: ${Height.sm}px;
-`;
-
-const DropdownText = styled.Text`
-  color: ${Colors.background};
-  font-size: ${Fonts.sizes.base}px;
-  font-family: ${Fonts.weights.semibold};
-  flex: 1;
-  margin-right: ${Spacing.sm}px;
-`;
-
-const DropdownMenu = styled.View`
-  background-color: ${Colors.white};
-  border-radius: ${BorderRadius.medium}px;
-  position: absolute;
-  top: ${Height.sm + Spacing.xs}px;
-  left: 0;
-  right: 0;
-  overflow: hidden;
-  z-index: 20;
-  elevation: 20;
-`;
-
-const DropdownScroll = styled.ScrollView`
-  max-height: 220px;
-`;
-
-const DropdownOption = styled.TouchableOpacity`
-  min-height: ${Height.tam_42}px;
-  padding: ${Spacing.sm}px ${Spacing.md}px;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom-width: 1px;
-  border-bottom-color: rgba(0, 0, 0, 0.08);
-`;
-
-const DropdownOptionText = styled.Text<{ selected?: boolean }>`
-  color: ${({ selected }: { selected?: boolean }) =>
-    selected ? Colors.palette.primary.dark50 : Colors.background};
-  font-size: ${Fonts.sizes.base}px;
-  font-family: ${Fonts.weights.semibold};
-  flex: 1;
-  margin-right: ${Spacing.sm}px;
 `;
 
 const CardsContainer = styled.View`

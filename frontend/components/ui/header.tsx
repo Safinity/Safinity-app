@@ -12,6 +12,7 @@ export type HeaderVariant = 'default' | 'back' | 'pageDetails';
 
 interface HeaderProps {
   variant?: HeaderVariant;
+  colorScheme?: 'dark' | 'light';
   showBottomDivider?: boolean;
   title?: string;
   subtitle?: string;
@@ -21,6 +22,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({
   variant = 'default',
+  colorScheme = 'dark',
   showBottomDivider = false,
   title,
   subtitle,
@@ -29,6 +31,7 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
   const statusBarHeight = Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 24;
   const { unreadCount } = useNotifications();
+  const iconColor = colorScheme === 'light' ? Colors.black : Colors.white;
 
   const hasText = Boolean(title || subtitle);
 
@@ -56,7 +59,7 @@ const Header: React.FC<HeaderProps> = ({
                 <Ionicons
                   name="notifications-outline"
                   size={Width.iconHeader}
-                  color={Colors.white}
+                  color={iconColor}
                 />
                 {unreadCount > 0 && (
                   <NotificationBadge>
@@ -72,7 +75,7 @@ const Header: React.FC<HeaderProps> = ({
                 role="button"
                 accessibilityLabel="Profile"
               >
-                <Ionicons name="person-circle" size={Width.iconHeader} color={Colors.white} />
+                <Ionicons name="person-circle" size={Width.iconHeader} color={iconColor} />
               </IconButton>
             </IconRow>
           </HeaderRow>
@@ -227,21 +230,6 @@ const DetailsRow = styled.View`
   flex-direction: row;
   align-items: center;
   gap: ${Spacing.md}px;
-`;
-
-const DetailsTextContainer = styled.View`
-  flex: 1;
-`;
-
-const DetailsTitle = styled.Text`
-  color: ${Colors.white};
-  ${TextStyles.titulo.h3};
-`;
-
-const DetailsSubtitle = styled.Text`
-  color: ${Colors.inactive};
-  margin-top: ${Spacing.xs}px;
-  ${TextStyles.corpo.corpoTexto};
 `;
 
 const Title = styled.Text`

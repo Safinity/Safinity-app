@@ -10,12 +10,15 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthRequiredGuard } from '../auth/auth.guards';
+import { Roles } from '../auth/roles.decorator';
+import { RolesGuard } from '../auth/roles.guard';
 import type { RequestWithUser } from '../auth/auth.types';
 import { AdminEventsService } from './events.admin.service';
 
 @ApiTags('admin-events')
 @Controller('admin/events')
-@UseGuards(AuthRequiredGuard)
+@UseGuards(AuthRequiredGuard, RolesGuard)
+@Roles('staff', 'admin')
 export class AdminEventsController {
   constructor(private readonly adminEventsService: AdminEventsService) {}
 

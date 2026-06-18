@@ -72,6 +72,17 @@ export class NotificationsRealtimeService {
     });
   }
 
+  emitFriendBuzz(
+    targetUserId: string,
+    sender: { id: string; name: string | null; username: string | null },
+  ) {
+    this.emitToUsers([targetUserId], {
+      type: 'friend.buzz',
+      senderId: sender.id,
+      senderName: sender.name || sender.username || 'A friend',
+    });
+  }
+
   emitReadAll(userId: string) {
     this.emitToUsers([userId], { type: 'notifications.read_all' });
   }

@@ -50,22 +50,22 @@ export default function RootLayout() {
       <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
         <UserProvider>
           <ActivityFavouritesProvider>
-          <NotificationsProvider>
-            <ThemeProvider theme={theme}>
-              <Container>
-                <NavigationHistoryTracker />
-                <Stack
-                  screenOptions={{
-                    headerShown: false,
-                    animation: 'slide_from_right',
-                    animationTypeForReplace: 'pop',
-                  }}
-                />
-              </Container>
-              <StatusBar style="light" />
-            </ThemeProvider>
+            <NotificationsProvider>
+              <ThemeProvider theme={theme}>
+                <Container>
+                  <NavigationHistoryTracker />
+                  <Stack
+                    screenOptions={{
+                      headerShown: false,
+                      animation: 'slide_from_right',
+                      animationTypeForReplace: 'pop',
+                    }}
+                  />
+                </Container>
+                <StatusBar style="light" />
+              </ThemeProvider>
+            </NotificationsProvider>
           </ActivityFavouritesProvider>
-          </NotificationsProvider>
         </UserProvider>
       </ClerkProvider>
     </GestureHandlerRootView>

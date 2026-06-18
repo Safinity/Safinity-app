@@ -400,8 +400,7 @@ export default function CalendarScreen() {
       </HeaderWrapper>
 
       <ScrollContent
-        accessibilityRole="main"
-        accessibilityLabel="Calendar events"
+        
         contentContainerStyle={{ paddingTop: 10 }}
       >
         <EventDropdownWrapper>

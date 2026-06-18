@@ -1,11 +1,11 @@
 import { useAuth } from '@clerk/expo';
 import { Ionicons } from '@expo/vector-icons';
 import Head from 'expo-router/head';
-import { useRouter } from 'expo-router';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import styled from 'styled-components/native';
 
+import { CalendarCard } from '../../components/CalendarCard';
 import { useActivityFavourites } from '../../context/ActivityFavouritesContext';
 import { BorderRadius, Colors, Fonts, Height, Spacing, TextStyles } from '../../constants/theme';
 import { navigateToPreviousRoute } from '../../utils/navigationHistory';
@@ -21,37 +21,21 @@ function getEventsList(data: any) {
   return [];
 }
 
-function getDateKey(value?: string | null) {
-  if (!value) return 'date-tbd';
+function formatActivityDate(value?: string | null) {
+  if (!value) return 'Date TBD';
 
   try {
-    return new Date(value).toISOString().slice(0, 10);
+    return new Date(value).toLocaleDateString('en-GB', {
+      weekday: 'long',
+      day: '2-digit',
+      month: 'short',
+    });
   } catch {
-    return 'date-tbd';
+    return 'Invalid date';
   }
 }
 
-function formatMonth(value?: string | null) {
-  if (!value) return 'TBD';
-
-  try {
-    return new Date(value).toLocaleDateString('en-GB', { month: 'short' });
-  } catch {
-    return 'TBD';
-  }
-}
-
-function formatDay(value?: string | null) {
-  if (!value) return '--';
-
-  try {
-    return new Date(value).toLocaleDateString('en-GB', { day: '2-digit' });
-  } catch {
-    return '--';
-  }
-}
-
-function formatTime(value?: string | null) {
+function formatActivityTime(value?: string | null) {
   if (!value) return '--:--';
 
   try {
@@ -65,33 +49,35 @@ function formatTime(value?: string | null) {
 }
 
 function normalizeFavouriteActivity(activity: any) {
-  const specifications = activity.specifications || {};
+  const source = activity.activity || activity.activities || activity;
+  const specifications = source.specifications || {};
 
   return {
-    ...activity,
-    title: activity.title || activity.name || 'Untitled activity',
-    location: activity.location || activity.points_interest?.name || 'Location TBD',
-    startTime: activity.startTime || formatTime(activity.start_time),
-    endTime: activity.endTime || formatTime(activity.end_time),
-    dateKey: activity.dateKey || getDateKey(activity.start_time),
-    month: activity.month || formatMonth(activity.start_time),
-    day: activity.day || formatDay(activity.start_time),
-    category: activity.category || specifications.category || 'Activity',
+    ...source,
+    id: source.id || activity.activity_id || activity.id,
+    title: source.title || source.name || 'Untitled activity',
+    category: source.category || specifications.category || 'Stages',
+    image: source.image || specifications.image || '1.jpg',
+    location: source.location || source.points_interest?.name || 'Location TBD',
+    date: source.date || formatActivityDate(source.start_time),
+    startTime: source.startTime || formatActivityTime(source.start_time),
+    endTime: source.endTime || formatActivityTime(source.end_time),
   };
 }
 
 export default function MyCalendarScreen() {
-  const router = useRouter();
   const { isLoaded, isSignedIn, getToken } = useAuth();
   const getTokenRef = useRef(getToken);
   const {
     favouriteActivitiesByEvent,
     loadingEventIds,
+    updatingActivityIds,
+    selectedCalendarEventId,
+    setSelectedCalendarEventId,
     loadEventFavourites,
     toggleFavouriteActivity,
   } = useActivityFavourites();
 
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -103,45 +89,17 @@ export default function MyCalendarScreen() {
   const favouriteActivities = useMemo(
     () =>
       selectedEventId
-        ? (favouriteActivitiesByEvent[selectedEventId] || []).map(normalizeFavouriteActivity)
+        ? (favouriteActivitiesByEvent[selectedEventId] || [])
+            .map(normalizeFavouriteActivity)
+            .sort((a, b) => {
+              const firstTime = a.start_time ? new Date(a.start_time).getTime() : 0;
+              const secondTime = b.start_time ? new Date(b.start_time).getTime() : 0;
+              return firstTime - secondTime;
+            })
         : [],
     [favouriteActivitiesByEvent, selectedEventId],
   );
-  const dates = useMemo(() => {
-    const uniqueDates = new Map<string, { key: string; month: string; day: string }>();
-
-    favouriteActivities.forEach(activity => {
-      if (!uniqueDates.has(activity.dateKey)) {
-        uniqueDates.set(activity.dateKey, {
-          key: activity.dateKey,
-          month: activity.month,
-          day: activity.day,
-        });
-      }
-    });
-
-    return Array.from(uniqueDates.values());
-  }, [favouriteActivities]);
-  const filteredActivities = selectedDate
-    ? favouriteActivities.filter(activity => activity.dateKey === selectedDate)
-    : favouriteActivities;
   const isLoadingFavourites = selectedEventId ? loadingEventIds.has(selectedEventId) : false;
-
-  useEffect(() => {
-    if (!selectedDate && dates.length > 0) {
-      setSelectedDate(dates[0].key);
-      return;
-    }
-
-    if (selectedDate && dates.length > 0 && !dates.some(date => date.key === selectedDate)) {
-      setSelectedDate(dates[0].key);
-      return;
-    }
-
-    if (dates.length === 0) {
-      setSelectedDate(null);
-    }
-  }, [dates, selectedDate]);
 
   useEffect(() => {
     let isActive = true;
@@ -166,14 +124,21 @@ export default function MyCalendarScreen() {
           params: { pageSize: 100, sortBy: 'start_date', sortOrder: 'asc' },
         });
         const eventsList = getEventsList(eventsResponse.data);
+        const savedEvent = selectedCalendarEventId
+          ? eventsList.find(eventItem => String(eventItem.id) === String(selectedCalendarEventId))
+          : null;
 
-        try {
-          const presentEventResponse = await api.get('/events/present-event', {
-            headers: authHeaders(token),
-          });
-          event = presentEventResponse.data;
-        } catch {
-          event = eventsList[0] || null;
+        if (savedEvent) {
+          event = savedEvent;
+        } else {
+          try {
+            const presentEventResponse = await api.get('/events/present-event', {
+              headers: authHeaders(token),
+            });
+            event = presentEventResponse.data;
+          } catch {
+            event = eventsList[0] || null;
+          }
         }
 
         if (!isActive) {
@@ -182,6 +147,7 @@ export default function MyCalendarScreen() {
 
         setEvents(eventsList);
         setSelectedEvent(event);
+        setSelectedCalendarEventId(event?.id ? String(event.id) : null);
 
         if (event?.id) {
           await loadEventFavourites(event.id, true);
@@ -200,7 +166,13 @@ export default function MyCalendarScreen() {
     return () => {
       isActive = false;
     };
-  }, [isLoaded, isSignedIn, loadEventFavourites]);
+  }, [
+    isLoaded,
+    isSignedIn,
+    loadEventFavourites,
+    selectedCalendarEventId,
+    setSelectedCalendarEventId,
+  ]);
 
   const handleToggleDropdown = () => {
     if (events.length === 0 || loading) {
@@ -218,20 +190,20 @@ export default function MyCalendarScreen() {
     }
 
     setSelectedEvent(event);
-    setSelectedDate(null);
+    setSelectedCalendarEventId(String(event.id));
 
     await loadEventFavourites(event.id, true);
   };
 
-  const handleRemoveFavourite = async (activity: any) => {
+  const handleToggleFavorite = async (activity: any, shouldBeFavorite: boolean) => {
     if (!selectedEventId) {
       return;
     }
 
     try {
-      await toggleFavouriteActivity(activity, selectedEventId, false);
+      await toggleFavouriteActivity(activity, selectedEventId, shouldBeFavorite);
     } catch (error) {
-      console.error('Erro ao remover favorito:', error);
+      console.error('Erro ao atualizar favorito:', error);
     }
   };
 
@@ -242,7 +214,7 @@ export default function MyCalendarScreen() {
   return (
     <Container>
       <Head>
-        <title>My Calendar | Safinity</title>
+        <title>Favourites activities | Safinity</title>
       </Head>
 
       <ContentWrapper role="banner">
@@ -255,7 +227,7 @@ export default function MyCalendarScreen() {
           <Ionicons name="arrow-back" size={26} color="white" />
         </BackButton>
 
-        <Title role="header">My calendar</Title>
+        <Title role="header">Favourites activities</Title>
 
         <DropdownWrapper>
           <DropdownContainer
@@ -308,87 +280,44 @@ export default function MyCalendarScreen() {
             </DropdownMenu>
           )}
         </DropdownWrapper>
-
-        {dates.length > 0 && (
-          <DateSelector role="group" accessibilityLabel="Select date">
-            {dates.map(item => (
-              <DateItem
-                key={item.key}
-                onPress={() => setSelectedDate(item.key)}
-                accessible
-                role="button"
-                accessibilityLabel={`Select date ${item.day} ${item.month}`}
-              >
-                <DateMonth>{item.month}</DateMonth>
-                <DateCircle active={selectedDate === item.key}>
-                  <DateDay active={selectedDate === item.key}>{item.day}</DateDay>
-                </DateCircle>
-              </DateItem>
-            ))}
-          </DateSelector>
-        )}
       </ContentWrapper>
 
       <ScrollView
         showsVerticalScrollIndicator={false}
         role="main"
-        accessibilityLabel="My events timeline"
+        accessibilityLabel="Favourite activities list"
       >
-        <TimelineContainer>
+        <CardsContainer>
           {loading || isLoadingFavourites ? (
             <EmptyText>Loading favourites...</EmptyText>
-          ) : filteredActivities.length > 0 ? (
-            filteredActivities.map(activity => (
-              <TimeRow key={activity.id}>
-                <View>
-                  <TimeLabel>{activity.startTime}</TimeLabel>
-                  <TimeLabel style={{ marginTop: Spacing.xl, opacity: 1 }}>
-                    {activity.endTime}
-                  </TimeLabel>
-                </View>
+          ) : favouriteActivities.length > 0 ? (
+            favouriteActivities.map((activity, index) => {
+              const activityId = String(activity.id);
+              const activityWithFavorite = {
+                ...activity,
+                isFavorite: true,
+              };
 
-                <TimelineContent>
-                  <GridLine />
-                  <EventCard
-                    activeOpacity={0.85}
-                    onPress={() => router.push(`/activity-details/${activity.id}`)}
-                    accessible
-                    role="button"
-                    accessibilityLabel={`${activity.title}, Location: ${activity.location}, from ${activity.startTime} to ${activity.endTime}`}
-                  >
-                    <RemoveButton
-                      onPress={() => handleRemoveFavourite(activity)}
-                      accessibilityRole="button"
-                      accessibilityLabel={`Remove ${activity.title} from favourites`}
-                    >
-                      <Ionicons name="heart" size={18} color={Colors.palette.primary.dark50} />
-                    </RemoveButton>
-                    <EventTitle>{activity.title}</EventTitle>
-                    <LocationRow>
-                      <Ionicons
-                        name="location"
-                        size={14}
-                        color={Colors.palette.primary.dark50}
-                        accessibilityElementsHidden
-                        importantForAccessibility="no"
-                      />
-                      <LocationText numberOfLines={1}>{activity.location}</LocationText>
-                    </LocationRow>
-                  </EventCard>
-                </TimelineContent>
-              </TimeRow>
-            ))
+              return (
+                <View key={activity.id}>
+                  {(index === 0 || favouriteActivities[index - 1].date !== activity.date) && (
+                    <DateHeader>{activity.date}</DateHeader>
+                  )}
+
+                  <View style={{ marginBottom: Spacing.md }}>
+                    <CalendarCard
+                      item={activityWithFavorite}
+                      onToggleFavorite={handleToggleFavorite}
+                      isFavoriteUpdating={updatingActivityIds.has(activityId)}
+                    />
+                  </View>
+                </View>
+              );
+            })
           ) : (
             <EmptyText>{emptyMessage}</EmptyText>
           )}
-
-          <TimeRow>
-            <TimeLabel>21:00</TimeLabel>
-            <TimelineContent>
-              <GridLine />
-            </TimelineContent>
-          </TimeRow>
-        </TimelineContainer>
+        </CardsContainer>
       </ScrollView>
     </Container>
   );
@@ -475,113 +404,19 @@ const DropdownOptionText = styled.Text<{ selected?: boolean }>`
   margin-right: ${Spacing.sm}px;
 `;
 
-const DateSelector = styled.View`
-  flex-direction: row;
-  justify-content: space-between;
-  margin-bottom: ${Spacing.xxl}px;
-`;
-
-const DateItem = styled.TouchableOpacity`
-  align-items: center;
-`;
-
-const DateMonth = styled.Text`
-  color: ${Colors.white};
-  font-size: ${Fonts.sizes.base}px;
-  margin-bottom: ${Spacing.xs}px;
-  opacity: 1;
-`;
-
-const DateCircle = styled.View<{ active?: boolean }>`
-  width: ${Height.tam_42}px;
-  height: ${Height.tam_42}px;
-  border-radius: ${Height.tam_42 / 2}px;
-  background-color: ${({ active }: { active?: boolean }) =>
-    active ? Colors.white : 'rgba(255,255,255,0)'};
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
-`;
-
-const DateDay = styled.Text<{ active?: boolean }>`
-  color: ${({ active }: { active?: boolean }) => (active ? Colors.background : Colors.white)};
-  font-size: ${Fonts.sizes.base}px;
-  ${TextStyles.textoPequeno};
-`;
-
-const TimelineContainer = styled.View`
+const CardsContainer = styled.View`
   flex: 1;
   padding: 0 ${Spacing.margemLateral}px;
+  padding-bottom: ${Spacing.xxl}px;
 `;
 
-const TimeRow = styled.View`
-  flex-direction: row;
-  align-items: flex-start;
-  margin-bottom: ${Spacing.sm}px;
-  min-height: ${Height.md}px;
-`;
-
-const TimeLabel = styled.Text`
+const DateHeader = styled.Text`
   color: ${Colors.white};
-  width: ${Height.tam_42}px;
-  ${TextStyles.label};
-  opacity: 1;
-`;
-
-const TimelineContent = styled.View`
-  flex: 1;
-  position: relative;
-`;
-
-const GridLine = styled.View`
-  position: absolute;
-  top: ${Spacing.xs}px;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background-color: rgba(255, 255, 255, 0.1);
-`;
-
-const EventCard = styled.TouchableOpacity`
-  background-color: ${Colors.palette.primary.light80};
-  border-radius: ${BorderRadius.large}px;
-  padding: ${Spacing.md}px;
-  margin-top: ${Spacing.sm}px;
-  min-height: ${Height.sm}px;
-  justify-content: center;
-  align-items: center;
-`;
-
-const EventTitle = styled.Text`
-  color: ${Colors.background};
-  text-align: center;
-  margin-bottom: ${Spacing.xs}px;
-  padding-horizontal: ${Spacing.lg}px;
-  ${TextStyles.cardsCalendar};
-`;
-
-const LocationRow = styled.View`
-  flex-direction: row;
-  align-items: center;
-  max-width: 100%;
-`;
-
-const LocationText = styled.Text`
-  color: ${Colors.background};
-  font-size: ${Fonts.sizes.xs}px;
-  margin-left: ${Spacing.xxs}px;
-  max-width: 86%;
-`;
-
-const RemoveButton = styled.TouchableOpacity`
-  position: absolute;
-  top: ${Spacing.sm}px;
-  right: ${Spacing.sm}px;
-  width: 32px;
-  height: 32px;
-  border-radius: 16px;
-  align-items: center;
-  justify-content: center;
+  font-family: ${TextStyles.corpo.corpoTexto.fontFamily};
+  font-size: ${TextStyles.textoPequeno.fontSize}px;
+  margin-top: ${Spacing.lg}px;
+  margin-bottom: ${Spacing.sm}px;
+  text-transform: capitalize;
 `;
 
 const EmptyText = styled.Text`

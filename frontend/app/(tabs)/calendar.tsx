@@ -514,7 +514,8 @@ export default function CalendarScreen() {
       </ScrollContent>
 
       <MyCalendarButton activeOpacity={0.8} onPress={() => router.push('/(tabs)/my-calendar')}>
-        <ButtonText>My calendar</ButtonText>
+        <ButtonText>My Activities
+        </ButtonText>
       </MyCalendarButton>
     </Container>
   );

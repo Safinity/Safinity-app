@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import styled from 'styled-components/native';
+import { useEventMode } from '@/context/EventModeContext';
 
 const NavbarContainer = styled.View`
   background-color: ${({ theme }) => theme.colors.grayNavbar};
@@ -48,19 +49,43 @@ const TabText = styled.Text<{ $active: boolean }>`
     $active ? theme.colors.white : theme.colors.palette.neutral.neutral80};
 `;
 
-const HiddenHeader = styled.Text`
-  position: absolute;
-  opacity: 0;
-`;
-
-const tabConfigs = [
+const eventModeTabs = [
   { name: 'index', title: 'Home', icon: 'home' },
   { name: 'map', title: 'Map', icon: 'map' },
   { name: 'calendar', title: 'Calendar', icon: 'calendar' },
   { name: 'friends', title: 'Friends', icon: 'people' },
 ] as const;
 
+const outsideEventTabs = [
+  { name: 'index', title: 'Home', icon: 'home' },
+  { name: 'wallet', title: 'Wallet', icon: 'wallet' },
+  { name: 'events-list', title: 'Events', icon: 'megaphone' },
+  { name: 'friends', title: 'Friends', icon: 'people' },
+] as const;
+
+const registeredScreens = [
+  'index',
+  'map',
+  'calendar',
+  'friends',
+  'events-list',
+  'wallet',
+  'my-calendar',
+  'notifications',
+  'perfil/profile',
+  'perfil/wallet',
+  'perfil/ticket',
+  'perfil/edit-profile',
+  'perfil/security',
+  'perfil/notifications-settings',
+  'friends/[id]',
+  'friends/friend-profile',
+] as const;
+
 function CustomTabBar({ state, navigation }: any) {
+  const { isInEventMode } = useEventMode();
+  const tabConfigs = isInEventMode ? eventModeTabs : outsideEventTabs;
+
   return (
     <NavbarContainer role="tablist">
       <TabBarContent>
@@ -111,8 +136,8 @@ export default function TabsLayout() {
       }}
       tabBar={props => <CustomTabBar {...props} />}
     >
-      {tabConfigs.map(tab => (
-        <Tabs.Screen key={tab.name} name={tab.name} />
+      {registeredScreens.map(name => (
+        <Tabs.Screen key={name} name={name} />
       ))}
     </Tabs>
   );

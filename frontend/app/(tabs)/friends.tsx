@@ -12,6 +12,7 @@ import PingFriend from '@/components/VibrateButton';
 import FriendActionButton from '@/components/FriendActionButton';
 import { useNotifications } from '@/context/NotificationsContext';
 import { useAuth } from '@clerk/expo';
+import { useEventMode } from '@/context/EventModeContext';
 import {
   buzzFriend,
   getFriends,
@@ -49,6 +50,7 @@ function getErrorMessage(error: unknown) {
 
 export default function FriendsScreen() {
   const { isLoaded, isSignedIn, getToken } = useAuth();
+  const { isInEventMode } = useEventMode();
   const { realtimeVersion } = useNotifications();
   const [friends, setFriends] = useState<FriendsGroupedResponse>(emptyFriends);
   const [isLoading, setIsLoading] = useState(true);
@@ -148,6 +150,10 @@ export default function FriendsScreen() {
     }
   };
 
+  const visibleFriends = isInEventMode
+    ? friends.otherFriends
+    : [...friends.onSameEvent, ...friends.otherFriends];
+
   const renderFriend = (friend: FriendListItem, action: 'event' | 'remove') => (
     <TouchableOpacity
       key={friend.id}
@@ -233,28 +239,29 @@ export default function FriendsScreen() {
           </SectionTitle>
         </RegionContainer>
 
-        {/* Region: On the same event */}
-        <RegionContainer role="region" accessibilityLabel="Amigos no mesmo evento">
-          <SectionSubtitle role="header" accessibilityLevel={2}>
-            On the same event
-          </SectionSubtitle>
-          {friends.onSameEvent.length ? (
-            friends.onSameEvent.map(friend => renderFriend(friend, 'event'))
-          ) : (
-            <EmptyText>No friends on the same event.</EmptyText>
-          )}
-        </RegionContainer>
+        {isInEventMode ? (
+          <RegionContainer role="region" accessibilityLabel="Amigos no mesmo evento">
+            <SectionSubtitle role="header" accessibilityLevel={2}>
+              On the same event
+            </SectionSubtitle>
+            {friends.onSameEvent.length ? (
+              friends.onSameEvent.map(friend => renderFriend(friend, 'event'))
+            ) : (
+              <EmptyText>No friends on the same event.</EmptyText>
+            )}
+          </RegionContainer>
+        ) : null}
 
         {/* Region: Other Friends */}
 
         <RegionContainer role="region" accessibilityLabel="Other friends">
           <SectionSubtitle role="header" accessibilityLevel={2}>
-            Other Friends
+            {isInEventMode ? 'Other Friends' : 'Friends'}
           </SectionSubtitle>
-          {friends.otherFriends.length ? (
-            friends.otherFriends.map(friend => renderFriend(friend, 'remove'))
+          {visibleFriends.length ? (
+            visibleFriends.map(friend => renderFriend(friend, 'remove'))
           ) : (
-            <EmptyText>No other friends yet.</EmptyText>
+            <EmptyText>No friends yet.</EmptyText>
           )}
         </RegionContainer>
       </ScrollArea>

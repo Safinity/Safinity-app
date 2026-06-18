@@ -50,7 +50,7 @@ export default function HomeScreen() {
       <Container>
         <Header />
         <Content>
-          <SectionTitle style={{ color: 'white', marginTop: 40 }}>Loading events…</SectionTitle>
+          <SectionTitle style={{ color: 'white', marginTop: 40 }}></SectionTitle>
         </Content>
       </Container>
     );

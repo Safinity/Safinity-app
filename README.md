@@ -10,7 +10,7 @@
   <a href="https://github.com/andredora/Safinity-app/actions/workflows/backoffice-ci.yml">
     <img alt="Backoffice CI" src="https://github.com/andredora/Safinity-app/actions/workflows/backoffice-ci.yml/badge.svg?branch=main" />
   </a>
-  <a href="https://sonarcloud.io/summary/new_code?id=andredora_Safinity-app">
+  <a href="https://sonarcloud.io/summary/new_code?id=Safinity-app">
     <img alt="SonarCloud Quality Gate" src="https://sonarcloud.io/api/project_badges/measure?project=Safinity-app&metric=alert_status" />
   </a>
   <br />

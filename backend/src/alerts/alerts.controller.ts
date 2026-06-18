@@ -10,6 +10,8 @@ import {
 } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthRequiredGuard } from '../auth/auth.guards';
+import { Roles } from '../auth/roles.decorator';
+import { RolesGuard } from '../auth/roles.guard';
 import type { RequestWithUser } from '../auth/auth.types';
 import { AlertsService } from './alerts.service';
 import { CreateAlertDto } from './dto/create-alert.dto';
@@ -36,7 +38,8 @@ export class AlertsController {
     summary:
       'Get alerts for an event within the authenticated user organization',
   })
-  @UseGuards(AuthRequiredGuard)
+  @UseGuards(AuthRequiredGuard, RolesGuard)
+  @Roles('staff', 'admin')
   @Get('organization/events/:eventId')
   getOrganizationEventAlerts(
     @Req() request: RequestWithUser,
@@ -48,7 +51,8 @@ export class AlertsController {
   @ApiOperation({
     summary: 'Assign an organization alert to the authenticated staff member',
   })
-  @UseGuards(AuthRequiredGuard)
+  @UseGuards(AuthRequiredGuard, RolesGuard)
+  @Roles('staff', 'admin')
   @Post('organization/alerts/:alertId/assign-self')
   assignAlertToSelf(
     @Req() request: RequestWithUser,
@@ -61,7 +65,8 @@ export class AlertsController {
     summary: 'Update status of an alert assigned to the authenticated staff',
   })
   @ApiBody({ type: UpdateAlertStatusDto })
-  @UseGuards(AuthRequiredGuard)
+  @UseGuards(AuthRequiredGuard, RolesGuard)
+  @Roles('staff', 'admin')
   @Patch('organization/alerts/:alertId/status')
   updateAssignedAlertStatus(
     @Req() request: RequestWithUser,

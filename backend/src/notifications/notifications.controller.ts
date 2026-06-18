@@ -11,6 +11,8 @@ import {
 } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthRequiredGuard } from '../auth/auth.guards';
+import { Roles } from '../auth/roles.decorator';
+import { RolesGuard } from '../auth/roles.guard';
 import type { RequestWithUser } from '../auth/auth.types';
 import { NotificationsService } from './notifications.service';
 import { CreateOrganizationNotificationDto } from './dto/create-organization-notification.dto';
@@ -66,7 +68,8 @@ export class NotificationsController {
     summary:
       'Get notifications for an event within the authenticated organization',
   })
-  @UseGuards(AuthRequiredGuard)
+  @UseGuards(AuthRequiredGuard, RolesGuard)
+  @Roles('staff', 'admin')
   @Get('organization/events/:eventId')
   getOrganizationEventNotifications(
     @Req() request: RequestWithUser,
@@ -83,7 +86,8 @@ export class NotificationsController {
       'Create a notification for an event in the authenticated organization',
   })
   @ApiBody({ type: CreateOrganizationNotificationDto })
-  @UseGuards(AuthRequiredGuard)
+  @UseGuards(AuthRequiredGuard, RolesGuard)
+  @Roles('staff', 'admin')
   @Post('organization/events/:eventId')
   createOrganizationEventNotification(
     @Req() request: RequestWithUser,

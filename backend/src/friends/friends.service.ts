@@ -29,6 +29,12 @@ type FriendsSearchQuery = {
   sortOrder?: 'asc' | 'desc';
 };
 
+type ExpoPushTicket = {
+  status?: string;
+  message?: string;
+  details?: unknown;
+};
+
 const FRIEND_QR_TYPE = 'safinity.friend';
 const ACCEPTED_STATE = 'ACCEPTED';
 const PENDING_STATE = 'PENDING';
@@ -66,6 +72,86 @@ export class FriendsService {
       BigInt(Date.now()) * BigInt(1000) +
       BigInt(Math.floor(Math.random() * 1000))
     );
+  }
+
+  private async ensurePushTokensTable() {
+    await this.prisma.$executeRaw`
+      CREATE TABLE IF NOT EXISTS public.user_push_tokens (
+        id bigserial PRIMARY KEY,
+        user_id uuid NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+        token text NOT NULL UNIQUE,
+        platform varchar(32),
+        updated_at timestamp NOT NULL DEFAULT now()
+      )
+    `;
+
+    await this.prisma.$executeRaw`
+      CREATE INDEX IF NOT EXISTS idx_user_push_tokens_user_id
+      ON public.user_push_tokens(user_id)
+    `;
+  }
+
+  private async findPushTokens(userId: string) {
+    await this.ensurePushTokensTable();
+
+    const rows = await this.prisma.$queryRaw<Array<{ token: string }>>`
+      SELECT token
+      FROM public.user_push_tokens
+      WHERE user_id = ${userId}::uuid
+    `;
+
+    return rows.map((row) => row.token);
+  }
+
+  private async sendBuzzPushNotification(
+    targetUserId: string,
+    sender: { name: string | null; username: string | null },
+  ) {
+    const tokens = await this.findPushTokens(targetUserId);
+
+    if (tokens.length === 0) {
+      return;
+    }
+
+    const senderName = sender.name || sender.username || 'A friend';
+    const response = await fetch('https://exp.host/--/api/v2/push/send', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Accept-Encoding': 'gzip, deflate',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(
+        tokens.map((token) => ({
+          to: token,
+          title: `${senderName} is buzzing you`,
+          body: 'Your friend is trying to get your attention at this event.',
+          sound: 'default',
+          priority: 'high',
+          channelId: 'friend-buzz',
+          data: {
+            type: 'friend.buzz',
+            senderName,
+          },
+        })),
+      ),
+    });
+
+    if (!response.ok) {
+      console.warn(
+        `[FRIENDS] Failed to send buzz push notification: ${response.status}`,
+      );
+      return;
+    }
+
+    const result = (await response.json()) as { data?: ExpoPushTicket[] };
+    const failedTickets = result.data?.filter(
+      (ticket) => ticket.status && ticket.status !== 'ok',
+    );
+
+    if (failedTickets?.length) {
+      console.warn('[FRIENDS] Expo push returned failures', failedTickets);
+    }
   }
 
   private parseQrFriendUserId(body: AddFriendFromQrDto) {
@@ -463,6 +549,65 @@ export class FriendsService {
     this.realtime.emitFriendshipUpdated([userId, friendId]);
 
     return friendship;
+  }
+
+  async buzzFriend(userId: string, friendId: string) {
+    if (friendId === userId) {
+      throw new BadRequestException('You cannot buzz yourself');
+    }
+
+    const friendship = await this.prisma.friendship.findFirst({
+      where: {
+        state: { in: [ACCEPTED_STATE, ACCEPTED_STATE.toLowerCase()] },
+        OR: [
+          { user1_id: userId, user2_id: friendId },
+          { user1_id: friendId, user2_id: userId },
+        ],
+      },
+      select: { id: true },
+    });
+
+    if (!friendship) {
+      throw new BadRequestException('You can only buzz accepted friends');
+    }
+
+    const [sender, sharedActiveTicket] = await Promise.all([
+      this.prisma.users.findUnique({
+        where: { id: userId },
+        select: { id: true, name: true, username: true },
+      }),
+      this.prisma.user_tickets.findFirst({
+        where: {
+          user_id: userId,
+          event: {
+            status: { equals: 'active', mode: 'insensitive' },
+            user_tickets: {
+              some: { user_id: friendId },
+            },
+          },
+        },
+        select: { event_id: true },
+      }),
+    ]);
+
+    if (!sender) {
+      throw new NotFoundException('Authenticated user not found');
+    }
+
+    if (!sharedActiveTicket) {
+      throw new BadRequestException(
+        'You can only buzz friends on the same active event',
+      );
+    }
+
+    this.realtime.emitFriendBuzz(friendId, sender);
+    await this.sendBuzzPushNotification(friendId, sender);
+
+    return {
+      sent: true,
+      friendId,
+      eventId: sharedActiveTicket.event_id.toString(),
+    };
   }
 
   async getPendingRequests(userId: string) {

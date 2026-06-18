@@ -74,6 +74,14 @@ export class FriendsController {
     return this.friendsService.acceptFriendship(req.user!.id, friendId);
   }
 
+  @Post('buzz/:friendId')
+  async buzzFriend(
+    @Param('friendId') friendId: string,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.friendsService.buzzFriend(req.user!.id, friendId);
+  }
+
   @Get('profile/:friendId')
   async getProfile(
     @Param('friendId') friendId: string,

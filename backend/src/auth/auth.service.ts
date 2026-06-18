@@ -51,14 +51,20 @@ export class AuthService {
    * Clerk is the source of truth for identity.
    */
   async findOrCreateUser(clerkUserId: string) {
+    console.log(`\n[BACKEND] 🔄 findOrCreateUser acionado para o Clerk ID: "${clerkUserId}"`);
+
     // First, check if user exists in DB
+    console.log('[BACKEND] 🔍 Executando SELECT no PostgreSQL para verificar existência...');
     const [existingUser] = await this.prisma.$queryRaw<
       Array<{ id: string }>
     >`SELECT "id" FROM public.users WHERE clerk_id = ${clerkUserId} LIMIT 1`;
 
     if (existingUser) {
+      console.log(`[BACKEND] 🎉 Utilizador já registado localmente. ID Prisma: ${existingUser.id}`);
       return this.getSelfProfile(existingUser.id);
     }
+
+    console.log('[BACKEND] 🆕 Utilizador em falta na BD local. Solicitando dados à API do Clerk...');
 
     // User doesn't exist, fetch from Clerk to sync
     try {
@@ -73,6 +79,8 @@ export class AuthService {
         clerkUser.fullName ||
         null;
 
+      console.log(`[BACKEND] 📝 Executando INSERT Raw na tabela public.users (Name: "${name}", Email: "${email}")`);
+      
       // Create new user
       const [createdUser] = await this.prisma.$queryRaw<Array<{ id: string }>>`
         INSERT INTO public.users (clerk_id, email, username, name, role, password_hash)
@@ -80,10 +88,14 @@ export class AuthService {
         RETURNING "id"
       `;
 
+      console.log(`[BACKEND] ✅ Utilizador inserido com sucesso via SQL Raw! Novo ID: ${createdUser.id}`);
       return this.getSelfProfile(createdUser.id);
     } catch (error: unknown) {
+      console.log('❌ [BACKEND ERRO] O pipeline de criação falhou:', error);
+
       // If Clerk API is rate-limited or unavailable, create a stub user
       if (isClerkRateLimitError(error)) {
+        console.log('[BACKEND] ⚠️ Clerk API Rate Limited. Criando utilizador Stub...');
         const [createdUser] = await this.prisma.$queryRaw<
           Array<{ id: string }>
         >`
@@ -154,6 +166,7 @@ export class AuthService {
    * This now expects Clerk ID, NOT Prisma ID
    */
   async getAuthenticatedProfile(clerkId: string): Promise<SelfProfileUser> {
+    console.log(`[BACKEND] 🔑 Rota /auth/me intercetada para o Clerk ID: ${clerkId}`);
     const user = await this.findOrCreateUser(clerkId);
 
     return this.getSelfProfile(user.id);

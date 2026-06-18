@@ -75,6 +75,7 @@ export const BorderRadius = {
 
 // --- Spacing ---
 export const Spacing = {
+  none: 0,
   xxs: scale(2),
   xs: scale(4),
   sm: scale(8),
@@ -88,10 +89,13 @@ export const Spacing = {
 };
 
 export const Height = {
+  separatorLine: scale(1),
   xs: scale(24),
   tam_42: scale(42),
+  socialButton: scale(48),
   sm: scale(58),
   md: scale(73),
+  landingLogo: Math.min(Math.max(SCREEN_WIDTH * 0.52, 190), 240) / 1.497,
   actionbutton: scale(120),
   profileAvatar: scale(160),
   friendProfileAvatar: scale(100),
@@ -114,6 +118,10 @@ export const Height = {
 
 export const Width = {
   logoHeader: scale(124),
+  landingLogo: Math.min(Math.max(SCREEN_WIDTH * 0.52, 190), 240),
+  iconAlert: scale(18),
+  iconSocial: scale(18),
+  iconSocialLarge: scale(19),
   iconHeader: scale(28),
   linkTicket: scale(50),
 };

@@ -21,6 +21,20 @@ type SelfProfileUser = {
   user_favorites: Array<unknown>;
 };
 
+type ClerkEmailAddressSnapshot = {
+  id?: string | null;
+  emailAddress?: string | null;
+};
+
+type ClerkUserSnapshot = {
+  emailAddresses?: ClerkEmailAddressSnapshot[] | null;
+  primaryEmailAddressId?: string | null;
+  username?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  fullName?: string | null;
+};
+
 function isClerkRateLimitError(error: unknown): boolean {
   if (!error || typeof error !== 'object') {
     return false;
@@ -34,6 +48,43 @@ function isClerkRateLimitError(error: unknown): boolean {
   return maybeError.status === 429 || maybeError.code === 'api_response_error';
 }
 
+function getPrimaryEmail(clerkUser: ClerkUserSnapshot) {
+  const emailAddresses = clerkUser.emailAddresses ?? [];
+  const primaryEmail = emailAddresses.find(
+    (emailAddress) => emailAddress.id === clerkUser.primaryEmailAddressId,
+  );
+
+  return (
+    primaryEmail?.emailAddress ??
+    emailAddresses.find((emailAddress) => emailAddress.emailAddress)
+      ?.emailAddress ??
+    null
+  );
+}
+
+function getDisplayName(clerkUser: ClerkUserSnapshot) {
+  return (
+    [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(' ') ||
+    clerkUser.fullName ||
+    null
+  );
+}
+
+function normalizeUsername(value: string | null) {
+  if (!value) {
+    return null;
+  }
+
+  const normalized = value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, 32);
+
+  return normalized || null;
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -43,6 +94,33 @@ export class AuthService {
 
   private toBase64Image(image: Uint8Array | null) {
     return image ? Buffer.from(image).toString('base64') : null;
+  }
+
+  private async getAvailableUsername(
+    preferredUsername: string | null,
+    email: string | null,
+    clerkUserId: string,
+  ) {
+    const fallbackUsername = `user_${clerkUserId.replace(/[^a-z0-9]/gi, '').slice(-12)}`;
+    const baseUsername =
+      normalizeUsername(email?.split('@')[0] ?? null) ??
+      normalizeUsername(preferredUsername) ??
+      fallbackUsername;
+
+    for (let attempt = 0; attempt < 10; attempt += 1) {
+      const suffix = attempt === 0 ? '' : `_${attempt + 1}`;
+      const username = `${baseUsername.slice(0, 32 - suffix.length)}${suffix}`;
+      const existingUser = await this.prisma.users.findUnique({
+        where: { username },
+        select: { id: true },
+      });
+
+      if (!existingUser) {
+        return username;
+      }
+    }
+
+    return fallbackUsername.slice(0, 32);
   }
 
   /**
@@ -62,21 +140,25 @@ export class AuthService {
 
     // User doesn't exist, fetch from Clerk to sync
     try {
-      const clerkUser =
-        await this.clerkService.client.users.getUser(clerkUserId);
+      const clerkUser = (await this.clerkService.client.users.getUser(
+        clerkUserId,
+      )) as ClerkUserSnapshot;
 
-      // Build fields to sync from Clerk
-      const email = clerkUser.emailAddresses?.[0]?.emailAddress ?? null;
-      const username = clerkUser.username ?? null;
-      const name =
-        [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(' ') ||
-        clerkUser.fullName ||
-        null;
+      const email = getPrimaryEmail(clerkUser);
+      const username = await this.getAvailableUsername(
+        clerkUser.username ?? null,
+        email,
+        clerkUserId,
+      );
+      const name = getDisplayName(clerkUser);
 
-      // Create new user
       const [createdUser] = await this.prisma.$queryRaw<Array<{ id: string }>>`
         INSERT INTO public.users (clerk_id, email, username, name, role, password_hash)
         VALUES (${clerkUserId}, ${email}, ${username}, ${name}, 'user', '')
+        ON CONFLICT (clerk_id) DO UPDATE SET
+          email = COALESCE(public.users.email, EXCLUDED.email),
+          username = COALESCE(public.users.username, EXCLUDED.username),
+          name = COALESCE(public.users.name, EXCLUDED.name)
         RETURNING "id"
       `;
 

@@ -9,6 +9,7 @@ import InputField from '@/components/InputField';
 import Checkbox from '@/components/Checkbox';
 import PrimaryButton from '@/components/PrimaryButton';
 import Header from '@/components/ui/header';
+import { Spacing, Width } from '@/constants/theme';
 
 export default function Register() {
   const { isLoaded } = useAuth();
@@ -135,9 +136,9 @@ export default function Register() {
                 <ErrorArea accessible={true} accessibilityLiveRegion="assertive" role="alert">
                   <Ionicons
                     name="alert-circle-outline"
-                    size={18}
+                    size={Width.iconAlert}
                     color="#ff4d4d"
-                    style={{ marginRight: 8 }}
+                    style={{ marginRight: Spacing.sm }}
                   />
                   <ErrorText>{error}</ErrorText>
                 </ErrorArea>
@@ -221,9 +222,9 @@ export default function Register() {
                 <ErrorArea accessible={true} accessibilityLiveRegion="assertive" role="alert">
                   <Ionicons
                     name="alert-circle-outline"
-                    size={18}
+                    size={Width.iconAlert}
                     color="#ff4d4d"
-                    style={{ marginRight: 8 }}
+                    style={{ marginRight: Spacing.sm }}
                   />
 
                   <ErrorText>The passwords entered do not match.</ErrorText>
@@ -234,9 +235,9 @@ export default function Register() {
                 <ErrorArea accessible={true} accessibilityLiveRegion="assertive" role="alert">
                   <Ionicons
                     name="alert-circle-outline"
-                    size={18}
+                    size={Width.iconAlert}
                     color="#ff4d4d"
-                    style={{ marginRight: 8 }}
+                    style={{ marginRight: Spacing.sm }}
                   />
                   <ErrorText>{error}</ErrorText>
                 </ErrorArea>
@@ -281,15 +282,12 @@ const Screen = styled.SafeAreaView`
   background-color: ${({ theme }) => theme.colors.background};
 `;
 
-const Container = styled.ScrollView.attrs(({ theme }) => ({
-  contentContainerStyle: {
-    paddingTop: theme.spacing.xxl,
-    paddingHorizontal: theme.spacing.margemLateral,
-    paddingBottom: theme.spacing.xl,
-    flexGrow: 1,
-  },
-  showsVerticalScrollIndicator: false,
-}))``;
+const Container = styled.View`
+  flex: 1;
+  padding-top: ${({ theme }) => theme.spacing.xxl}px;
+  padding-horizontal: ${({ theme }) => theme.spacing.margemLateral}px;
+  padding-bottom: ${({ theme }) => theme.spacing.md}px;
+`;
 
 const MainArea = styled.View`
   flex: 1;
@@ -305,7 +303,7 @@ const InputRow = styled.View`
 `;
 
 const Actions = styled.View`
-  margin-top: ${({ theme }) => theme.spacing.lg}px;
+  margin-top: ${({ theme }) => theme.spacing.sm}px;
 `;
 
 const CheckboxWrapper = styled.View`

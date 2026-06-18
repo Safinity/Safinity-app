@@ -13,8 +13,8 @@ const expoHost = expoHostUri
   ?.split(':')[0];
 
 export const API_BASE =
-  (expoHost ? `http://${expoHost}:${API_PORT}` : undefined) ||
   process.env.EXPO_PUBLIC_API_URL ||
+  (expoHost ? `http://${expoHost}:${API_PORT}` : undefined) ||
   LOCALHOST_API_URL;
 
 const api = create({ baseURL: API_BASE });

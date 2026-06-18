@@ -95,9 +95,7 @@ export default function HomeScreen() {
       <Container>
         <Header />
         <Content>
-          <SectionTitle style={{ marginTop: 40, textAlign: 'center' }}>
-            A carregar o Safinity...
-          </SectionTitle>
+          <SectionTitle style={{ color: 'white', marginTop: 40 }}></SectionTitle>
         </Content>
       </Container>
     );

@@ -13,6 +13,7 @@ import FriendActionButton from '@/components/FriendActionButton';
 import { useNotifications } from '@/context/NotificationsContext';
 import { useAuth } from '@clerk/expo';
 import {
+  buzzFriend,
   getFriends,
   toggleFriendship,
   type FriendListItem,
@@ -53,6 +54,7 @@ export default function FriendsScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [removingFriendId, setRemovingFriendId] = useState<string | null>(null);
+  const [buzzingFriendId, setBuzzingFriendId] = useState<string | null>(null);
   const hasLoadedOnce = useRef(false);
   const getTokenRef = useRef(getToken);
   getTokenRef.current = getToken;
@@ -133,6 +135,19 @@ export default function FriendsScreen() {
     }
   };
 
+  const handleBuzzFriend = async (friend: FriendListItem) => {
+    try {
+      setBuzzingFriendId(friend.id);
+      const token = await getTokenRef.current();
+      await buzzFriend(token, friend.id);
+    } catch (error) {
+      console.error('Failed to buzz friend', error);
+      Alert.alert('Unable to buzz friend', getErrorMessage(error));
+    } finally {
+      setBuzzingFriendId(null);
+    }
+  };
+
   const renderFriend = (friend: FriendListItem, action: 'event' | 'remove') => (
     <TouchableOpacity
       key={friend.id}
@@ -155,7 +170,8 @@ export default function FriendsScreen() {
           {action === 'event' ? (
             <>
               <PingFriend
-                onPress={() => console.log('Buzz amigo')}
+                onPress={() => handleBuzzFriend(friend)}
+                disabled={buzzingFriendId === friend.id}
                 role="button"
                 accessibilityLabel={`Buzz ${friend.name}`}
                 accessibilityHint={`Send a buzz to ${friend.name}`}

@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Patch,
+  Post,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -42,6 +43,15 @@ export class UsersController {
     @Body() body: { lat?: number; lng?: number },
   ) {
     return this.usersService.updateMyLocation(request.user!.id, body);
+  }
+
+  @Post('me/push-token')
+  @UseGuards(AuthRequiredGuard)
+  registerPushToken(
+    @Req() request: RequestWithUser,
+    @Body() body: { token?: string; platform?: string },
+  ) {
+    return this.usersService.registerPushToken(request.user!.id, body);
   }
 
   @Delete('me')

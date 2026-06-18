@@ -88,6 +88,18 @@ export async function toggleFriendship(token: string | null, friendId: string) {
   return response.data;
 }
 
+export async function buzzFriend(token: string | null, friendId: string) {
+  const response = await friendsApi.post<{ sent: boolean; friendId: string; eventId: string }>(
+    `/friends/buzz/${friendId}`,
+    undefined,
+    {
+      headers: authHeaders(token),
+    },
+  );
+
+  return response.data;
+}
+
 export async function searchUsers(token: string | null, query: string) {
   const response = await friendsApi.get<FriendSearchItem[]>('/friends/search', {
     headers: authHeaders(token),

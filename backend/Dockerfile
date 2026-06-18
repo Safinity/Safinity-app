@@ -1,21 +1,39 @@
-FROM node:20-alpine
+FROM node:20-alpine AS deps
 
 WORKDIR /usr/src/app
 
-RUN apk add --no-cache curl
+RUN apk add --no-cache openssl
 
-# Copia tudo primeiro
-COPY . .
+COPY package*.json ./
+RUN npm ci
 
-# Instala deps
-RUN npm install
-
-# Prisma
+COPY prisma ./prisma
 RUN npx prisma generate
 
-# Build
-RUN rm -rf dist tsconfig.build.tsbuildinfo
-RUN npx nest build
+
+FROM node:20-alpine AS build
+
+WORKDIR /usr/src/app
+
+COPY --from=deps /usr/src/app/node_modules ./node_modules
+COPY . .
+
+RUN npm run build
+RUN npm prune --omit=dev
+
+
+FROM node:20-alpine AS production
+
+WORKDIR /usr/src/app
+
+ENV NODE_ENV=production
+
+RUN apk add --no-cache openssl curl
+
+COPY --from=build /usr/src/app/dist ./dist
+COPY --from=build /usr/src/app/node_modules ./node_modules
+COPY --from=build /usr/src/app/package*.json ./
+COPY --from=build /usr/src/app/prisma ./prisma
 
 EXPOSE 3000
 

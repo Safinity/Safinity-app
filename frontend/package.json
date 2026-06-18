@@ -27,6 +27,7 @@
     "@react-navigation/native": "^7.1.8",
     "axios": "^1.15.0",
     "expo": "~54.0.35",
+    "expo-apple-authentication": "~8.0.8",
     "expo-auth-session": "~7.0.11",
     "expo-camera": "~17.0.10",
     "expo-constants": "~18.0.13",
@@ -37,6 +38,7 @@
     "expo-linear-gradient": "~15.0.8",
     "expo-linking": "~8.0.12",
     "expo-location": "~19.0.8",
+    "expo-notifications": "~0.32.17",
     "expo-router": "~6.0.24",
     "expo-secure-store": "~15.0.8",
     "expo-splash-screen": "~31.0.13",
@@ -72,5 +74,10 @@
     "prettier": "^3.7.4",
     "typescript": "~5.9.2"
   },
-  "private": true
+  "private": true,
+  "overrides": {
+    "viem": {
+      "ws": "^8.21.0"
+    }
+  }
 }

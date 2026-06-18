@@ -1,22 +1,246 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { router, Stack } from 'expo-router';
 import styled from 'styled-components/native';
-import { ImageBackground } from 'react-native';
+import { ImageBackground, Platform } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { StaticImages } from '../assets/images/landing';
 import Head from 'expo-router/head';
-import { useAuth } from '@clerk/expo';
+import * as WebBrowser from 'expo-web-browser';
+import { useAuth, useClerk, useSSO } from '@clerk/expo';
+import { useSignInWithApple } from '@clerk/expo/apple';
 import PrimaryButton from '../components/PrimaryButton';
 import SecondaryButton from '../components/SecondaryButton';
-import TertiaryButton from '../components/TertiaryButton';
+import { getMyProfile } from '../utils/profile';
+import { Height, Spacing, Width } from '../constants/theme';
+
+WebBrowser.maybeCompleteAuthSession();
+
+function wait(ms: number) {
+  return new Promise(resolve => {
+    setTimeout(resolve, ms);
+  });
+}
+
+type SocialProvider = 'Google' | 'Apple';
+
+type SocialAuthResult = {
+  createdSessionId?: string | null;
+  authSessionResult?: { type?: string } | null;
+  setActive?: (params: { session: string }) => Promise<void>;
+  signIn?: any;
+  signUp?: any;
+};
+
+function normalizeUsername(value?: string | null) {
+  const normalized = value
+    ?.toLowerCase()
+    .replace(/[^a-z0-9_]/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_|_$/g, '');
+
+  return normalized || undefined;
+}
+
+function getSocialSessionId(result: SocialAuthResult) {
+  return (
+    result.createdSessionId ||
+    result.signUp?.createdSessionId ||
+    result.signIn?.createdSessionId ||
+    null
+  );
+}
+
+function getSocialEmail(signUp: any) {
+  return signUp?.emailAddress || signUp?.externalAccount?.emailAddress || null;
+}
 
 export default function Landing() {
-  const { isLoaded, isSignedIn } = useAuth();
+  const { isLoaded, isSignedIn, getToken } = useAuth();
+  const clerk = useClerk();
+  const { startSSOFlow } = useSSO();
+  const { startAppleAuthenticationFlow } = useSignInWithApple();
+  const [activeSocialProvider, setActiveSocialProvider] = useState<SocialProvider | null>(null);
+  const [error, setError] = useState('');
+
+  const isSocialLoading = activeSocialProvider !== null;
+  const isAppleSignInEnabled = process.env.EXPO_PUBLIC_ENABLE_APPLE_SIGN_IN === 'true';
+  const canUseAppleSignIn = Platform.OS === 'ios' && isAppleSignInEnabled;
 
   useEffect(() => {
     if (isLoaded && isSignedIn) {
       router.replace('/(tabs)');
     }
   }, [isLoaded, isSignedIn]);
+
+  async function syncProfileWithBackend() {
+    let lastError: unknown = null;
+    await wait(500);
+
+    for (let attempt = 0; attempt < 8; attempt += 1) {
+      try {
+        const token = await getToken({ skipCache: true });
+
+        if (token) {
+          await getMyProfile(token);
+          return;
+        }
+      } catch (syncError) {
+        console.warn('[Clerk-Auth] Falha temporária na API de perfil:', syncError);
+        lastError = syncError;
+      }
+
+      await wait(650);
+    }
+
+    throw lastError || new Error('Unable to sync authenticated profile');
+  }
+
+  async function completeSocialSignUpIfNeeded(result: SocialAuthResult) {
+    const signUp = result.signUp;
+    const missingFields = signUp?.missingFields ?? [];
+
+    if (!signUp || signUp.createdSessionId || !missingFields.length) {
+      return result;
+    }
+
+    const email = getSocialEmail(signUp);
+    const emailUsername = normalizeUsername(email?.split('@')[0]);
+    const updatePayload: Record<string, string> = {};
+
+    if (missingFields.includes('username') && !signUp.username && emailUsername) {
+      updatePayload.username = emailUsername;
+    }
+
+    if (missingFields.includes('first_name') && !signUp.firstName) {
+      updatePayload.firstName = emailUsername || 'Safinity';
+    }
+
+    if (missingFields.includes('last_name') && !signUp.lastName) {
+      updatePayload.lastName = 'User';
+    }
+
+    if (!Object.keys(updatePayload).length || typeof signUp.update !== 'function') {
+      return result;
+    }
+
+    const updatedSignUp = await signUp.update(updatePayload);
+    return { ...result, signUp: updatedSignUp };
+  }
+
+  function getMissingSocialSessionMessage(provider: SocialProvider, result: SocialAuthResult) {
+    if (result.authSessionResult?.type && result.authSessionResult.type !== 'success') {
+      return `${provider} sign in was cancelled.`;
+    }
+
+    const signUpMissingFields = result.signUp?.missingFields?.join(', ');
+    const clerkStatus = [
+      result.signIn?.status ? `signIn: ${result.signIn.status}` : null,
+      result.signUp?.status ? `signUp: ${result.signUp.status}` : null,
+      signUpMissingFields ? `missing: ${signUpMissingFields}` : null,
+    ]
+      .filter(Boolean)
+      .join(', ');
+
+    return `${provider} sign in did not return a session${clerkStatus ? ` (${clerkStatus})` : ''}.`;
+  }
+
+  async function activateSocialSession(provider: SocialProvider, authResult: SocialAuthResult) {
+    const completedResult = await completeSocialSignUpIfNeeded(authResult);
+    const createdSessionId = getSocialSessionId(completedResult);
+    const activateSession =
+      completedResult.setActive ||
+      (clerk?.setActive ? (params: { session: string }) => clerk.setActive(params) : undefined);
+
+    if (!createdSessionId) {
+      console.warn('[Clerk-Auth] Social login finished without session:', {
+        provider,
+        authSessionType: completedResult.authSessionResult?.type,
+        signInStatus: completedResult.signIn?.status,
+        signUpStatus: completedResult.signUp?.status,
+        signUpMissingFields: completedResult.signUp?.missingFields,
+      });
+      setError(getMissingSocialSessionMessage(provider, completedResult));
+      setActiveSocialProvider(null);
+      return;
+    }
+
+    if (!activateSession) {
+      throw new Error(`Unable to activate ${provider} session. Please try again.`);
+    }
+
+    await activateSession({ session: createdSessionId });
+    await syncProfileWithBackend();
+    router.replace('/(tabs)');
+  }
+
+  function startSocialLoading(provider: SocialProvider) {
+    if (!isLoaded) {
+      setError('Authentication is still loading. Please try again.');
+      return false;
+    }
+
+    setError('');
+    setActiveSocialProvider(provider);
+    return true;
+  }
+
+  function stopSocialLoading() {
+    setActiveSocialProvider(null);
+  }
+
+  async function handleGoogleLogin() {
+    if (!startSocialLoading('Google')) {
+      return;
+    }
+
+    try {
+      const authResult = await startSSOFlow({
+        strategy: 'oauth_google',
+      });
+
+      await activateSocialSession('Google', authResult);
+    } catch (err: any) {
+      console.error('[Clerk-Auth] Google login failed from landing:', err);
+      setError(
+        err.errors?.[0]?.message ||
+          err.message ||
+          'Unable to sign in with Google. Please try again.',
+      );
+      stopSocialLoading();
+    }
+  }
+
+  async function handleAppleLogin() {
+    if (!isAppleSignInEnabled) {
+      setError('Apple sign in is not enabled for this app environment.');
+      return;
+    }
+
+    if (!canUseAppleSignIn) {
+      setError('Apple sign in is only available on iOS.');
+      return;
+    }
+
+    if (!startSocialLoading('Apple')) {
+      return;
+    }
+
+    try {
+      const authResult = await startAppleAuthenticationFlow();
+      await activateSocialSession('Apple', authResult);
+    } catch (err: any) {
+      console.error('[Clerk-Auth] Apple login failed from landing:', err);
+      const clerkMessage = err.errors?.[0]?.message || err.message;
+      const isAppleStrategyDisabled = clerkMessage?.includes('oauth_token_apple');
+
+      setError(
+        isAppleStrategyDisabled
+          ? 'Apple sign in is not enabled in Clerk for this environment.'
+          : clerkMessage || 'Unable to sign in with Apple. Please try again.',
+      );
+      stopSocialLoading();
+    }
+  }
 
   return (
     <Background source={StaticImages.landingBg} accessible={false}>
@@ -25,11 +249,77 @@ export default function Landing() {
       </Head>
       <Stack.Screen options={{ title: 'Welcome to Safinity!', headerShown: false }} />
 
-      <WelcomeTitle role="header" accessibilityHeadingLevel={1}>
-        Welcome to Safinity!
-      </WelcomeTitle>
+      <LogoArea>
+        <LogoImage
+          source={require('../assets/logos/logo-ss.png')}
+          resizeMode="contain"
+          accessible={true}
+          accessibilityLabel="Safinity"
+        />
+      </LogoArea>
 
       <Content role="main">
+        {error ? (
+          <ErrorArea
+            accessible={true}
+            accessibilityLiveRegion="assertive"
+            role="alert"
+            accessibilityLabel={`Error: ${error}`}
+          >
+            <Ionicons
+              name="alert-circle"
+              size={Width.iconAlert}
+              color="#ff5252"
+              style={{ marginRight: Spacing.sm }}
+            />
+            <ErrorText>{error}</ErrorText>
+          </ErrorArea>
+        ) : null}
+
+        <GoogleButton
+          activeOpacity={0.85}
+          $disabled={isSocialLoading || !isLoaded}
+          disabled={isSocialLoading || !isLoaded}
+          accessibilityRole="button"
+          accessibilityLabel="Continue with Google"
+          accessibilityState={{
+            disabled: isSocialLoading || !isLoaded,
+            busy: activeSocialProvider === 'Google',
+          }}
+          onPress={handleGoogleLogin}
+        >
+          <Ionicons name="logo-google" size={Width.iconSocial} color="#fff" />
+          <GoogleButtonText>
+            {activeSocialProvider === 'Google' ? 'Connecting...' : 'Continue with Google'}
+          </GoogleButtonText>
+        </GoogleButton>
+
+        {canUseAppleSignIn ? (
+          <GoogleButton
+            activeOpacity={0.85}
+            $disabled={isSocialLoading || !isLoaded}
+            disabled={isSocialLoading || !isLoaded}
+            accessibilityRole="button"
+            accessibilityLabel="Continue with Apple"
+            accessibilityState={{
+              disabled: isSocialLoading || !isLoaded,
+              busy: activeSocialProvider === 'Apple',
+            }}
+            onPress={handleAppleLogin}
+          >
+            <Ionicons name="logo-apple" size={Width.iconSocialLarge} color="#fff" />
+            <GoogleButtonText>
+              {activeSocialProvider === 'Apple' ? 'Connecting...' : 'Continue with Apple'}
+            </GoogleButtonText>
+          </GoogleButton>
+        ) : null}
+
+        <SeparatorRow>
+          <SeparatorLine />
+          <SeparatorText>or</SeparatorText>
+          <SeparatorLine />
+        </SeparatorRow>
+
         <PrimaryButton
           accessibilityLabel="Log in"
           title="Log in"
@@ -41,14 +331,10 @@ export default function Landing() {
           title="Create account"
           onPress={() => router.push('/register')}
         />
-
-        <TertiaryButton title="Other options" onPress={() => console.log('Other options')} />
       </Content>
     </Background>
   );
 }
-
-// --------------------------------------------------------- Styled Components ---------------------------------------------------------
 
 const Background = styled(ImageBackground).attrs({
   imageStyle: {
@@ -61,16 +347,77 @@ const Background = styled(ImageBackground).attrs({
   background-color: ${({ theme }) => theme.colors.background};
 `;
 
+const LogoArea = styled.View`
+  position: absolute;
+  top: 44%;
+  left: ${({ theme }) => theme.spacing.none}px;
+  right: ${({ theme }) => theme.spacing.none}px;
+  align-items: center;
+  padding-horizontal: ${({ theme }) => theme.spacing.margemLateral}px;
+`;
+
 const Content = styled.View`
   padding: ${({ theme }) => theme.spacing.margemLateral}px;
-  gap: ${({ theme }) => theme.spacing.lg}px;
+  gap: ${({ theme }) => theme.spacing.md}px;
+  margin-bottom: ${({ theme }) => theme.spacing.lg}px;
+`;
+
+const LogoImage = styled.Image`
+  align-self: center;
+  width: ${Width.landingLogo}px;
+  height: ${Height.landingLogo}px;
+`;
+
+const GoogleButton = styled.TouchableOpacity<{ $disabled: boolean }>`
+  height: ${Height.socialButton}px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: ${({ theme }) => theme.spacing.sm}px;
+  border-radius: ${({ theme }) => theme.borderRadius.medium}px;
+  background-color: ${({ theme }) => theme.colors.grayNavbar};
+  border-width: ${Height.separatorLine}px;
+  border-color: ${({ theme }) => theme.colors.palette.primary.light80};
+  opacity: ${(props: { $disabled: boolean }) => (props.$disabled ? 0.65 : 1)};
+`;
+
+const GoogleButtonText = styled.Text`
+  color: ${({ theme }) => theme.colors.white};
+  font-weight: 700;
+  ${({ theme }) => theme.text.corpo.corpoTexto};
+`;
+
+const ErrorArea = styled.View`
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: ${({ theme }) => theme.spacing.sm}px;
+  border-radius: ${({ theme }) => theme.borderRadius.medium}px;
+  background-color: rgba(34, 39, 52, 0.85);
+`;
+
+const ErrorText = styled.Text`
+  color: ${({ theme }) => theme.colors.error};
+  text-align: center;
+  font-weight: bold;
+  ${({ theme }) => theme.text.corpo.corpoTexto};
+`;
+
+const SeparatorRow = styled.View`
+  flex-direction: row;
+  align-items: center;
+  margin-top: ${({ theme }) => theme.spacing.lg}px;
   margin-bottom: ${({ theme }) => theme.spacing.md}px;
 `;
 
-const WelcomeTitle = styled.Text`
-  color: ${({ theme }) => theme.colors.white};
-  font-size: 30px;
-  text-align: center;
-  font-weight: ${({ theme }) => theme.fonts.weights.extralight};
-  margin-bottom: ${({ theme }) => theme.spacing.xl}px;
+const SeparatorLine = styled.View`
+  flex: 1;
+  height: ${Height.separatorLine}px;
+  background-color: ${({ theme }) => theme.colors.palette.primary.light80};
+`;
+
+const SeparatorText = styled.Text`
+  margin-horizontal: ${({ theme }) => theme.spacing.md}px;
+  color: ${({ theme }) => theme.colors.inactive};
+  ${({ theme }) => theme.text.textoPequeno};
 `;

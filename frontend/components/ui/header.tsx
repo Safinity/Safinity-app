@@ -57,11 +57,7 @@ const Header: React.FC<HeaderProps> = ({
                 role="button"
                 accessibilityLabel="Notifications"
               >
-                <Ionicons
-                  name="notifications-outline"
-                  size={Width.iconHeader}
-                  color={iconColor}
-                />
+                <Ionicons name="notifications-outline" size={Width.iconHeader} color={iconColor} />
                 {unreadCount > 0 && (
                   <NotificationBadge>
                     <NotificationBadgeText>

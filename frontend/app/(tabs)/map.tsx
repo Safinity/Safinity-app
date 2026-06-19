@@ -328,20 +328,22 @@ export default function MapScreen() {
     translateY.value = Math.min(maxY, Math.max(minY, translateY.value));
   }, [scale, translateX, translateY]);
 
-  const getClampedMapTranslation = useCallback((targetX: number, targetY: number) => {
-    const scaledWidth = IMAGE_WIDTH * scale.value;
-    const scaledHeight = IMAGE_HEIGHT * scale.value;
-    const minX = screenWidth - (IMAGE_WIDTH + scaledWidth) / 2;
-    const maxX = (scaledWidth - IMAGE_WIDTH) / 2;
-    const minY = screenHeight - (IMAGE_HEIGHT + scaledHeight) / 2;
-    const maxY = (scaledHeight - IMAGE_HEIGHT) / 2;
+  const getClampedMapTranslation = useCallback(
+    (targetX: number, targetY: number) => {
+      const scaledWidth = IMAGE_WIDTH * scale.value;
+      const scaledHeight = IMAGE_HEIGHT * scale.value;
+      const minX = screenWidth - (IMAGE_WIDTH + scaledWidth) / 2;
+      const maxX = (scaledWidth - IMAGE_WIDTH) / 2;
+      const minY = screenHeight - (IMAGE_HEIGHT + scaledHeight) / 2;
+      const maxY = (scaledHeight - IMAGE_HEIGHT) / 2;
 
-    return {
-      x: Math.min(maxX, Math.max(minX, targetX)),
-      y: Math.min(maxY, Math.max(minY, targetY)),
-    };
-  }, [scale]);
-
+      return {
+        x: Math.min(maxX, Math.max(minX, targetX)),
+        y: Math.min(maxY, Math.max(minY, targetY)),
+      };
+    },
+    [scale],
+  );
 
   // Monitorização de mutações de estado e re-renderizações locais
 
@@ -681,131 +683,131 @@ export default function MapScreen() {
               imageUrl={mapImageUrl}
             />
 
-          <Svg
-            width={IMAGE_WIDTH}
-            height={IMAGE_HEIGHT}
-            style={{ position: 'absolute' }}
-            pointerEvents="none"
-          >
-            {heatmapEnabled && (
-              <>
-                <Defs>
+            <Svg
+              width={IMAGE_WIDTH}
+              height={IMAGE_HEIGHT}
+              style={{ position: 'absolute' }}
+              pointerEvents="none"
+            >
+              {heatmapEnabled && (
+                <>
+                  <Defs>
+                    {densitySensors.map(sensor => {
+                      const alpha = getHeatOpacity(sensor.density);
+                      const gradientId = `heat-${String(sensor.id).replace(/[^a-zA-Z0-9_-]/g, '-')}`;
+
+                      return (
+                        <RadialGradient key={gradientId} id={gradientId} cx="50%" cy="50%" r="50%">
+                          <Stop
+                            offset="0%"
+                            stopColor={getHeatColor(sensor.density, alpha)}
+                            stopOpacity={0.3}
+                          />
+                          <Stop
+                            offset="36%"
+                            stopColor={getHeatColor(sensor.density, alpha * 0.68)}
+                            stopOpacity={0.15}
+                          />
+                          <Stop
+                            offset="68%"
+                            stopColor={getHeatColor(sensor.density, alpha * 0.32)}
+                            stopOpacity={0.1}
+                          />
+                          <Stop
+                            offset="100%"
+                            stopColor={getHeatColor(sensor.density, 0)}
+                            stopOpacity={0}
+                          />
+                        </RadialGradient>
+                      );
+                    })}
+                  </Defs>
+
                   {densitySensors.map(sensor => {
-                    const alpha = getHeatOpacity(sensor.density);
+                    const { x, y } = latLngToPixelFromBounds(
+                      sensor.lat,
+                      sensor.lng,
+                      bounds,
+                      IMAGE_WIDTH,
+                      IMAGE_HEIGHT,
+                    );
                     const gradientId = `heat-${String(sensor.id).replace(/[^a-zA-Z0-9_-]/g, '-')}`;
 
                     return (
-                      <RadialGradient key={gradientId} id={gradientId} cx="50%" cy="50%" r="50%">
-                        <Stop
-                          offset="0%"
-                          stopColor={getHeatColor(sensor.density, alpha)}
-                          stopOpacity={0.3}
-                        />
-                        <Stop
-                          offset="36%"
-                          stopColor={getHeatColor(sensor.density, alpha * 0.68)}
-                          stopOpacity={0.15}
-                        />
-                        <Stop
-                          offset="68%"
-                          stopColor={getHeatColor(sensor.density, alpha * 0.32)}
-                          stopOpacity={0.1}
-                        />
-                        <Stop
-                          offset="100%"
-                          stopColor={getHeatColor(sensor.density, 0)}
-                          stopOpacity={0}
-                        />
-                      </RadialGradient>
+                      <Circle
+                        key={`circle-${gradientId}`}
+                        cx={x}
+                        cy={y}
+                        r={getHeatSize(sensor.density)}
+                        fill={`url(#${gradientId})`}
+                      />
                     );
                   })}
-                </Defs>
+                </>
+              )}
 
-                {densitySensors.map(sensor => {
-                  const { x, y } = latLngToPixelFromBounds(
-                    sensor.lat,
-                    sensor.lng,
-                    bounds,
-                    IMAGE_WIDTH,
-                    IMAGE_HEIGHT,
-                  );
-                  const gradientId = `heat-${String(sensor.id).replace(/[^a-zA-Z0-9_-]/g, '-')}`;
+              {activeRoute && (
+                <Polyline
+                  points={activeRoute.map(p => `${p.x},${p.y}`).join(' ')}
+                  stroke={Colors.primary}
+                  strokeWidth={4}
+                  fill="none"
+                  strokeDasharray="10,5"
+                />
+              )}
+            </Svg>
 
-                  return (
-                    <Circle
-                      key={`circle-${gradientId}`}
-                      cx={x}
-                      cy={y}
-                      r={getHeatSize(sensor.density)}
-                      fill={`url(#${gradientId})`}
-                    />
-                  );
-                })}
-              </>
-            )}
+            {visiblePins.map(pin => {
+              if (pin.lat === null || pin.lng === null || pin.lat === undefined) {
+                return null;
+              }
+              return (
+                <MapPin
+                  key={String(pin.id)}
+                  pin={pin}
+                  avatar={
+                    pin.type === 'friend' && pin.image
+                      ? { uri: `data:image/jpeg;base64,${pin.image}` }
+                      : undefined
+                  }
+                  bounds={bounds}
+                  width={IMAGE_WIDTH}
+                  height={IMAGE_HEIGHT}
+                  onPress={() => handlePinPress(pin)}
+                  accessible
+                  role="button"
+                  accessibilityLabel={`Map pin: ${getDisplayName(pin)} (${pin.type})`}
+                />
+              );
+            })}
 
-            {activeRoute && (
-              <Polyline
-                points={activeRoute.map(p => `${p.x},${p.y}`).join(' ')}
-                stroke={Colors.primary}
-                strokeWidth={4}
-                fill="none"
-                strokeDasharray="10,5"
+            {visibleStages.map(stage => {
+              if (stage.lat === null || stage.lng === null || stage.lat === undefined) {
+                return null;
+              }
+              return (
+                <MapStage
+                  key={String(stage.id)}
+                  stage={stage}
+                  bounds={bounds}
+                  width={IMAGE_WIDTH}
+                  height={IMAGE_HEIGHT}
+                  onPress={() => handlePinPress(stage)}
+                  accessible
+                  role="button"
+                  accessibilityLabel={`Stage: ${getDisplayName(stage)}`}
+                />
+              );
+            })}
+
+            {selectedPin && (
+              <MapCallout
+                x={selectedPin.px}
+                y={selectedPin.py}
+                title={selectedPin.name}
+                onPressRoute={() => handlePinPress(selectedPin, true)}
               />
             )}
-          </Svg>
-
-          {visiblePins.map(pin => {
-            if (pin.lat === null || pin.lng === null || pin.lat === undefined) {
-              return null;
-            }
-            return (
-              <MapPin
-                key={String(pin.id)}
-                pin={pin}
-                avatar={
-                  pin.type === 'friend' && pin.image
-                    ? { uri: `data:image/jpeg;base64,${pin.image}` }
-                    : undefined
-                }
-                bounds={bounds}
-                width={IMAGE_WIDTH}
-                height={IMAGE_HEIGHT}
-                onPress={() => handlePinPress(pin)}
-                accessible
-                role="button"
-                accessibilityLabel={`Map pin: ${getDisplayName(pin)} (${pin.type})`}
-              />
-            );
-          })}
-
-          {visibleStages.map(stage => {
-            if (stage.lat === null || stage.lng === null || stage.lat === undefined) {
-              return null;
-            }
-            return (
-              <MapStage
-                key={String(stage.id)}
-                stage={stage}
-                bounds={bounds}
-                width={IMAGE_WIDTH}
-                height={IMAGE_HEIGHT}
-                onPress={() => handlePinPress(stage)}
-                accessible
-                role="button"
-                accessibilityLabel={`Stage: ${getDisplayName(stage)}`}
-              />
-            );
-          })}
-
-          {selectedPin && (
-            <MapCallout
-              x={selectedPin.px}
-              y={selectedPin.py}
-              title={selectedPin.name}
-              onPressRoute={() => handlePinPress(selectedPin, true)}
-            />
-          )}
 
             {currentLocation && (
               <UserMarker

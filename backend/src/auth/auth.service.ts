@@ -189,6 +189,7 @@ export class AuthService {
                 description: true,
                 status: true,
                 category: true,
+                image: true,
                 start_date: true,
                 end_date: true,
               },

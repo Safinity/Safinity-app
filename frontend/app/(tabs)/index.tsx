@@ -38,7 +38,7 @@ interface Activity {
   end_time: string;
   description?: string;
   point_interest_id: string;
-  poi_name?: string; 
+  poi_name?: string;
   specifications?: {
     image?: string;
     category?: string;
@@ -70,10 +70,6 @@ function formatEventDate(start?: string | null, end?: string | null) {
 }
 
 function getLocalAwareEventImageSource(image?: string | null) {
-  if (image && eventImages[image]) {
-    return eventImages[image];
-  }
-
   return getEventImageSource(image, eventImages['banner-lista-eventos']);
 }
 
@@ -194,10 +190,7 @@ export default function HomeScreen() {
     router.replace('/(tabs)');
   };
 
-  const ticketEvents = useMemo(
-    () => tickets.filter(ticket => ticket.event).slice(0, 8),
-    [tickets],
-  );
+  const ticketEvents = useMemo(() => tickets.filter(ticket => ticket.event).slice(0, 8), [tickets]);
 
   if (loading) {
     return (
@@ -238,7 +231,12 @@ export default function HomeScreen() {
             </WelcomeText>
 
             <LeaveButton onPress={handleLeaveEvent}>
-              <Ionicons name="log-out-outline" size={20} color="#7A39B8" style={{ marginRight: 8 }} />
+              <Ionicons
+                name="log-out-outline"
+                size={20}
+                color="#7A39B8"
+                style={{ marginRight: 8 }}
+              />
               <LeaveButtonText>Leave event</LeaveButtonText>
             </LeaveButton>
 
@@ -247,7 +245,7 @@ export default function HomeScreen() {
 
           <VerticalListWrapper>
             {activities.length > 0 ? (
-              activities.map((activity) => {
+              activities.map(activity => {
                 const mappedItem = {
                   id: activity.id,
                   title: activity.name,
@@ -259,9 +257,9 @@ export default function HomeScreen() {
                 };
 
                 return (
-                  <CalendarCard 
-                    key={activity.id} 
-                    item={mappedItem} 
+                  <CalendarCard
+                    key={activity.id}
+                    item={mappedItem}
                     onToggleFavorite={async (item: any, isFav: boolean) => {
                       if (isFav) {
                         await api.post('/favorites', { activity_id: item.id });
@@ -421,7 +419,7 @@ const PaddedContent = styled.View`
 `;
 
 const WelcomeText = styled.Text`
-  color: ${({ theme }: any) => theme.colors.white || '#FFFFFF'}; 
+  color: ${({ theme }: any) => theme.colors.white || '#FFFFFF'};
   font-family: ${({ theme }: any) => theme.text.corpo.corpoTexto.fontFamily};
   font-size: ${({ theme }: any) => theme.text.corpo.corpoTexto.fontSize}px;
   line-height: ${({ theme }: any) => theme.text.corpo.corpoTexto.lineHeight || 24}px;
@@ -440,21 +438,21 @@ const LeaveButton = styled.Pressable`
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  background-color: ${({ theme }: any) => theme.colors.primary_10 || '#EFE5FA'}; 
+  background-color: ${({ theme }: any) => theme.colors.primary_10 || '#EFE5FA'};
   padding: 14px;
   border-radius: 20px;
   margin-bottom: ${({ theme }: any) => theme.spacing.xl}px;
 `;
 
 const LeaveButtonText = styled.Text`
-  color: ${({ theme }: any) => theme.colors.primary || '#7A39B8'}; 
+  color: ${({ theme }: any) => theme.colors.primary || '#7A39B8'};
   font-family: ${({ theme }: any) => theme.text.corpo.medium?.fontFamily || 'System'};
   font-size: 16px;
   font-weight: 600;
 `;
 
 const PopularActivitiesTitle = styled.Text`
-  color: ${({ theme }: any) => theme.colors.primary_50 || '#A259FF'}; 
+  color: ${({ theme }: any) => theme.colors.primary_50 || '#A259FF'};
   font-family: ${({ theme }: any) => theme.text.titulo.h.fontFamily};
   font-size: 18px;
   font-weight: bold;
@@ -463,7 +461,7 @@ const PopularActivitiesTitle = styled.Text`
 
 const VerticalListWrapper = styled.View`
   padding: 0 ${({ theme }: any) => theme.spacing.margemLateral}px;
-  padding-bottom: 120px; 
+  padding-bottom: 120px;
 `;
 
 const NoActivitiesText = styled.Text`
@@ -566,7 +564,11 @@ const TicketBarcode = styled.View`
 const TicketBar = styled.View<{ $index: number }>`
   width: ${({ theme }: any) => theme.spacing.xs}px;
   height: ${({ $index, theme }: any) =>
-    $index % 3 === 0 ? theme.height.sm : $index % 2 === 0 ? theme.height.tam_42 : theme.height.xs}px;
+    $index % 3 === 0
+      ? theme.height.sm
+      : $index % 2 === 0
+        ? theme.height.tam_42
+        : theme.height.xs}px;
   background-color: ${({ theme }: any) => theme.colors.white};
   opacity: ${({ $index }: any) => ($index % 2 === 0 ? 0.95 : 0.75)};
 `;

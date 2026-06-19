@@ -37,10 +37,12 @@ function formatNotificationTime(value?: string | null) {
     return value;
   }
 
-  return date.toLocaleDateString('en-GB', {
-    day: '2-digit',
-    month: 'short',
-  }) + `, ${date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`;
+  return (
+    date.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+    }) + `, ${date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`
+  );
 }
 
 const Container = styled.View`
@@ -177,59 +179,68 @@ export default function NotificationsPage() {
   getTokenRef.current = getToken;
 
   const getFreshToken = useCallback(async () => {
-    const getTokenWithOptions = getTokenRef.current as (options?: unknown) => Promise<string | null>;
+    const getTokenWithOptions = getTokenRef.current as (
+      options?: unknown,
+    ) => Promise<string | null>;
     return getTokenWithOptions({ skipCache: true });
   }, []);
 
-  const fetchNotifications = useCallback(async (showLoading = false) => {
-    if (!isSignedIn) {
-      setNotifications([]);
-      setLoading(false);
-      setError('Please sign in to view notifications.');
-      return;
-    }
-
-    try {
-      if (showLoading) {
-        setLoading(true);
+  const fetchNotifications = useCallback(
+    async (showLoading = false) => {
+      if (!isSignedIn) {
+        setNotifications([]);
+        setLoading(false);
+        setError('Please sign in to view notifications.');
+        return;
       }
-      setError(null);
-      const token = await getFreshToken();
-      const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
-      const [notificationsResponse, pendingRequestsResponse] = await Promise.all([
-        api.get('/notifications/me', { headers }),
-        api.get('/friends/requests/pending', { headers }),
-      ]);
-      const eventNotifications = Array.isArray(notificationsResponse.data)
-        ? notificationsResponse.data
-        : [];
-      const pendingRequests = Array.isArray(pendingRequestsResponse.data)
-        ? pendingRequestsResponse.data.map(request => ({
-            id: `friend-${request.id}`,
-            friendshipId: request.id,
-            senderId: request.sender?.id,
-            title: 'Friendship request',
-            message: request.sender?.username ? `@${request.sender.username}` : request.sender?.name,
-            description: request.sender?.username ? `@${request.sender.username}` : request.sender?.name,
-            type: 'friend',
-            category: 'friend',
-            time: null,
-            read: false,
-            imageUri: request.sender?.image
-              ? `data:image/jpeg;base64,${request.sender.image}`
-              : undefined,
-          }))
-        : [];
 
-      setNotifications([...pendingRequests, ...eventNotifications]);
-    } catch (err: any) {
-      console.error('Failed to fetch notifications:', err);
-      setError(err.response?.data?.message || 'Failed to load notifications');
-      setNotifications([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [getFreshToken, isSignedIn]);
+      try {
+        if (showLoading) {
+          setLoading(true);
+        }
+        setError(null);
+        const token = await getFreshToken();
+        const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
+        const [notificationsResponse, pendingRequestsResponse] = await Promise.all([
+          api.get('/notifications/me', { headers }),
+          api.get('/friends/requests/pending', { headers }),
+        ]);
+        const eventNotifications = Array.isArray(notificationsResponse.data)
+          ? notificationsResponse.data
+          : [];
+        const pendingRequests = Array.isArray(pendingRequestsResponse.data)
+          ? pendingRequestsResponse.data.map(request => ({
+              id: `friend-${request.id}`,
+              friendshipId: request.id,
+              senderId: request.sender?.id,
+              title: 'Friendship request',
+              message: request.sender?.username
+                ? `@${request.sender.username}`
+                : request.sender?.name,
+              description: request.sender?.username
+                ? `@${request.sender.username}`
+                : request.sender?.name,
+              type: 'friend',
+              category: 'friend',
+              time: null,
+              read: false,
+              imageUri: request.sender?.image
+                ? `data:image/jpeg;base64,${request.sender.image}`
+                : undefined,
+            }))
+          : [];
+
+        setNotifications([...pendingRequests, ...eventNotifications]);
+      } catch (err: any) {
+        console.error('Failed to fetch notifications:', err);
+        setError(err.response?.data?.message || 'Failed to load notifications');
+        setNotifications([]);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [getFreshToken, isSignedIn],
+  );
 
   useEffect(() => {
     if (!isLoaded) {
@@ -385,7 +396,9 @@ export default function NotificationsPage() {
       const token = await getFreshToken();
       const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
       const endpoint =
-        action === 'accept' ? `/friends/accept/${item.senderId}` : `/friends/toggle/${item.senderId}`;
+        action === 'accept'
+          ? `/friends/accept/${item.senderId}`
+          : `/friends/toggle/${item.senderId}`;
 
       await api.post(endpoint, undefined, { headers });
       await fetchNotifications(false);
@@ -433,7 +446,9 @@ export default function NotificationsPage() {
         <CardContent>
           <CardHeader>
             <CardTitle
-              style={item.type === 'emergency' || item.type === 'sos' ? { color: '#f67f7f' } : undefined}
+              style={
+                item.type === 'emergency' || item.type === 'sos' ? { color: '#f67f7f' } : undefined
+              }
             >
               {notificationTitle}
             </CardTitle>

@@ -35,8 +35,7 @@ const TabButton = styled.TouchableOpacity`
 const TabIcon = styled(Ionicons).attrs(({ theme }) => ({
   size: theme.height.xs,
 }))<{ $active: boolean }>`
-  color: ${({ $active, theme }) =>
-    $active ? theme.colors.navActive : theme.colors.navInactive};
+  color: ${({ $active, theme }) => ($active ? theme.colors.navActive : theme.colors.navInactive)};
 `;
 
 const IconBox = styled.View`
@@ -49,8 +48,7 @@ const IconBox = styled.View`
 const TabText = styled.Text<{ $active: boolean }>`
   ${({ theme }) => theme.text.textoPequeno};
   margin-top: ${({ theme }) => theme.spacing.xxs}px;
-  color: ${({ $active, theme }) =>
-    $active ? theme.colors.navActive : theme.colors.navInactive};
+  color: ${({ $active, theme }) => ($active ? theme.colors.navActive : theme.colors.navInactive)};
 `;
 
 const eventModeTabs = [

@@ -216,16 +216,16 @@ Used by Expo. Public app variables need the `EXPO_PUBLIC_` prefix.
 
 ```env
 EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_xxxxxxxxx
-EXPO_PUBLIC_API_URL=http://localhost:3000
-```
-
-For a deployed backend:
-
-```env
 EXPO_PUBLIC_API_URL=https://safinity-app.onrender.com
 ```
 
-If `EXPO_PUBLIC_API_URL` is missing, the app tries to infer the Expo host IP and call `http://<expo-host-ip>:3000`, which is useful for local physical-device testing.
+For local backend testing, temporarily override the value:
+
+```env
+EXPO_PUBLIC_API_URL=http://localhost:3000
+```
+
+If `EXPO_PUBLIC_API_URL` is missing, the mobile app defaults to the Render backend at `https://safinity-app.onrender.com`.
 
 ---
 

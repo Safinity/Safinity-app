@@ -14,6 +14,7 @@ export type ProfileEvent = {
   description?: string | null;
   status?: string | null;
   category?: string | null;
+  image?: string | null;
   start_date?: string | null;
   end_date?: string | null;
 };
@@ -44,6 +45,8 @@ export type UpdateProfilePayload = {
   username?: string;
 };
 
+type EventImageLookup = Record<string, string | null | undefined>;
+
 function authHeaders(token: string | null) {
   return token ? { Authorization: `Bearer ${token}` } : undefined;
 }
@@ -54,6 +57,68 @@ export async function getMyProfile(token: string | null) {
   });
 
   return response.data;
+}
+
+async function fetchMissingEventImages(token: string | null, profile: AuthenticatedProfile) {
+  const missingEventIds = Array.from(
+    new Set(
+      profile.user_tickets
+        .map(ticket => ticket.event?.id || ticket.event_id)
+        .filter((eventId, index) => eventId && !profile.user_tickets[index]?.event?.image),
+    ),
+  );
+
+  if (!missingEventIds.length) {
+    return {};
+  }
+
+  const eventResponses = await Promise.allSettled(
+    missingEventIds.map(async eventId => {
+      const response = await profileApi.get<ProfileEvent>(`/events/${eventId}`, {
+        headers: authHeaders(token),
+      });
+
+      return [eventId, response.data.image] as const;
+    }),
+  );
+
+  return eventResponses.reduce<EventImageLookup>((imagesByEventId, response) => {
+    if (response.status === 'fulfilled') {
+      const [eventId, image] = response.value;
+      imagesByEventId[eventId] = image;
+    }
+
+    return imagesByEventId;
+  }, {});
+}
+
+export async function getMyProfileWithEventImages(token: string | null) {
+  const profile = await getMyProfile(token);
+  const imagesByEventId = await fetchMissingEventImages(token, profile);
+
+  if (!Object.keys(imagesByEventId).length) {
+    return profile;
+  }
+
+  return {
+    ...profile,
+    user_tickets: profile.user_tickets.map(ticket => {
+      const eventId = ticket.event?.id || ticket.event_id;
+      const image = eventId ? imagesByEventId[eventId] : undefined;
+
+      if (!ticket.event || !image || ticket.event.image) {
+        return ticket;
+      }
+
+      return {
+        ...ticket,
+        event: {
+          ...ticket.event,
+          image,
+        },
+      };
+    }),
+  };
 }
 
 export async function updateMyProfile(token: string | null, payload: UpdateProfilePayload) {

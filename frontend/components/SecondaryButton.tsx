@@ -1,10 +1,10 @@
-import { Spacing, BorderRadius, Colors } from '../constants/theme';
+import { Spacing, BorderRadius } from '../constants/theme';
 import styled from 'styled-components/native';
 
 const Button = styled.TouchableOpacity`
   padding: ${Spacing.md}px;
   border-radius: ${BorderRadius.medium}px;
-  background-color: ${Colors.white};
+  background-color: ${({ theme }) => theme.colors.surfaceSoft};
   width: 100%;
   include-font-padding: false;
 `;
@@ -12,7 +12,7 @@ const Button = styled.TouchableOpacity`
 const Label = styled.Text`
   text-align: center;
   font-weight: 600;
-  color: ${Colors.palette.primary.dark20};
+  color: ${({ theme }) => theme.colors.primary};
 `;
 
 export default function SecondaryButton({ title, onPress }: any) {

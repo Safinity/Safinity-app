@@ -1,7 +1,7 @@
 import { useAuth } from '@clerk/expo';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import styled from 'styled-components/native';
-import { Colors, Spacing, TextStyles } from '../../../constants/theme';
+import styled, { useTheme } from 'styled-components/native';
+import { Spacing, TextStyles } from '../../../constants/theme';
 import { ActivityIndicator, ScrollView } from 'react-native';
 import { Stack } from 'expo-router';
 import Header from '../../../components/ui/header';
@@ -13,6 +13,7 @@ import { getMyProfile } from '../../../utils/profile';
 import { getUserTickets, type UserTicket } from '../../../utils/tickets';
 
 const WalletScreen = () => {
+  const theme = useTheme();
   const { isLoaded, isSignedIn, getToken } = useAuth();
   const [searchText, setSearchText] = useState('');
   const [firstName, setFirstName] = useState('Wallet');
@@ -87,7 +88,12 @@ const WalletScreen = () => {
   return (
     <Container>
       <Stack.Screen options={{ title: `${firstName}'s Wallet` }} />
-      <Header variant="back" title={`${firstName}'s Wallet`} showBottomDivider={false} />
+      <Header
+        variant="back"
+        colorScheme={theme.colors.mode === 'light' ? 'light' : 'dark'}
+        title={`${firstName}'s Wallet`}
+        showBottomDivider={false}
+      />
 
       <ScrollView
         contentContainerStyle={{ paddingTop: 120, paddingHorizontal: Spacing.margemLateral }}
@@ -110,7 +116,7 @@ const WalletScreen = () => {
 
           {isLoading ? (
             <LoadingState>
-              <ActivityIndicator color="white" />
+              <ActivityIndicator color={theme.colors.primary} />
               <StateText>Loading...</StateText>
             </LoadingState>
           ) : error ? (
@@ -150,7 +156,7 @@ export default WalletScreen;
 
 const Container = styled.View`
   flex: 1;
-  background-color: ${Colors.background};
+  background-color: ${({ theme }) => theme.colors.background};
 `;
 
 const Content = styled.View`
@@ -180,7 +186,7 @@ const LoadingState = styled.View`
 `;
 
 const StateText = styled.Text`
-  color: ${Colors.inactive};
+  color: ${({ theme }) => theme.colors.textMuted};
   font-family: ${TextStyles.corpo.corpoTexto.fontFamily};
   font-size: ${TextStyles.corpo.corpoTexto.fontSize}px;
   text-align: center;

@@ -1,6 +1,6 @@
 import { useAuth } from '@clerk/expo';
 import React, { useEffect, useRef, useState } from 'react';
-import styled from 'styled-components/native';
+import styled, { useTheme } from 'styled-components/native';
 import { ActivityIndicator, Alert } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { Colors, Spacing, TextStyles } from '../../../constants/theme';
@@ -59,6 +59,7 @@ function formatBarcode(value: string) {
 }
 
 const TicketScreen = () => {
+  const theme = useTheme();
   const { isLoaded, isSignedIn, getToken } = useAuth();
   const router = useRouter();
   const { eventId, ticketId } = useLocalSearchParams<{
@@ -154,12 +155,17 @@ const TicketScreen = () => {
   return (
     <Container>
       <Stack.Screen options={{ title: 'Ticket' }} />
-      <Header variant="back" title="Ticket" showBottomDivider={false} />
+      <Header
+        variant="back"
+        colorScheme={theme.colors.mode === 'light' ? 'light' : 'dark'}
+        title="Ticket"
+        showBottomDivider={false}
+      />
 
       <TicketBody>
         {isLoading ? (
           <LoadingState>
-            <ActivityIndicator color="white" />
+            <ActivityIndicator color={theme.colors.primary} />
             <ErrorText>Loading...</ErrorText>
           </LoadingState>
         ) : error || !ticket || !event ? (
@@ -234,7 +240,7 @@ export default TicketScreen;
 
 const Container = styled.View`
   flex: 1;
-  background-color: ${Colors.background};
+  background-color: ${({ theme }) => theme.colors.background};
 `;
 
 const TicketBody = styled.View`
@@ -265,7 +271,7 @@ const TicketCard = styled.View`
 const EventImage = styled.Image`
   width: 100%;
   height: ${({ theme }) => theme.height.card.compact * 0.48}px;
-  background-color: ${Colors.background};
+  background-color: ${({ theme }) => theme.colors.background};
 `;
 
 const TicketStatusContainer = styled.View`
@@ -292,7 +298,7 @@ const TicketStatusValue = styled.Text`
 const Divider = styled.View`
   width: 100%;
   height: ${({ theme }) => theme.spacing.sm}px;
-  background-color: ${Colors.background};
+  background-color: ${({ theme }) => theme.colors.background};
 `;
 
 const TicketHeader = styled.View`
@@ -360,7 +366,7 @@ const BarcodeText = styled.Text`
 `;
 
 const ErrorText = styled.Text`
-  color: ${Colors.inactive};
+  color: ${({ theme }) => theme.colors.textMuted};
   font-family: ${TextStyles.corpo.corpoTexto.fontFamily};
   font-size: ${TextStyles.corpo.corpoTexto.fontSize}px;
   padding: ${Spacing.lg}px;

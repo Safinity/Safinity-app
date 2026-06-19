@@ -1,7 +1,7 @@
 import { useAuth } from '@clerk/expo';
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Modal, TextInput } from 'react-native';
-import styled from 'styled-components/native';
+import styled, { useTheme } from 'styled-components/native';
 import { linkUserTicket, type UserTicket } from '../utils/tickets';
 
 type LinkTicketModalProps = {
@@ -12,6 +12,7 @@ type LinkTicketModalProps = {
 };
 
 export function LinkTicketModal({ visible, eventId, onClose, onLinked }: LinkTicketModalProps) {
+  const theme = useTheme();
   const { isSignedIn, getToken } = useAuth();
   const getTokenRef = useRef(getToken);
   const [ticketCode, setTicketCode] = useState('');
@@ -87,7 +88,7 @@ export function LinkTicketModal({ visible, eventId, onClose, onLinked }: LinkTic
             autoCapitalize="characters"
             autoCorrect={false}
             placeholder="ABC123"
-            placeholderTextColor="rgba(255,255,255,0.35)"
+            placeholderTextColor={theme.colors.textSubtle}
             editable={!isSubmitting}
             accessible
             accessibilityLabel="6-character ticket validation code"
@@ -103,7 +104,7 @@ export function LinkTicketModal({ visible, eventId, onClose, onLinked }: LinkTic
 
             <ModalBtn isPrimary onPress={handleSubmit} disabled={isSubmitting}>
               {isSubmitting ? (
-                <ActivityIndicator color="white" />
+                <ActivityIndicator color={theme.colors.onPrimary} />
               ) : (
                 <ModalBtnText isPrimary>Link</ModalBtnText>
               )}
@@ -124,7 +125,7 @@ const ModalOverlay = styled.View`
 `;
 
 const ModalContent = styled.View`
-  background-color: ${({ theme }) => theme.colors.grayNavbar};
+  background-color: ${({ theme }) => theme.colors.surfaceElevated};
   width: 95%;
   border-radius: ${({ theme }) => theme.borderRadius.xlarge}px;
   padding: ${({ theme }) => theme.spacing.xl}px;
@@ -132,14 +133,14 @@ const ModalContent = styled.View`
 `;
 
 const ModalTitle = styled.Text`
-  color: ${({ theme }) => theme.colors.white};
+  color: ${({ theme }) => theme.colors.text};
   font-family: ${({ theme }) => theme.text.titulo.h.fontFamily};
   font-size: ${({ theme }) => theme.text.titulo.h.fontSize}px;
   margin-bottom: ${({ theme }) => theme.spacing.md}px;
 `;
 
 const ModalDescription = styled.Text`
-  color: ${({ theme }) => theme.colors.white};
+  color: ${({ theme }) => theme.colors.textMuted};
   text-align: center;
   font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
   font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
@@ -151,9 +152,9 @@ const TicketCodeInput = styled(TextInput)`
   width: 100%;
   height: 54px;
   border-width: 1px;
-  border-color: rgba(255, 255, 255, 0.5);
+  border-color: ${({ theme }) => theme.colors.border};
   border-radius: 12px;
-  color: ${({ theme }) => theme.colors.white};
+  color: ${({ theme }) => theme.colors.text};
   font-family: ${({ theme }) => theme.text.titulo.h2.fontFamily};
   font-size: ${({ theme }) => theme.text.titulo.h2.fontSize}px;
   text-align: center;
@@ -179,7 +180,8 @@ const ModalButtons = styled.View`
 const ModalBtn = styled.TouchableOpacity<{ isPrimary?: boolean }>`
   flex: 0.48;
   min-height: 52px;
-  background-color: ${({ isPrimary, theme }) => (isPrimary ? theme.colors.primary : '#E5D9F2')};
+  background-color: ${({ isPrimary, theme }) =>
+    isPrimary ? theme.colors.primary : theme.colors.surfaceSoft};
   padding: ${({ theme }) => theme.spacing.md}px;
   border-radius: ${({ theme }) => theme.borderRadius.round}px;
   align-items: center;
@@ -189,5 +191,5 @@ const ModalBtn = styled.TouchableOpacity<{ isPrimary?: boolean }>`
 const ModalBtnText = styled.Text<{ isPrimary?: boolean }>`
   font-family: ${({ theme }) => theme.text.botao.fontFamily};
   font-size: ${({ theme }) => theme.text.botao.fontSize}px;
-  color: ${({ isPrimary, theme }) => (isPrimary ? theme.colors.white : theme.colors.primary)};
+  color: ${({ isPrimary, theme }) => (isPrimary ? theme.colors.onPrimary : theme.colors.primary)};
 `;

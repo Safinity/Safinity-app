@@ -98,7 +98,7 @@ const semanticLightColors = {
   text: Colors.background,
   textMuted: Colors.neutralGray,
   textSubtle: Colors.palette.neutral.neutral60,
-  icon: Colors.background,
+  icon: Colors.primary_50,
   onPrimary: Colors.white,
   navBackground: Colors.white,
   navActive: Colors.primary,

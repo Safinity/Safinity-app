@@ -44,7 +44,7 @@ const TimeBadge = styled.View<{ isCompact?: boolean }>`
 `;
 
 const TimeText = styled.Text`
-  color: ${({ theme }) => theme.colors.white};
+  color: "white";
   font-family: ${({ theme }) => theme.text.label.fontFamily};
   font-size: ${({ theme }) => theme.text.label.fontSize}px;
   line-height: ${({ theme }) => theme.text.label.lineHeight}px;
@@ -65,7 +65,7 @@ const DateText = styled.Text`
 `;
 
 const TitleText = styled.Text`
-  color: ${({ theme }) => theme.colors.white};
+  color: "white";
   font-family: ${({ theme }) => theme.text.titulo.h1.fontFamily};
   font-size: ${({ theme }) => theme.text.titulo.h1.fontSize}px;
   line-height: ${({ theme }) => theme.text.titulo.h1.lineHeight}px;

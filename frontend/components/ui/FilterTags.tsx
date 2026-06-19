@@ -1,35 +1,34 @@
 import React from 'react';
 import styled from 'styled-components/native';
-import { Spacing, Height, BorderRadius, TextStyles, Colors } from '../../constants/theme';
+import { useTheme } from 'styled-components/native';
+import {
+  Spacing,
+  Height,
+  BorderRadius,
+  TextStyles,
+} from '../../constants/theme';
 
-/*
-Accessibility Enhancements / WCAG Level A Compliance
-
-- Each Tag (Pressable) now includes:
-  • role="button" to identify it as an interactive element
-  • accessibilityState={{ selected: isSelected }} to communicate selection state
-  • accessibilityLabel={`Filtrar por ${tag}`} to provide descriptive text for screen readers
-  • accessibilityHint="Aplica este filtro de atividades" to explain its action
-  • focusable set to true to ensure keyboard and assistive technology navigation
-
-These changes improve screen reader support, keyboard navigation, and overall accessibility for the filter tags.
-*/
 export type FilterTagsVariant = 'homepage' | 'mapa';
 
-const getTagTheme = () => ({
+/**
+ * Dynamic theme properties mapping matching your styling images
+ */
+const getTagTheme = (theme: any) => ({
   homepage: {
-    color: Colors.grayNavbar,
-    selectedColor: Colors.primary,
-    textColor: Colors.white,
-    selectedTextColor: Colors.white,
+    color: theme.colors.mode === 'dark' ? theme.colors.surface : theme.colors.palette.primary.light80,
+    selectedColor: theme.colors.primary,  // selected background
+    textColor: theme.colors.text,         // unselected text
+    selectedTextColor: '#FFFFFF',          // selected text color
+    borderColor: 'transparent',
     paddingLeft: Spacing.margemLateral,
     paddingRight: Spacing.lg,
   },
   mapa: {
-    color: Colors.background,
-    selectedColor: Colors.primary,
-    textColor: Colors.white,
-    selectedTextColor: Colors.white,
+    color: theme.colors.mode === 'dark' ? theme.colors.surface : "white",
+    selectedColor: theme.colors.primary,
+    textColor: theme.colors.text,
+    selectedTextColor: '#FFFFFF',
+    borderColor: theme.colors.mode === 'dark' ? '#4A5568' : '#E2E8F0', // Uses subtle clean borders observed in image 2
     paddingLeft: Spacing.margemLateral,
     paddingRight: Spacing.lg,
   },
@@ -44,9 +43,12 @@ interface FilterTagsProps {
   showsHorizontalScrollIndicator?: boolean;
 }
 
-const TagsScrollView = styled.ScrollView.attrs<{ variant: FilterTagsVariant }>(
-  ({ variant }: { variant: FilterTagsVariant }) => {
-    const tagTheme = getTagTheme()[variant];
+/**
+ * Scroll container
+ */
+const TagsScrollView = styled.ScrollView.attrs<{ variant: FilterTagsVariant; theme: any }>(
+  ({ variant, theme }) => {
+    const tagTheme = getTagTheme(theme)[variant];
 
     return {
       horizontal: true,
@@ -62,37 +64,64 @@ const TagsScrollView = styled.ScrollView.attrs<{ variant: FilterTagsVariant }>(
   margin-top: ${Spacing.md}px;
 `;
 
+/**
+ * Container dos tags
+ */
 const TagsContainer = styled.View`
   flex-direction: row;
-  gap: ${Spacing.sm}px;
+  gap: ${Spacing.sm}px; /* Perfectly scales according to your device functions */
 `;
 
-const Tag = styled.Pressable<{ selected: boolean; variant: FilterTagsVariant }>`
-  padding: ${Spacing.sm}px ${Spacing.md}px;
+/**
+ * Tag button
+ */
+const Tag = styled.Pressable<{
+  selected: boolean;
+  variant: FilterTagsVariant;
+  theme: any;
+}>`
+  padding: 0px ${Spacing.md}px;
   border-radius: ${BorderRadius.round}px;
   border-width: 1px;
-  min-height: ${Height.tam_42}px;
+  height: ${Height.tam_42}px; /* Uses your predefined scale size (42) */
   justify-content: center;
   align-items: center;
-  ${({ selected, variant }: { selected: boolean; variant: FilterTagsVariant }) => {
-    const tagTheme = getTagTheme()[variant];
+
+  ${({ selected, variant, theme }) => {
+    const tagTheme = getTagTheme(theme)[variant];
+
     return `
       background-color: ${selected ? tagTheme.selectedColor : tagTheme.color};
-      border-color: ${selected ? tagTheme.selectedColor : 'transparent'};
+      border-color: ${selected ? tagTheme.selectedColor : tagTheme.borderColor};
     `;
   }}
 `;
 
-const TagText = styled.Text<{ selected: boolean; variant: FilterTagsVariant }>`
-  ${TextStyles.textoFiltros};
-  ${({ selected, variant }: { selected: boolean; variant: FilterTagsVariant }) => {
-    const tagTheme = getTagTheme()[variant];
+/**
+ * Texto do tag
+ */
+const TagText = styled.Text<{
+  selected: boolean;
+  variant: FilterTagsVariant;
+  theme: any;
+}>`
+  /* Pulls your default font configurations */
+  font-family: ${TextStyles.textoFiltros.fontFamily};
+  font-size: ${TextStyles.textoFiltros.fontSize}px;
+  line-height: ${TextStyles.textoFiltros.lineHeight}px;
+
+  ${({ selected, variant, theme }) => {
+    const tagTheme = getTagTheme(theme)[variant];
+
     return `
       color: ${selected ? tagTheme.selectedTextColor : tagTheme.textColor};
     `;
   }}
 `;
 
+/**
+ * Component principal
+ */
 const FilterTags: React.FC<FilterTagsProps> = ({
   tags,
   selectedTags,
@@ -101,9 +130,12 @@ const FilterTags: React.FC<FilterTagsProps> = ({
   style,
   showsHorizontalScrollIndicator = false,
 }) => {
+  const theme = useTheme();
+
   return (
     <TagsScrollView
       variant={variant}
+      theme={theme}
       style={style}
       showsHorizontalScrollIndicator={showsHorizontalScrollIndicator}
     >
@@ -116,6 +148,7 @@ const FilterTags: React.FC<FilterTagsProps> = ({
               key={tag}
               selected={isSelected}
               variant={variant}
+              theme={theme}
               onPress={() => onTagPress(tag)}
               role="button"
               accessibilityState={{ selected: isSelected }}
@@ -123,7 +156,11 @@ const FilterTags: React.FC<FilterTagsProps> = ({
               accessibilityHint="Aplica este filtro de atividades"
               focusable
             >
-              <TagText selected={isSelected} variant={variant}>
+              <TagText
+                selected={isSelected}
+                variant={variant}
+                theme={theme}
+              >
                 {tag}
               </TagText>
             </Tag>

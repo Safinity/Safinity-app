@@ -225,7 +225,7 @@ export default function HomeScreen() {
         <Stack.Screen options={{ headerShown: false }} />
         <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
 
-        <Header />
+        <Header variant="default" forceDarkLogo={true} />
 
         <Content>
           {/* O Banner gere autonomamente o texto "Now, at" a branco puro lá dentro */}

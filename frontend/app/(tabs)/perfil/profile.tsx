@@ -3,7 +3,6 @@ import {
   FlatList,
   Modal,
   Platform,
-  Pressable,
   ScrollView,
   View,
 } from 'react-native';
@@ -12,7 +11,6 @@ import { Stack, router } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import styled, { useTheme } from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth, useClerk } from '@clerk/expo';
 
 import { EventCard } from '../../../components/EventCard';
@@ -20,14 +18,14 @@ import { Fonts } from '../../../constants/theme';
 import { useThemePreference } from '../../../context/ThemeContext';
 
 import EditIcon from '../../../assets/Icons/edit.png';
-import Header from '../../../components/ui/header'; // import do header customizado
+import ProfileFundoImg from '../../../assets/images/Profile-fundo.png';
+import ProfileFundoDarkImg from '../../../assets/images/Profile-fundo-dark.png';
 import { deleteMyAccount, getMyProfile, type AuthenticatedProfile } from '../../../utils/profile';
 
 function getProfileImageSource(user: AuthenticatedProfile | null) {
   if (user?.image) {
     return { uri: `data:image/jpeg;base64,${user.image}` };
   }
-
   return null;
 }
 
@@ -44,38 +42,91 @@ async function clearCachedAuthToken() {
   if (Platform.OS === 'web') {
     return;
   }
-
   try {
     await SecureStore.deleteItemAsync('clerk-token');
   } catch {
-    // Best effort cleanup; Clerk signOut is still the source of truth.
+    // Best effort cleanup
   }
 }
+
+// --- Styled Components ---
+
+const BackgroundWrapper = styled.ImageBackground`
+  flex: 1;
+  background-color: ${({ theme }) => theme.colors.background};
+`;
 
 const Container = styled(ScrollView).attrs({
   showsVerticalScrollIndicator: false,
 })`
   flex: 1;
-  background-color: ${({ theme }) => theme.colors.background};
+  background-color: transparent;
 `;
 
-const TopGradient = styled(LinearGradient)`
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 33%;
-  z-index: 0;
+const CustomHeaderBar = styled.View`
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  padding-horizontal: ${({ theme }) => theme.spacing.margemLateral}px;
+  margin-top: 50px;
+  z-index: 10;
+`;
+
+const HeaderActionButton = styled.TouchableOpacity`
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+`;
+
+// O WalletBadge continua aqui mas será renderizado na linha do título
+const WalletBadge = styled.TouchableOpacity`
+  width: 40px;
+  height: 40px;
+  background-color: rgba(255, 255, 255, 0.4);
+  border-radius: 20px;
+  align-items: center;
+  justify-content: center;
+`;
+
+// Alterado para alinhar o título à esquerda e a carteira à direita
+const MainTitleRow = styled.View`
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding-horizontal: ${({ theme }) => theme.spacing.margemLateral}px;
+  margin-top: 24px;
+  z-index: 5;
+`;
+
+const TitleLeftGroup = styled.View`
+  flex-direction: row;
+  align-items: center;
+`;
+
+const MainTitleIndicator = styled.View`
+  width: 5px;
+  height: 28px;
+  background-color: #7A39B8;
+  border-radius: 3px;
+  margin-right: 12px;
+`;
+
+const MainTitle = styled.Text<{ $themeMode: string }>`
+  font-size: 28px;
+  font-weight: bold;
+  color: ${({ $themeMode }) => ($themeMode === 'dark' ? '#FFFFFF' : '#2D3142')}; 
+  font-family: ${({ theme }) => theme.text.titulo.h1.fontFamily};
 `;
 
 const AvatarContainer = styled.View`
   align-items: center;
-  margin-top: 20px;
+  margin-top: 30px;
   margin-bottom: 20px;
   position: relative;
   width: 160px;
   align-self: center;
-  z-index: 1;
+  z-index: 5;
 `;
 
 const AvatarCircle = styled.View`
@@ -86,6 +137,11 @@ const AvatarCircle = styled.View`
   overflow: hidden;
   align-items: center;
   justify-content: center;
+  elevation: 4;
+  shadow-color: #000;
+  shadow-offset: 0px 2px;
+  shadow-opacity: 0.15;
+  shadow-radius: 4px;
 `;
 
 const Avatar = styled.Image`
@@ -111,14 +167,20 @@ const EditIconCircle = styled.View`
   width: 36px;
   height: 36px;
   border-radius: 18px;
-  background-color: ${({ theme }) => theme.colors.palette.primary.light90};
+  background-color: #FFFFFF;
   align-items: center;
   justify-content: center;
+  elevation: 3;
+  shadow-color: #000;
+  shadow-offset: 0px 1px;
+  shadow-opacity: 0.2;
+  shadow-radius: 2px;
 `;
 
 const EditImage = styled.Image`
   width: 18px;
   height: 18px;
+  tint-color: #7A39B8;
 `;
 
 const PaddedContent = styled.View`
@@ -126,12 +188,12 @@ const PaddedContent = styled.View`
   z-index: 1;
 `;
 
-const Name = styled.Text`
-  font-size: 22px;
-  color: ${({ theme }) => theme.colors.text};
+const Name = styled.Text<{ $themeMode: string }>`
+  font-size: 24px;
+  color: ${({ $themeMode }) => ($themeMode === 'dark' ? '#FFFFFF' : '#2D3142')};
   align-self: center;
   margin-top: 10px;
-  font-weight: 600;
+  font-weight: 700;
 `;
 
 const Username = styled.Text`
@@ -154,13 +216,12 @@ const LinkButton = styled.TouchableOpacity`
 `;
 
 const LinkButtonText = styled.Text`
-  color: ${({ theme }) => theme.colors.onPrimary};
+  color: #FFFFFF;
   font-family: ${Fonts.weights.medium};
 `;
 
 const SectionHeader = styled.View`
   flex-direction: row;
-  justify-content: space-between;
   align-items: center;
   margin-top: 20px;
   margin-bottom: ${({ theme }) => theme.spacing.md}px;
@@ -170,14 +231,7 @@ const SectionTitle = styled.Text`
   color: ${({ theme }) => theme.colors.text};
   font-family: ${({ theme }) => theme.text.titulo.h1.fontFamily};
   font-size: ${({ theme }) => theme.text.titulo.h1.fontSize}px;
-`;
-
-const SeeMore = styled.Text`
-  font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
-  font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
-  line-height: ${({ theme }) => theme.text.corpo.corpoTexto.lineHeight}px;
-  color: ${({ theme }) => theme.colors.primary_50};
-  padding: 5px;
+  font-weight: bold;
 `;
 
 const SettingsRow = styled.TouchableOpacity`
@@ -229,7 +283,7 @@ const ThemeOption = styled.Pressable<{ $active: boolean }>`
 `;
 
 const ThemeOptionText = styled.Text<{ $active: boolean }>`
-  color: ${({ $active, theme }) => ($active ? theme.colors.onPrimary : theme.colors.textMuted)};
+  color: ${({ $active, theme }) => ($active ? '#FFFFFF' : theme.colors.textMuted)};
   font-family: ${Fonts.weights.medium};
   font-size: 13px;
 `;
@@ -241,6 +295,8 @@ const LogoutButton = styled.TouchableOpacity`
   margin-top: 24px;
   margin-bottom: ${({ theme }) => theme.spacing.md}px;
   align-self: center;
+  width: 202px; 
+  align-items: center; 
 `;
 
 const LogoutText = styled.Text`
@@ -250,12 +306,13 @@ const LogoutText = styled.Text`
 `;
 
 const DeleteAccountButton = styled.TouchableOpacity`
-  border-width: 1px;
   background-color: ${({ theme }) => theme.colors.palette.primary.light80};
   border-radius: ${({ theme }) => theme.borderRadius.large}px;
   padding: 12px 20px;
   margin-bottom: ${({ theme }) => theme.spacing.xxl}px;
   align-self: center;
+  width: 202px; 
+  align-items: center; 
 `;
 
 const DeleteAccountText = styled.Text`
@@ -321,7 +378,7 @@ const ModalButton = styled.TouchableOpacity<{ variant?: 'danger' | 'secondary' }
 
 const ModalButtonText = styled.Text<{ variant?: 'danger' | 'secondary' }>`
   color: ${({ theme, variant }) =>
-    variant === 'danger' ? theme.colors.onPrimary : theme.colors.text};
+    variant === 'danger' ? '#FFFFFF' : theme.colors.text};
   font-family: ${Fonts.weights.medium};
   font-size: 14px;
 `;
@@ -365,7 +422,6 @@ export default function Profile() {
     if (isLoaded) {
       return;
     }
-
     setIsLoading(true);
 
     const timeoutId = setTimeout(() => {
@@ -373,18 +429,14 @@ export default function Profile() {
       setIsLoading(false);
     }, 12000);
 
-    return () => {
-      clearTimeout(timeoutId);
-    };
+    return () => clearTimeout(timeoutId);
   }, [isLoaded]);
 
   useEffect(() => {
     let isActive = true;
 
     async function loadProfile() {
-      if (!isLoaded) {
-        return;
-      }
+      if (!isLoaded) return;
 
       if (!isSignedIn) {
         setUser(null);
@@ -416,10 +468,7 @@ export default function Profile() {
     }
 
     loadProfile();
-
-    return () => {
-      isActive = false;
-    };
+    return () => { isActive = false; };
   }, [isLoaded, isSignedIn]);
 
   const imageSource = getProfileImageSource(user);
@@ -452,102 +501,95 @@ export default function Profile() {
 
   if (isLoading) {
     return (
-      <Container>
-        <Header
-          variant="back"
-          colorScheme={themeMode === 'light' ? 'light' : 'dark'}
-          title="Profile"
-          rightIcon="wallet"
-          onRightPress={() => router.push('/perfil/wallet')}
-        />
+      <BackgroundWrapper source={themeMode === 'light' ? ProfileFundoImg : ProfileFundoDarkImg} resizeMode="cover">
         <LoadingState>
           <ActivityIndicator color={theme.colors.primary} />
           <LoadingText>Loading...</LoadingText>
         </LoadingState>
-      </Container>
+      </BackgroundWrapper>
     );
   }
 
   if (error || !user) {
     return (
-      <Container>
-        <Header
-          variant="back"
-          colorScheme={themeMode === 'light' ? 'light' : 'dark'}
-          title="Profile"
-          rightIcon="wallet"
-          onRightPress={() => router.push('/perfil/wallet')}
-        />
+      <BackgroundWrapper source={themeMode === 'light' ? ProfileFundoImg : ProfileFundoDarkImg} resizeMode="cover">
         <LoadingState>
           <LoadingText>{error || 'Unable to load profile.'}</LoadingText>
         </LoadingState>
-      </Container>
+      </BackgroundWrapper>
     );
   }
 
   return (
-    <Container>
-      <Stack.Screen options={{ title: 'Profile' }} />
-      <Modal
-        animationType="fade"
-        transparent
-        visible={isDeleteModalVisible}
-        onRequestClose={() => {
-          if (!isDeletingAccount) {
-            setIsDeleteModalVisible(false);
-          }
-        }}
-      >
-        <ModalOverlay>
-          <ModalContent role="alert" accessibilityLabel="Delete account confirmation">
-            <ModalTitle>Delete account?</ModalTitle>
-            <ModalDescription>
-              This will permanently delete your Safinity account, friends, tickets and saved data.
-            </ModalDescription>
-            {deleteAccountError ? <ModalError>{deleteAccountError}</ModalError> : null}
-            <ModalActions>
-              <ModalButton
-                variant="secondary"
-                disabled={isDeletingAccount}
-                onPress={() => setIsDeleteModalVisible(false)}
-                accessibilityRole="button"
-                accessibilityLabel="Cancel account deletion"
-              >
-                <ModalButtonText variant="secondary">Cancel</ModalButtonText>
-              </ModalButton>
-              <ModalButton
-                variant="danger"
-                disabled={isDeletingAccount}
-                onPress={handleDeleteAccount}
-                accessibilityRole="button"
-                accessibilityLabel="Confirm account deletion"
-              >
-                <ModalButtonText variant="danger">
-                  {isDeletingAccount ? 'Deleting...' : 'Delete'}
-                </ModalButtonText>
-              </ModalButton>
-            </ModalActions>
-          </ModalContent>
-        </ModalOverlay>
-      </Modal>
+    <BackgroundWrapper 
+      source={themeMode === 'light' ? ProfileFundoImg : ProfileFundoDarkImg} 
+      resizeMode="cover"
+    >
+      <Container>
+        <Stack.Screen options={{ headerShown: false }} />
+        <Modal
+          animationType="fade"
+          transparent
+          visible={isDeleteModalVisible}
+          onRequestClose={() => {
+            if (!isDeletingAccount) {
+              setIsDeleteModalVisible(false);
+            }
+          }}
+        >
+          <ModalOverlay>
+            <ModalContent role="alert" accessibilityLabel="Delete account confirmation">
+              <ModalTitle>Delete account?</ModalTitle>
+              <ModalDescription>
+                This will permanently delete your Safinity account, friends, tickets and saved data.
+              </ModalDescription>
+              {deleteAccountError ? <ModalError>{deleteAccountError}</ModalError> : null}
+              <ModalActions>
+                <ModalButton
+                  variant="secondary"
+                  disabled={isDeletingAccount}
+                  onPress={() => setIsDeleteModalVisible(false)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Cancel account deletion"
+                >
+                  <ModalButtonText variant="secondary">Cancel</ModalButtonText>
+                </ModalButton>
+                <ModalButton
+                  variant="danger"
+                  disabled={isDeletingAccount}
+                  onPress={handleDeleteAccount}
+                  accessibilityRole="button"
+                  accessibilityLabel="Confirm account deletion"
+                >
+                  <ModalButtonText variant="danger">
+                    {isDeletingAccount ? 'Deleting...' : 'Delete'}
+                  </ModalButtonText>
+                </ModalButton>
+              </ModalActions>
+            </ModalContent>
+          </ModalOverlay>
+        </Modal>
 
-      {/* Header Customizado */}
-      <Header
-        variant="back"
-        colorScheme={themeMode === 'light' ? 'light' : 'dark'}
-        title="Profile"
-        rightIcon="wallet"
-        onRightPress={() => router.push('/perfil/wallet')}
-      />
+        <CustomHeaderBar>
+          <HeaderActionButton onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={26} color={themeMode === 'dark' ? '#FFFFFF' : '#2D3142'} />
+          </HeaderActionButton>
+          {/* O WalletBadge foi retirado daqui e movido para baixo */}
+        </CustomHeaderBar>
 
-      <TopGradient
-        colors={[theme.colors.profileGradientStart, theme.colors.profileGradientEnd]}
-        locations={[0, 0.33]}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 3 }}
-      />
+        {/* Alinhamento horizontal do título com a carteira */}
+        <MainTitleRow>
+          <TitleLeftGroup>
+            <MainTitleIndicator />
+            <MainTitle $themeMode={themeMode}>Profile</MainTitle>
+          </TitleLeftGroup>
+          
+          {/* A carteira agora vive aqui e fica na mesma linha do "Profile" */}
+          <WalletBadge onPress={() => router.push('/perfil/wallet')}>
+            <Ionicons name="wallet-outline" size={22} color={themeMode === 'dark' ? '#FFFFFF' : '#2D3142'} />
+          </WalletBadge>
+        </MainTitleRow>
 
-      <PaddedContent style={{ marginTop: 120 }}>
         <AvatarContainer>
           <AvatarCircle>
             {imageSource ? (
@@ -567,107 +609,102 @@ export default function Profile() {
           </EditButtonContainer>
         </AvatarContainer>
 
-        <Name>{user.name || user.email || 'Safinity user'}</Name>
+        <Name $themeMode={themeMode}>{user.name || user.email || 'Safinity user'}</Name>
         <Username>@{user.username || 'user'}</Username>
 
         <LinkButton role="button" accessibilityLabel="Link my ticket">
           <LinkButtonText>Link my ticket</LinkButtonText>
         </LinkButton>
 
-        <SectionHeader>
-          <SectionTitle role="header">Past Events</SectionTitle>
-          <Pressable
-            onPress={() => router.push('/events-list')}
-            role="button"
-            accessibilityLabel="See more past events"
-          >
-            <SeeMore>See more</SeeMore>
-          </Pressable>
-        </SectionHeader>
-      </PaddedContent>
+        <PaddedContent>
+          <SectionHeader>
+            <SectionTitle role="header">Past Events</SectionTitle>
+          </SectionHeader>
+        </PaddedContent>
 
-      <FlatList
-        horizontal
-        data={userPastEvents}
-        renderItem={({ item }) => (
-          <View style={{ width: 280, marginRight: 16 }}>
-            <EventCard event={item} />
+        <FlatList
+          horizontal
+          data={userPastEvents}
+          renderItem={({ item }) => (
+            <View style={{ width: 280, marginRight: 16 }}>
+              <EventCard event={item} />
+            </View>
+          )}
+          keyExtractor={item => item.id}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingLeft: 40, paddingRight: 40 }}
+          ListEmptyComponent={<EmptyText>No past events yet</EmptyText>}
+          role="list"
+          accessibilityLabel="Past events"
+        />
+
+        <PaddedContent>
+          <View style={{ marginTop: 40 }}>
+            <SectionTitle role="header">Settings</SectionTitle>
           </View>
-        )}
-        keyExtractor={item => item.id}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingLeft: 40, paddingRight: 40 }}
-        ListEmptyComponent={<EmptyText>No past events yet</EmptyText>}
-        role="list"
-        accessibilityLabel="Past events"
-      />
 
-      <PaddedContent>
-        <View style={{ marginTop: 40 }}>
-          <SectionTitle role="header">Settings</SectionTitle>
-        </View>
+          <SettingsRow
+            onPress={() => router.push('/perfil/notifications-settings')}
+            role="button"
+            accessibilityLabel="Notifications settings"
+          >
+            <SettingsText>Notifications</SettingsText>
+            <SettingsIcon accessible={false}>›</SettingsIcon>
+          </SettingsRow>
 
-        <SettingsRow
-          onPress={() => router.push('/perfil/notifications-settings')}
-          role="button"
-          accessibilityLabel="Notifications settings"
-        >
-          <SettingsText>Notifications</SettingsText>
-          <SettingsIcon accessible={false}>›</SettingsIcon>
-        </SettingsRow>
+          <SettingsRow
+            onPress={() => router.push('/perfil/security')}
+            role="button"
+            accessibilityLabel="Password and security settings"
+          >
+            <SettingsText>Password and Security</SettingsText>
+            <SettingsIcon accessible={false}>›</SettingsIcon>
+          </SettingsRow>
 
-        <SettingsRow
-          onPress={() => router.push('/perfil/security')}
-          role="button"
-          accessibilityLabel="Password and security settings"
-        >
-          <SettingsText>Password and Security</SettingsText>
-          <SettingsIcon accessible={false}>›</SettingsIcon>
-        </SettingsRow>
+          <ThemeSettingsRow accessibilityLabel="Theme settings">
+            <SettingsText>Theme</SettingsText>
+            <ThemeControl>
+              <ThemeOption
+                $active={themeMode === 'light'}
+                onPress={() => setThemeMode('light')}
+                accessibilityRole="button"
+                accessibilityLabel="Use light theme"
+                accessibilityState={{ selected: themeMode === 'light' }}
+              >
+                <ThemeOptionText $active={themeMode === 'light'}>Light</ThemeOptionText>
+              </ThemeOption>
+              <ThemeOption
+                $active={themeMode === 'dark'}
+                onPress={() => setThemeMode('dark')}
+                accessibilityRole="button"
+                accessibilityLabel="Use dark theme"
+                accessibilityState={{ selected: themeMode === 'dark' }}
+              >
+                <ThemeOptionText $active={themeMode === 'dark'}>Dark</ThemeOptionText>
+              </ThemeOption>
+            </ThemeControl>
+          </ThemeSettingsRow>
 
-        <ThemeSettingsRow accessibilityLabel="Theme settings">
-          <SettingsText>Theme</SettingsText>
-          <ThemeControl>
-            <ThemeOption
-              $active={themeMode === 'light'}
-              onPress={() => setThemeMode('light')}
-              accessibilityRole="button"
-              accessibilityLabel="Use light theme"
-              accessibilityState={{ selected: themeMode === 'light' }}
-            >
-              <ThemeOptionText $active={themeMode === 'light'}>Light</ThemeOptionText>
-            </ThemeOption>
-            <ThemeOption
-              $active={themeMode === 'dark'}
-              onPress={() => setThemeMode('dark')}
-              accessibilityRole="button"
-              accessibilityLabel="Use dark theme"
-              accessibilityState={{ selected: themeMode === 'dark' }}
-            >
-              <ThemeOptionText $active={themeMode === 'dark'}>Dark</ThemeOptionText>
-            </ThemeOption>
-          </ThemeControl>
-        </ThemeSettingsRow>
+          <SettingsRow role="button" accessibilityLabel="Terms and conditions">
+            <SettingsText>Terms and Conditions</SettingsText>
+            <SettingsIcon accessible={false}>›</SettingsIcon>
+          </SettingsRow>
 
-        <SettingsRow role="button" accessibilityLabel="Terms and conditions">
-          <SettingsText>Terms and Conditions</SettingsText>
-          <SettingsIcon accessible={false}>›</SettingsIcon>
-        </SettingsRow>
-
-        <LogoutButton onPress={handleLogout} role="button" accessibilityLabel="Log out of the app">
-          <LogoutText>Log out</LogoutText>
-        </LogoutButton>
-        <DeleteAccountButton
-          onPress={() => {
-            setDeleteAccountError('');
-            setIsDeleteModalVisible(true);
-          }}
-          role="button"
-          accessibilityLabel="Delete account"
-        >
-          <DeleteAccountText>Delete account</DeleteAccountText>
-        </DeleteAccountButton>
-      </PaddedContent>
-    </Container>
+          <LogoutButton onPress={handleLogout} role="button" accessibilityLabel="Log out of the app">
+            <LogoutText>Log out</LogoutText>
+          </LogoutButton>
+          <DeleteAccountButton
+            onPress={() => {
+              setDeleteAccountError('');
+              setIsDeleteModalVisible(true);
+            }}
+            role="button"
+            accessibilityLabel="Delete account"
+          >
+            <DeleteAccountText>Delete account</DeleteAccountText>
+          </DeleteAccountButton>
+        </PaddedContent>
+      </Container>
+    </BackgroundWrapper>
   );
 }

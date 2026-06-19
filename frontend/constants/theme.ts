@@ -89,7 +89,7 @@ const semanticLightColors = {
   grayNavbar: Colors.palette.primary.light90,
   background: Colors.white,
   inactive: Colors.palette.neutral.neutral50,
-  white: Colors.background,
+  white: Colors.white, // Alterado de Colors.background para Colors.white para corrigir conflitos visuais
   surface: Colors.white,
   surfaceElevated: Colors.white,
   surfaceSoft: Colors.palette.primary.light90,

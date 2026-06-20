@@ -50,7 +50,7 @@ describe('AuthService', () => {
     clerkService = module.get<ClerkService>(ClerkService);
   });
 
-  // ✅ TESTE 1: Encontrar user existente
+  // TEST 1: Encontrar user existente
   describe('findOrCreateUser', () => {
     it('should return existing user', async () => {
       // ARRANGE
@@ -61,9 +61,9 @@ describe('AuthService', () => {
       (prisma.users.findUnique as jest.Mock).mockResolvedValue({
         id: userId,
         clerk_id: clerkId,
-        name: 'João Silva',
-        email: 'joao@example.com',
-        username: 'joao123',
+        name: 'Beatriz Castro',
+        email: 'beatriz@example.com',
+        username: 'beatriz123',
         image: null,
         role: 'user',
         emergency_contact: null,
@@ -90,18 +90,18 @@ describe('AuthService', () => {
 
       (clerkService.client.users.getUser as jest.Mock).mockResolvedValue({
         id: clerkId,
-        firstName: 'Maria',
-        lastName: 'Silva',
-        emailAddresses: [{ emailAddress: 'maria@example.com' }],
-        username: 'maria123',
+        firstName: 'André',
+        lastName: 'Dora',
+        emailAddresses: [{ emailAddress: 'andre@example.com' }],
+        username: 'andre123',
       });
 
       (prisma.users.findUnique as jest.Mock).mockResolvedValue({
         id: userId,
         clerk_id: clerkId,
-        name: 'Maria Silva',
-        email: 'maria@example.com',
-        username: 'maria123',
+        name: 'André Dora',
+        email: 'andre@example.com',
+        username: 'andre123',
         image: null,
         role: 'user',
         emergency_contact: null,
@@ -113,12 +113,12 @@ describe('AuthService', () => {
       const result = await service.findOrCreateUser(clerkId);
 
       // ASSERT
-      expect(result.name).toBe('Maria Silva');
-      expect(result.email).toBe('maria@example.com');
+      expect(result.name).toBe('André Dora');
+      expect(result.email).toBe('andre@example.com');
     });
   });
 
-  // ✅ TESTE 2: Obter perfil autenticado
+  // TEST 2: Obter perfil autenticado
   describe('getAuthenticatedProfile', () => {
     it('should return authenticated profile', async () => {
       // ARRANGE
@@ -128,9 +128,9 @@ describe('AuthService', () => {
       (prisma.users.findUnique as jest.Mock).mockResolvedValue({
         id: 'user_123',
         clerk_id: clerkId,
-        name: 'João Silva',
-        email: 'joao@example.com',
-        username: 'joao123',
+        name: 'Beatriz Castro',
+        email: 'beatriz@example.com',
+        username: 'beatriz123',
         image: null,
         role: 'user',
         emergency_contact: null,
@@ -143,23 +143,23 @@ describe('AuthService', () => {
 
       // ASSERT
       expect(result.clerk_id).toBe(clerkId);
-      expect(result.email).toBe('joao@example.com');
+      expect(result.email).toBe('beatriz@example.com');
     });
   });
 
-  // ✅ TESTE 3: Atualizar perfil
+  // TEST 3: Atualizar perfil
   describe('updateProfile', () => {
     it('should update user profile with name', async () => {
       // ARRANGE
       const userId = 'user_123';
-      const body = { name: 'João Updated' };
+      const body = { name: 'Beatriz Updated' };
 
       (prisma.users.findUnique as jest.Mock).mockResolvedValue({
         id: userId,
         clerk_id: 'clerk_123',
-        name: 'João Updated',
-        email: 'joao@example.com',
-        username: 'joao123',
+        name: 'Beatriz Updated',
+        email: 'beatriz@example.com',
+        username: 'beatriz123',
         image: null,
         role: 'user',
         emergency_contact: null,
@@ -171,22 +171,22 @@ describe('AuthService', () => {
       const result = await service.updateProfile(userId, body);
 
       // ASSERT
-      expect(result.name).toBe('João Updated');
+      expect(result.name).toBe('Beatriz Updated');
       expect(prisma.users.update).toHaveBeenCalled();
     });
 
     it('should update username if available', async () => {
       // ARRANGE
       const userId = 'user_123';
-      const body = { username: 'joao_updated' };
+      const body = { username: 'beatriz_updated' };
 
       (prisma.users.findFirst as jest.Mock).mockResolvedValue(null); // Username not taken
       (prisma.users.findUnique as jest.Mock).mockResolvedValue({
         id: userId,
         clerk_id: 'clerk_123',
-        name: 'João',
-        email: 'joao@example.com',
-        username: 'joao_updated',
+        name: 'Beatriz Castro',
+        email: 'beatriz@example.com',
+        username: 'beatriz_updated',
         image: null,
         role: 'user',
         emergency_contact: null,
@@ -198,7 +198,7 @@ describe('AuthService', () => {
       const result = await service.updateProfile(userId, body);
 
       // ASSERT
-      expect(result.username).toBe('joao_updated');
+      expect(result.username).toBe('beatriz_updated');
     });
 
     it('should throw if username already in use', async () => {
@@ -228,7 +228,7 @@ describe('AuthService', () => {
     });
   });
 
-  // ✅ TESTE 4: Deletar conta
+  // TEST 4: Apagar conta
   describe('deleteAccount', () => {
     it('should delete user account', async () => {
       // ARRANGE
@@ -268,7 +268,7 @@ describe('AuthService', () => {
     });
   });
 
-  // ✅ TESTE 5: getSelfProfile
+  // TEST 5: getSelfProfile
   describe('getSelfProfile', () => {
     it('should return self profile', async () => {
       // ARRANGE
@@ -277,9 +277,9 @@ describe('AuthService', () => {
       (prisma.users.findUnique as jest.Mock).mockResolvedValue({
         id: userId,
         clerk_id: 'clerk_123',
-        name: 'João Silva',
-        email: 'joao@example.com',
-        username: 'joao123',
+        name: 'Beatriz Castro',
+        email: 'beatriz@example.com',
+        username: 'beatriz123',
         image: 'http://example.com/avatar.jpg',
         role: 'user',
         emergency_contact: '911',
@@ -291,7 +291,7 @@ describe('AuthService', () => {
       const result = await service['getSelfProfile'](userId);
 
       // ASSERT
-      expect(result.name).toBe('João Silva');
+      expect(result.name).toBe('Beatriz Castro');
       expect(result.image).toBe('http://example.com/avatar.jpg');
     });
 

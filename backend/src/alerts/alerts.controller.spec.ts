@@ -27,7 +27,7 @@ describe('AlertsController', () => {
     service = module.get<AlertsService>(AlertsService);
   });
 
-  // ✅ TESTE 1: POST /alerts - Create alert
+  // TEST 1: POST /alerts - Create alert
   describe('POST /alerts', () => {
     it('should create alert', async () => {
       // ARRANGE
@@ -75,7 +75,7 @@ describe('AlertsController', () => {
     });
   });
 
-  // ✅ TESTE 2: POST /alerts/organization/alerts/:alertId/assign-self
+  // TEST 2: POST /alerts/organization/alerts/:alertId/assign-self
   describe('POST /alerts/organization/alerts/:alertId/assign-self', () => {
     it('should assign alert to self', async () => {
       // ARRANGE
@@ -116,7 +116,7 @@ describe('AlertsController', () => {
     });
   });
 
-  // ✅ TESTE 3: GET /alerts/organization/events/:eventId
+  // TEST 3: GET /alerts/organization/events/:eventId
   describe('GET /alerts/organization/events/:eventId', () => {
     it('should get organization event alerts', async () => {
       // ARRANGE
@@ -163,7 +163,7 @@ describe('AlertsController', () => {
     });
   });
 
-  // ✅ TESTE 4: PATCH /alerts/organization/alerts/:alertId/status
+  // TEST 4: PATCH /alerts/organization/alerts/:alertId/status
   describe('PATCH /alerts/organization/alerts/:alertId/status', () => {
     it('should update alert status', async () => {
       // ARRANGE
@@ -227,7 +227,7 @@ describe('AlertsController', () => {
     });
   });
 
-  // ✅ TESTE 5: Validações gerais
+  // TEST 5: Validações gerais
   describe('General validations', () => {
     it('controller should be defined', () => {
       expect(controller).toBeDefined();

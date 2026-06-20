@@ -14,8 +14,8 @@
     "format:check": "prettier --check .",
     "build-apk": "eas build --profile preview --platform android --clear-cache",
     "build-qr": "eas update --branch main --message 'minha atualização'",
-    "test:e2e": "detox test e2e --configuration android.emu.debug --cleanup",
-    "test:e2e:build": "detox build-app --configuration android.emu.debug"
+    "test:e2e": "detox test e2e --configuration ios.sim.debug --cleanup",
+    "test:e2e:build": "detox build-framework-cache && detox build-app --configuration ios.sim.debug"
   },
   "dependencies": {
     "@clerk/expo": "^3.4.2",

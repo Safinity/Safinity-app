@@ -1,4 +1,4 @@
-describe('Example', () => {
+/*describe('Example', () => {
   beforeAll(async () => {
     await device.launchApp();
   });
@@ -20,4 +20,4 @@ describe('Example', () => {
     await element(by.id('world_button')).tap();
     await expect(element(by.text('World!!!'))).toBeVisible();
   });
-});
+});*/

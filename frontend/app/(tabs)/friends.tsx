@@ -4,7 +4,6 @@ import { ActivityIndicator, Alert, RefreshControl, TouchableOpacity } from 'reac
 import { router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Head from 'expo-router/head';
-import { isAxiosError } from 'axios';
 import { userImages } from '../../assets/images/Users/userImages';
 import Header from '@/components/ui/header';
 import FindFriendButton from '@/components/FindFriendButton';

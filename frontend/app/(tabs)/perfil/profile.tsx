@@ -6,6 +6,7 @@ import {
   ScrollView,
   View,
 } from 'react-native';
+import { Link } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import { Stack, router } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
@@ -688,10 +689,15 @@ export default function Profile() {
             </ThemeControl>
           </ThemeSettingsRow>
 
-          <SettingsRow role="button" accessibilityLabel="Terms and conditions">
-            <SettingsText>Terms and Conditions</SettingsText>
-            <SettingsIcon accessible={false}>›</SettingsIcon>
-          </SettingsRow>
+          <Link href="/perfil/terms" asChild>
+  <SettingsRow 
+    role="button" 
+    accessibilityLabel="Terms and conditions"
+  >
+    <SettingsText>Terms and Conditions</SettingsText>
+    <SettingsIcon accessible={false}>›</SettingsIcon>
+  </SettingsRow>
+</Link>
 
           <LogoutButton onPress={handleLogout} role="button" accessibilityLabel="Log out of the app">
             <LogoutText>Log out</LogoutText>

@@ -7,11 +7,41 @@ import { AppModule } from '../src/app.module';
 import { AuthRequiredGuard } from '../src/auth/auth.guards';
 import { PrismaService } from '../src/prisma/prisma.service';
 
+type MockUser = {
+  id: string;
+  clerk_id: string;
+  name: string;
+  username: string;
+  image: string | null;
+  role: string;
+  email: string;
+  emergency_contact: string | null;
+  user_tickets: unknown[];
+  user_favorites: unknown[];
+};
+
+type UpdateUserArgs = {
+  where: { id: string };
+  data: {
+    name?: string;
+    username?: string;
+    image?: string;
+  };
+};
+
+type FetchInput = string | URL | { url: string };
+type FetchMock = jest.MockedFunction<
+  (input: FetchInput, init?: RequestInit) => Promise<Response>
+>;
+
 describe('Profile image upload (e2e)', () => {
   let app: INestApplication<App>;
+  let fetchMock: FetchMock;
+  let capturedUpload: { url: string; options?: RequestInit } | null;
+  let capturedUpdateArgs: UpdateUserArgs | null;
   const originalEnv = process.env;
 
-  const mockUser = {
+  const mockUser: MockUser = {
     id: 'b72c7959-12fc-4eb5-af57-a18ee73c37e4',
     clerk_id: 'user_test',
     name: 'Andre Dora',
@@ -26,14 +56,16 @@ describe('Profile image upload (e2e)', () => {
 
   const prismaMock = {
     users: {
-      findUnique: jest.fn(),
-      findFirst: jest.fn(),
-      update: jest.fn(),
+      findUnique: jest.fn<(args?: unknown) => Promise<MockUser | null>>(),
+      findFirst: jest.fn<(args?: unknown) => Promise<MockUser | null>>(),
+      update: jest.fn<(args: UpdateUserArgs) => Promise<MockUser>>(),
     },
   };
 
   beforeEach(async () => {
     jest.resetAllMocks();
+    capturedUpload = null;
+    capturedUpdateArgs = null;
 
     process.env = {
       ...originalEnv,
@@ -43,10 +75,13 @@ describe('Profile image upload (e2e)', () => {
     };
 
     prismaMock.users.findFirst.mockResolvedValue(null);
-    prismaMock.users.update.mockResolvedValue({
-      ...mockUser,
-      image:
-        'https://example-project.supabase.co/storage/v1/object/public/safinity/User/Profile/old.jpg',
+    prismaMock.users.update.mockImplementation((args: UpdateUserArgs) => {
+      capturedUpdateArgs = args;
+      return Promise.resolve({
+        ...mockUser,
+        image:
+          'https://example-project.supabase.co/storage/v1/object/public/safinity/User/Profile/old.jpg',
+      });
     });
     prismaMock.users.findUnique.mockResolvedValue({
       ...mockUser,
@@ -54,10 +89,20 @@ describe('Profile image upload (e2e)', () => {
         'https://example-project.supabase.co/storage/v1/object/public/safinity/User/Profile/new.jpg',
     });
 
-    global.fetch = jest.fn().mockResolvedValue({
-      ok: true,
-      text: jest.fn().mockResolvedValue(''),
-    }) as unknown as typeof fetch;
+    const mockFetchImplementation = (input: FetchInput, init?: RequestInit) => {
+      const url =
+        typeof input === 'string'
+          ? input
+          : input instanceof URL
+            ? input.href
+            : input.url;
+
+      capturedUpload = { url, options: init };
+
+      return Promise.resolve(new Response('', { status: 200 }));
+    };
+    fetchMock = jest.fn(mockFetchImplementation);
+    global.fetch = fetchMock;
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
@@ -113,33 +158,30 @@ describe('Profile image upload (e2e)', () => {
       })
       .expect(200);
 
-    expect(global.fetch).toHaveBeenCalledTimes(1);
-    expect(global.fetch).toHaveBeenCalledWith(
-      expect.stringMatching(
-        /^https:\/\/example-project\.supabase\.co\/storage\/v1\/object\/safinity\/User\/Profile\/b72c7959-12fc-4eb5-af57-a18ee73c37e4-\d+\.jpg$/,
-      ),
-      expect.objectContaining({
-        method: 'POST',
-        headers: expect.objectContaining({
-          apikey: 'service-role-test-key',
-          Authorization: 'Bearer service-role-test-key',
-          'Content-Type': 'image/jpeg',
-          'x-upsert': 'true',
-        }),
-      }),
-    );
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(capturedUpload).not.toBeNull();
 
-    expect(prismaMock.users.update).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: { id: mockUser.id },
-        data: expect.objectContaining({
-          name: 'Andre Dora',
-          username: 'andredora',
-          image: expect.stringMatching(
-            /^https:\/\/example-project\.supabase\.co\/storage\/v1\/object\/public\/safinity\/User\/Profile\/b72c7959-12fc-4eb5-af57-a18ee73c37e4-\d+\.jpg$/,
-          ),
-        }),
-      }),
+    expect(capturedUpload?.url).toMatch(
+      /^https:\/\/example-project\.supabase\.co\/storage\/v1\/object\/safinity\/User\/Profile\/b72c7959-12fc-4eb5-af57-a18ee73c37e4-\d+\.jpg$/,
+    );
+    expect(capturedUpload?.options?.method).toBe('POST');
+    expect(capturedUpload?.options?.headers).toMatchObject({
+      apikey: 'service-role-test-key',
+      Authorization: 'Bearer service-role-test-key',
+      'Content-Type': 'image/jpeg',
+      'x-upsert': 'true',
+    });
+
+    expect(prismaMock.users.update).toHaveBeenCalledTimes(1);
+    expect(capturedUpdateArgs).not.toBeNull();
+
+    expect(capturedUpdateArgs?.where).toEqual({ id: mockUser.id });
+    expect(capturedUpdateArgs?.data).toMatchObject({
+      name: 'Andre Dora',
+      username: 'andredora',
+    });
+    expect(capturedUpdateArgs?.data.image).toMatch(
+      /^https:\/\/example-project\.supabase\.co\/storage\/v1\/object\/public\/safinity\/User\/Profile\/b72c7959-12fc-4eb5-af57-a18ee73c37e4-\d+\.jpg$/,
     );
 
     expect(response.body).toEqual(

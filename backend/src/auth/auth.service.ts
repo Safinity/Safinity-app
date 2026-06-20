@@ -58,7 +58,9 @@ export class AuthService {
   ) {}
 
   private serializeUserImage(image: string | null) {
-    return image?.startsWith('http://') || image?.startsWith('https://') ? image : null;
+    return image?.startsWith('http://') || image?.startsWith('https://')
+      ? image
+      : null;
   }
 
   private getProfileImageExtension(mimeType: string) {
@@ -329,7 +331,9 @@ export class AuthService {
     const imageMimeType = body.imageMimeType?.trim() || 'image/jpeg';
 
     if (!name && !username && !imageBase64) {
-      throw new BadRequestException('name, username or profile image is required');
+      throw new BadRequestException(
+        'name, username or profile image is required',
+      );
     }
 
     if (username) {

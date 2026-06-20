@@ -35,7 +35,6 @@ function getAvatarSource(friend: FriendListItem) {
   return userImages.default;
 }
 
-
 export default function FriendsScreen() {
   const { isLoaded, isSignedIn, getToken } = useAuth();
   const { isInEventMode } = useEventMode();

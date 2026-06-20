@@ -766,7 +766,9 @@ export default function MapScreen() {
                 <MapPin
                   key={String(pin.id)}
                   pin={pin}
-                  avatar={pin.type === 'friend' ? getUserImageSource(pin.image) ?? undefined : undefined}
+                  avatar={
+                    pin.type === 'friend' ? (getUserImageSource(pin.image) ?? undefined) : undefined
+                  }
                   bounds={bounds}
                   width={IMAGE_WIDTH}
                   height={IMAGE_HEIGHT}

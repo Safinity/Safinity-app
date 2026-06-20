@@ -64,7 +64,9 @@ export class FriendsService {
   }
 
   private serializeUserImage(image: string | null) {
-    return image?.startsWith('http://') || image?.startsWith('https://') ? image : null;
+    return image?.startsWith('http://') || image?.startsWith('https://')
+      ? image
+      : null;
   }
 
   private generateBigIntId() {

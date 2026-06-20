@@ -228,6 +228,7 @@ export default function FriendsScreen() {
           <SectionTitle role="header" accessibilityLevel={1}>
             <Title>Friends</Title>
             <TouchableOpacity
+              testID="add-friend-button"
               onPress={handleAddFriend}
               accessible={true}
               role="button"

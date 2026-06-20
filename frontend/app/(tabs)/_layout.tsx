@@ -103,6 +103,7 @@ function CustomTabBar({ state, navigation }: any) {
 
           return (
             <TabButton
+              testID={`tab-${tab.name}`}
               key={tab.name}
               onPress={onPress}
               role="tab"

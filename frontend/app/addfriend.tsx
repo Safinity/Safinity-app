@@ -52,13 +52,12 @@ export default function AddFriendScreen() {
         setIsLoadingFriends(true);
         const token = await getTokenRef.current();
         const friends = await getFriends(token);
-        const states = [...friends.onSameEvent, ...friends.otherFriends].reduce<Record<string, string>>(
-          (acc, friend) => {
-            acc[friend.id] = 'ACCEPTED';
-            return acc;
-          },
-          {},
-        );
+        const states = [...friends.onSameEvent, ...friends.otherFriends].reduce<
+          Record<string, string>
+        >((acc, friend) => {
+          acc[friend.id] = 'ACCEPTED';
+          return acc;
+        }, {});
 
         if (isActive) {
           setFriendshipStates(states);
@@ -259,6 +258,7 @@ export default function AddFriendScreen() {
 
             {results.map(user => (
               <TouchableOpacity
+                testID={`friend-result-${user.id}`}
                 key={user.id}
                 onPress={() => router.push(`/friends/${user.id}`)}
                 accessible={true}

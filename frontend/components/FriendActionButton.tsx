@@ -8,7 +8,10 @@ type FriendActionButtonProps = {
   variant?: 'add' | 'remove' | 'pending';
 } & React.ComponentProps<typeof styled.TouchableOpacity>; // aceita props extras
 
-const Button = styled.TouchableOpacity<{ variant: 'add' | 'remove' | 'pending'; disabled?: boolean }>`
+const Button = styled.TouchableOpacity<{
+  variant: 'add' | 'remove' | 'pending';
+  disabled?: boolean;
+}>`
   width: ${({ theme }) => theme.height.sm}px;
   height: ${({ theme }) => theme.height.sm}px;
   border-radius: ${({ theme }) => theme.borderRadius.medium}px;
@@ -38,7 +41,14 @@ export default function FriendActionButton({
   const iconColor = variant === 'add' ? theme.colors.white : theme.colors.palette.primary.normal;
 
   return (
-    <Button variant={variant} disabled={disabled} onPress={onPress} {...rest} activeOpacity={0.85}>
+    <Button
+      testID={`friend-action-${variant}`}
+      variant={variant}
+      disabled={disabled}
+      onPress={onPress}
+      {...rest}
+      activeOpacity={0.85}
+    >
       <Ionicons name={iconName} size={theme.width.iconHeader} color={iconColor} />
     </Button>
   );

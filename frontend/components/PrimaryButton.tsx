@@ -18,9 +18,16 @@ const Label = styled.Text`
   font-weight: 600;
 `;
 
-export default function PrimaryButton({ title, onPress, disabled, accessibilityLabel }: any) {
+export default function PrimaryButton({
+  title,
+  onPress,
+  disabled,
+  accessibilityLabel,
+  testID,
+}: any) {
   return (
     <Button
+      testID={testID || 'primary-button'}
       disabled={disabled}
       onPress={onPress}
       accessible={true}

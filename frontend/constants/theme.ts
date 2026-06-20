@@ -1,11 +1,10 @@
-// app/constants/theme.ts
 import { Dimensions } from 'react-native';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 // Base do design: iPhone 15 Pro Max
-const BASE_WIDTH = 430; // largura em dp do iPhone 15 Pro Max
-const BASE_HEIGHT = 932; // altura em dp do iPhone 15 Pro Max
+const BASE_WIDTH = 430;
+const BASE_HEIGHT = 932;
 
 // Funções de escala
 const scale = (size: number) => (SCREEN_WIDTH / BASE_WIDTH) * size;
@@ -72,6 +71,7 @@ const semanticDarkColors = {
   input: Colors.grayNavbar,
   border: Colors.grayNavbar,
   text: Colors.white,
+  textHeading: Colors.white, // Cor para títulos em dark mode
   textMuted: Colors.inactive,
   textSubtle: Colors.palette.neutral.neutral60,
   icon: Colors.white,
@@ -96,6 +96,7 @@ const semanticLightColors = {
   input: Colors.palette.primary.light90,
   border: Colors.palette.primary.light80,
   text: Colors.background,
+  textHeading: Colors.black, // Cor para títulos em light mode (Corrigido para Preto)
   textMuted: Colors.neutralGray,
   textSubtle: Colors.palette.neutral.neutral60,
   icon: Colors.primary_50,

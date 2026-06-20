@@ -50,6 +50,16 @@ function normalizeUsername(value: string | null) {
   return normalized || null;
 }
 
+function removeTrailingSlashes(value: string) {
+  let end = value.length;
+
+  while (end > 0 && value.charCodeAt(end - 1) === 47) {
+    end -= 1;
+  }
+
+  return value.slice(0, end);
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -82,7 +92,9 @@ export class AuthService {
     imageBase64: string,
     imageMimeType = 'image/jpeg',
   ) {
-    const supabaseUrl = process.env.SUPABASE_URL?.replace(/\/+$/, '');
+    const supabaseUrl = process.env.SUPABASE_URL
+      ? removeTrailingSlashes(process.env.SUPABASE_URL)
+      : undefined;
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     const bucket = process.env.SUPABASE_PROFILE_BUCKET || 'safinity';
     const extension = this.getProfileImageExtension(imageMimeType);

@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Dimensions } from 'react-native';
-import styled from 'styled-components/native';
+import styled, { useTheme } from 'styled-components/native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+
 import Svg, {
   Circle,
   Defs,
@@ -15,7 +16,7 @@ import Svg, {
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { useLocalSearchParams, router, Stack } from 'expo-router';
-import { useAuth } from '@clerk/expo'; // Gancho nativo para controlo assíncrono do token
+import { useAuth } from '@clerk/expo'; 
 
 import Header from '../../components/ui/header';
 import SearchInput from '../../components/ui/SearchInput';
@@ -30,6 +31,7 @@ import mapData from '../../data/mapdata.json';
 import api, { API_BASE } from '../../utils/api';
 import { latLngToPixelFromBounds } from '../../utils/coordinates';
 import { getUserImageSource } from '../../utils/userImages';
+import { useThemePreference } from '@/context/ThemeContext';
 import Head from 'expo-router/head';
 
 type MapPinItem = {
@@ -87,15 +89,16 @@ const IMAGE_HEIGHT = screenHeight * 1.6;
 const MIN_SCALE = 0.7;
 const MAX_SCALE = 3;
 
+// Atualizado para usar as cores semânticas injetadas pelo Styled Provider
 const Container = styled.View`
   flex: 1;
-  background-color: ${Colors.background};
+  background-color: ${({ theme }) => theme.colors.background};
 `;
 
 const MapViewport = styled.View`
   flex: 1;
   overflow: hidden;
-  background-color: ${Colors.background};
+  background-color: ${({ theme }) => theme.colors.background};
 `;
 
 const OverlayContent = styled.View`
@@ -141,7 +144,7 @@ const SOSButtonText = styled.Text`
   font-weight: bold;
 `;
 
-const HeatmapToggle = styled.Pressable<{ active: boolean }>`
+const HeatmapToggle = styled.Pressable<{ active: boolean; currentTheme: 'light' | 'dark' }>`
   align-self: flex-start;
   margin-left: ${Spacing.margemLateral}px;
   margin-top: ${Spacing.md}px;
@@ -150,17 +153,24 @@ const HeatmapToggle = styled.Pressable<{ active: boolean }>`
   flex-direction: row;
   align-items: center;
   gap: 8px;
-  background-color: ${({ active }: { active: boolean }) =>
-    active ? Colors.primary : Colors.grayNavbar};
+  background-color: ${({ active, currentTheme }) => {
+    if (active) return Colors.primary;
+    return currentTheme === 'dark' ? Colors.grayNavbar : 'white';
+  }};
 `;
 
-const HeatmapToggleText = styled.Text`
-  color: ${Colors.white};
+const HeatmapToggleText = styled.Text<{ active: boolean; currentTheme: 'light' | 'dark' }>`
   font-size: 13px;
-  font-weight: bold;
+  font-weight: light;
+  color: ${({ active, currentTheme }) => {
+    if (active) return Colors.white;
+    return currentTheme === 'dark' ? Colors.white : '#1C1C1E';
+  }};
 `;
 
-const HeatmapLegend = styled.View`
+const HeatmapLegend = styled.View.attrs<{ currentTheme: 'light' | 'dark' }>(props => ({
+  shadowOffset: { width: 0, height: 2 },
+}))<{ currentTheme: 'light' | 'dark' }>`
   position: absolute;
   left: ${Spacing.margemLateral}px;
   bottom: ${Spacing.xxl}px;
@@ -171,7 +181,14 @@ const HeatmapLegend = styled.View`
   flex-direction: row;
   align-items: center;
   gap: 6px;
-  background-color: rgba(20, 24, 34, 0.8);
+  background-color: ${({ currentTheme }) => 
+    currentTheme === 'dark' ? 'rgba(20, 24, 34, 0.85)' : 'rgba(255, 255, 255, 0.92)'
+  };
+  
+  elevation: ${({ currentTheme }) => currentTheme === 'dark' ? 0 : 3};
+  shadow-color: #000000;
+  shadow-opacity: ${({ currentTheme }) => currentTheme === 'dark' ? 0 : 0.1};
+  shadow-radius: 4px;
 `;
 
 const HeatmapLegendBar = styled.View`
@@ -187,11 +204,12 @@ const HeatmapLegendLabels = styled.View`
   justify-content: space-between;
 `;
 
-const HeatmapLegendLabel = styled.Text`
-  color: ${Colors.white};
-  font-family: ${({ theme }) => theme.text.label.fontFamily};
-  font-size: ${({ theme }) => theme.text.label.fontSize}px;
-  line-height: ${({ theme }) => theme.text.label.lineHeight}px;
+const HeatmapLegendLabel = styled.Text<{ currentTheme: 'light' | 'dark' }>`
+  font-family: ${({ theme }) => theme?.text?.label?.fontFamily || 'System'};
+  font-size: ${({ theme }) => theme?.text?.label?.fontSize || 12}px;
+  line-height: ${({ theme }) => theme?.text?.label?.lineHeight || 14}px;
+  font-weight: 500;
+  color: ${({ currentTheme }) => currentTheme === 'dark' ? Colors.white : '#1C1C1E'};
   opacity: 0.82;
 `;
 
@@ -204,7 +222,7 @@ const NavigationFooter = styled.View`
 `;
 
 const LongCancelButton = styled.Pressable`
-  background-color: ${Colors.background};
+  background-color: ${({ theme }) => theme.colors.background};
   height: 50px;
   border-radius: 30px;
   flex-direction: row;
@@ -278,10 +296,14 @@ const getRouteParam = (value?: string | string[]) => {
   return Array.isArray(value) ? value[0] : value;
 };
 
-// --- MapScreen Component ---
 export default function MapScreen() {
+  const theme = useTheme();
+  const { themeMode } = useThemePreference();
   const { isLoaded, isSignedIn, getToken } = useAuth();
   const getTokenRef = useRef(getToken);
+
+  // Sincronização robusta através do teu Context customizado global
+  const currentTheme = themeMode === 'dark' ? 'dark' : 'light';
 
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
@@ -304,9 +326,12 @@ export default function MapScreen() {
   }, [getToken]);
 
   const mapSource = mapPayload?.map;
+  
+  // Incluído &t= para rebentar a cache da imagem nativa aquando da mutação do tema
   const mapImageUrl = mapPayload?.event?.id
-    ? `${API_BASE}/events/${mapPayload.event.id}/static-map?theme=dark&width=1024&height=1024`
+    ? `${API_BASE}/events/${mapPayload.event.id}/static-map?theme=${currentTheme}&width=1024&height=1024&t=${currentTheme}`
     : undefined;
+
   const pins = useMemo(() => mapSource?.pins ?? [], [mapSource?.pins]);
   const stages = useMemo(() => mapSource?.stages ?? [], [mapSource?.stages]);
   const bounds = mapSource?.bounds ?? mapData.bounds;
@@ -346,16 +371,11 @@ export default function MapScreen() {
     [scale],
   );
 
-  // Monitorização de mutações de estado e re-renderizações locais
-
   useEffect(() => {
     let mounted = true;
 
     const loadMap = async () => {
-      // Bloqueia a execução imediata se a infraestrutura do Clerk ainda estiver fria
-
       if (!isSignedIn) {
-        console.warn('[MAP_DEBUG] Pedido abortado: Utilizador sem sessão iniciada.');
         if (mounted) {
           setMapLoading(false);
           setMapError('Please sign in to view the event map.');
@@ -373,7 +393,6 @@ export default function MapScreen() {
           throw new Error('Could not retrieve a valid session token from Clerk.');
         }
 
-        // Injeção explícita de cabeçalho local isolado de interceptores globais flutuantes
         const requestConfig = {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -389,7 +408,6 @@ export default function MapScreen() {
         }
 
         if (!targetEventId) {
-          console.warn('[MAP_DEBUG] Evento nulo ou inexistente retornado do banco para este ID.');
           if (mounted) {
             setMapPayload(null);
             setMapError('No active event found for the current user');
@@ -397,7 +415,6 @@ export default function MapScreen() {
           return;
         }
 
-        // Rota preservada em conformidade exata com o @Get(':id/mapa') do NestJS
         const mapUrl = `/events/${targetEventId}/mapa`;
         const mapResponse = await api.get(mapUrl, requestConfig);
 
@@ -405,11 +422,6 @@ export default function MapScreen() {
           setMapPayload(mapResponse.data);
         }
       } catch (error: any) {
-        console.error('[MAP_DEBUG] Exceção intercetada no fluxo loadMap:', {
-          message: error?.message,
-          status: error?.response?.status,
-          data: error?.response?.data,
-        });
         if (mounted) {
           setMapPayload(null);
           setMapError(error?.response?.data?.message || 'Unable to load event map');
@@ -426,7 +438,7 @@ export default function MapScreen() {
     return () => {
       mounted = false;
     };
-  }, [isLoaded, isSignedIn, requestedEventId]); // Dispara novamente assim que as permissões do dispositivo mudarem de estado
+  }, [isLoaded, isSignedIn, requestedEventId]);
 
   useEffect(() => {
     let mounted = true;
@@ -439,20 +451,12 @@ export default function MapScreen() {
 
       try {
         const token = await getTokenRef.current();
-
-        if (!token) {
-          return;
-        }
+        if (!token) return;
 
         await api.patch('/users/me/location', location, {
           headers: { Authorization: `Bearer ${token}` },
         });
-      } catch (error: any) {
-        console.error('[MAP_DEBUG] Erro ao guardar localização real:', {
-          message: error?.message,
-          status: error?.response?.status,
-        });
-      }
+      } catch (error: any) {}
     };
 
     const loadRealLocation = async () => {
@@ -503,8 +507,7 @@ export default function MapScreen() {
       );
     };
 
-    loadRealLocation().catch((error: any) => {
-      console.error('[MAP_DEBUG] Erro ao obter localização real:', error?.message);
+    loadRealLocation().catch(() => {
       if (mounted) {
         setRealUserLocation(null);
       }
@@ -540,12 +543,7 @@ export default function MapScreen() {
             ),
           );
         }
-      } catch (error: any) {
-        console.error('[MAP_DEBUG] Erro ao carregar sensores:', {
-          message: error?.message,
-          status: error?.response?.status,
-        });
-      }
+      } catch (error: any) {}
     };
 
     loadSensors();
@@ -559,7 +557,6 @@ export default function MapScreen() {
     };
   }, [isLoaded, isSignedIn, mapPayload?.event?.id]);
 
-  // --- GESTURES ---
   const panGesture = Gesture.Pan().onChange(e => {
     translateX.value += e.changeX;
     translateY.value += e.changeY;
@@ -582,17 +579,9 @@ export default function MapScreen() {
     ],
   }));
 
-  // --- FUNÇÕES ---
   const handlePinPress = useCallback(
     (pin: any, showRoute = false) => {
       if (pin.lat === undefined || pin.lng === undefined || !bounds) {
-        console.error(
-          '[MAP_DEBUG] Erro de projeção espacial: Atributos lat/lng ausentes nos bounds.',
-          {
-            pin,
-            bounds,
-          },
-        );
         return;
       }
 
@@ -673,23 +662,15 @@ export default function MapScreen() {
 
       <GestureDetector gesture={composedGesture}>
         <MapViewport>
-          <Animated.View
-            style={[{ width: IMAGE_WIDTH, height: IMAGE_HEIGHT }, animatedStyle]}
-            accessible={false}
-          >
+          <Animated.View style={[{ width: IMAGE_WIDTH, height: IMAGE_HEIGHT }, animatedStyle]} accessible={false}>
             <StaticMapPreview
               width={IMAGE_WIDTH}
               height={IMAGE_HEIGHT}
-              theme="dark"
+              theme={currentTheme}  
               imageUrl={mapImageUrl}
             />
 
-            <Svg
-              width={IMAGE_WIDTH}
-              height={IMAGE_HEIGHT}
-              style={{ position: 'absolute' }}
-              pointerEvents="none"
-            >
+            <Svg width={IMAGE_WIDTH} height={IMAGE_HEIGHT} style={{ position: 'absolute' }} pointerEvents="none">
               {heatmapEnabled && (
                 <>
                   <Defs>
@@ -699,39 +680,17 @@ export default function MapScreen() {
 
                       return (
                         <RadialGradient key={gradientId} id={gradientId} cx="50%" cy="50%" r="50%">
-                          <Stop
-                            offset="0%"
-                            stopColor={getHeatColor(sensor.density, alpha)}
-                            stopOpacity={0.3}
-                          />
-                          <Stop
-                            offset="36%"
-                            stopColor={getHeatColor(sensor.density, alpha * 0.68)}
-                            stopOpacity={0.15}
-                          />
-                          <Stop
-                            offset="68%"
-                            stopColor={getHeatColor(sensor.density, alpha * 0.32)}
-                            stopOpacity={0.1}
-                          />
-                          <Stop
-                            offset="100%"
-                            stopColor={getHeatColor(sensor.density, 0)}
-                            stopOpacity={0}
-                          />
+                          <Stop offset="0%" stopColor={getHeatColor(sensor.density, alpha)} stopOpacity={0.3} />
+                          <Stop offset="36%" stopColor={getHeatColor(sensor.density, alpha * 0.68)} stopOpacity={0.15} />
+                          <Stop offset="68%" stopColor={getHeatColor(sensor.density, alpha * 0.32)} stopOpacity={0.1} />
+                          <Stop offset="100%" stopColor={getHeatColor(sensor.density, 0)} stopOpacity={0} />
                         </RadialGradient>
                       );
                     })}
                   </Defs>
 
                   {densitySensors.map(sensor => {
-                    const { x, y } = latLngToPixelFromBounds(
-                      sensor.lat,
-                      sensor.lng,
-                      bounds,
-                      IMAGE_WIDTH,
-                      IMAGE_HEIGHT,
-                    );
+                    const { x, y } = latLngToPixelFromBounds(sensor.lat, sensor.lng, bounds, IMAGE_WIDTH, IMAGE_HEIGHT);
                     const gradientId = `heat-${String(sensor.id).replace(/[^a-zA-Z0-9_-]/g, '-')}`;
 
                     return (
@@ -759,16 +718,12 @@ export default function MapScreen() {
             </Svg>
 
             {visiblePins.map(pin => {
-              if (pin.lat === null || pin.lng === null || pin.lat === undefined) {
-                return null;
-              }
+              if (pin.lat === null || pin.lng === null || pin.lat === undefined) return null;
               return (
                 <MapPin
                   key={String(pin.id)}
                   pin={pin}
-                  avatar={
-                    pin.type === 'friend' ? (getUserImageSource(pin.image) ?? undefined) : undefined
-                  }
+                  avatar={pin.type === 'friend' ? (getUserImageSource(pin.image) ?? undefined) : undefined}
                   bounds={bounds}
                   width={IMAGE_WIDTH}
                   height={IMAGE_HEIGHT}
@@ -781,9 +736,7 @@ export default function MapScreen() {
             })}
 
             {visibleStages.map(stage => {
-              if (stage.lat === null || stage.lng === null || stage.lat === undefined) {
-                return null;
-              }
+              if (stage.lat === null || stage.lng === null || stage.lat === undefined) return null;
               return (
                 <MapStage
                   key={String(stage.id)}
@@ -809,12 +762,7 @@ export default function MapScreen() {
             )}
 
             {currentLocation && (
-              <UserMarker
-                location={currentLocation}
-                bounds={bounds}
-                width={IMAGE_WIDTH}
-                height={IMAGE_HEIGHT}
-              />
+              <UserMarker location={currentLocation} bounds={bounds} width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
             )}
           </Animated.View>
         </MapViewport>
@@ -837,21 +785,14 @@ export default function MapScreen() {
         )}
 
         <PaddingSearchInput>
-          <SearchInput
-            variant="mapa"
-            placeholder="Search..."
-            value={searchValue}
-            onChangeText={setSearchValue}
-          />
+          <SearchInput variant="mapa" placeholder="Search..." value={searchValue} onChangeText={setSearchValue} />
         </PaddingSearchInput>
 
         <FilterTags
           tags={tags}
           selectedTags={selectedTags}
           onTagPress={tag =>
-            setSelectedTags(prev =>
-              prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag],
-            )
+            setSelectedTags(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag])
           }
           variant="mapa"
           style={{ marginTop: Spacing.md }}
@@ -859,18 +800,25 @@ export default function MapScreen() {
 
         <HeatmapToggle
           active={heatmapEnabled}
+          currentTheme={currentTheme}
           onPress={() => setHeatmapEnabled(prev => !prev)}
           accessible
           role="button"
           accessibilityLabel={heatmapEnabled ? 'Disable heatmap filter' : 'Enable heatmap filter'}
         >
-          <Ionicons name="flame" size={16} color={Colors.white} />
-          <HeatmapToggleText>Heatmap</HeatmapToggleText>
+          <Ionicons 
+            name="flame" 
+            size={16} 
+            color={heatmapEnabled ? Colors.white : (currentTheme === 'dark' ? Colors.white : '#1C1C1E')} 
+          />
+          <HeatmapToggleText active={heatmapEnabled} currentTheme={currentTheme}>
+            Heatmap
+          </HeatmapToggleText>
         </HeatmapToggle>
       </OverlayContent>
 
       {heatmapEnabled && (
-        <HeatmapLegend pointerEvents="none">
+        <HeatmapLegend currentTheme={currentTheme} pointerEvents="none">
           <HeatmapLegendBar>
             <Svg width={8} height={75}>
               <Defs>
@@ -884,8 +832,8 @@ export default function MapScreen() {
             </Svg>
           </HeatmapLegendBar>
           <HeatmapLegendLabels>
-            <HeatmapLegendLabel>High</HeatmapLegendLabel>
-            <HeatmapLegendLabel>Low</HeatmapLegendLabel>
+            <HeatmapLegendLabel currentTheme={currentTheme}>High</HeatmapLegendLabel>
+            <HeatmapLegendLabel currentTheme={currentTheme}>Low</HeatmapLegendLabel>
           </HeatmapLegendLabels>
         </HeatmapLegend>
       )}
@@ -905,12 +853,7 @@ export default function MapScreen() {
         </NavigationFooter>
       )}
 
-      <SosButton
-        onPress={() => router.push('/sos')}
-        accessible
-        role="button"
-        accessibilityLabel="Emergency SOS button"
-      >
+      <SosButton onPress={() => router.push('/sos')} accessible role="button" accessibilityLabel="Emergency SOS button">
         <SOSButtonText>SOS</SOSButtonText>
       </SosButton>
     </Container>

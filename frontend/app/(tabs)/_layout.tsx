@@ -4,11 +4,15 @@ import styled from 'styled-components/native';
 import { useEventMode } from '@/context/EventModeContext';
 
 const NavbarContainer = styled.View`
-  background-color: ${({ theme }) => theme.colors.grayNavbar};
+  background-color: ${({ theme }) => theme.colors.navBackground};
   border-radius: ${({ theme }) => theme.borderRadius.xlarge}px;
   height: ${({ theme }) => theme.height.md}px;
   margin-bottom: ${({ theme }) => theme.spacing.margemLateral}px;
   elevation: 8;
+  shadow-color: ${({ theme }) => theme.colors.shadow};
+  shadow-offset: 0px 6px;
+  shadow-opacity: 1;
+  shadow-radius: 18px;
   position: absolute;
   bottom: 0;
   left: ${({ theme }) => theme.spacing.margemLateral}px;
@@ -31,8 +35,7 @@ const TabButton = styled.TouchableOpacity`
 const TabIcon = styled(Ionicons).attrs(({ theme }) => ({
   size: theme.height.xs,
 }))<{ $active: boolean }>`
-  color: ${({ $active, theme }) =>
-    $active ? theme.colors.white : theme.colors.palette.neutral.neutral80};
+  color: ${({ $active, theme }) => ($active ? theme.colors.navActive : theme.colors.navInactive)};
 `;
 
 const IconBox = styled.View`
@@ -45,8 +48,7 @@ const IconBox = styled.View`
 const TabText = styled.Text<{ $active: boolean }>`
   ${({ theme }) => theme.text.textoPequeno};
   margin-top: ${({ theme }) => theme.spacing.xxs}px;
-  color: ${({ $active, theme }) =>
-    $active ? theme.colors.white : theme.colors.palette.neutral.neutral80};
+  color: ${({ $active, theme }) => ($active ? theme.colors.navActive : theme.colors.navInactive)};
 `;
 
 const eventModeTabs = [

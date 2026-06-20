@@ -10,24 +10,26 @@ import {
 import * as SecureStore from 'expo-secure-store';
 import { Stack, router } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
-import styled from 'styled-components/native';
+import styled, { useTheme } from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth, useClerk } from '@clerk/expo';
 
 import { EventCard } from '../../../components/EventCard';
 import { Fonts } from '../../../constants/theme';
+import { useThemePreference } from '../../../context/ThemeContext';
 
 import EditIcon from '../../../assets/Icons/edit.png';
 import Header from '../../../components/ui/header'; // import do header customizado
-import { deleteMyAccount, getMyProfile, type AuthenticatedProfile } from '../../../utils/profile';
+import {
+  deleteMyAccount,
+  getMyProfileWithEventImages,
+  type AuthenticatedProfile,
+} from '../../../utils/profile';
+import { getUserImageSource } from '../../../utils/userImages';
 
 function getProfileImageSource(user: AuthenticatedProfile | null) {
-  if (user?.image) {
-    return { uri: `data:image/jpeg;base64,${user.image}` };
-  }
-
-  return null;
+  return getUserImageSource(user?.image);
 }
 
 function withTimeout<T>(promise: Promise<T>, timeoutMs = 12000) {
@@ -81,7 +83,7 @@ const AvatarCircle = styled.View`
   width: ${({ theme }) => theme.height.profileAvatar}px;
   height: ${({ theme }) => theme.height.profileAvatar}px;
   border-radius: 80px;
-  background-color: ${({ theme }) => theme.colors.background};
+  background-color: ${({ theme }) => theme.colors.surfaceSoft};
   overflow: hidden;
   align-items: center;
   justify-content: center;
@@ -127,7 +129,7 @@ const PaddedContent = styled.View`
 
 const Name = styled.Text`
   font-size: 22px;
-  color: white;
+  color: ${({ theme }) => theme.colors.text};
   align-self: center;
   margin-top: 10px;
   font-weight: 600;
@@ -135,7 +137,7 @@ const Name = styled.Text`
 
 const Username = styled.Text`
   font-size: 14px;
-  color: #ccc;
+  color: ${({ theme }) => theme.colors.textMuted};
   align-self: center;
   margin-top: 4px;
 `;
@@ -153,7 +155,7 @@ const LinkButton = styled.TouchableOpacity`
 `;
 
 const LinkButtonText = styled.Text`
-  color: white;
+  color: ${({ theme }) => theme.colors.onPrimary};
   font-family: ${Fonts.weights.medium};
 `;
 
@@ -166,7 +168,7 @@ const SectionHeader = styled.View`
 `;
 
 const SectionTitle = styled.Text`
-  color: ${({ theme }) => theme.colors.white};
+  color: ${({ theme }) => theme.colors.text};
   font-family: ${({ theme }) => theme.text.titulo.h1.fontFamily};
   font-size: ${({ theme }) => theme.text.titulo.h1.fontSize}px;
 `;
@@ -182,21 +184,55 @@ const SeeMore = styled.Text`
 const SettingsRow = styled.TouchableOpacity`
   padding: 16px 0;
   border-bottom-width: 1px;
-  border-bottom-color: ${({ theme }) => theme.colors.grayNavbar};
+  border-bottom-color: ${({ theme }) => theme.colors.border};
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
 `;
 
+const ThemeSettingsRow = styled.View`
+  padding: 16px 0;
+  border-bottom-width: 1px;
+  border-bottom-color: ${({ theme }) => theme.colors.border};
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.md}px;
+`;
+
 const SettingsText = styled.Text`
-  color: #ccc;
+  color: ${({ theme }) => theme.colors.textMuted};
   font-size: 16px;
   font-family: ${Fonts.weights.light};
 `;
 
 const SettingsIcon = styled.Text`
-  color: ${({ theme }) => theme.colors.white};
+  color: ${({ theme }) => theme.colors.textSubtle};
   font-size: 24px;
+`;
+
+const ThemeControl = styled.View`
+  flex-direction: row;
+  align-items: center;
+  background-color: ${({ theme }) => theme.colors.surfaceSoft};
+  border-radius: ${({ theme }) => theme.borderRadius.round}px;
+  padding: ${({ theme }) => theme.spacing.xs}px;
+`;
+
+const ThemeOption = styled.Pressable<{ $active: boolean }>`
+  min-width: 64px;
+  min-height: 34px;
+  align-items: center;
+  justify-content: center;
+  border-radius: ${({ theme }) => theme.borderRadius.round}px;
+  background-color: ${({ $active, theme }) => ($active ? theme.colors.primary : 'transparent')};
+  padding: ${({ theme }) => theme.spacing.xs}px ${({ theme }) => theme.spacing.sm}px;
+`;
+
+const ThemeOptionText = styled.Text<{ $active: boolean }>`
+  color: ${({ $active, theme }) => ($active ? theme.colors.onPrimary : theme.colors.textMuted)};
+  font-family: ${Fonts.weights.medium};
+  font-size: 13px;
 `;
 
 const LogoutButton = styled.TouchableOpacity`
@@ -240,20 +276,20 @@ const ModalOverlay = styled.View`
 const ModalContent = styled.View`
   width: 100%;
   max-width: 360px;
-  background-color: ${({ theme }) => theme.colors.grayNavbar};
+  background-color: ${({ theme }) => theme.colors.surfaceElevated};
   border-radius: ${({ theme }) => theme.borderRadius.large}px;
   padding: ${({ theme }) => theme.spacing.xl}px;
 `;
 
 const ModalTitle = styled.Text`
-  color: ${({ theme }) => theme.colors.white};
+  color: ${({ theme }) => theme.colors.text};
   font-family: ${({ theme }) => theme.text.titulo.h3.fontFamily};
   font-size: ${({ theme }) => theme.text.titulo.h3.fontSize}px;
   margin-bottom: ${({ theme }) => theme.spacing.sm}px;
 `;
 
 const ModalDescription = styled.Text`
-  color: ${({ theme }) => theme.colors.inactive};
+  color: ${({ theme }) => theme.colors.textMuted};
   font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
   font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
   line-height: ${({ theme }) => theme.text.corpo.corpoTexto.lineHeight}px;
@@ -278,7 +314,7 @@ const ModalButton = styled.TouchableOpacity<{ variant?: 'danger' | 'secondary' }
   align-items: center;
   justify-content: center;
   background-color: ${({ theme, variant }) =>
-    variant === 'danger' ? '#ef4444' : theme.colors.background};
+    variant === 'danger' ? '#ef4444' : theme.colors.surfaceSoft};
   border-radius: ${({ theme }) => theme.borderRadius.medium}px;
   padding: ${({ theme }) => theme.spacing.sm}px ${({ theme }) => theme.spacing.md}px;
   opacity: ${({ disabled }) => (disabled ? 0.6 : 1)};
@@ -286,7 +322,7 @@ const ModalButton = styled.TouchableOpacity<{ variant?: 'danger' | 'secondary' }
 
 const ModalButtonText = styled.Text<{ variant?: 'danger' | 'secondary' }>`
   color: ${({ theme, variant }) =>
-    variant === 'danger' ? theme.colors.white : theme.colors.white};
+    variant === 'danger' ? theme.colors.onPrimary : theme.colors.text};
   font-family: ${Fonts.weights.medium};
   font-size: 14px;
 `;
@@ -299,20 +335,22 @@ const LoadingState = styled.View`
 `;
 
 const LoadingText = styled.Text`
-  color: ${({ theme }) => theme.colors.white};
+  color: ${({ theme }) => theme.colors.text};
   font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
   font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
   margin-top: ${({ theme }) => theme.spacing.sm}px;
 `;
 
 const EmptyText = styled.Text`
-  color: ${({ theme }) => theme.colors.inactive};
+  color: ${({ theme }) => theme.colors.textMuted};
   font-family: ${({ theme }) => theme.text.textoPequeno.fontFamily};
   font-size: ${({ theme }) => theme.text.textoPequeno.fontSize}px;
   padding-left: ${({ theme }) => theme.spacing.margemLateral}px;
 `;
 
 export default function Profile() {
+  const theme = useTheme();
+  const { themeMode, setThemeMode } = useThemePreference();
   const { isLoaded, isSignedIn, getToken } = useAuth();
   const { signOut } = useClerk();
   const [user, setUser] = useState<AuthenticatedProfile | null>(null);
@@ -360,7 +398,7 @@ export default function Profile() {
         setIsLoading(true);
         setError('');
         const token = await withTimeout(getTokenRef.current());
-        const profile = await withTimeout(getMyProfile(token));
+        const profile = await withTimeout(getMyProfileWithEventImages(token));
 
         if (isActive) {
           setUser(profile);
@@ -418,12 +456,13 @@ export default function Profile() {
       <Container>
         <Header
           variant="back"
+          colorScheme={themeMode === 'light' ? 'light' : 'dark'}
           title="Profile"
           rightIcon="wallet"
           onRightPress={() => router.push('/perfil/wallet')}
         />
         <LoadingState>
-          <ActivityIndicator color="white" />
+          <ActivityIndicator color={theme.colors.primary} />
           <LoadingText>Loading...</LoadingText>
         </LoadingState>
       </Container>
@@ -435,6 +474,7 @@ export default function Profile() {
       <Container>
         <Header
           variant="back"
+          colorScheme={themeMode === 'light' ? 'light' : 'dark'}
           title="Profile"
           rightIcon="wallet"
           onRightPress={() => router.push('/perfil/wallet')}
@@ -495,13 +535,14 @@ export default function Profile() {
       {/* Header Customizado */}
       <Header
         variant="back"
+        colorScheme={themeMode === 'light' ? 'light' : 'dark'}
         title="Profile"
         rightIcon="wallet"
         onRightPress={() => router.push('/perfil/wallet')}
       />
 
       <TopGradient
-        colors={['rgba(190, 142, 224)', 'rgba(34, 39, 52, 0)']}
+        colors={[theme.colors.profileGradientStart, theme.colors.profileGradientEnd]}
         locations={[0, 0.33]}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 3 }}
@@ -585,10 +626,29 @@ export default function Profile() {
           <SettingsIcon accessible={false}>›</SettingsIcon>
         </SettingsRow>
 
-        <SettingsRow role="button" accessibilityLabel="Theme settings">
+        <ThemeSettingsRow accessibilityLabel="Theme settings">
           <SettingsText>Theme</SettingsText>
-          <SettingsIcon accessible={false}>›</SettingsIcon>
-        </SettingsRow>
+          <ThemeControl>
+            <ThemeOption
+              $active={themeMode === 'light'}
+              onPress={() => setThemeMode('light')}
+              accessibilityRole="button"
+              accessibilityLabel="Use light theme"
+              accessibilityState={{ selected: themeMode === 'light' }}
+            >
+              <ThemeOptionText $active={themeMode === 'light'}>Light</ThemeOptionText>
+            </ThemeOption>
+            <ThemeOption
+              $active={themeMode === 'dark'}
+              onPress={() => setThemeMode('dark')}
+              accessibilityRole="button"
+              accessibilityLabel="Use dark theme"
+              accessibilityState={{ selected: themeMode === 'dark' }}
+            >
+              <ThemeOptionText $active={themeMode === 'dark'}>Dark</ThemeOptionText>
+            </ThemeOption>
+          </ThemeControl>
+        </ThemeSettingsRow>
 
         <SettingsRow role="button" accessibilityLabel="Terms and conditions">
           <SettingsText>Terms and Conditions</SettingsText>

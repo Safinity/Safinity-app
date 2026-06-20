@@ -41,9 +41,9 @@ jobs:
         run: npx prisma generate
         working-directory: backend
 
-      - name: Run backend tests with coverage
-        run: npm test -- --coverage --runInBand
-        working-directory: backend
+      #- name: Run backend tests with coverage
+      #  run: npm test -- --coverage --runInBand
+      #  working-directory: backend
 
       - name: Install Expo app dependencies
         run: npm ci

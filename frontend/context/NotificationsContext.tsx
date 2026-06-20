@@ -39,9 +39,7 @@ Notifications.setNotificationHandler({
 });
 
 function getExpoProjectId() {
-  const extra = Constants.expoConfig?.extra as
-    | { eas?: { projectId?: string } }
-    | undefined;
+  const extra = Constants.expoConfig?.extra as { eas?: { projectId?: string } } | undefined;
 
   return Constants.easConfig?.projectId ?? extra?.eas?.projectId;
 }
@@ -62,7 +60,9 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
   getTokenRef.current = getToken;
 
   const getFreshToken = useCallback(async () => {
-    const getTokenWithOptions = getTokenRef.current as (options?: unknown) => Promise<string | null>;
+    const getTokenWithOptions = getTokenRef.current as (
+      options?: unknown,
+    ) => Promise<string | null>;
     return getTokenWithOptions({ skipCache: true });
   }, []);
 
@@ -78,7 +78,9 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
       api.get('/notifications/me', { headers }),
       api.get('/friends/requests/pending', { headers }),
     ]);
-    const notifications = Array.isArray(notificationsResponse.data) ? notificationsResponse.data : [];
+    const notifications = Array.isArray(notificationsResponse.data)
+      ? notificationsResponse.data
+      : [];
     const pendingRequests = Array.isArray(pendingRequestsResponse.data)
       ? pendingRequestsResponse.data
       : [];
@@ -275,9 +277,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
         <View style={styles.backdrop}>
           <View style={styles.card}>
             <Text style={styles.title}>{activeBuzz?.senderName ?? 'A friend'} is buzzing you</Text>
-            <Text style={styles.message}>
-              Your friend is trying to get your attention.
-            </Text>
+            <Text style={styles.message}>Your friend is trying to get your attention.</Text>
             <Pressable
               style={styles.button}
               onPress={stopFriendBuzz}

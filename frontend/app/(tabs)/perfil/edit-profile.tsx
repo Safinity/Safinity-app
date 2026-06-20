@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@clerk/expo';
 import { Stack, router } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Modal, type ImageSourcePropType } from 'react-native';
 import styled from 'styled-components/native';
@@ -10,17 +11,10 @@ import Header from '../../../components/ui/header';
 import { Colors, Fonts } from '../../../constants/theme';
 import { LinearGradient } from 'expo-linear-gradient';
 import { getMyProfile, updateMyProfile, type AuthenticatedProfile } from '../../../utils/profile';
+import { getUserImageSource } from '../../../utils/userImages';
 
 function getProfileImageSource(image: string | null | undefined): ImageSourcePropType | null {
-  if (!image || image === 'default' || image.includes('.')) {
-    return null;
-  }
-
-  if (image.startsWith('data:image') || image.startsWith('http')) {
-    return { uri: image };
-  }
-
-  return { uri: `data:image/jpeg;base64,${image}` };
+  return getUserImageSource(image);
 }
 
 function getApiErrorMessage(error: unknown) {
@@ -52,6 +46,10 @@ export default function EditProfile() {
     username: '',
   });
   const [profileImage, setProfileImage] = useState<ImageSourcePropType | null>(null);
+  const [selectedProfileImage, setSelectedProfileImage] = useState<{
+    base64: string;
+    mimeType: string;
+  } | null>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccessModalVisible, setIsSuccessModalVisible] = useState(false);
@@ -115,8 +113,60 @@ export default function EditProfile() {
     }));
   };
 
+  const pickProfileImage = async (source: 'camera' | 'library') => {
+    const permission =
+      source === 'camera'
+        ? await ImagePicker.requestCameraPermissionsAsync()
+        : await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permission.granted) {
+      Alert.alert('Permission required', 'Please allow access to update your profile photo');
+      return;
+    }
+
+    const result =
+      source === 'camera'
+        ? await ImagePicker.launchCameraAsync({
+            allowsEditing: true,
+            aspect: [1, 1],
+            base64: true,
+            quality: 0.8,
+          })
+        : await ImagePicker.launchImageLibraryAsync({
+            allowsEditing: true,
+            aspect: [1, 1],
+            base64: true,
+            mediaTypes: ['images'],
+            quality: 0.8,
+          });
+
+    if (result.canceled) {
+      return;
+    }
+
+    const asset = result.assets[0];
+    const mimeType = asset.mimeType || 'image/jpeg';
+
+    if (!asset.base64) {
+      Alert.alert('Error', 'Unable to read selected image');
+      return;
+    }
+
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(mimeType)) {
+      Alert.alert('Unsupported image', 'Please choose a JPEG, PNG or WebP image');
+      return;
+    }
+
+    setSelectedProfileImage({ base64: asset.base64, mimeType });
+    setProfileImage({ uri: asset.uri });
+  };
+
   const takePhoto = async () => {
-    Alert.alert('Not available yet', 'Profile photo editing is not available yet');
+    Alert.alert('Profile photo', 'Choose a new profile photo', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Choose from library', onPress: () => void pickProfileImage('library') },
+      { text: 'Take photo', onPress: () => void pickProfileImage('camera') },
+    ]);
   };
 
   const handleSave = async () => {
@@ -131,7 +181,12 @@ export default function EditProfile() {
     try {
       setIsLoading(true);
       const token = await getTokenRef.current();
-      await updateMyProfile(token, { name, username });
+      await updateMyProfile(token, {
+        name,
+        username,
+        imageBase64: selectedProfileImage?.base64,
+        imageMimeType: selectedProfileImage?.mimeType,
+      });
 
       setIsSuccessModalVisible(true);
     } catch (error) {

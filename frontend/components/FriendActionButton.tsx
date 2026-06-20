@@ -8,7 +8,10 @@ type FriendActionButtonProps = {
   variant?: 'add' | 'remove' | 'pending';
 } & React.ComponentProps<typeof styled.TouchableOpacity>; // aceita props extras
 
-const Button = styled.TouchableOpacity<{ variant: 'add' | 'remove' | 'pending'; disabled?: boolean }>`
+const Button = styled.TouchableOpacity<{
+  variant: 'add' | 'remove' | 'pending';
+  disabled?: boolean;
+}>`
   width: ${({ theme }) => theme.height.sm}px;
   height: ${({ theme }) => theme.height.sm}px;
   border-radius: ${({ theme }) => theme.borderRadius.medium}px;

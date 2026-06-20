@@ -154,7 +154,7 @@ export default function EventsListScreen() {
               selectedCategories.every(
                 cat =>
                   !events.some((e: any) => e.category?.toLowerCase().trim() === cat.toLowerCase()),
-              ) }
+              )}
 
             {visibleCategories.map(category => {
               const sectionEvents = events.filter((e: any) => {

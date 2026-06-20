@@ -290,8 +290,6 @@ export default function CalendarScreen() {
       </HeaderWrapper>
 
       <ScrollContent contentContainerStyle={{ paddingTop: theme.spacing.sm }}>
-
-
         <SearchInput
           value={searchValue}
           onChangeText={setSearchValue}

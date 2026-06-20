@@ -26,13 +26,10 @@ import {
   getMyProfileWithEventImages,
   type AuthenticatedProfile,
 } from '../../../utils/profile';
+import { getUserImageSource } from '../../../utils/userImages';
 
 function getProfileImageSource(user: AuthenticatedProfile | null) {
-  if (user?.image) {
-    return { uri: `data:image/jpeg;base64,${user.image}` };
-  }
-
-  return null;
+  return getUserImageSource(user?.image);
 }
 
 function withTimeout<T>(promise: Promise<T>, timeoutMs = 12000) {

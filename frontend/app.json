@@ -32,6 +32,13 @@
       "expo-router",
       "expo-font",
       "expo-camera",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Safinity uses your photo library so you can choose a profile picture.",
+          "cameraPermission": "Safinity uses your camera so you can take a profile picture."
+        }
+      ],
       "expo-location",
       "expo-notifications",
       "expo-secure-store",

@@ -29,6 +29,7 @@ import { Colors, Spacing } from '../../constants/theme';
 import mapData from '../../data/mapdata.json';
 import api, { API_BASE } from '../../utils/api';
 import { latLngToPixelFromBounds } from '../../utils/coordinates';
+import { getUserImageSource } from '../../utils/userImages';
 import Head from 'expo-router/head';
 
 type MapPinItem = {
@@ -765,11 +766,7 @@ export default function MapScreen() {
                 <MapPin
                   key={String(pin.id)}
                   pin={pin}
-                  avatar={
-                    pin.type === 'friend' && pin.image
-                      ? { uri: `data:image/jpeg;base64,${pin.image}` }
-                      : undefined
-                  }
+                  avatar={pin.type === 'friend' ? getUserImageSource(pin.image) ?? undefined : undefined}
                   bounds={bounds}
                   width={IMAGE_WIDTH}
                   height={IMAGE_HEIGHT}

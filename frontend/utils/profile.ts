@@ -43,6 +43,8 @@ export type AuthenticatedProfile = {
 export type UpdateProfilePayload = {
   name?: string;
   username?: string;
+  imageBase64?: string;
+  imageMimeType?: string;
 };
 
 type EventImageLookup = Record<string, string | null | undefined>;

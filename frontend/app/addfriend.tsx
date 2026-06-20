@@ -11,11 +11,12 @@ import { useNotifications } from '@/context/NotificationsContext';
 import { useAuth } from '@clerk/expo';
 import { getFriends, searchUsers, toggleFriendship, type FriendSearchItem } from '@/utils/friends';
 import { Ionicons } from '@expo/vector-icons';
+import { getUserImageSource } from '@/utils/userImages';
 
 function getAvatarSource(user: FriendSearchItem) {
-  if (user.image) {
-    return { uri: `data:image/jpeg;base64,${user.image}` };
-  }
+  const remoteImage = getUserImageSource(user.image);
+
+  if (remoteImage) return remoteImage;
 
   return userImages.default;
 }

@@ -8,6 +8,7 @@ import { userImages } from '../../assets/images/Users/userImages';
 import { Stack } from 'expo-router';
 import { useNotifications } from '@/context/NotificationsContext';
 import api, { API_BASE } from '../../utils/api';
+import { getUserImageUri } from '../../utils/userImages';
 
 type NotificationItem = {
   id: string;
@@ -224,9 +225,7 @@ export default function NotificationsPage() {
               category: 'friend',
               time: null,
               read: false,
-              imageUri: request.sender?.image
-                ? `data:image/jpeg;base64,${request.sender.image}`
-                : undefined,
+              imageUri: getUserImageUri(request.sender?.image) ?? undefined,
             }))
           : [];
 

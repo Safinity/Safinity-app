@@ -18,7 +18,7 @@ const BannerContainer = styled.ImageBackground.attrs({
 
 // Gradiente adaptado dinamicamente usando a cor de fundo do tema original
 const HeroGradient = styled(LinearGradient).attrs(({ theme, isLiveMode }: any) => ({
-  colors: isLiveMode 
+  colors: isLiveMode
     ? ['transparent', theme.colors.background] // Removido o esbranquiçado, funde diretamente com a cor da app
     : ['transparent', theme.colors.background],
   start: { x: 0, y: 0.2 },
@@ -170,7 +170,7 @@ export const HeroBanner = ({
   const isEventDetail =
     isDetail && (detailType === 'event' || (!detailType && event?.name && !event?.title));
   const isList = !isDetail && title;
-  
+
   const isHome = !isDetail && !title && event && !isLiveMode;
 
   const accessibleLabel = `Banner de destaque do evento: ${event?.name || event?.title || title || 'Evento'}`;
@@ -189,12 +189,12 @@ export const HeroBanner = ({
           <LiveModeWrapper>
             <NowAtText>Now, at</NowAtText>
             <LiveEventName>{event.name}</LiveEventName>
-            
+
             <CheckedInBadge>
               <CheckedInDot />
               <CheckedInText>You’re checked in!</CheckedInText>
             </CheckedInBadge>
-            
+
             {/* O link "View the map" foi removido daqui completamente */}
           </LiveModeWrapper>
         )}

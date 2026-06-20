@@ -97,7 +97,7 @@ export const EventCard = ({ event, variant }: any) => {
         return `${startDay}-${endDay} ${month} ${year}`;
       }
       return `${startDay} ${startDate.toLocaleString('en-GB', { month: 'short' })} - ${endDay} ${endDate.toLocaleString('en-GB', { month: 'short' })} ${year}`;
-    } catch (e) {
+    } catch {
       return 'Invalid Date';
     }
   };

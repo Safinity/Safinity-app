@@ -11,14 +11,15 @@ import FriendActionButton from '@/components/FriendActionButton';
 import { useNotifications } from '@/context/NotificationsContext';
 import { getFriendProfile, toggleFriendship, type FriendProfileResponse } from '@/utils/friends';
 import { navigateToPreviousRoute } from '@/utils/navigationHistory';
+import { getUserImageSource } from '@/utils/userImages';
 import { userImages } from '../../../assets/images/Users/userImages';
 
 const { width } = Dimensions.get('window');
 
 function getAvatarSource(friend: FriendProfileResponse) {
-  if (friend.image) {
-    return { uri: `data:image/jpeg;base64,${friend.image}` };
-  }
+  const remoteImage = getUserImageSource(friend.image);
+
+  if (remoteImage) return remoteImage;
 
   return userImages.default;
 }

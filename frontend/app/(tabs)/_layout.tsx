@@ -56,8 +56,7 @@ const IconBox = styled.View`
 const TabText = styled.Text<{ $active: boolean }>`
   ${({ theme }) => theme.text.textoPequeno};
   margin-top: ${({ theme }) => theme.spacing.xxs}px;
-  color: ${({ $active, theme }) =>
-    $active ? theme.colors.navActive : theme.colors.navInactive};
+  color: ${({ $active, theme }) => ($active ? theme.colors.navActive : theme.colors.navInactive)};
 `;
 
 const eventModeTabs = [

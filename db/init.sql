@@ -74,7 +74,7 @@ CREATE TABLE public.event (
     description character varying(255),
     status character varying(32),
     category character varying(24),
-    image character varying(512),
+    image bytea,
     start_date timestamp without time zone,
     end_date timestamp without time zone,
     location public.geography(Point,4326),
@@ -263,7 +263,7 @@ CREATE TABLE public.users (
     password_hash character varying(255) NOT NULL,
     role character varying(24) NOT NULL,
     email character varying(255),
-    image bytea,
+    image text,
     location public.geography(Point,4326),
     emergency_contact character varying(20),
     clerk_id character varying(50)

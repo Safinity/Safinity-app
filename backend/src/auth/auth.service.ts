@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -49,6 +50,16 @@ function normalizeUsername(value: string | null) {
   return normalized || null;
 }
 
+function removeTrailingSlashes(value: string) {
+  let end = value.length;
+
+  while (end > 0 && value.charCodeAt(end - 1) === 47) {
+    end -= 1;
+  }
+
+  return value.slice(0, end);
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -56,8 +67,86 @@ export class AuthService {
     private readonly clerkService: ClerkService,
   ) {}
 
-  private toBase64Image(image: Uint8Array | null) {
-    return image ? Buffer.from(image).toString('base64') : null;
+  private serializeUserImage(image: string | null) {
+    return image?.startsWith('http://') || image?.startsWith('https://')
+      ? image
+      : null;
+  }
+
+  private getProfileImageExtension(mimeType: string) {
+    const extensions: Record<string, string> = {
+      'image/jpeg': 'jpg',
+      'image/png': 'png',
+      'image/webp': 'webp',
+    };
+
+    return extensions[mimeType];
+  }
+
+  private encodeStoragePath(path: string) {
+    return path.split('/').map(encodeURIComponent).join('/');
+  }
+
+  private async uploadProfileImage(
+    userId: string,
+    imageBase64: string,
+    imageMimeType = 'image/jpeg',
+  ) {
+    const supabaseUrl = process.env.SUPABASE_URL
+      ? removeTrailingSlashes(process.env.SUPABASE_URL)
+      : undefined;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const bucket = process.env.SUPABASE_PROFILE_BUCKET || 'safinity';
+    const extension = this.getProfileImageExtension(imageMimeType);
+
+    if (!supabaseUrl || !serviceRoleKey) {
+      throw new InternalServerErrorException(
+        'Supabase profile image upload is not configured',
+      );
+    }
+
+    if (!extension) {
+      throw new BadRequestException('Unsupported profile image type');
+    }
+
+    const normalizedBase64 = imageBase64.includes(',')
+      ? imageBase64.split(',').pop() || ''
+      : imageBase64;
+    const imageBuffer = Buffer.from(normalizedBase64, 'base64');
+    const maxSizeBytes = 5 * 1024 * 1024;
+
+    if (!imageBuffer.length) {
+      throw new BadRequestException('Profile image is empty');
+    }
+
+    if (imageBuffer.length > maxSizeBytes) {
+      throw new BadRequestException('Profile image must be 5MB or less');
+    }
+
+    const storagePath = `User/Profile/${userId}-${Date.now()}.${extension}`;
+    const encodedPath = this.encodeStoragePath(storagePath);
+    const uploadResponse = await fetch(
+      `${supabaseUrl}/storage/v1/object/${bucket}/${encodedPath}`,
+      {
+        method: 'POST',
+        headers: {
+          apikey: serviceRoleKey,
+          Authorization: `Bearer ${serviceRoleKey}`,
+          'Content-Type': imageMimeType,
+          'x-upsert': 'true',
+        },
+        body: imageBuffer,
+      },
+    );
+
+    if (!uploadResponse.ok) {
+      const errorText = await uploadResponse.text().catch(() => '');
+      throw new InternalServerErrorException(
+        `Failed to upload profile image${errorText ? `: ${errorText}` : ''}`,
+      );
+    }
+
+    return `${supabaseUrl}/storage/v1/object/public/${bucket}/${encodedPath}`;
   }
 
   private async getAvailableUsername(
@@ -189,6 +278,7 @@ export class AuthService {
                 description: true,
                 status: true,
                 category: true,
+                image: true,
                 start_date: true,
                 end_date: true,
               },
@@ -212,7 +302,7 @@ export class AuthService {
       clerk_id: user.clerk_id,
       name: user.name,
       username: user.username,
-      image: this.toBase64Image(user.image),
+      image: this.serializeUserImage(user.image),
       role: user.role,
       email: user.email,
       emergency_contact: user.emergency_contact,
@@ -243,13 +333,19 @@ export class AuthService {
     body: {
       name?: string;
       username?: string;
+      imageBase64?: string;
+      imageMimeType?: string;
     },
   ) {
     const name = body.name?.trim();
     const username = body.username?.trim();
+    const imageBase64 = body.imageBase64?.trim();
+    const imageMimeType = body.imageMimeType?.trim() || 'image/jpeg';
 
-    if (!name && !username) {
-      throw new BadRequestException('name or username is required');
+    if (!name && !username && !imageBase64) {
+      throw new BadRequestException(
+        'name, username or profile image is required',
+      );
     }
 
     if (username) {
@@ -266,13 +362,20 @@ export class AuthService {
       }
     }
 
-    return this.prisma.users.update({
+    const imageUrl = imageBase64
+      ? await this.uploadProfileImage(userId, imageBase64, imageMimeType)
+      : undefined;
+
+    await this.prisma.users.update({
       where: { id: userId },
       data: {
         name: name ?? undefined,
         username: username ?? undefined,
+        image: imageUrl,
       },
     });
+
+    return this.getSelfProfile(userId);
   }
 
   async deleteAccount(userId: string) {

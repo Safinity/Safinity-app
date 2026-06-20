@@ -25,6 +25,7 @@ import {
   type AddFriendQrResponse,
   type FriendQrResponse,
 } from '@/utils/friends';
+import { getUserImageUri } from '@/utils/userImages';
 
 const Container = styled.View`
   flex: 1;
@@ -349,9 +350,7 @@ export default function QRCodeScreen() {
     }
   };
 
-  const pendingFriendImage = pendingFriend?.image
-    ? `data:image/jpeg;base64,${pendingFriend.image}`
-    : null;
+  const pendingFriendImage = getUserImageUri(pendingFriend?.image);
 
   return (
     <Container>

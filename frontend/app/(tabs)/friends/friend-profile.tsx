@@ -183,10 +183,7 @@ export default function FriendProfileScreen() {
           renderItem={({ item }) => (
             <EventCard>
               <EventImageOverlay
-                source={
-                  eventImages[item.image] ??
-                  getEventImageSource(item.image, eventImages['banner-lista-eventos'])
-                }
+                source={getEventImageSource(item.image, eventImages['banner-lista-eventos'])}
               >
                 <GradientOverlay />
                 <EventDate>{item.date}</EventDate>

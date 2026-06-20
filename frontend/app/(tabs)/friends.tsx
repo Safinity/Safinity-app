@@ -4,7 +4,6 @@ import { ActivityIndicator, Alert, RefreshControl, TouchableOpacity } from 'reac
 import { router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Head from 'expo-router/head';
-import { isAxiosError } from 'axios';
 import { userImages } from '../../assets/images/Users/userImages';
 import Header from '@/components/ui/header';
 import FindFriendButton from '@/components/FindFriendButton';
@@ -13,6 +12,7 @@ import FriendActionButton from '@/components/FriendActionButton';
 import { useNotifications } from '@/context/NotificationsContext';
 import { useAuth } from '@clerk/expo';
 import { useEventMode } from '@/context/EventModeContext';
+import { getUserImageSource } from '@/utils/userImages';
 import {
   buzzFriend,
   getFriends,
@@ -27,25 +27,11 @@ const emptyFriends: FriendsGroupedResponse = {
 };
 
 function getAvatarSource(friend: FriendListItem) {
-  if (friend.image) {
-    return { uri: `data:image/jpeg;base64,${friend.image}` };
-  }
+  const remoteImage = getUserImageSource(friend.image);
+
+  if (remoteImage) return remoteImage;
 
   return userImages.default;
-}
-
-function getErrorMessage(error: unknown) {
-  if (isAxiosError(error)) {
-    if (error.response?.status) {
-      return `Request failed with status ${error.response.status}.`;
-    }
-
-    if (error.message) {
-      return error.message;
-    }
-  }
-
-  return 'Please try again.';
 }
 
 export default function FriendsScreen() {
@@ -85,7 +71,6 @@ export default function FriendsScreen() {
         hasLoadedOnce.current = true;
       } catch (error) {
         console.error('Failed to load friends', error);
-        Alert.alert('Unable to load friends', getErrorMessage(error));
       } finally {
         setIsLoading(false);
         setIsRefreshing(false);

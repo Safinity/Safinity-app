@@ -158,13 +158,7 @@ export default function MyCalendarScreen() {
     return () => {
       isActive = false;
     };
-  }, [
-    activeEvent,
-    isLoaded,
-    isSignedIn,
-    loadEventFavourites,
-    setSelectedCalendarEventId,
-  ]);
+  }, [activeEvent, isLoaded, isSignedIn, loadEventFavourites, setSelectedCalendarEventId]);
 
   const handleToggleFavorite = async (activity: any, shouldBeFavorite: boolean) => {
     if (!selectedEventId) {

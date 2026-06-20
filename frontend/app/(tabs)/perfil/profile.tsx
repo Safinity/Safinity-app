@@ -18,15 +18,16 @@ import { Fonts } from '../../../constants/theme';
 import { useThemePreference } from '../../../context/ThemeContext';
 
 import EditIcon from '../../../assets/Icons/edit.png';
-import ProfileFundoImg from '../../../assets/images/Profile-fundo.png';
-import ProfileFundoDarkImg from '../../../assets/images/Profile-fundo-dark.png';
-import { deleteMyAccount, getMyProfile, type AuthenticatedProfile } from '../../../utils/profile';
+import Header from '../../../components/ui/header'; // import do header customizado
+import {
+  deleteMyAccount,
+  getMyProfileWithEventImages,
+  type AuthenticatedProfile,
+} from '../../../utils/profile';
+import { getUserImageSource } from '../../../utils/userImages';
 
 function getProfileImageSource(user: AuthenticatedProfile | null) {
-  if (user?.image) {
-    return { uri: `data:image/jpeg;base64,${user.image}` };
-  }
-  return null;
+  return getUserImageSource(user?.image);
 }
 
 function withTimeout<T>(promise: Promise<T>, timeoutMs = 12000) {
@@ -449,7 +450,7 @@ export default function Profile() {
         setIsLoading(true);
         setError('');
         const token = await withTimeout(getTokenRef.current());
-        const profile = await withTimeout(getMyProfile(token));
+        const profile = await withTimeout(getMyProfileWithEventImages(token));
 
         if (isActive) {
           setUser(profile);

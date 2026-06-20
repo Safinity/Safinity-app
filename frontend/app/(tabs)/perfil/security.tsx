@@ -1,18 +1,38 @@
 import { useAuth, useUser as useClerkUser } from '@clerk/expo';
 import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components/native';
-import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { Stack } from 'expo-router';
 import Header from '../../../components/ui/header';
 import { Colors, Spacing, Fonts } from '../../../constants/theme';
 import InputField from '../../../components/InputField';
 import { getMyProfile } from '../../../utils/profile';
 
+function getClerkErrorMessage(error: unknown) {
+  if (!error || typeof error !== 'object') {
+    return 'Unable to update your password. Please try again.';
+  }
+
+  const maybeError = error as {
+    errors?: { message?: string; longMessage?: string }[];
+    message?: string;
+  };
+  const firstError = maybeError.errors?.[0];
+
+  return (
+    firstError?.longMessage ||
+    firstError?.message ||
+    maybeError.message ||
+    'Unable to update your password. Please try again.'
+  );
+}
+
 const SecurityScreen = () => {
   const { isLoaded, isSignedIn, getToken } = useAuth();
   const { user: clerkUser } = useClerkUser();
   const [email, setEmail] = useState('');
   const [isLoadingEmail, setIsLoadingEmail] = useState(true);
+  const [isSavingPassword, setIsSavingPassword] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [repeatPassword, setRepeatPassword] = useState('');
@@ -64,6 +84,61 @@ const SecurityScreen = () => {
       isActive = false;
     };
   }, [clerkUser?.primaryEmailAddress?.emailAddress, isLoaded, isSignedIn]);
+
+  const handleSavePassword = async () => {
+    const currentPasswordValue = currentPassword;
+    const newPasswordValue = newPassword;
+    const repeatPasswordValue = repeatPassword;
+
+    if (!isLoaded || !isSignedIn || !clerkUser) {
+      Alert.alert('Authentication required', 'Please sign in to update your password.');
+      return;
+    }
+
+    if (clerkUser.passwordEnabled && !currentPasswordValue) {
+      Alert.alert('Missing password', 'Please enter your current password.');
+      return;
+    }
+
+    if (!newPasswordValue || !repeatPasswordValue) {
+      Alert.alert('Missing password', 'Please enter and repeat your new password.');
+      return;
+    }
+
+    if (newPasswordValue.length < 8) {
+      Alert.alert('Weak password', 'Your new password must be at least 8 characters.');
+      return;
+    }
+
+    if (newPasswordValue !== repeatPasswordValue) {
+      Alert.alert('Passwords do not match', 'Please repeat the same new password.');
+      return;
+    }
+
+    if (currentPasswordValue && currentPasswordValue === newPasswordValue) {
+      Alert.alert('Same password', 'Please choose a different new password.');
+      return;
+    }
+
+    try {
+      setIsSavingPassword(true);
+      await clerkUser.updatePassword({
+        currentPassword: currentPasswordValue || undefined,
+        newPassword: newPasswordValue,
+        signOutOfOtherSessions: false,
+      });
+
+      setCurrentPassword('');
+      setNewPassword('');
+      setRepeatPassword('');
+      Alert.alert('Password updated', 'Your password was updated successfully.');
+    } catch (error) {
+      console.error('Failed to update password', error);
+      Alert.alert('Unable to update password', getClerkErrorMessage(error));
+    } finally {
+      setIsSavingPassword(false);
+    }
+  };
 
   return (
     <Container>
@@ -127,8 +202,18 @@ const SecurityScreen = () => {
                 accessibilityHint="Repeat the new password exactly as entered above"
               />
 
-              <SaveButton role="button" accessibilityLabel="Save password changes">
-                <SaveButtonText>Save changes</SaveButtonText>
+              <SaveButton
+                role="button"
+                accessibilityLabel="Save password changes"
+                disabled={isSavingPassword}
+                $disabled={isSavingPassword}
+                onPress={handleSavePassword}
+              >
+                {isSavingPassword ? (
+                  <ActivityIndicator color={Colors.white} />
+                ) : (
+                  <SaveButtonText>Save changes</SaveButtonText>
+                )}
               </SaveButton>
             </Section>
           </Content>
@@ -164,12 +249,13 @@ const SectionTitle = styled.Text`
   margin-bottom: ${Spacing.md}px;
 `;
 
-const SaveButton = styled.TouchableOpacity`
+const SaveButton = styled.TouchableOpacity<{ $disabled?: boolean }>`
   background-color: ${Colors.palette.primary.normal};
   border-radius: ${Spacing.md}px;
   padding: ${Spacing.md}px;
   align-items: center;
   margin-top: ${Spacing.md}px;
+  opacity: ${({ $disabled }) => ($disabled ? 0.6 : 1)};
 `;
 
 const SaveButtonText = styled.Text`

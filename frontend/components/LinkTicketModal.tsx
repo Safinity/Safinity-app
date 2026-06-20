@@ -32,7 +32,12 @@ export function LinkTicketModal({ visible, eventId, onClose, onLinked }: LinkTic
   }, [visible]);
 
   const handleCodeChange = (value: string) => {
-    setTicketCode(value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 6));
+    setTicketCode(
+      value
+        .replace(/[^a-zA-Z0-9]/g, '')
+        .toUpperCase()
+        .slice(0, 6),
+    );
     setError('');
     setSuccess('');
   };
@@ -163,7 +168,8 @@ const TicketCodeInput = styled(TextInput)`
 `;
 
 const FeedbackText = styled.Text<{ isError?: boolean }>`
-  color: ${({ isError, theme }) => (isError ? theme.colors.error : theme.colors.palette.secondary.turquoise)};
+  color: ${({ isError, theme }) =>
+    isError ? theme.colors.error : theme.colors.palette.secondary.turquoise};
   font-family: ${({ theme }) => theme.text.label.fontFamily};
   font-size: ${({ theme }) => theme.text.label.fontSize}px;
   line-height: ${({ theme }) => theme.text.label.lineHeight}px;

@@ -357,7 +357,7 @@ export class EventsService {
         u.id AS friend_id,
         u.name,
         u.username,
-        encode(u.image, 'base64') AS image,
+        u.image AS image,
         COALESCE(
           ST_Y(latest_location.location::geometry),
           ST_Y(u.location::geometry)

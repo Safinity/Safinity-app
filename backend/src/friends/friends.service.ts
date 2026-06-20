@@ -63,8 +63,10 @@ export class FriendsService {
     return parsed;
   }
 
-  private toBase64Image(image: Uint8Array | null) {
-    return image ? Buffer.from(image).toString('base64') : null;
+  private serializeUserImage(image: string | null) {
+    return image?.startsWith('http://') || image?.startsWith('https://')
+      ? image
+      : null;
   }
 
   private generateBigIntId() {
@@ -264,7 +266,7 @@ export class FriendsService {
         id: friendData.id,
         name: friendData.name || '',
         username: friendData.username || '',
-        image: this.toBase64Image(friendData.image),
+        image: this.serializeUserImage(friendData.image),
         isOnSameEvent: isAtSameEvent,
         friendshipState: ACCEPTED_STATE,
       };
@@ -389,7 +391,7 @@ export class FriendsService {
 
     return users.map((u) => ({
       ...u,
-      image: this.toBase64Image(u.image),
+      image: this.serializeUserImage(u.image),
       friendshipState: friendshipStateByUserId.get(u.id) ?? null,
     }));
   }
@@ -416,7 +418,7 @@ export class FriendsService {
         id: user.id,
         name: user.name || '',
         username: user.username || '',
-        image: this.toBase64Image(user.image),
+        image: this.serializeUserImage(user.image),
       },
     };
   }
@@ -474,7 +476,7 @@ export class FriendsService {
         id: friend.id,
         name: friend.name || '',
         username: friend.username || '',
-        image: this.toBase64Image(friend.image),
+        image: this.serializeUserImage(friend.image),
       },
     };
   }
@@ -526,7 +528,7 @@ export class FriendsService {
         id: friend.id,
         name: friend.name || '',
         username: friend.username || '',
-        image: this.toBase64Image(friend.image),
+        image: this.serializeUserImage(friend.image),
       },
     };
   }
@@ -631,7 +633,7 @@ export class FriendsService {
           id: sender.id,
           name: sender.name,
           username: sender.username,
-          image: this.toBase64Image(sender.image),
+          image: this.serializeUserImage(sender.image),
         },
       };
     });
@@ -671,7 +673,7 @@ export class FriendsService {
       id: friend.id,
       name: friend.name || '',
       username: friend.username || '',
-      image: this.toBase64Image(friend.image),
+      image: this.serializeUserImage(friend.image),
       friendshipState: friendship?.state ?? null,
       totalEventsCount: friend.user_tickets.length,
       commonEvents: commonEvents,

@@ -3,11 +3,11 @@ import { Ionicons } from '@expo/vector-icons';
 import Head from 'expo-router/head';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import styled from 'styled-components/native';
+import styled, { useTheme } from 'styled-components/native';
 
 import { CalendarCard } from '../../components/CalendarCard';
 import { useActivityFavourites } from '../../context/ActivityFavouritesContext';
-import { Colors, Spacing, TextStyles } from '../../constants/theme';
+import { Spacing, TextStyles } from '../../constants/theme';
 import { navigateToPreviousRoute } from '../../utils/navigationHistory';
 import api from '../../utils/api';
 import { useEventMode } from '../../context/EventModeContext';
@@ -67,6 +67,7 @@ function normalizeFavouriteActivity(activity: any) {
 }
 
 export default function MyCalendarScreen() {
+  const theme = useTheme(); // Aceder ao tema atual para pintar o ícone
   const { isLoaded, isSignedIn, getToken } = useAuth();
   const { activeEvent } = useEventMode();
   const getTokenRef = useRef(getToken);
@@ -178,7 +179,7 @@ export default function MyCalendarScreen() {
   return (
     <Container>
       <Head>
-        <title>Favourites activities | Safinity</title>
+        <title>My favourite actvities | Safinity</title>
       </Head>
 
       <ContentWrapper role="banner">
@@ -188,10 +189,11 @@ export default function MyCalendarScreen() {
           role="button"
           accessibilityLabel="Go back to calendar"
         >
-          <Ionicons name="arrow-back" size={26} color="white" />
+          {/* MUDANÇA: O ícone agora recebe dinamicamente a cor principal de texto do tema */}
+          <Ionicons name="arrow-back" size={26} color={theme.colors.text} />
         </BackButton>
 
-        <Title role="header">Favourites activities</Title>
+        <Title role="header">My favourite activities</Title>
       </ContentWrapper>
 
       <ScrollView
@@ -235,9 +237,11 @@ export default function MyCalendarScreen() {
   );
 }
 
+// --- MUDANÇAS: Substituição do objeto estático "Colors" pelo token dinâmico "${({ theme }) => theme.colors...}" ---
+
 const Container = styled.View`
   flex: 1;
-  background-color: ${Colors.background};
+  background-color: ${({ theme }) => theme.colors.background};
   padding-top: ${Spacing.margemTop}px;
 `;
 
@@ -250,7 +254,7 @@ const BackButton = styled.TouchableOpacity`
 `;
 
 const Title = styled.Text`
-  color: ${Colors.white};
+  color: ${({ theme }) => theme.colors.text};
   ${TextStyles.titulo.h};
   font-weight: bold;
   margin-bottom: ${Spacing.lg}px;
@@ -263,7 +267,7 @@ const CardsContainer = styled.View`
 `;
 
 const DateHeader = styled.Text`
-  color: ${Colors.white};
+  color: ${({ theme }) => theme.colors.inactive};
   font-family: ${TextStyles.corpo.corpoTexto.fontFamily};
   font-size: ${TextStyles.textoPequeno.fontSize}px;
   margin-top: ${Spacing.lg}px;
@@ -272,7 +276,7 @@ const DateHeader = styled.Text`
 `;
 
 const EmptyText = styled.Text`
-  color: ${Colors.white};
+  color: ${({ theme }) => theme.colors.textMuted};
   text-align: center;
   margin-top: ${Spacing.xxl}px;
   ${TextStyles.corpo.corpoTexto};

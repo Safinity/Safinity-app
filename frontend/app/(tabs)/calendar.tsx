@@ -10,11 +10,11 @@ import Header from '../../components/ui/header';
 import SearchInput from '../../components/ui/SearchInput';
 import FilterTags from '../../components/ui/FilterTags';
 import { CalendarCard } from '../../components/CalendarCard';
-import api from '../../utils/api'; // Reativado o teu cliente de API
+import api from '../../utils/api'; 
 import { useActivityFavourites } from '../../context/ActivityFavouritesContext';
 import { useEventMode } from '../../context/EventModeContext';
 
-// --- Imports estÃ¡ticos de imagens para o mapeamento local ---
+// --- Imports estáticos de imagens para o mapeamento local ---
 import img1 from '../../assets/images/Calendar/1.jpg';
 import img2 from '../../assets/images/Calendar/2.jpg';
 import img3 from '../../assets/images/Calendar/3.jpg';
@@ -131,8 +131,9 @@ const MyCalendarButton = styled.TouchableOpacity`
   z-index: 10;
 `;
 
+// CORREÇÃO: Alterado de theme.colors.white para a cor estática branca #FFFFFF
 const ButtonText = styled.Text`
-  color: ${({ theme }) => theme.colors.white};
+  color: #FFFFFF; 
   font-family: ${({ theme }) => theme.text.botao.fontFamily};
   font-size: ${({ theme }) => theme.text.botao.fontSize}px;
   line-height: 20px;
@@ -310,7 +311,6 @@ export default function CalendarScreen() {
           ? filteredActivities.map((item, index) => {
               let resolvedImage;
 
-              // Interceta strings locais ("1.jpg", etc) vindas da base de dados e injeta o import estÃ¡tico
               if (
                 item.image &&
                 (item.image.startsWith('http://') || item.image.startsWith('https://'))
@@ -319,7 +319,7 @@ export default function CalendarScreen() {
               } else if (localImages[item.image]) {
                 resolvedImage = localImages[item.image];
               } else {
-                resolvedImage = img1; // Fallback seguro caso falte a propriedade
+                resolvedImage = img1; 
               }
 
               const activityId = String(item.id);
@@ -353,7 +353,7 @@ export default function CalendarScreen() {
       </ScrollContent>
 
       <MyCalendarButton activeOpacity={0.8} onPress={() => router.push('/(tabs)/my-calendar')}>
-        <ButtonText>My Activities</ButtonText>
+        <ButtonText>My favourite activities</ButtonText>
       </MyCalendarButton>
     </Container>
   );

@@ -57,7 +57,7 @@ const NowAtText = styled.Text`
 `;
 
 const LiveEventName = styled.Text`
-  color: ${({ theme }) => theme.colors.primary_50 || '#C9A0E5'}; /* Nome do evento a roxo */
+  color: ${({ theme }) => theme.colors.primary_50 || '#000000'}; /* Nome do evento a roxo */
   font-family: ${({ theme }) => theme.text.titulo.h.fontFamily};
   font-size: ${({ theme }) => theme.text.titulo.h.fontSize}px;
   font-weight: bold;
@@ -240,14 +240,14 @@ export const HeroBanner = ({
 
             <InfoRow>
               <InfoItem>
-                <Ionicons name="time-outline" size={18} color="white" />
+                <Ionicons name="time-outline" size={18} color={theme.colors.mode === 'light' ? theme.colors.primary : theme.colors.white} />
                 <InfoText>
                   {event.date}, {event.startTime} - {event.endTime}
                 </InfoText>
               </InfoItem>
 
               <InfoItem>
-                <Ionicons name="location-outline" size={18} color="white" />
+                <Ionicons name="location-outline" size={18} color={theme.colors.mode === 'light' ? theme.colors.primary : theme.colors.white}/>
                 <InfoText>{event.location}</InfoText>
               </InfoItem>
             </InfoRow>

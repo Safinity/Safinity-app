@@ -1,5 +1,6 @@
 import React from 'react';
-import { Image, Platform, Pressable } from 'react-native';
+import { Image, Platform, Pressable, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { latLngToPixelFromBounds } from '../../utils/coordinates';
 import { PIN_ICONS } from './constants';
 
@@ -55,19 +56,40 @@ export const MapPin = ({
       />
 
       {/* Avatar on top of pin */}
-      {pin.type === 'friend' && avatar && (
-        <Image
-          source={avatar}
-          style={{
-            position: 'absolute',
-            top: 3, // adjust to place avatar at the top of pin
-            width: 22,
-            height: 22,
-            borderRadius: 11,
-            borderWidth: 1,
-            borderColor: 'white',
-          }}
-        />
+      {pin.type === 'friend' && (
+        <>
+          {avatar ? (
+            <Image
+              source={avatar}
+              style={{
+                position: 'absolute',
+                top: 3, // adjust to place avatar at the top of pin
+                width: 22,
+                height: 22,
+                borderRadius: 11,
+                borderWidth: 1,
+                borderColor: 'white',
+              }}
+            />
+          ) : (
+            <View
+              style={{
+                position: 'absolute',
+                top: 3,
+                width: 22,
+                height: 22,
+                borderRadius: 11,
+                borderWidth: 1,
+                borderColor: 'white',
+                backgroundColor: '#303a4a',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Ionicons name="person" size={14} color="#cfd3e0" />
+            </View>
+          )}
+        </>
       )}
     </Pressable>
   );

@@ -1,10 +1,22 @@
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import React from 'react';
-import { Platform, StatusBar } from 'react-native';
+import { useAuth } from '@clerk/expo';
+import { router, useFocusEffect } from 'expo-router';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  DeviceEventEmitter,
+  Platform,
+  StatusBar,
+  type ImageSourcePropType,
+} from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 
 import { useNotifications } from '@/context/NotificationsContext';
+import {
+  PROFILE_UPDATED_EVENT,
+  type ProfileUpdatedPayload,
+} from '@/utils/profileEvents';
+import { getMyProfile } from '@/utils/profile';
+import { getUserImageSource } from '@/utils/userImages';
 import { Colors, Spacing, Height, Width, BorderRadius, TextStyles } from '../../constants/theme';
 import { navigateToPreviousRoute } from '../../utils/navigationHistory';
 
@@ -12,12 +24,13 @@ export type HeaderVariant = 'default' | 'back' | 'pageDetails';
 
 interface HeaderProps {
   variant?: HeaderVariant;
-  colorScheme?: 'dark' | 'light';
+  colorScheme?: 'dark' | 'light'; // Mantido por compatibilidade, mas a lógica agora segue o forceDarkLogo
   showBottomDivider?: boolean;
   title?: string;
   subtitle?: string;
   rightIcon?: keyof typeof Ionicons.glyphMap;
   onRightPress?: () => void;
+  forceDarkLogo?: boolean; // Controla se a página força o aspeto escuro (Logótipo escuro + Ícones brancos)
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -28,11 +41,76 @@ const Header: React.FC<HeaderProps> = ({
   subtitle,
   rightIcon,
   onRightPress,
+  forceDarkLogo = false,
 }) => {
   const theme = useTheme();
   const statusBarHeight = Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 24;
   const { unreadCount } = useNotifications();
-  const iconColor = colorScheme === 'light' ? theme.colors.black : Colors.white;
+  const { isLoaded, isSignedIn, getToken } = useAuth();
+  const getTokenRef = useRef(getToken);
+  const [profileImageSource, setProfileImageSource] = useState<ImageSourcePropType | null>(null);
+
+  getTokenRef.current = getToken;
+
+  const loadProfileImage = useCallback(async () => {
+    if (variant !== 'default') return;
+
+    if (!isLoaded || !isSignedIn) {
+      setProfileImageSource(null);
+      return;
+    }
+
+    try {
+      const token = await getTokenRef.current({ skipCache: true });
+      const profile = await getMyProfile(token);
+
+      setProfileImageSource(getUserImageSource(profile.image));
+    } catch {
+      setProfileImageSource(null);
+    }
+  }, [isLoaded, isSignedIn, variant]);
+
+  useEffect(() => {
+    void loadProfileImage();
+  }, [loadProfileImage]);
+
+  useFocusEffect(
+    useCallback(() => {
+      void loadProfileImage();
+    }, [loadProfileImage]),
+  );
+
+  useEffect(() => {
+    const subscription = DeviceEventEmitter.addListener(
+      PROFILE_UPDATED_EVENT,
+      (payload?: ProfileUpdatedPayload) => {
+        if (payload && 'image' in payload) {
+          setProfileImageSource(getUserImageSource(payload.image));
+          return;
+        }
+
+        void loadProfileImage();
+      },
+    );
+
+    return () => {
+      subscription.remove();
+    };
+  }, [loadProfileImage]);
+
+  // REGRA DA MUDANÇA:
+  // Determina se o cabeçalho deve usar a aparência escura (seja pelo sistema ou forçado por esta página)
+  const isDarkMode = theme.colors.mode === 'dark';
+  const useDarkAppearance = isDarkMode || forceDarkLogo;
+
+  // 1. Lógica do Logótipo (Igual à anterior)
+  const logoSource = useDarkAppearance
+    ? require('../../assets/logos/logo-header.png')       // Imagem para fundo escuro
+    : require('../../assets/logos/logo-header-light.png'); // Imagem para fundo claro
+
+  // 2. Lógica dos Ícones baseada na mesma regra
+  // Se for aparência escura, o ícone deve ser BRANCO. Se for aparência clara, o ícone deve ser PRETO.
+  const iconColor = useDarkAppearance ? Colors.white : theme.colors.black;
 
   const hasText = Boolean(title || subtitle);
 
@@ -46,7 +124,7 @@ const Header: React.FC<HeaderProps> = ({
           <HeaderRow>
             <LogoContainer>
               <LogoImage
-                source={require('../../assets/logos/logo-header.png')}
+                source={logoSource}
                 resizeMode="contain"
               />
             </LogoContainer>
@@ -57,7 +135,11 @@ const Header: React.FC<HeaderProps> = ({
                 role="button"
                 accessibilityLabel="Notifications"
               >
-                <Ionicons name="notifications-outline" size={Width.iconHeader} color={iconColor} />
+                <Ionicons
+                  name="notifications-outline"
+                  size={Width.iconHeader}
+                  color={iconColor} // <-- Atualizado dinamicamente
+                />
                 {unreadCount > 0 && (
                   <NotificationBadge>
                     <NotificationBadgeText>
@@ -72,7 +154,18 @@ const Header: React.FC<HeaderProps> = ({
                 role="button"
                 accessibilityLabel="Profile"
               >
-                <Ionicons name="person-circle" size={Width.iconHeader} color={iconColor} />
+                {profileImageSource ? (
+                  <ProfileAvatar
+                    source={profileImageSource}
+                    accessibilityLabel="Profile picture"
+                  />
+                ) : (
+                  <Ionicons 
+                    name="person-circle" 
+                    size={Width.iconHeader} 
+                    color={iconColor} // <-- Atualizado dinamicamente
+                  />
+                )}
               </IconButton>
             </IconRow>
           </HeaderRow>
@@ -200,6 +293,13 @@ const IconRow = styled.View`
 
 const IconButton = styled.Pressable`
   position: relative;
+`;
+
+const ProfileAvatar = styled.Image`
+  width: ${Width.iconHeader}px;
+  height: ${Width.iconHeader}px;
+  border-radius: ${Width.iconHeader / 2}px;
+  background-color: ${({ theme }) => theme.colors.surfaceSoft};
 `;
 
 const NotificationBadge = styled.View`

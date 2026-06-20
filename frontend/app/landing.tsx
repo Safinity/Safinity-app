@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { router, Stack } from 'expo-router';
-import styled from 'styled-components/native';
+import styled, { useTheme } from 'styled-components/native';
 import { ImageBackground, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { StaticImages } from '../assets/images/landing';
@@ -55,6 +55,7 @@ function getSocialEmail(signUp: any) {
 }
 
 export default function Landing() {
+  const theme = useTheme(); // Injetado para gerir as cores dinâmicas dos ícones
   const { isLoaded, isSignedIn, getToken } = useAuth();
   const clerk = useClerk();
   const { startSSOFlow } = useSSO();
@@ -288,8 +289,9 @@ export default function Landing() {
           }}
           onPress={handleGoogleLogin}
         >
-          <Ionicons name="logo-google" size={Width.iconSocial} color="#fff" />
-          <GoogleButtonText>
+          {/* Alteração: Cor do ícone passa a usar o texto do tema (preto no dark, ajustável no light) */}
+          <Ionicons name="logo-google" size={Width.iconSocial} color={theme.colors.text} />
+          <GoogleButtonText color={theme.colors.text}>
             {activeSocialProvider === 'Google' ? 'Connecting...' : 'Continue with Google'}
           </GoogleButtonText>
         </GoogleButton>
@@ -307,8 +309,8 @@ export default function Landing() {
             }}
             onPress={handleAppleLogin}
           >
-            <Ionicons name="logo-apple" size={Width.iconSocialLarge} color="#fff" />
-            <GoogleButtonText>
+            <Ionicons name="logo-apple" size={Width.iconSocialLarge} color={theme.colors.text} />
+            <GoogleButtonText color={theme.colors.text}>
               {activeSocialProvider === 'Apple' ? 'Connecting...' : 'Continue with Apple'}
             </GoogleButtonText>
           </GoogleButton>
@@ -375,14 +377,16 @@ const GoogleButton = styled.TouchableOpacity<{ $disabled: boolean }>`
   justify-content: center;
   gap: ${({ theme }) => theme.spacing.sm}px;
   border-radius: ${({ theme }) => theme.borderRadius.medium}px;
-  background-color: ${({ theme }) => theme.colors.grayNavbar};
+  /* Alteração: background-color agora puxa a cor clara vinda do wrapper ou text inverso se necessário */
+  background-color: ${({ theme }) => theme.colors.white};
   border-width: ${Height.separatorLine}px;
   border-color: ${({ theme }) => theme.colors.palette.primary.light80};
   opacity: ${(props: { $disabled: boolean }) => (props.$disabled ? 0.65 : 1)};
 `;
 
-const GoogleButtonText = styled.Text`
-  color: ${({ theme }) => theme.colors.white};
+{/* Alteração: Aceita propriedade dinâmica color para alternar de acordo com o tema */}
+const GoogleButtonText = styled.Text<{ color: string }>`
+  color: ${props => props.color};
   font-weight: 700;
   ${({ theme }) => theme.text.corpo.corpoTexto};
 `;

@@ -4,7 +4,6 @@ import { ActivityIndicator, Alert, RefreshControl, TouchableOpacity } from 'reac
 import { router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Head from 'expo-router/head';
-import { userImages } from '../../assets/images/Users/userImages';
 import Header from '@/components/ui/header';
 import FindFriendButton from '@/components/FindFriendButton';
 import PingFriend from '@/components/VibrateButton';
@@ -25,14 +24,6 @@ const emptyFriends: FriendsGroupedResponse = {
   onSameEvent: [],
   otherFriends: [],
 };
-
-function getAvatarSource(friend: FriendListItem) {
-  const remoteImage = getUserImageSource(friend.image);
-
-  if (remoteImage) return remoteImage;
-
-  return userImages.default;
-}
 
 export default function FriendsScreen() {
   const { isLoaded, isSignedIn, getToken } = useAuth();
@@ -139,55 +130,65 @@ export default function FriendsScreen() {
     ? friends.otherFriends
     : [...friends.onSameEvent, ...friends.otherFriends];
 
-  const renderFriend = (friend: FriendListItem, action: 'event' | 'remove') => (
-    <TouchableOpacity
-      key={friend.id}
-      onPress={() => router.push(`/friends/${friend.id}`)}
-      accessible={true}
-      role="button"
-      accessibilityLabel={`${friend.name}, username ${friend.username}. Tap to view profile.`}
-    >
-      <FriendRow>
-        <Avatar
-          source={getAvatarSource(friend)}
-          role="image"
-          accessibilityLabel={`Profile picture of ${friend.name}`}
-        />
-        <Info>
-          <Name>{friend.name}</Name>
-          <Username>@{friend.username}</Username>
-        </Info>
-        <Buttons>
-          {action === 'event' ? (
-            <>
-              <PingFriend
-                onPress={() => handleBuzzFriend(friend)}
-                disabled={buzzingFriendId === friend.id}
-                role="button"
-                accessibilityLabel={`Buzz ${friend.name}`}
-                accessibilityHint={`Send a buzz to ${friend.name}`}
-              />
-              <FindFriendButton
-                onPress={() => router.push({ pathname: '/map', params: { focusId: friend.id } })}
-                role="button"
-                accessibilityLabel={`Locate ${friend.name} on the map`}
-                accessibilityHint="Shows the location of the friend on the map"
-              />
-            </>
-          ) : (
-            <FriendActionButton
-              variant="remove"
-              onPress={() => handleRemoveFriend(friend)}
-              disabled={removingFriendId === friend.id}
-              role="button"
-              accessibilityLabel={`Remove ${friend.name}`}
-              accessibilityHint="Remove this friend from your list"
+  const renderFriend = (friend: FriendListItem, action: 'event' | 'remove') => {
+    const avatarSource = getUserImageSource(friend.image);
+
+    return (
+      <TouchableOpacity
+        key={friend.id}
+        onPress={() => router.push(`/friends/${friend.id}`)}
+        accessible={true}
+        role="button"
+        accessibilityLabel={`${friend.name}, username ${friend.username}. Tap to view profile.`}
+      >
+        <FriendRow>
+          {avatarSource ? (
+            <Avatar
+              source={avatarSource}
+              role="image"
+              accessibilityLabel={`Profile picture of ${friend.name}`}
             />
+          ) : (
+            <AvatarIcon role="image" accessibilityLabel={`Default profile icon of ${friend.name}`}>
+              <Ionicons name="person" size={28} color="#cfd3e0" />
+            </AvatarIcon>
           )}
-        </Buttons>
-      </FriendRow>
-    </TouchableOpacity>
-  );
+          <Info>
+            <Name>{friend.name}</Name>
+            <Username>@{friend.username}</Username>
+          </Info>
+          <Buttons>
+            {action === 'event' ? (
+              <>
+                <PingFriend
+                  onPress={() => handleBuzzFriend(friend)}
+                  disabled={buzzingFriendId === friend.id}
+                  role="button"
+                  accessibilityLabel={`Buzz ${friend.name}`}
+                  accessibilityHint={`Send a buzz to ${friend.name}`}
+                />
+                <FindFriendButton
+                  onPress={() => router.push({ pathname: '/map', params: { focusId: friend.id } })}
+                  role="button"
+                  accessibilityLabel={`Locate ${friend.name} on the map`}
+                  accessibilityHint="Shows the location of the friend on the map"
+                />
+              </>
+            ) : (
+              <FriendActionButton
+                variant="remove"
+                onPress={() => handleRemoveFriend(friend)}
+                disabled={removingFriendId === friend.id}
+                role="button"
+                accessibilityLabel={`Remove ${friend.name}`}
+                accessibilityHint="Remove this friend from your list"
+              />
+            )}
+          </Buttons>
+        </FriendRow>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <Container>
@@ -332,6 +333,15 @@ const Avatar = styled.Image`
   height: ${({ theme }) => theme.height.sm}px;
   border-radius: ${({ theme }) => theme.borderRadius.round}px;
   background-color: ${({ theme }) => theme.colors.neutralGray};
+`;
+
+const AvatarIcon = styled.View`
+  width: ${({ theme }) => theme.height.sm}px;
+  height: ${({ theme }) => theme.height.sm}px;
+  border-radius: ${({ theme }) => theme.borderRadius.round}px;
+  background-color: ${({ theme }) => theme.colors.surfaceSoft};
+  align-items: center;
+  justify-content: center;
 `;
 
 const Info = styled.View`

@@ -296,6 +296,16 @@ const getRouteParam = (value?: string | string[]) => {
   return Array.isArray(value) ? value[0] : value;
 };
 
+const TopFadeImage = styled.Image`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 399px;
+  z-index: 40;
+`;
+
 export default function MapScreen() {
   const theme = useTheme();
   const { themeMode } = useThemePreference();
@@ -767,6 +777,12 @@ export default function MapScreen() {
           </Animated.View>
         </MapViewport>
       </GestureDetector>
+
+      <TopFadeImage
+        source={require('../../assets/images/degrade-mapa.png')}
+        resizeMode="stretch"
+        pointerEvents="none"
+      />
 
       <Header />
 

@@ -9,6 +9,7 @@ import { theme } from '../constants/theme';
 import { NotificationsProvider } from '@/context/NotificationsContext';
 import { UserProvider } from '@/context/UserContext';
 import { ActivityFavouritesProvider } from '@/context/ActivityFavouritesContext';
+import { EventModeProvider } from '@/context/EventModeContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { NavigationHistoryTracker } from '@/components/NavigationHistoryTracker';
 
@@ -49,23 +50,25 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
         <UserProvider>
-          <ActivityFavouritesProvider>
-            <NotificationsProvider>
-              <ThemeProvider theme={theme}>
-                <Container>
-                  <NavigationHistoryTracker />
-                  <Stack
-                    screenOptions={{
-                      headerShown: false,
-                      animation: 'slide_from_right',
-                      animationTypeForReplace: 'pop',
-                    }}
-                  />
-                </Container>
-                <StatusBar style="light" />
-              </ThemeProvider>
-            </NotificationsProvider>
-          </ActivityFavouritesProvider>
+          <EventModeProvider>
+            <ActivityFavouritesProvider>
+              <NotificationsProvider>
+                <ThemeProvider theme={theme}>
+                  <Container>
+                    <NavigationHistoryTracker />
+                    <Stack
+                      screenOptions={{
+                        headerShown: false,
+                        animation: 'slide_from_right',
+                        animationTypeForReplace: 'pop',
+                      }}
+                    />
+                  </Container>
+                  <StatusBar style="light" />
+                </ThemeProvider>
+              </NotificationsProvider>
+            </ActivityFavouritesProvider>
+          </EventModeProvider>
         </UserProvider>
       </ClerkProvider>
     </GestureHandlerRootView>

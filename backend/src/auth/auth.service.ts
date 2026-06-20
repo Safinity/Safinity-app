@@ -34,6 +34,21 @@ function isClerkRateLimitError(error: unknown): boolean {
   return maybeError.status === 429 || maybeError.code === 'api_response_error';
 }
 
+function normalizeUsername(value: string | null) {
+  if (!value) {
+    return null;
+  }
+
+  const normalized = value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, 32);
+
+  return normalized || null;
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -45,20 +60,61 @@ export class AuthService {
     return image ? Buffer.from(image).toString('base64') : null;
   }
 
+  private async getAvailableUsername(
+    preferredUsername: string | null,
+    email: string | null,
+    clerkUserId: string,
+  ) {
+    const fallbackUsername = `user_${clerkUserId.replace(/[^a-z0-9]/gi, '').slice(-12)}`;
+    const baseUsername =
+      normalizeUsername(email?.split('@')[0] ?? null) ??
+      normalizeUsername(preferredUsername) ??
+      fallbackUsername;
+
+    for (let attempt = 0; attempt < 10; attempt += 1) {
+      const suffix = attempt === 0 ? '' : `_${attempt + 1}`;
+      const username = `${baseUsername.slice(0, 32 - suffix.length)}${suffix}`;
+      const existingUser = await this.prisma.users.findUnique({
+        where: { username },
+        select: { id: true },
+      });
+
+      if (!existingUser) {
+        return username;
+      }
+    }
+
+    return fallbackUsername.slice(0, 32);
+  }
+
   /**
    * Development helper:
    * Ensures a Clerk user exists in your DB.
    * Clerk is the source of truth for identity.
    */
   async findOrCreateUser(clerkUserId: string) {
+    console.log(
+      `\n[BACKEND] 🔄 findOrCreateUser acionado para o Clerk ID: "${clerkUserId}"`,
+    );
+
     // First, check if user exists in DB
+    console.log(
+      '[BACKEND] 🔍 Executando SELECT no PostgreSQL para verificar existência...',
+    );
     const [existingUser] = await this.prisma.$queryRaw<
       Array<{ id: string }>
     >`SELECT "id" FROM public.users WHERE clerk_id = ${clerkUserId} LIMIT 1`;
 
     if (existingUser) {
+      console.log(
+        `[BACKEND] 🎉 Utilizador já registado localmente. ID Prisma: ${existingUser.id}`,
+      );
       return this.getSelfProfile(existingUser.id);
     }
+
+    console.log(
+      '[BACKEND] 🆕 Utilizador em falta na BD local. Solicitando dados à API do Clerk...',
+    );
 
     // User doesn't exist, fetch from Clerk to sync
     try {
@@ -73,17 +129,33 @@ export class AuthService {
         clerkUser.fullName ||
         null;
 
+      console.log(
+        `[BACKEND] 📝 Executando INSERT Raw na tabela public.users (Name: "${name}", Email: "${email}")`,
+      );
+
       // Create new user
       const [createdUser] = await this.prisma.$queryRaw<Array<{ id: string }>>`
         INSERT INTO public.users (clerk_id, email, username, name, role, password_hash)
         VALUES (${clerkUserId}, ${email}, ${username}, ${name}, 'user', '')
+        ON CONFLICT (clerk_id) DO UPDATE SET
+          email = COALESCE(public.users.email, EXCLUDED.email),
+          username = COALESCE(public.users.username, EXCLUDED.username),
+          name = COALESCE(public.users.name, EXCLUDED.name)
         RETURNING "id"
       `;
 
+      console.log(
+        `[BACKEND] ✅ Utilizador inserido com sucesso via SQL Raw! Novo ID: ${createdUser.id}`,
+      );
       return this.getSelfProfile(createdUser.id);
     } catch (error: unknown) {
+      console.log('❌ [BACKEND ERRO] O pipeline de criação falhou:', error);
+
       // If Clerk API is rate-limited or unavailable, create a stub user
       if (isClerkRateLimitError(error)) {
+        console.log(
+          '[BACKEND] ⚠️ Clerk API Rate Limited. Criando utilizador Stub...',
+        );
         const [createdUser] = await this.prisma.$queryRaw<
           Array<{ id: string }>
         >`
@@ -154,6 +226,9 @@ export class AuthService {
    * This now expects Clerk ID, NOT Prisma ID
    */
   async getAuthenticatedProfile(clerkId: string): Promise<SelfProfileUser> {
+    console.log(
+      `[BACKEND] 🔑 Rota /auth/me intercetada para o Clerk ID: ${clerkId}`,
+    );
     const user = await this.findOrCreateUser(clerkId);
 
     return this.getSelfProfile(user.id);

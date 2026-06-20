@@ -18,6 +18,11 @@ type UpdateLocationInput = {
   lng?: number;
 };
 
+type PushTokenInput = {
+  token?: string;
+  platform?: string;
+};
+
 type UserProfile = {
   id: string;
   name: string | null;
@@ -77,6 +82,23 @@ export class UsersService {
     }
 
     return parsed;
+  }
+
+  private async ensurePushTokensTable() {
+    await this.prisma.$executeRaw(Prisma.sql`
+      CREATE TABLE IF NOT EXISTS public.user_push_tokens (
+        id bigserial PRIMARY KEY,
+        user_id uuid NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+        token text NOT NULL UNIQUE,
+        platform varchar(32),
+        updated_at timestamp NOT NULL DEFAULT now()
+      )
+    `);
+
+    await this.prisma.$executeRaw(Prisma.sql`
+      CREATE INDEX IF NOT EXISTS idx_user_push_tokens_user_id
+      ON public.user_push_tokens(user_id)
+    `);
   }
 
   private async resolveProfileMode(
@@ -238,5 +260,40 @@ export class UsersService {
     `);
 
     return this.serialize(location);
+  }
+
+  async registerPushToken(userId: string, body: PushTokenInput) {
+    const token = body.token?.trim();
+
+    if (
+      !token ||
+      (!token.startsWith('ExpoPushToken[') &&
+        !token.startsWith('ExponentPushToken['))
+    ) {
+      throw new BadRequestException('A valid Expo push token is required');
+    }
+
+    const user = await this.prisma.users.findUnique({
+      where: { id: userId },
+      select: { id: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Authenticated user not found');
+    }
+
+    await this.ensurePushTokensTable();
+
+    await this.prisma.$executeRaw(Prisma.sql`
+      INSERT INTO public.user_push_tokens (user_id, token, platform, updated_at)
+      VALUES (${userId}::uuid, ${token}, ${body.platform ?? null}, now())
+      ON CONFLICT (token)
+      DO UPDATE SET
+        user_id = EXCLUDED.user_id,
+        platform = EXCLUDED.platform,
+        updated_at = now()
+    `);
+
+    return { registered: true };
   }
 }

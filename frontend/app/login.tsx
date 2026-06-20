@@ -3,17 +3,56 @@ import styled from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
 import { router, Stack } from 'expo-router';
 import Head from 'expo-router/head';
-import { useAuth, useClerk, useSignIn } from '@clerk/expo';
+import * as WebBrowser from 'expo-web-browser';
+import { useAuth, useClerk, useSignIn, useSSO } from '@clerk/expo';
+import { useSignInWithApple } from '@clerk/expo/apple';
+import { Platform } from 'react-native';
 
 import InputField from '@/components/InputField';
 import PrimaryButton from '@/components/PrimaryButton';
 import Header from '@/components/ui/header';
 import { getMyProfile } from '@/utils/profile';
+import { Height, Spacing, Width } from '@/constants/theme';
+
+WebBrowser.maybeCompleteAuthSession();
 
 function wait(ms: number) {
   return new Promise(resolve => {
     setTimeout(resolve, ms);
   });
+}
+
+type SocialProvider = 'Google' | 'Apple';
+
+type SocialAuthResult = {
+  createdSessionId?: string | null;
+  authSessionResult?: { type?: string } | null;
+  setActive?: (params: { session: string }) => Promise<void>;
+  signIn?: any;
+  signUp?: any;
+};
+
+function normalizeUsername(value?: string | null) {
+  const normalized = value
+    ?.toLowerCase()
+    .replace(/[^a-z0-9_]/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_|_$/g, '');
+
+  return normalized || undefined;
+}
+
+function getSocialSessionId(result: SocialAuthResult) {
+  return (
+    result.createdSessionId ||
+    result.signUp?.createdSessionId ||
+    result.signIn?.createdSessionId ||
+    null
+  );
+}
+
+function getSocialEmail(signUp: any) {
+  return signUp?.emailAddress || signUp?.externalAccount?.emailAddress || null;
 }
 
 export default function Login() {
@@ -22,6 +61,8 @@ export default function Login() {
   const { signOut } = clerk;
   // REMOVIDO: o setActive daqui, pois vamos usar o clerk.setActive que é 100% fiável
   const { signIn } = useSignIn();
+  const { startSSOFlow } = useSSO();
+  const { startAppleAuthenticationFlow } = useSignInWithApple();
   const getTokenRef = useRef(getToken);
   const signOutRef = useRef(signOut);
 
@@ -34,8 +75,13 @@ export default function Login() {
   >(null);
   const [secondFactorHint, setSecondFactorHint] = useState('');
   const [isCompletingLogin, setIsCompletingLogin] = useState(false);
+  const [activeSocialProvider, setActiveSocialProvider] = useState<SocialProvider | null>(null);
   const [error, setError] = useState('');
   const isSyncingProfileRef = useRef(false);
+
+  const isSocialLoading = activeSocialProvider !== null;
+  const isAppleSignInEnabled = process.env.EXPO_PUBLIC_ENABLE_APPLE_SIGN_IN === 'true';
+  const canUseAppleSignIn = Platform.OS === 'ios' && isAppleSignInEnabled;
 
   getTokenRef.current = getToken;
   signOutRef.current = signOut;
@@ -82,11 +128,11 @@ export default function Login() {
 
   async function syncProfileWithBackend() {
     let lastError: unknown = null;
-    await wait(400);
+    await wait(500);
 
-    for (let attempt = 0; attempt < 4; attempt += 1) {
+    for (let attempt = 0; attempt < 8; attempt += 1) {
       try {
-        const token = await getTokenRef.current();
+        const token = await getTokenRef.current({ skipCache: true });
 
         if (token) {
           await getMyProfile(token);
@@ -96,7 +142,7 @@ export default function Login() {
         console.warn('[Clerk-Auth] Falha temporária na API de perfil:', syncError);
         lastError = syncError;
       }
-      await wait(500);
+      await wait(650);
     }
     throw lastError || new Error('Unable to sync authenticated profile');
   }
@@ -115,14 +161,17 @@ export default function Login() {
     }
 
     setIsCompletingLogin(true);
+    isSyncingProfileRef.current = true;
 
     try {
       await clerk.setActive({ session: createdSessionId });
+      await syncProfileWithBackend();
 
       router.replace('/(tabs)');
       return true;
     } catch (syncError: any) {
       console.error('[Clerk-Auth] Erro crítico ao rodar o clerk.setActive:', syncError);
+      isSyncingProfileRef.current = false;
       setIsCompletingLogin(false);
       setError(syncError?.message || 'Erro ao ativar a sessão.');
       return false;
@@ -298,6 +347,163 @@ export default function Login() {
     }
   }
 
+  async function completeSocialSignUpIfNeeded(result: SocialAuthResult) {
+    const signUp = result.signUp;
+    const missingFields = signUp?.missingFields ?? [];
+
+    if (!signUp || signUp.createdSessionId || !missingFields.length) {
+      return result;
+    }
+
+    const email = getSocialEmail(signUp);
+    const emailUsername = normalizeUsername(email?.split('@')[0]);
+    const updatePayload: Record<string, string> = {};
+
+    if (missingFields.includes('username') && !signUp.username && emailUsername) {
+      updatePayload.username = emailUsername;
+    }
+
+    if (missingFields.includes('first_name') && !signUp.firstName) {
+      updatePayload.firstName = emailUsername || 'Safinity';
+    }
+
+    if (missingFields.includes('last_name') && !signUp.lastName) {
+      updatePayload.lastName = 'User';
+    }
+
+    if (!Object.keys(updatePayload).length || typeof signUp.update !== 'function') {
+      return result;
+    }
+
+    const updatedSignUp = await signUp.update(updatePayload);
+    return { ...result, signUp: updatedSignUp };
+  }
+
+  function getMissingSocialSessionMessage(provider: SocialProvider, result: SocialAuthResult) {
+    if (result.authSessionResult?.type && result.authSessionResult.type !== 'success') {
+      return `${provider} sign in was cancelled.`;
+    }
+
+    const signUpMissingFields = result.signUp?.missingFields?.join(', ');
+    const clerkStatus = [
+      result.signIn?.status ? `signIn: ${result.signIn.status}` : null,
+      result.signUp?.status ? `signUp: ${result.signUp.status}` : null,
+      signUpMissingFields ? `missing: ${signUpMissingFields}` : null,
+    ]
+      .filter(Boolean)
+      .join(', ');
+
+    return `${provider} sign in did not return a session${clerkStatus ? ` (${clerkStatus})` : ''}.`;
+  }
+
+  async function activateSocialSession(provider: SocialProvider, authResult: SocialAuthResult) {
+    const completedResult = await completeSocialSignUpIfNeeded(authResult);
+    const createdSessionId = getSocialSessionId(completedResult);
+    const activateSession =
+      completedResult.setActive ||
+      (clerk?.setActive ? (params: { session: string }) => clerk.setActive(params) : undefined);
+
+    if (!createdSessionId) {
+      console.warn('[Clerk-Auth] Social login finished without session:', {
+        provider,
+        authSessionType: completedResult.authSessionResult?.type,
+        signInStatus: completedResult.signIn?.status,
+        signUpStatus: completedResult.signUp?.status,
+        signUpMissingFields: completedResult.signUp?.missingFields,
+      });
+      setError(getMissingSocialSessionMessage(provider, completedResult));
+      isSyncingProfileRef.current = false;
+      setActiveSocialProvider(null);
+      setIsCompletingLogin(false);
+      return;
+    }
+
+    if (!activateSession) {
+      throw new Error(`Unable to activate ${provider} session. Please try again.`);
+    }
+
+    await activateSession({ session: createdSessionId });
+    await syncProfileWithBackend();
+    router.replace('/(tabs)');
+  }
+
+  function startSocialLoading(provider: SocialProvider) {
+    if (!isLoaded) {
+      setError('Authentication is still loading. Please try again.');
+      return false;
+    }
+
+    setError('');
+    setVerificationCode('');
+    setPendingSignIn(null);
+    setSecondFactorStrategy(null);
+    setSecondFactorHint('');
+    setActiveSocialProvider(provider);
+    setIsCompletingLogin(true);
+    isSyncingProfileRef.current = true;
+    return true;
+  }
+
+  function stopSocialLoading() {
+    isSyncingProfileRef.current = false;
+    setActiveSocialProvider(null);
+    setIsCompletingLogin(false);
+  }
+
+  async function handleGoogleLogin() {
+    if (!startSocialLoading('Google')) {
+      return;
+    }
+
+    try {
+      const authResult = await startSSOFlow({
+        strategy: 'oauth_google',
+      });
+
+      await activateSocialSession('Google', authResult);
+    } catch (err: any) {
+      console.error('[Clerk-Auth] Google login failed:', err);
+      setError(
+        err.errors?.[0]?.message ||
+          err.message ||
+          'Unable to sign in with Google. Please try again.',
+      );
+      stopSocialLoading();
+    }
+  }
+
+  async function handleAppleLogin() {
+    if (!isAppleSignInEnabled) {
+      setError('Apple sign in is not enabled for this app environment.');
+      return;
+    }
+
+    if (!canUseAppleSignIn) {
+      setError('Apple sign in is only available on iOS.');
+      return;
+    }
+
+    if (!startSocialLoading('Apple')) {
+      return;
+    }
+
+    try {
+      const authResult = await startAppleAuthenticationFlow();
+      await activateSocialSession('Apple', authResult);
+    } catch (err: any) {
+      console.error('[Clerk-Auth] Apple login failed:', err);
+      const clerkMessage = err.errors?.[0]?.message || err.message;
+      const isAppleStrategyDisabled = clerkMessage?.includes('oauth_token_apple');
+
+      setError(
+        isAppleStrategyDisabled
+          ? 'Apple sign in is not enabled in Clerk for this environment.'
+          : clerkMessage || 'Unable to sign in with Apple. Please try again.',
+      );
+      stopSocialLoading();
+    }
+  }
+
   async function handleVerifySecondFactor() {
     setError('');
 
@@ -392,7 +598,12 @@ export default function Login() {
             role="alert"
             accessibilityLabel={`Error: ${error}`}
           >
-            <Ionicons name="alert-circle" size={18} color="#ff5252" style={{ marginRight: 8 }} />
+            <Ionicons
+              name="alert-circle"
+              size={Width.iconAlert}
+              color="#ff5252"
+              style={{ marginRight: Spacing.sm }}
+            />
             <ErrorText>{error}</ErrorText>
           </ErrorArea>
         ) : null}
@@ -404,11 +615,62 @@ export default function Login() {
           }
           disabled={
             isCompletingLogin ||
+            isSocialLoading ||
             !isLoaded ||
             (pendingSignIn ? verificationCode === '' : email === '' || password === '')
           }
           onPress={pendingSignIn ? handleVerifySecondFactor : handleLogin}
         />
+
+        {!pendingSignIn ? (
+          <>
+            <SeparatorRow>
+              <SeparatorLine />
+              <SeparatorText>or</SeparatorText>
+              <SeparatorLine />
+            </SeparatorRow>
+
+            <SocialButtonsGroup>
+              <GoogleButton
+                activeOpacity={0.85}
+                $disabled={isCompletingLogin || isSocialLoading || !isLoaded}
+                disabled={isCompletingLogin || isSocialLoading || !isLoaded}
+                accessibilityRole="button"
+                accessibilityLabel="Continue with Google"
+                accessibilityState={{
+                  disabled: isCompletingLogin || isSocialLoading || !isLoaded,
+                  busy: activeSocialProvider === 'Google',
+                }}
+                onPress={handleGoogleLogin}
+              >
+                <Ionicons name="logo-google" size={Width.iconSocial} color="#fff" />
+                <GoogleButtonText>
+                  {activeSocialProvider === 'Google' ? 'Connecting...' : 'Continue with Google'}
+                </GoogleButtonText>
+              </GoogleButton>
+
+              {canUseAppleSignIn ? (
+                <GoogleButton
+                  activeOpacity={0.85}
+                  $disabled={isCompletingLogin || isSocialLoading || !isLoaded}
+                  disabled={isCompletingLogin || isSocialLoading || !isLoaded}
+                  accessibilityRole="button"
+                  accessibilityLabel="Continue with Apple"
+                  accessibilityState={{
+                    disabled: isCompletingLogin || isSocialLoading || !isLoaded,
+                    busy: activeSocialProvider === 'Apple',
+                  }}
+                  onPress={handleAppleLogin}
+                >
+                  <Ionicons name="logo-apple" size={Width.iconSocialLarge} color="#fff" />
+                  <GoogleButtonText>
+                    {activeSocialProvider === 'Apple' ? 'Connecting...' : 'Continue with Apple'}
+                  </GoogleButtonText>
+                </GoogleButton>
+              ) : null}
+            </SocialButtonsGroup>
+          </>
+        ) : null}
 
         {pendingSignIn ? (
           <RowWithLink>
@@ -500,5 +762,47 @@ const ErrorText = styled.Text`
   color: ${({ theme }) => theme.colors.error};
   text-align: center;
   font-weight: bold;
+  ${({ theme }) => theme.text.corpo.corpoTexto};
+`;
+
+const SeparatorRow = styled.View`
+  flex-direction: row;
+  align-items: center;
+  margin-top: ${({ theme }) => theme.spacing.lg}px;
+  margin-bottom: ${({ theme }) => theme.spacing.md}px;
+`;
+
+const SeparatorLine = styled.View`
+  flex: 1;
+  height: ${Height.separatorLine}px;
+  background-color: ${({ theme }) => theme.colors.grayNavbar};
+`;
+
+const SeparatorText = styled.Text`
+  margin-horizontal: ${({ theme }) => theme.spacing.md}px;
+  color: ${({ theme }) => theme.colors.inactive};
+  ${({ theme }) => theme.text.textoPequeno};
+`;
+
+const SocialButtonsGroup = styled.View`
+  gap: ${({ theme }) => theme.spacing.md}px;
+`;
+
+const GoogleButton = styled.TouchableOpacity<{ $disabled: boolean }>`
+  height: ${Height.socialButton}px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: ${({ theme }) => theme.spacing.sm}px;
+  border-radius: ${({ theme }) => theme.borderRadius.medium}px;
+  background-color: ${({ theme }) => theme.colors.grayNavbar};
+  border-width: ${Height.separatorLine}px;
+  border-color: ${({ theme }) => theme.colors.palette.primary.light80};
+  opacity: ${(props: { $disabled: boolean }) => (props.$disabled ? 0.65 : 1)};
+`;
+
+const GoogleButtonText = styled.Text`
+  color: ${({ theme }) => theme.colors.white};
+  font-weight: 700;
   ${({ theme }) => theme.text.corpo.corpoTexto};
 `;

@@ -2,7 +2,6 @@ import { useAuth } from '@clerk/expo';
 import React, { useEffect, useRef, useState } from 'react';
 import { View, StatusBar, Platform, ScrollView } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
-import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import Head from 'expo-router/head';
@@ -13,6 +12,7 @@ import FilterTags from '../../components/ui/FilterTags';
 import { CalendarCard } from '../../components/CalendarCard';
 import api from '../../utils/api'; // Reativado o teu cliente de API
 import { useActivityFavourites } from '../../context/ActivityFavouritesContext';
+import { useEventMode } from '../../context/EventModeContext';
 
 // --- Imports estÃ¡ticos de imagens para o mapeamento local ---
 import img1 from '../../assets/images/Calendar/1.jpg';
@@ -110,68 +110,6 @@ const ScrollContent = styled(ScrollView).attrs({
   padding-top: ${({ theme }) => theme.spacing.xl}px;
 `;
 
-const EventSelector = styled.TouchableOpacity`
-  background-color: ${({ theme }) => theme.colors.grayNavbar};
-  padding-vertical: ${({ theme }) => theme.spacing.md}px;
-  padding-horizontal: ${({ theme }) => theme.spacing.md}px;
-  border-radius: ${({ theme }) => theme.borderRadius.medium}px;
-  min-height: ${({ theme }) => theme.height.sm}px;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-`;
-
-const EventDropdownWrapper = styled.View`
-  margin-bottom: ${({ theme }) => theme.spacing.lg}px;
-  position: relative;
-  z-index: 12;
-  elevation: 12;
-`;
-
-const SelectorLabel = styled.Text`
-  color: ${({ theme }) => theme.colors.white};
-  font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
-  font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
-  flex: 1;
-  margin-right: ${({ theme }) => theme.spacing.sm}px;
-`;
-
-const EventDropdownMenu = styled.View`
-  background-color: ${({ theme }) => theme.colors.grayNavbar};
-  border-radius: ${({ theme }) => theme.borderRadius.medium}px;
-  position: absolute;
-  top: ${({ theme }) => theme.height.sm + theme.spacing.xs}px;
-  left: 0;
-  right: 0;
-  overflow: hidden;
-  z-index: 20;
-  elevation: 20;
-`;
-
-const EventDropdownScroll = styled.ScrollView`
-  max-height: 220px;
-`;
-
-const EventOption = styled.TouchableOpacity`
-  min-height: ${({ theme }) => theme.height.tam_42}px;
-  padding-vertical: ${({ theme }) => theme.spacing.sm}px;
-  padding-horizontal: ${({ theme }) => theme.spacing.md}px;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom-width: 1px;
-  border-bottom-color: rgba(255, 255, 255, 0.08);
-`;
-
-const EventOptionText = styled.Text<{ selected?: boolean }>`
-  color: ${({ selected, theme }: { selected?: boolean; theme: any }) =>
-    selected ? theme.colors.primary : theme.colors.white};
-  font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
-  font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
-  flex: 1;
-  margin-right: ${({ theme }) => theme.spacing.sm}px;
-`;
-
 const DateHeader = styled.Text`
   color: ${({ theme }) => theme.colors.inactive};
   font-family: ${({ theme }) => theme.text.corpo.corpoTexto.fontFamily};
@@ -215,50 +153,26 @@ export default function CalendarScreen() {
   const router = useRouter();
   const { eventId } = useLocalSearchParams<{ eventId?: string }>();
   const requestedEventId = getRouteParam(eventId);
+  const { activeEvent } = useEventMode();
   const { isLoaded, isSignedIn, getToken } = useAuth();
   const getTokenRef = useRef(getToken);
 
   const [searchValue, setSearchValue] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [presentEvent, setPresentEvent] = useState<any>(null);
-  const [events, setEvents] = useState<any[]>([]);
   const [activities, setActivities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isEventDropdownOpen, setIsEventDropdownOpen] = useState(false);
   const {
     favouriteActivityIds,
     updatingActivityIds,
-    selectedCalendarEventId,
     setSelectedCalendarEventId,
     loadEventFavourites,
     toggleFavouriteActivity,
   } = useActivityFavourites();
-  const selectedCalendarEventIdRef = useRef(selectedCalendarEventId);
 
   const categories = ['All', 'Stages', 'Workshops', 'Podcasts', 'Business'];
 
   getTokenRef.current = getToken;
-  selectedCalendarEventIdRef.current = selectedCalendarEventId;
-
-  const loadEventActivities = async (event: any) => {
-    setPresentEvent(event);
-    setSelectedCategory('All');
-    setActivities([]);
-
-    if (!event?.id) {
-      return;
-    }
-
-    const [activitiesResponse] = await Promise.all([
-      api.get(`/events/${event.id}/activities`),
-      loadEventFavourites(event.id, true).catch(() => []),
-    ]);
-    const data = Array.isArray(activitiesResponse.data)
-      ? activitiesResponse.data
-      : activitiesResponse.data?.results || [];
-
-    setActivities(data.map(normalizeActivity));
-  };
 
   useEffect(() => {
     let isActive = true;
@@ -281,6 +195,10 @@ export default function CalendarScreen() {
           }
         }
 
+        if (!event && activeEvent?.id) {
+          event = activeEvent;
+        }
+
         if (!event && isSignedIn) {
           try {
             const eventResponse = await api.get('/events/present-event', {
@@ -292,19 +210,11 @@ export default function CalendarScreen() {
           }
         }
 
-        const eventsResponse = await api.get('/events', {
-          params: { pageSize: 100, sortBy: 'start_date', sortOrder: 'asc' },
-        });
-        const eventsList = getEventsList(eventsResponse.data);
-        const savedEvent = selectedCalendarEventIdRef.current
-          ? eventsList.find(
-              eventItem => String(eventItem.id) === String(selectedCalendarEventIdRef.current),
-            )
-          : null;
-
-        if (savedEvent) {
-          event = savedEvent;
-        } else if (!event) {
+        if (!event) {
+          const eventsResponse = await api.get('/events', {
+            params: { pageSize: 100, sortBy: 'start_date', sortOrder: 'asc' },
+          });
+          const eventsList = getEventsList(eventsResponse.data);
           event = eventsList[0] ?? null;
         }
 
@@ -312,7 +222,6 @@ export default function CalendarScreen() {
           return;
         }
 
-        setEvents(eventsList);
         setPresentEvent(event);
         setSelectedCalendarEventId(event?.id ? String(event.id) : null);
         setSelectedCategory('All');
@@ -341,33 +250,14 @@ export default function CalendarScreen() {
     return () => {
       isActive = false;
     };
-  }, [isLoaded, isSignedIn, loadEventFavourites, setSelectedCalendarEventId]);
-
-  const handleToggleEventDropdown = () => {
-    if (events.length === 0 || loading) {
-      return;
-    }
-
-    setIsEventDropdownOpen(prev => !prev);
-  };
-
-  const handleSelectEvent = async (event: any) => {
-    setIsEventDropdownOpen(false);
-
-    if (!event?.id || event.id === presentEvent?.id) {
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setSelectedCalendarEventId(String(event.id));
-      await loadEventActivities(event);
-    } catch (error) {
-      console.error('Erro ao trocar evento:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [
+    activeEvent,
+    isLoaded,
+    isSignedIn,
+    loadEventFavourites,
+    requestedEventId,
+    setSelectedCalendarEventId,
+  ]);
 
   const handleToggleFavorite = (activity: any, shouldBeFavorite: boolean) =>
     toggleFavouriteActivity(activity, presentEvent?.id, shouldBeFavorite);
@@ -399,57 +289,8 @@ export default function CalendarScreen() {
         <Header />
       </HeaderWrapper>
 
-      <ScrollContent
-        accessibilityRole="main"
-        accessibilityLabel="Calendar events"
-        contentContainerStyle={{ paddingTop: 10 }}
-      >
-        <EventDropdownWrapper>
-          <EventSelector
-            activeOpacity={0.7}
-            onPress={handleToggleEventDropdown}
-            accessible
-            accessibilityRole="button"
-            accessibilityLabel="Select event"
-            accessibilityState={{ expanded: isEventDropdownOpen }}
-          >
-            <SelectorLabel numberOfLines={1}>{presentEvent?.name ?? 'Atual Event'}</SelectorLabel>
-            <Ionicons
-              name={isEventDropdownOpen ? 'chevron-up' : 'chevron-down'}
-              size={20}
-              color="white"
-            />
-          </EventSelector>
+      <ScrollContent contentContainerStyle={{ paddingTop: theme.spacing.sm }}>
 
-          {isEventDropdownOpen && (
-            <EventDropdownMenu>
-              <EventDropdownScroll
-                nestedScrollEnabled
-                showsVerticalScrollIndicator={events.length > 4}
-              >
-                {events.map(event => {
-                  const isSelected = event.id === presentEvent?.id;
-
-                  return (
-                    <EventOption
-                      key={event.id}
-                      onPress={() => handleSelectEvent(event)}
-                      activeOpacity={0.75}
-                      accessibilityRole="button"
-                      accessibilityLabel={`Select ${event.name}`}
-                      accessibilityState={{ selected: isSelected }}
-                    >
-                      <EventOptionText numberOfLines={1} selected={isSelected}>
-                        {event.name}
-                      </EventOptionText>
-                      {isSelected && <Ionicons name="checkmark" size={18} color="white" />}
-                    </EventOption>
-                  );
-                })}
-              </EventDropdownScroll>
-            </EventDropdownMenu>
-          )}
-        </EventDropdownWrapper>
 
         <SearchInput
           value={searchValue}
@@ -496,7 +337,7 @@ export default function CalendarScreen() {
                     <DateHeader>{item.date}</DateHeader>
                   )}
 
-                  <View style={{ marginBottom: 15 }}>
+                  <View style={{ marginBottom: theme.spacing.md }}>
                     <CalendarCard
                       item={activityWithImage}
                       onToggleFavorite={handleToggleFavorite}
@@ -514,7 +355,7 @@ export default function CalendarScreen() {
       </ScrollContent>
 
       <MyCalendarButton activeOpacity={0.8} onPress={() => router.push('/(tabs)/my-calendar')}>
-        <ButtonText>My calendar</ButtonText>
+        <ButtonText>My Activities</ButtonText>
       </MyCalendarButton>
     </Container>
   );

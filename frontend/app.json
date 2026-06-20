@@ -33,6 +33,7 @@
       "expo-font",
       "expo-camera",
       "expo-location",
+      "expo-notifications",
       "expo-secure-store",
       "@clerk/expo"
     ],

@@ -12,7 +12,9 @@ import PingFriend from '@/components/VibrateButton';
 import FriendActionButton from '@/components/FriendActionButton';
 import { useNotifications } from '@/context/NotificationsContext';
 import { useAuth } from '@clerk/expo';
+import { useEventMode } from '@/context/EventModeContext';
 import {
+  buzzFriend,
   getFriends,
   toggleFriendship,
   type FriendListItem,
@@ -48,11 +50,13 @@ function getErrorMessage(error: unknown) {
 
 export default function FriendsScreen() {
   const { isLoaded, isSignedIn, getToken } = useAuth();
+  const { isInEventMode } = useEventMode();
   const { realtimeVersion } = useNotifications();
   const [friends, setFriends] = useState<FriendsGroupedResponse>(emptyFriends);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [removingFriendId, setRemovingFriendId] = useState<string | null>(null);
+  const [buzzingFriendId, setBuzzingFriendId] = useState<string | null>(null);
   const hasLoadedOnce = useRef(false);
   const getTokenRef = useRef(getToken);
   getTokenRef.current = getToken;
@@ -133,6 +137,23 @@ export default function FriendsScreen() {
     }
   };
 
+  const handleBuzzFriend = async (friend: FriendListItem) => {
+    try {
+      setBuzzingFriendId(friend.id);
+      const token = await getTokenRef.current();
+      await buzzFriend(token, friend.id);
+    } catch (error) {
+      console.error('Failed to buzz friend', error);
+      Alert.alert('Unable to buzz friend', getErrorMessage(error));
+    } finally {
+      setBuzzingFriendId(null);
+    }
+  };
+
+  const visibleFriends = isInEventMode
+    ? friends.otherFriends
+    : [...friends.onSameEvent, ...friends.otherFriends];
+
   const renderFriend = (friend: FriendListItem, action: 'event' | 'remove') => (
     <TouchableOpacity
       key={friend.id}
@@ -155,7 +176,8 @@ export default function FriendsScreen() {
           {action === 'event' ? (
             <>
               <PingFriend
-                onPress={() => console.log('Buzz amigo')}
+                onPress={() => handleBuzzFriend(friend)}
+                disabled={buzzingFriendId === friend.id}
                 role="button"
                 accessibilityLabel={`Buzz ${friend.name}`}
                 accessibilityHint={`Send a buzz to ${friend.name}`}
@@ -217,28 +239,29 @@ export default function FriendsScreen() {
           </SectionTitle>
         </RegionContainer>
 
-        {/* Region: On the same event */}
-        <RegionContainer role="region" accessibilityLabel="Amigos no mesmo evento">
-          <SectionSubtitle role="header" accessibilityLevel={2}>
-            On the same event
-          </SectionSubtitle>
-          {friends.onSameEvent.length ? (
-            friends.onSameEvent.map(friend => renderFriend(friend, 'event'))
-          ) : (
-            <EmptyText>No friends on the same event.</EmptyText>
-          )}
-        </RegionContainer>
+        {isInEventMode ? (
+          <RegionContainer role="region" accessibilityLabel="Amigos no mesmo evento">
+            <SectionSubtitle role="header" accessibilityLevel={2}>
+              On the same event
+            </SectionSubtitle>
+            {friends.onSameEvent.length ? (
+              friends.onSameEvent.map(friend => renderFriend(friend, 'event'))
+            ) : (
+              <EmptyText>No friends on the same event.</EmptyText>
+            )}
+          </RegionContainer>
+        ) : null}
 
         {/* Region: Other Friends */}
 
         <RegionContainer role="region" accessibilityLabel="Other friends">
           <SectionSubtitle role="header" accessibilityLevel={2}>
-            Other Friends
+            {isInEventMode ? 'Other Friends' : 'Friends'}
           </SectionSubtitle>
-          {friends.otherFriends.length ? (
-            friends.otherFriends.map(friend => renderFriend(friend, 'remove'))
+          {visibleFriends.length ? (
+            visibleFriends.map(friend => renderFriend(friend, 'remove'))
           ) : (
-            <EmptyText>No other friends yet.</EmptyText>
+            <EmptyText>No friends yet.</EmptyText>
           )}
         </RegionContainer>
       </ScrollArea>

@@ -39,15 +39,17 @@ async function bootstrap() {
     }),
   );
   app.useGlobalFilters(new AllExceptionsFilter());
-  const swaggerConfig = new DocumentBuilder()
-    .setTitle('Safinity API')
-    .setDescription('Safinity backend API documentation')
-    .setVersion('1.0')
-    .addBearerAuth()
-    .build();
+  if (process.env.ENABLE_SWAGGER !== 'false') {
+    const swaggerConfig = new DocumentBuilder()
+      .setTitle('Safinity API')
+      .setDescription('Safinity backend API documentation')
+      .setVersion('1.0')
+      .addBearerAuth()
+      .build();
 
-  const document = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup('api', app, document);
+    const document = SwaggerModule.createDocument(app, swaggerConfig);
+    SwaggerModule.setup('api', app, document);
+  }
 
   // Register OptionalAuthGuard globally so requests with a Clerk token
   // populate `request.user` before route-level guards run.

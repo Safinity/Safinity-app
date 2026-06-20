@@ -103,7 +103,7 @@ export default function EventDetailsScreen() {
       <Container>
         <Header />
         <ScrollView>
-          <Text style={{ color: 'white', marginTop: 40, textAlign: 'center' }}>Loading event…</Text>
+          <Text style={{ color: 'white', marginTop: 40, textAlign: 'center' }}></Text>
         </ScrollView>
       </Container>
     );

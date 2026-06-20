@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components/native';
 import { useRouter, Stack } from 'expo-router';
-import { userImages } from '../assets/images/Users/userImages';
 import SearchBarQR from '@/components/SearchBarQR';
 import FriendActionButton from '@/components/FriendActionButton';
 import { ActivityIndicator, Alert, TouchableOpacity } from 'react-native';
@@ -12,14 +11,6 @@ import { useAuth } from '@clerk/expo';
 import { getFriends, searchUsers, toggleFriendship, type FriendSearchItem } from '@/utils/friends';
 import { Ionicons } from '@expo/vector-icons';
 import { getUserImageSource } from '@/utils/userImages';
-
-function getAvatarSource(user: FriendSearchItem) {
-  const remoteImage = getUserImageSource(user.image);
-
-  if (remoteImage) return remoteImage;
-
-  return userImages.default;
-}
 
 export default function AddFriendScreen() {
   const { isLoaded, isSignedIn, getToken } = useAuth();
@@ -257,62 +248,75 @@ export default function AddFriendScreen() {
               <EmptyText>{searchError || 'No users found'}</EmptyText>
             ) : null}
 
-            {results.map(user => (
-              <TouchableOpacity
-                key={user.id}
-                onPress={() => router.push(`/friends/${user.id}`)}
-                accessible={true}
-                role="button"
-                accessibilityLabel={`Open profile of ${user.name}`}
-                accessibilityHint="Tap to view this friend's profile"
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  marginBottom: 16,
-                }}
-              >
-                <Avatar
-                  source={getAvatarSource(user)}
-                  role="image"
-                  accessibilityLabel={`Profile picture of ${user.name}`}
-                />
+            {results.map(user => {
+              const avatarSource = getUserImageSource(user.image);
 
-                <Info>
-                  <Name>{user.name || 'Safinity user'}</Name>
+              return (
+                <TouchableOpacity
+                  key={user.id}
+                  onPress={() => router.push(`/friends/${user.id}`)}
+                  accessible={true}
+                  role="button"
+                  accessibilityLabel={`Open profile of ${user.name}`}
+                  accessibilityHint="Tap to view this friend's profile"
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginBottom: 16,
+                  }}
+                >
+                  {avatarSource ? (
+                    <Avatar
+                      source={avatarSource}
+                      role="image"
+                      accessibilityLabel={`Profile picture of ${user.name}`}
+                    />
+                  ) : (
+                    <AvatarIcon
+                      role="image"
+                      accessibilityLabel={`Default profile icon of ${user.name}`}
+                    >
+                      <Ionicons name="person" size={34} color="#cfd3e0" />
+                    </AvatarIcon>
+                  )}
 
-                  <Username>@{user.username || 'user'}</Username>
-                </Info>
+                  <Info>
+                    <Name>{user.name || 'Safinity user'}</Name>
 
-                {getFriendshipState(user.id) === 'PENDING' ? (
-                  <FriendActionButton
-                    variant="pending"
-                    onPress={() => handleToggleFriend(user)}
-                    disabled={togglingUserId === user.id}
-                    role="button"
-                    accessibilityLabel={`Cancel pending friend request to ${user.name}`}
-                    accessibilityHint="Cancels the pending friend request"
-                  />
-                ) : getFriendshipState(user.id) === 'ACCEPTED' ? (
-                  <FriendActionButton
-                    variant="remove"
-                    onPress={() => handleToggleFriend(user)}
-                    disabled={togglingUserId === user.id}
-                    role="button"
-                    accessibilityLabel={`Remove ${user.name} from friends`}
-                    accessibilityHint="Removes this user from your friend list"
-                  />
-                ) : (
-                  <FriendActionButton
-                    variant="add"
-                    onPress={() => handleToggleFriend(user)}
-                    disabled={togglingUserId === user.id}
-                    role="button"
-                    accessibilityLabel={`Add ${user.name} as a friend`}
-                    accessibilityHint="Adds this user to your friend list"
-                  />
-                )}
-              </TouchableOpacity>
-            ))}
+                    <Username>@{user.username || 'user'}</Username>
+                  </Info>
+
+                  {getFriendshipState(user.id) === 'PENDING' ? (
+                    <FriendActionButton
+                      variant="pending"
+                      onPress={() => handleToggleFriend(user)}
+                      disabled={togglingUserId === user.id}
+                      role="button"
+                      accessibilityLabel={`Cancel pending friend request to ${user.name}`}
+                      accessibilityHint="Cancels the pending friend request"
+                    />
+                  ) : getFriendshipState(user.id) === 'ACCEPTED' ? (
+                    <FriendActionButton
+                      variant="remove"
+                      onPress={() => handleToggleFriend(user)}
+                      disabled={togglingUserId === user.id}
+                      role="button"
+                      accessibilityLabel={`Remove ${user.name} from friends`}
+                      accessibilityHint="Removes this user from your friend list"
+                    />
+                  ) : (
+                    <FriendActionButton
+                      variant="add"
+                      onPress={() => handleToggleFriend(user)}
+                      disabled={togglingUserId === user.id}
+                      role="button"
+                      accessibilityLabel={`Add ${user.name} as a friend`}
+                      accessibilityHint="Adds this user to your friend list"
+                    />
+                  )}
+                </TouchableOpacity>
+              );
+            })}
           </>
         )}
       </MainContent>
@@ -385,6 +389,15 @@ const Avatar = styled.Image`
   height: 70px;
   border-radius: 35px;
   background-color: #ccc;
+`;
+
+const AvatarIcon = styled.View`
+  width: 70px;
+  height: 70px;
+  border-radius: 35px;
+  background-color: ${({ theme }) => theme.colors.surfaceSoft};
+  align-items: center;
+  justify-content: center;
 `;
 
 const Info = styled.View`

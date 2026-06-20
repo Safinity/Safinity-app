@@ -3,6 +3,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { OptionalAuthGuard } from './auth/auth.guards';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { json, urlencoded } from 'express';
 import type { Server as HttpServer } from 'http';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { NotificationsRealtimeService } from './notifications/notifications-realtime.service';
@@ -27,6 +28,8 @@ async function bootstrap() {
     origin: true,
     credentials: true,
   });
+  app.use(json({ limit: '8mb' }));
+  app.use(urlencoded({ extended: true, limit: '8mb' }));
 
   app.useGlobalPipes(
     new ValidationPipe({

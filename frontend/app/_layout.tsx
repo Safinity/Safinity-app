@@ -4,12 +4,12 @@ import { ClerkProvider } from '@clerk/expo';
 import { tokenCache } from '@clerk/expo/token-cache';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import styled, { ThemeProvider } from 'styled-components/native';
-import { theme } from '../constants/theme';
+import styled from 'styled-components/native';
 import { NotificationsProvider } from '@/context/NotificationsContext';
 import { UserProvider } from '@/context/UserContext';
 import { ActivityFavouritesProvider } from '@/context/ActivityFavouritesContext';
 import { EventModeProvider } from '@/context/EventModeContext';
+import { AppThemeProvider, useThemePreference } from '@/context/ThemeContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { NavigationHistoryTracker } from '@/components/NavigationHistoryTracker';
 
@@ -34,6 +34,24 @@ if (!publishableKey) {
   throw new Error('Add your Clerk publishable key to frontend/.env');
 }
 
+function RootContent() {
+  const { themeMode } = useThemePreference();
+
+  return (
+    <Container>
+      <NavigationHistoryTracker />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          animation: 'slide_from_right',
+          animationTypeForReplace: 'pop',
+        }}
+      />
+      <StatusBar style={themeMode === 'light' ? 'dark' : 'light'} />
+    </Container>
+  );
+}
+
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
     PlusJakartaSans_200ExtraLight,
@@ -48,24 +66,14 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+      <ClerkProvider publishableKey={publishableKey as string} tokenCache={tokenCache}>
         <UserProvider>
           <EventModeProvider>
             <ActivityFavouritesProvider>
               <NotificationsProvider>
-                <ThemeProvider theme={theme}>
-                  <Container>
-                    <NavigationHistoryTracker />
-                    <Stack
-                      screenOptions={{
-                        headerShown: false,
-                        animation: 'slide_from_right',
-                        animationTypeForReplace: 'pop',
-                      }}
-                    />
-                  </Container>
-                  <StatusBar style="light" />
-                </ThemeProvider>
+                <AppThemeProvider>
+                  <RootContent />
+                </AppThemeProvider>
               </NotificationsProvider>
             </ActivityFavouritesProvider>
           </EventModeProvider>

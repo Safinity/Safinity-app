@@ -64,6 +64,63 @@ export const Colors = {
   },
 };
 
+const semanticDarkColors = {
+  mode: 'dark' as const,
+  surface: Colors.grayNavbar,
+  surfaceElevated: Colors.grayNavbar,
+  surfaceSoft: Colors.palette.primary.dark60,
+  input: Colors.grayNavbar,
+  border: Colors.grayNavbar,
+  text: Colors.white,
+  textMuted: Colors.inactive,
+  textSubtle: Colors.palette.neutral.neutral60,
+  icon: Colors.white,
+  onPrimary: Colors.white,
+  navBackground: Colors.grayNavbar,
+  navActive: Colors.white,
+  navInactive: Colors.palette.neutral.neutral80,
+  shadow: 'rgba(0, 0, 0, 0.35)',
+  profileGradientStart: 'rgba(190, 142, 224, 1)',
+  profileGradientEnd: 'rgba(34, 39, 52, 0)',
+};
+
+const semanticLightColors = {
+  mode: 'light' as const,
+  grayNavbar: Colors.palette.primary.light90,
+  background: Colors.white,
+  inactive: Colors.palette.neutral.neutral50,
+  white: Colors.background,
+  surface: Colors.white,
+  surfaceElevated: Colors.white,
+  surfaceSoft: Colors.palette.primary.light90,
+  input: Colors.palette.primary.light90,
+  border: Colors.palette.primary.light80,
+  text: Colors.background,
+  textMuted: Colors.neutralGray,
+  textSubtle: Colors.palette.neutral.neutral60,
+  icon: Colors.background,
+  onPrimary: Colors.white,
+  navBackground: Colors.white,
+  navActive: Colors.primary,
+  navInactive: Colors.palette.primary.light40,
+  shadow: 'rgba(88, 38, 122, 0.16)',
+  profileGradientStart: 'rgba(233, 217, 245, 1)',
+  profileGradientEnd: 'rgba(255, 255, 255, 0)',
+};
+
+export const ThemeColors = {
+  dark: {
+    ...Colors,
+    ...semanticDarkColors,
+  },
+  light: {
+    ...Colors,
+    ...semanticLightColors,
+  },
+};
+
+export type ThemeMode = keyof typeof ThemeColors;
+
 // --- Border radius ---
 export const BorderRadius = {
   small: scale(8),
@@ -210,11 +267,22 @@ export const TextStyles = {
 
 // --- Theme completo ---
 export const theme = {
-  colors: Colors,
+  colors: ThemeColors.dark,
   borderRadius: BorderRadius,
   spacing: Spacing,
   fonts: Fonts,
   text: TextStyles,
   height: Height,
   width: Width,
+};
+
+export type AppTheme = Omit<typeof theme, 'colors'> & {
+  colors: (typeof ThemeColors)[ThemeMode];
+};
+
+export const darkTheme: AppTheme = theme;
+
+export const lightTheme: AppTheme = {
+  ...theme,
+  colors: ThemeColors.light,
 };

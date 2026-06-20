@@ -199,6 +199,9 @@ PORT=3000
 DATABASE_URL=<postgres-connection-url>
 CLERK_SECRET_KEY=sk_test_xxxxxxxxx
 MAPBOX_TOKEN=pk.xxxxxxxxx
+SUPABASE_URL=https://<project-ref>.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=<supabase-service-role-key>
+SUPABASE_PROFILE_BUCKET=safinity
 SENSOR_WEBHOOK_SECRET=change_me
 ENABLE_SWAGGER=true
 ```
@@ -207,6 +210,8 @@ Useful notes:
 
 - `CLERK_SECRET_KEY` comes from Clerk Dashboard -> API keys -> Secret key.
 - `MAPBOX_TOKEN` is used by the backend to request static map images.
+- `SUPABASE_SERVICE_ROLE_KEY` is used only by the backend to upload profile photos to Supabase Storage.
+- `SUPABASE_PROFILE_BUCKET` defaults to `safinity` when omitted.
 - `SENSOR_WEBHOOK_SECRET` protects sensor/webhook ingestion.
 - Set `ENABLE_SWAGGER=false` in deployed environments if you do not want `/api` exposed.
 
@@ -216,16 +221,16 @@ Used by Expo. Public app variables need the `EXPO_PUBLIC_` prefix.
 
 ```env
 EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_xxxxxxxxx
-EXPO_PUBLIC_API_URL=http://localhost:3000
-```
-
-For a deployed backend:
-
-```env
 EXPO_PUBLIC_API_URL=https://safinity-app.onrender.com
 ```
 
-If `EXPO_PUBLIC_API_URL` is missing, the app tries to infer the Expo host IP and call `http://<expo-host-ip>:3000`, which is useful for local physical-device testing.
+For local backend testing, temporarily override the value:
+
+```env
+EXPO_PUBLIC_API_URL=http://localhost:3000
+```
+
+If `EXPO_PUBLIC_API_URL` is missing, the mobile app defaults to the Render backend at `https://safinity-app.onrender.com`.
 
 ---
 
@@ -343,6 +348,9 @@ For Render + Supabase, configure at least:
 DATABASE_URL=<supabase-postgres-url-with-ssl>
 CLERK_SECRET_KEY=sk_test_or_sk_live_xxxxxxxxx
 MAPBOX_TOKEN=pk.xxxxxxxxx
+SUPABASE_URL=https://<project-ref>.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=<supabase-service-role-key>
+SUPABASE_PROFILE_BUCKET=safinity
 ENABLE_SWAGGER=false
 NODE_ENV=production
 ```

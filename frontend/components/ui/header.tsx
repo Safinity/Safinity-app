@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React from 'react';
 import { Platform, StatusBar } from 'react-native';
-import styled from 'styled-components/native';
+import styled, { useTheme } from 'styled-components/native';
 
 import { useNotifications } from '@/context/NotificationsContext';
 import { Colors, Spacing, Height, Width, BorderRadius, TextStyles } from '../../constants/theme';
@@ -29,9 +29,10 @@ const Header: React.FC<HeaderProps> = ({
   rightIcon,
   onRightPress,
 }) => {
+  const theme = useTheme();
   const statusBarHeight = Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 24;
   const { unreadCount } = useNotifications();
-  const iconColor = colorScheme === 'light' ? Colors.black : Colors.white;
+  const iconColor = colorScheme === 'light' ? theme.colors.black : Colors.white;
 
   const hasText = Boolean(title || subtitle);
 
@@ -56,11 +57,7 @@ const Header: React.FC<HeaderProps> = ({
                 role="button"
                 accessibilityLabel="Notifications"
               >
-                <Ionicons
-                  name="notifications-outline"
-                  size={Width.iconHeader}
-                  color={iconColor}
-                />
+                <Ionicons name="notifications-outline" size={Width.iconHeader} color={iconColor} />
                 {unreadCount > 0 && (
                   <NotificationBadge>
                     <NotificationBadgeText>
@@ -90,12 +87,12 @@ const Header: React.FC<HeaderProps> = ({
                 accessibilityLabel="Go back"
                 role="button"
               >
-                <Ionicons name="arrow-back" size={Width.iconHeader} color={Colors.white} />
+                <Ionicons name="arrow-back" size={Width.iconHeader} color={iconColor} />
               </BackButton>
 
               {rightIcon && onRightPress && (
                 <RightButton onPress={onRightPress} accessibilityLabel="Right action" role="button">
-                  <Ionicons name={rightIcon} size={Width.iconHeader} color={Colors.white} />
+                  <Ionicons name={rightIcon} size={Width.iconHeader} color={iconColor} />
                 </RightButton>
               )}
             </BackButtonRow>
@@ -118,7 +115,7 @@ const Header: React.FC<HeaderProps> = ({
               accessibilityLabel="Go back"
               role="button"
             >
-              <Ionicons name="arrow-back" size={Width.iconHeader} color={Colors.white} />
+              <Ionicons name="arrow-back" size={Width.iconHeader} color={iconColor} />
             </BackButtonDetails>
           </DetailsRow>
         )}
@@ -181,7 +178,7 @@ const RightButton = styled.Pressable`
 
 const BackButtonDetails = styled.Pressable`
   z-index: 99;
-  background-color: ${Colors.background};
+  background-color: ${({ theme }) => theme.colors.background};
   padding: ${Spacing.sm}px;
   border-radius: ${BorderRadius.round}px;
 `;
@@ -210,7 +207,7 @@ const NotificationBadge = styled.View`
   height: 16px;
   border-radius: 8px;
   padding-horizontal: 4px;
-  background-color: ${Colors.primary};
+  background-color: ${({ theme }) => theme.colors.primary};
   align-items: center;
   justify-content: center;
   position: absolute;

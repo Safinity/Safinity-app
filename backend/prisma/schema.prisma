@@ -211,7 +211,7 @@ model users {
   password_hash                         String?                    @db.VarChar(255)
   role                                  String                     @default("user") @db.VarChar(24)
   email                                 String?                    @unique @db.VarChar(255)
-  image                                 Bytes?
+  image                                 String?
   location                              Unsupported("geography")?
   emergency_contact                     String?                    @db.VarChar(20)
   friendship_friendship_user1_idTousers friendship[]               @relation("friendship_user1_idTousers")

@@ -19,6 +19,7 @@ import { useEventMode } from '../../context/EventModeContext';
 import { getMyProfile } from '../../utils/profile';
 import { getUserTickets, type UserTicket } from '../../utils/tickets';
 import { getEventImageSource } from '../../utils/eventImages';
+import { matchesEventSearch } from '../../utils/eventSearch';
 
 interface Event {
   id: string;
@@ -72,6 +73,29 @@ function formatEventDate(start?: string | null, end?: string | null) {
 function getLocalAwareEventImageSource(image?: string | null) {
   return getEventImageSource(image, eventImages['banner-lista-eventos']);
 }
+
+const barcodePattern = [
+  { width: 1, gap: 0 },
+  { width: 1, gap: 0 },
+  { width: 3, gap: 2 },
+  { width: 1, gap: 0 },
+  { width: 4, gap: 1 },
+  { width: 2, gap: 3 },
+  { width: 1, gap: 0 },
+  { width: 3, gap: 0 },
+  { width: 1, gap: 4 },
+  { width: 4, gap: 0 },
+  { width: 2, gap: 1 },
+  { width: 1, gap: 0 },
+  { width: 3, gap: 2 },
+  { width: 1, gap: 0 },
+  { width: 2, gap: 3 },
+  { width: 4, gap: 1 },
+  { width: 1, gap: 0 },
+  { width: 3, gap: 0 },
+  { width: 1, gap: 2 },
+  { width: 4, gap: 0 },
+];
 
 export default function HomeScreen() {
   const { isLoaded, isSignedIn, getToken } = useAuth();
@@ -206,7 +230,8 @@ export default function HomeScreen() {
   const upcomingEvents = events.filter(
     e =>
       ['upcoming', 'active', 'planned'].includes(e.status) &&
-      e.category?.toLowerCase().includes(selectedCategory.toLowerCase()),
+      e.category?.toLowerCase().includes(selectedCategory.toLowerCase()) &&
+      matchesEventSearch(e, searchValue),
   );
 
   if (liveEvent) {
@@ -335,13 +360,18 @@ export default function HomeScreen() {
                   <TicketOverlay>
                     <TicketTopRow>
                       <Ionicons name="heart" size={theme.height.xs} color={theme.colors.white} />
-                      <TicketBarcode>
-                        {Array.from({ length: 11 }).map((_, index) => (
-                          <TicketBar key={`${item.id}-${index}`} $index={index} />
-                        ))}
-                      </TicketBarcode>
                     </TicketTopRow>
-
+<TicketBarcode>
+  {barcodePattern.map((bar, index) => (
+    <BarcodeBar
+      key={`${item.id}-${index}`}
+      style={{
+        width: bar.width,
+        marginRight: bar.gap,
+      }}
+    />
+  ))}
+</TicketBarcode>
                     <TicketFooter>
                       <TicketDate>{formatEventDate(event?.start_date, event?.end_date)}</TicketDate>
                       <TicketTitle numberOfLines={2}>{event?.name || 'Untitled event'}</TicketTitle>
@@ -372,7 +402,9 @@ export default function HomeScreen() {
 
         <PaddedContent>
           <SectionHeader>
-            <SectionTitle>{selectedCategory} events</SectionTitle>
+            <SectionTitle>
+              {searchValue.trim() ? `Results in ${selectedCategory}` : `${selectedCategory} events`}
+            </SectionTitle>
             <Pressable onPress={() => router.push('/events-list')}>
               <SeeMore>See more</SeeMore>
             </Pressable>
@@ -392,6 +424,13 @@ export default function HomeScreen() {
           }}
           snapToInterval={280 + 16}
           decelerationRate="fast"
+          ListEmptyComponent={
+            <EmptySearchState>
+              {`No ${selectedCategory} events found${
+                searchValue.trim() ? ` for “${searchValue.trim()}”` : ''
+              }.`}
+            </EmptySearchState>
+          }
         />
       </Content>
     </Container>
@@ -545,6 +584,7 @@ const TicketOverlay = styled(LinearGradient).attrs({
 })`
   flex: 1;
   padding: ${({ theme }: any) => theme.spacing.lg}px;
+  padding-right: ${({ theme }: any) => theme.spacing.xxl}px;
   justify-content: space-between;
 `;
 
@@ -555,24 +595,20 @@ const TicketTopRow = styled.View`
 `;
 
 const TicketBarcode = styled.View`
+  position: absolute;
+  right: -17%;
+  top: 50%;
+  gap: ${({ theme }: any) => theme.spacing.xs}px;
+  height: ${({ theme }: any) => theme.height.xs}px;
+  transform: rotate(90deg);
   flex-direction: row;
-  align-items: flex-end;
-  gap: ${({ theme }: any) => theme.spacing.xxs}px;
-  height: ${({ theme }: any) => theme.height.sm}px;
 `;
 
-const TicketBar = styled.View<{ $index: number }>`
-  width: ${({ theme }: any) => theme.spacing.xs}px;
-  height: ${({ $index, theme }: any) =>
-    $index % 3 === 0
-      ? theme.height.sm
-      : $index % 2 === 0
-        ? theme.height.tam_42
-        : theme.height.xs}px;
-  background-color: ${({ theme }: any) => theme.colors.white};
-  opacity: ${({ $index }: any) => ($index % 2 === 0 ? 0.95 : 0.75)};
+const BarcodeBar = styled.View`
+  height: 100%;
+  background-color: white;
+  opacity: 0.9;
 `;
-
 const TicketFooter = styled.View``;
 
 const TicketDate = styled.Text`
@@ -608,6 +644,15 @@ const EmptyTicketText = styled.Text`
   line-height: ${({ theme }: any) => theme.text.corpo.corpoTexto.lineHeight}px;
   text-align: center;
   margin-top: ${({ theme }: any) => theme.spacing.sm}px;
+`;
+
+const EmptySearchState = styled.Text`
+  width: ${({ theme }: any) => theme.height.lg}px;
+  color: ${({ theme }: any) => theme.colors.textMuted};
+  font-family: ${({ theme }: any) => theme.text.corpo.corpoTexto.fontFamily};
+  font-size: ${({ theme }: any) => theme.text.corpo.corpoTexto.fontSize}px;
+  line-height: ${({ theme }: any) => theme.text.corpo.corpoTexto.lineHeight}px;
+  padding-vertical: ${({ theme }: any) => theme.spacing.lg}px;
 `;
 
 const SearchIntroTitle = styled.Text`

@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/unbound-method */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Test, TestingModule } from '@nestjs/testing';
 import { AlertsService } from './alerts.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -122,7 +124,7 @@ describe('AlertsService', () => {
           created_at: new Date(),
           updated_at: new Date(),
         },
-      } as never);
+      });
 
       jest.mocked(prisma.alerts.findUnique).mockResolvedValue({
         id: 1n,
@@ -138,7 +140,7 @@ describe('AlertsService', () => {
         event: {
           organization_id: 'org1',
         },
-      } as never);
+      });
 
       jest.mocked(prisma.alerts.update).mockResolvedValue({
         id: 1n,
@@ -195,7 +197,7 @@ describe('AlertsService', () => {
           created_at: new Date(),
           updated_at: new Date(),
         },
-      } as never);
+      });
 
       jest.mocked(prisma.alerts.findUnique).mockResolvedValue({
         id: 1n,
@@ -211,7 +213,7 @@ describe('AlertsService', () => {
         event: {
           organization_id: 'org1',
         },
-      } as never);
+      });
 
       jest.mocked(prisma.alerts.update).mockResolvedValue({
         id: 1n,
@@ -263,7 +265,7 @@ describe('AlertsService', () => {
           created_at: new Date(),
           updated_at: new Date(),
         },
-      } as never);
+      });
 
       jest.mocked(prisma.event.findUnique).mockResolvedValue({
         id: 1n,

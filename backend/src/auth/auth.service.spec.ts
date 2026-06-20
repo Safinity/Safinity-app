@@ -3,11 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { ClerkService } from './clerk.service';
-import {
-  UnauthorizedException,
-  BadRequestException,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 
 describe('AuthService', () => {
@@ -118,7 +114,7 @@ describe('AuthService', () => {
 
       jest.mocked(prisma.users.findFirst).mockResolvedValue({
         id: 'other_user',
-      } as never);
+      });
 
       await expect(service.updateProfile(userId, body)).rejects.toThrow(
         BadRequestException,
@@ -134,7 +130,7 @@ describe('AuthService', () => {
       jest.mocked(prisma.users.findUnique).mockResolvedValue({
         id: userId,
         clerk_id: clerkId,
-      } as never);
+      });
 
       jest.mocked(prisma.$transaction).mockResolvedValue(null);
       jest

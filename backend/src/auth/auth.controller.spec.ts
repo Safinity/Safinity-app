@@ -46,9 +46,7 @@ describe('AuthController', () => {
         user_favorites: [],
       };
 
-      jest
-        .mocked(service.getAuthenticatedProfile)
-        .mockResolvedValue(mockUser as never);
+      jest.mocked(service.getAuthenticatedProfile).mockResolvedValue(mockUser);
 
       const req: MockRequest = {
         user: { clerk_id: 'clerk_123' },

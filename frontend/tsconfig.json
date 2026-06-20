@@ -7,5 +7,5 @@
     },
     "typeRoots": ["./types", "./node_modules/@types"]
   },
-  "include": ["**/*.ts", "**/*.tsx", "**/*.d.ts"]
+  "include": ["**/*.ts", "**/*.tsx", "**/*.d.ts", "jest.config.js", "jest.setup.js"]
 }

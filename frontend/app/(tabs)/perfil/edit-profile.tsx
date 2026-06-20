@@ -15,6 +15,7 @@ import Camera from '../../../assets/Icons/camera.png';
 import InputField from '../../../components/InputField';
 import Header from '../../../components/ui/header';
 import { Colors, Fonts } from '../../../constants/theme';
+import { useThemePreference } from '../../../context/ThemeContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import { getMyProfile, updateMyProfile, type AuthenticatedProfile } from '../../../utils/profile';
 import { PROFILE_UPDATED_EVENT } from '../../../utils/profileEvents';
@@ -47,6 +48,7 @@ function getApiErrorMessage(error: unknown) {
 
 export default function EditProfile() {
   const { isLoaded, isSignedIn, getToken } = useAuth();
+  const { themeMode } = useThemePreference();
   const [user, setUser] = useState<AuthenticatedProfile | null>(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -223,10 +225,15 @@ export default function EditProfile() {
     <Container>
       <Stack.Screen options={{ title: 'Edit Profile' }} />
       <TopGradient
-        colors={['rgba(190, 142, 224)', 'rgba(34, 39, 52, 0)']}
+        colors={
+          themeMode === 'light'
+            ? ['rgba(190, 142, 224, 0.72)', 'rgba(255, 255, 255, 0)']
+            : ['rgba(92, 48, 126, 0.78)', 'rgba(34, 39, 52, 0)']
+        }
         locations={[0, 0.33]}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 3.1 }}
+        pointerEvents="none"
       />
 
       <Header variant="back" title="Edit Profile" />

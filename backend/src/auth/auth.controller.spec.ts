@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -24,10 +24,8 @@ describe('AuthController', () => {
     service = module.get<AuthService>(AuthService);
   });
 
-  // ✅ TESTE 1: GET /auth/me
   describe('GET /auth/me', () => {
     it('should return authenticated user profile', async () => {
-      // ARRANGE
       const mockUser = {
         id: 'user_123',
         clerk_id: 'clerk_123',
@@ -45,20 +43,22 @@ describe('AuthController', () => {
         mockUser,
       );
 
-      // ACT
-      const result = await controller.me({
+      const req = {
         user: { clerk_id: 'clerk_123' },
-      } as any);
+      };
 
-      // ASSERT
+      const result = await controller.me(req as never);
+
       expect(result.email).toBe('joao@example.com');
       expect(result.name).toBe('João Silva');
-      expect(service.getAuthenticatedProfile).toHaveBeenCalledWith('clerk_123');
+      expect(service.getAuthenticatedProfile as jest.Mock).toHaveBeenCalledWith(
+        'clerk_123',
+      );
     });
 
     it('should call service with correct clerk_id', async () => {
-      // ARRANGE
       const clerkId = 'clerk_abc';
+
       (service.getAuthenticatedProfile as jest.Mock).mockResolvedValue({
         id: 'user_123',
         clerk_id: clerkId,
@@ -72,15 +72,18 @@ describe('AuthController', () => {
         user_favorites: [],
       });
 
-      // ACT
-      await controller.me({ user: { clerk_id: clerkId } } as any);
+      const req = {
+        user: { clerk_id: clerkId },
+      };
 
-      // ASSERT
-      expect(service.getAuthenticatedProfile).toHaveBeenCalledWith(clerkId);
+      await controller.me(req as never);
+
+      expect(service.getAuthenticatedProfile as jest.Mock).toHaveBeenCalledWith(
+        clerkId,
+      );
     });
 
     it('should handle user with tickets', async () => {
-      // ARRANGE
       const mockUser = {
         id: 'user_123',
         clerk_id: 'clerk_123',
@@ -105,18 +108,17 @@ describe('AuthController', () => {
         mockUser,
       );
 
-      // ACT
-      const result = await controller.me({
+      const req = {
         user: { clerk_id: 'clerk_123' },
-      } as any);
+      };
 
-      // ASSERT
+      const result = await controller.me(req as never);
+
       expect(result.user_tickets).toHaveLength(1);
       expect(result.user_tickets[0].event.name).toBe('Music Festival 2024');
     });
 
     it('should handle user with favorites', async () => {
-      // ARRANGE
       const mockUser = {
         id: 'user_123',
         clerk_id: 'clerk_123',
@@ -129,7 +131,10 @@ describe('AuthController', () => {
         user_tickets: [],
         user_favorites: [
           {
-            activity: { id: 'act_1', name: 'Concert' },
+            activity: {
+              id: 'act_1',
+              name: 'Concert',
+            },
           },
         ],
       };
@@ -138,17 +143,16 @@ describe('AuthController', () => {
         mockUser,
       );
 
-      // ACT
-      const result = await controller.me({
+      const req = {
         user: { clerk_id: 'clerk_123' },
-      } as any);
+      };
 
-      // ASSERT
+      const result = await controller.me(req as never);
+
       expect(result.user_favorites).toHaveLength(1);
     });
   });
 
-  // ✅ TESTE 2: Validações gerais
   describe('General validations', () => {
     it('controller should be defined', () => {
       expect(controller).toBeDefined();
@@ -159,11 +163,10 @@ describe('AuthController', () => {
     });
 
     it('me method should be defined', () => {
-      expect(controller.me).toBeDefined();
+      expect(typeof controller.me).toBe('function');
     });
 
     it('should have correct endpoint', async () => {
-      // Verifica que o método existe e é callable
       (service.getAuthenticatedProfile as jest.Mock).mockResolvedValue({
         id: 'user_123',
         clerk_id: 'clerk_123',
@@ -177,25 +180,29 @@ describe('AuthController', () => {
         user_favorites: [],
       });
 
-      const result = await controller.me({
+      const req = {
         user: { clerk_id: 'clerk_123' },
-      } as any);
+      };
+
+      const result = await controller.me(req as never);
+
       expect(result).toBeDefined();
     });
   });
 
-  // ✅ TESTE 3: Error handling
   describe('Error handling', () => {
     it('should propagate service errors', async () => {
-      // ARRANGE
       (service.getAuthenticatedProfile as jest.Mock).mockRejectedValue(
         new Error('User not found'),
       );
 
-      // ACT & ASSERT
-      await expect(
-        controller.me({ user: { clerk_id: 'clerk_invalid' } } as any),
-      ).rejects.toThrow('User not found');
+      const req = {
+        user: { clerk_id: 'clerk_invalid' },
+      };
+
+      await expect(controller.me(req as never)).rejects.toThrow(
+        'User not found',
+      );
     });
   });
 });

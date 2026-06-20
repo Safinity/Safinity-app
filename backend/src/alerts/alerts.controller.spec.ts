@@ -30,7 +30,6 @@ describe('AlertsController', () => {
   // TEST 1: POST /alerts - Create alert
   describe('POST /alerts', () => {
     it('should create alert', async () => {
-      // ARRANGE
       const input = {
         title: 'Fire Alert',
         description: 'Fire detected',
@@ -49,16 +48,13 @@ describe('AlertsController', () => {
 
       (service.create as jest.Mock).mockResolvedValue(mockAlert);
 
-      // ACT
       const result = await controller.create(input as any);
 
-      // ASSERT
       expect(result.title).toBe('Fire Alert');
-      expect(service.create).toHaveBeenCalledWith(input);
+      expect(service.create as jest.Mock).toHaveBeenCalledWith(input);
     });
 
     it('should handle create error', async () => {
-      // ARRANGE
       const input = {
         title: 'Alert',
         event_id: null,
@@ -68,7 +64,6 @@ describe('AlertsController', () => {
         new Error('Invalid event'),
       );
 
-      // ACT & ASSERT
       await expect(controller.create(input as any)).rejects.toThrow(
         'Invalid event',
       );
@@ -78,7 +73,6 @@ describe('AlertsController', () => {
   // TEST 2: POST /alerts/organization/alerts/:alertId/assign-self
   describe('POST /alerts/organization/alerts/:alertId/assign-self', () => {
     it('should assign alert to self', async () => {
-      // ARRANGE
       const user = { id: 'user1', role: 'staff' };
       const alertId = '1';
 
@@ -90,26 +84,25 @@ describe('AlertsController', () => {
 
       (service.assignAlertToSelf as jest.Mock).mockResolvedValue(mockAlert);
 
-      // ACT
       const result = await controller.assignAlertToSelf(
         { user } as any,
         alertId,
       );
 
-      // ASSERT
       expect(result.staff_id).toBe(1n);
-      expect(service.assignAlertToSelf).toHaveBeenCalledWith(user, alertId);
+      expect(service.assignAlertToSelf as jest.Mock).toHaveBeenCalledWith(
+        user,
+        alertId,
+      );
     });
 
     it('should throw if alert not found', async () => {
-      // ARRANGE
       const user = { id: 'user1' };
 
       (service.assignAlertToSelf as jest.Mock).mockRejectedValue(
         new Error('Alert not found'),
       );
 
-      // ACT & ASSERT
       await expect(
         controller.assignAlertToSelf({ user } as any, '999'),
       ).rejects.toThrow('Alert not found');
@@ -119,7 +112,6 @@ describe('AlertsController', () => {
   // TEST 3: GET /alerts/organization/events/:eventId
   describe('GET /alerts/organization/events/:eventId', () => {
     it('should get organization event alerts', async () => {
-      // ARRANGE
       const user = { id: 'user1', role: 'staff' };
       const eventId = '1';
 
@@ -132,33 +124,28 @@ describe('AlertsController', () => {
         mockAlerts,
       );
 
-      // ACT
       const result = await controller.getOrganizationEventAlerts(
         { user } as any,
         eventId,
       );
 
-      // ASSERT
       expect(result).toHaveLength(2);
-      expect(service.findByOrganizationEvent).toHaveBeenCalledWith(
+      expect(service.findByOrganizationEvent as jest.Mock).toHaveBeenCalledWith(
         user,
         eventId,
       );
     });
 
     it('should return empty list if no alerts', async () => {
-      // ARRANGE
       const user = { id: 'user1' };
 
       (service.findByOrganizationEvent as jest.Mock).mockResolvedValue([]);
 
-      // ACT
       const result = await controller.getOrganizationEventAlerts(
         { user } as any,
         '1',
       );
 
-      // ASSERT
       expect(result).toEqual([]);
     });
   });
@@ -166,7 +153,6 @@ describe('AlertsController', () => {
   // TEST 4: PATCH /alerts/organization/alerts/:alertId/status
   describe('PATCH /alerts/organization/alerts/:alertId/status', () => {
     it('should update alert status', async () => {
-      // ARRANGE
       const user = { id: 'user1', role: 'staff' };
       const alertId = '1';
       const body = { status: 'resolved' };
@@ -180,24 +166,19 @@ describe('AlertsController', () => {
         mockAlert,
       );
 
-      // ACT
       const result = await controller.updateAssignedAlertStatus(
         { user } as any,
         alertId,
         body,
       );
 
-      // ASSERT
       expect(result.status).toBe('resolved');
-      expect(service.updateAssignedAlertStatus).toHaveBeenCalledWith(
-        user,
-        alertId,
-        'resolved',
-      );
+      expect(
+        service.updateAssignedAlertStatus as jest.Mock,
+      ).toHaveBeenCalledWith(user, alertId, 'resolved');
     });
 
     it('should throw if status is invalid', async () => {
-      // ARRANGE
       const user = { id: 'user1' };
       const body = { status: '' };
 
@@ -205,14 +186,12 @@ describe('AlertsController', () => {
         new Error('Status is required'),
       );
 
-      // ACT & ASSERT
       await expect(
         controller.updateAssignedAlertStatus({ user } as any, '1', body),
       ).rejects.toThrow('Status is required');
     });
 
     it('should throw if not assigned to staff', async () => {
-      // ARRANGE
       const user = { id: 'user1' };
       const body = { status: 'resolved' };
 
@@ -220,7 +199,6 @@ describe('AlertsController', () => {
         new Error('Alert not assigned to you'),
       );
 
-      // ACT & ASSERT
       await expect(
         controller.updateAssignedAlertStatus({ user } as any, '1', body),
       ).rejects.toThrow('Alert not assigned to you');
@@ -238,10 +216,10 @@ describe('AlertsController', () => {
     });
 
     it('should have all endpoints', () => {
-      expect(controller.create).toBeDefined();
-      expect(controller.assignAlertToSelf).toBeDefined();
-      expect(controller.getOrganizationEventAlerts).toBeDefined();
-      expect(controller.updateAssignedAlertStatus).toBeDefined();
+      expect(typeof controller.create).toBe('function');
+      expect(typeof controller.assignAlertToSelf).toBe('function');
+      expect(typeof controller.getOrganizationEventAlerts).toBe('function');
+      expect(typeof controller.updateAssignedAlertStatus).toBe('function');
     });
   });
 });

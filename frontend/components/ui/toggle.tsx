@@ -56,7 +56,9 @@ export default Toggle;
 const ToggleContainer = styled.View`
   padding: ${Spacing.md}px 0;
   border-bottom-width: 1px;
-  border-bottom-color: rgba(255, 255, 255, 0.1);
+  border-bottom-color: ${({ theme }) =>
+    theme.colors.mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'};
+
 `;
 
 const ToggleContent = styled.View`
@@ -71,14 +73,14 @@ const ToggleLabelContainer = styled.View`
 `;
 
 const ToggleLabel = styled.Text`
-  color: ${Colors.white};
+  color: ${({ theme }) => theme.colors.text};
   font-family: 'PlusJakartaSans_500Medium';
   font-size: 16px;
   margin-bottom: ${Spacing.xs}px;
 `;
 
 const ToggleDescription = styled.Text`
-  color: ${Colors.inactive};
+  color: ${({ theme }) => theme.colors.text};
   font-family: 'PlusJakartaSans_300Light';
   font-size: 14px;
   line-height: 18px;
@@ -88,9 +90,13 @@ const ToggleSwitch = styled.Pressable<{ active: boolean }>`
   width: 51px;
   height: 31px;
   border-radius: 15.5px;
-  background-color: ${({ active }) =>
-    active ? Colors.palette.primary.light80 : Colors.background};
-  border: ${({ active }) => (active ? 'none' : `1px solid ${Colors.palette.primary.light80}`)};
+  background-color: ${({ active, theme }) => {
+    const isDark = theme.colors.mode === 'dark';
+    if (isDark) {
+      return active ? theme.colors.palette.primary.light60 : theme.colors.grayNavbar;
+    }
+    return active ? theme.colors.palette.primary.light80 : theme.colors.palette.neutral.neutral80;
+  }};
   justify-content: center;
   padding: 2px;
 `;
@@ -102,7 +108,13 @@ const AnimatedKnob = Animated.createAnimatedComponent(styled.View<{
   width: 27px;
   height: 27px;
   border-radius: 13.5px;
-  background-color: ${({ active }) =>
-    active ? Colors.background : Colors.palette.primary.light80};
+  background-color: ${({ active, theme }) => {
+    const isDark = theme.colors.mode === 'dark';
+
+    if (isDark) {
+      return active ? theme.colors.palette.primary.dark50: theme.colors.background;
+    }
+    return active ? theme.colors.primary : theme.colors.inactive;
+  }};
   position: absolute;
 `);

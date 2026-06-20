@@ -6,7 +6,11 @@ import { useEventMode } from '@/context/EventModeContext';
 const NavbarContainer = styled.View`
   background-color: ${({ theme }) => theme.colors.navBackground};
   border-radius: ${({ theme }) => theme.borderRadius.xlarge}px;
-  height: ${({ theme }) => theme.height.md}px;
+  
+  /* Diminui a altura fora do modo de evento se quiseres, ou mantém theme.height.md */
+  height: ${({ $isEventMode, theme }) => 
+    $isEventMode ? theme.height.md : theme.height.md * 0.95 }px; 
+  
   margin-bottom: ${({ theme }) => theme.spacing.margemLateral}px;
   elevation: 8;
   shadow-color: ${({ theme }) => theme.colors.shadow};
@@ -15,8 +19,11 @@ const NavbarContainer = styled.View`
   shadow-radius: 18px;
   position: absolute;
   bottom: 0;
-  left: ${({ theme }) => theme.spacing.margemLateral}px;
-  right: ${({ theme }) => theme.spacing.margemLateral}px;
+  
+  left: ${({ $isEventMode, theme }) => 
+    $isEventMode ? theme.spacing.margemLateral  : theme.spacing.margemLateral * 1.3 }px;
+  right: ${({ $isEventMode, theme }) => 
+    $isEventMode ? theme.spacing.margemLateral  : theme.spacing.margemLateral * 1.3 }px;
 `;
 
 const TabBarContent = styled.View`
@@ -32,10 +39,11 @@ const TabButton = styled.TouchableOpacity`
   justify-content: center;
 `;
 
-const TabIcon = styled(Ionicons).attrs(({ theme }) => ({
-  size: theme.height.xs,
-}))<{ $active: boolean }>`
-  color: ${({ $active, theme }) => ($active ? theme.colors.navActive : theme.colors.navInactive)};
+const TabIcon = styled(Ionicons).attrs<{ $isEventMode: boolean }>(({ theme, $isEventMode }) => ({
+  size: $isEventMode ? theme.height.xs : theme.height.xs * 0.9,
+}))<{ $active: boolean; $isEventMode: boolean }>`
+  color: ${({ $active, theme }) =>
+    $active ? theme.colors.navActive : theme.colors.navInactive};
 `;
 
 const IconBox = styled.View`
@@ -61,7 +69,6 @@ const eventModeTabs = [
 const outsideEventTabs = [
   { name: 'index', title: 'Home', icon: 'home' },
   { name: 'wallet', title: 'Wallet', icon: 'wallet' },
-  { name: 'events-list', title: 'Events', icon: 'megaphone' },
   { name: 'friends', title: 'Friends', icon: 'people' },
 ] as const;
 
@@ -89,7 +96,7 @@ function CustomTabBar({ state, navigation }: any) {
   const tabConfigs = isInEventMode ? eventModeTabs : outsideEventTabs;
 
   return (
-    <NavbarContainer role="tablist">
+    <NavbarContainer role="tablist" $isEventMode={isInEventMode}>
       <TabBarContent>
         {tabConfigs.map(tab => {
           const routeIndex = state.routes.findIndex((r: any) => r.name === tab.name);
@@ -115,6 +122,7 @@ function CustomTabBar({ state, navigation }: any) {
                 <TabIcon
                   name={isFocused ? tab.icon : `${tab.icon}-outline`}
                   $active={isFocused}
+                  $isEventMode={isInEventMode} // 4. Passamos também para o ícone
                   accessibilityElementsHidden
                   importantForAccessibility="no"
                 />

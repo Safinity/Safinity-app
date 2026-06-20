@@ -12,12 +12,13 @@ export type HeaderVariant = 'default' | 'back' | 'pageDetails';
 
 interface HeaderProps {
   variant?: HeaderVariant;
-  colorScheme?: 'dark' | 'light';
+  colorScheme?: 'dark' | 'light'; // Mantido por compatibilidade, mas a lógica agora segue o forceDarkLogo
   showBottomDivider?: boolean;
   title?: string;
   subtitle?: string;
   rightIcon?: keyof typeof Ionicons.glyphMap;
   onRightPress?: () => void;
+  forceDarkLogo?: boolean; // Controla se a página força o aspeto escuro (Logótipo escuro + Ícones brancos)
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -28,11 +29,25 @@ const Header: React.FC<HeaderProps> = ({
   subtitle,
   rightIcon,
   onRightPress,
+  forceDarkLogo = false,
 }) => {
   const theme = useTheme();
   const statusBarHeight = Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 24;
   const { unreadCount } = useNotifications();
-  const iconColor = colorScheme === 'light' ? theme.colors.black : Colors.white;
+
+  // REGRA DA MUDANÇA:
+  // Determina se o cabeçalho deve usar a aparência escura (seja pelo sistema ou forçado por esta página)
+  const isDarkMode = theme.colors.mode === 'dark';
+  const useDarkAppearance = isDarkMode || forceDarkLogo;
+
+  // 1. Lógica do Logótipo (Igual à anterior)
+  const logoSource = useDarkAppearance
+    ? require('../../assets/logos/logo-header.png')       // Imagem para fundo escuro
+    : require('../../assets/logos/logo-header-light.png'); // Imagem para fundo claro
+
+  // 2. Lógica dos Ícones baseada na mesma regra
+  // Se for aparência escura, o ícone deve ser BRANCO. Se for aparência clara, o ícone deve ser PRETO.
+  const iconColor = useDarkAppearance ? Colors.white : theme.colors.black;
 
   const hasText = Boolean(title || subtitle);
 
@@ -46,7 +61,7 @@ const Header: React.FC<HeaderProps> = ({
           <HeaderRow>
             <LogoContainer>
               <LogoImage
-                source={require('../../assets/logos/logo-header.png')}
+                source={logoSource}
                 resizeMode="contain"
               />
             </LogoContainer>
@@ -57,7 +72,11 @@ const Header: React.FC<HeaderProps> = ({
                 role="button"
                 accessibilityLabel="Notifications"
               >
-                <Ionicons name="notifications-outline" size={Width.iconHeader} color={iconColor} />
+                <Ionicons
+                  name="notifications-outline"
+                  size={Width.iconHeader}
+                  color={iconColor} // <-- Atualizado dinamicamente
+                />
                 {unreadCount > 0 && (
                   <NotificationBadge>
                     <NotificationBadgeText>
@@ -72,7 +91,11 @@ const Header: React.FC<HeaderProps> = ({
                 role="button"
                 accessibilityLabel="Profile"
               >
-                <Ionicons name="person-circle" size={Width.iconHeader} color={iconColor} />
+                <Ionicons 
+                  name="person-circle" 
+                  size={Width.iconHeader} 
+                  color={iconColor} // <-- Atualizado dinamicamente
+                />
               </IconButton>
             </IconRow>
           </HeaderRow>

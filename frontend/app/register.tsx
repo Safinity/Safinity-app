@@ -1,17 +1,18 @@
 import { useState } from 'react';
-import styled from 'styled-components/native';
+import styled, { useTheme } from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
 import { router, Stack } from 'expo-router';
 import Head from 'expo-router/head';
 import { useAuth, useClerk, useSignUp } from '@clerk/expo';
+import { TextInput, TouchableOpacity, View } from 'react-native';
 
-import InputField from '@/components/InputField';
 import Checkbox from '@/components/Checkbox';
 import PrimaryButton from '@/components/PrimaryButton';
 import Header from '@/components/ui/header';
-import { Spacing, Width } from '@/constants/theme';
+import { Height, Spacing, Width } from '@/constants/theme';
 
 export default function Register() {
+  const theme = useTheme();
   const { isLoaded } = useAuth();
   const { setActive } = useClerk();
   const { signUp } = useSignUp();
@@ -22,6 +23,8 @@ export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
   const [checked, setChecked] = useState(false);
   const [code, setCode] = useState('');
   const [needsVerification, setNeedsVerification] = useState(false);
@@ -45,65 +48,55 @@ export default function Register() {
       return;
     }
 
-    const { error: clerkError } = await signUp.create({
-      emailAddress: email,
-      password,
-      firstName,
-      lastName,
-    });
+    try {
+      const result = await signUp.create({
+        emailAddress: email,
+        password,
+        firstName,
+        lastName,
+      });
 
-    if (clerkError) {
-      setError(clerkError.message || 'Unable to create account');
-      return;
+      if (result.status === 'missing_requirements') {
+        setError('Missing requirements to complete registration.');
+        return;
+      }
+
+      await signUp.update({
+        username,
+      });
+
+      await signUp.verifications.sendEmailCode();
+      setNeedsVerification(true);
+    } catch (clerkError: any) {
+      setError(clerkError.errors?.[0]?.message || clerkError.message || 'Unable to create account');
     }
-
-    const { error: usernameError } = await signUp.update({
-      username,
-    });
-
-    if (usernameError) {
-      setError(usernameError.message || 'Unable to set username');
-      return;
-    }
-
-    const emailCodeResult = await signUp.verifications.sendEmailCode();
-
-    if (emailCodeResult.error) {
-      setError(emailCodeResult.error.message || 'Unable to send verification code');
-      return;
-    }
-
-    setNeedsVerification(true);
   };
 
   const handleVerify = async () => {
     setError('');
 
-    const { error: clerkError } = await signUp.verifications.verifyEmailCode({ code });
+    try {
+      const result = await signUp.verifications.verifyEmailCode({ code });
 
-    if (clerkError) {
-      setError(clerkError.message || 'Invalid verification code');
-      return;
-    }
+      if (result.createdSessionId) {
+        await setActive({ session: result.createdSessionId });
+        router.replace('/onboarding/step1');
+        return;
+      }
 
-    if (signUp.createdSessionId) {
-      await setActive({ session: signUp.createdSessionId });
       router.replace('/onboarding/step1');
-      return;
+    } catch (clerkError: any) {
+      setError(clerkError.errors?.[0]?.message || clerkError.message || 'Invalid verification code');
     }
-
-    router.replace('/onboarding/step1');
   };
 
   if (!isLoaded) {
     return (
       <Screen>
         <Stack.Screen options={{ headerShown: false }} />
-
         <Head>
           <title>Register | Safinity</title>
         </Head>
-
         <LoadingArea />
       </Screen>
     );
@@ -117,20 +110,30 @@ export default function Register() {
         <title>Register | Safinity</title>
       </Head>
 
-      <Header variant="back" title="Register" subtitle="Create your account here!" />
+      <Header 
+        variant="back" 
+        title="Register" 
+        subtitle="Create your account here!" 
+        titleColor={theme.colors.text}
+        subtitleColor={theme.colors.text}
+      />
 
       <Container>
         <MainArea role="main">
           {needsVerification ? (
             <>
-              <InputField
-                label="Verification code *"
-                placeholder="Verification code"
-                keyboardType="numeric"
-                value={code}
-                onChangeText={setCode}
-                accessibilityState={{ required: true }}
-              />
+              <SemanticLabel color={theme.colors.text}>Verification code *</SemanticLabel>
+              {/* Alteração: Removido o borderColor */}
+              <InputWrapper color={theme.colors.palette.primary.light90}>
+                <NativeInputField
+                  color={theme.colors.text}
+                  placeholder="Verification code"
+                  placeholderTextColor={theme.colors.inactive}
+                  keyboardType="numeric"
+                  value={code}
+                  onChangeText={setCode}
+                />
+              </InputWrapper>
 
               {error ? (
                 <ErrorArea accessible={true} accessibilityLiveRegion="assertive" role="alert">
@@ -149,13 +152,13 @@ export default function Register() {
                   title="Verify and continue"
                   onPress={handleVerify}
                   disabled={code === ''}
+                  color={theme.colors.primary}
                 />
 
                 <RowWithLink>
                   <SmallText>Need to edit your details?</SmallText>
-
                   <LinkArea role="link" onPress={() => setNeedsVerification(false)}>
-                    <LinkText>Back</LinkText>
+                    <LinkText color={theme.colors.palette.primary.light40}>Back</LinkText>
                   </LinkArea>
                 </RowWithLink>
               </Actions>
@@ -163,60 +166,97 @@ export default function Register() {
           ) : (
             <>
               <InputRow>
-                <InputField
-                  label="First Name *"
-                  placeholder="First Name"
-                  value={firstName}
-                  onChangeText={setFirstName}
-                  style={{ flex: 1 }}
-                  accessibilityState={{ required: true }}
-                />
+                <View style={{ flex: 1 }}>
+                  <SemanticLabel color={theme.colors.text}>First Name *</SemanticLabel>
+                  {/* Alteração: Removido o borderColor de todos os inputs abaixo */}
+                  <InputWrapper color={theme.colors.palette.primary.light90}>
+                    <NativeInputField
+                      color={theme.colors.text}
+                      placeholder="First Name"
+                      placeholderTextColor={theme.colors.inactive}
+                      value={firstName}
+                      onChangeText={setFirstName}
+                    />
+                  </InputWrapper>
+                </View>
 
-                <InputField
-                  label="Last Name *"
-                  placeholder="Last Name"
-                  value={lastName}
-                  onChangeText={setLastName}
-                  style={{ flex: 1 }}
-                  accessibilityState={{ required: true }}
-                />
+                <View style={{ flex: 1 }}>
+                  <SemanticLabel color={theme.colors.text}>Last Name *</SemanticLabel>
+                  <InputWrapper color={theme.colors.palette.primary.light90}>
+                    <NativeInputField
+                      color={theme.colors.text}
+                      placeholder="Last Name"
+                      placeholderTextColor={theme.colors.inactive}
+                      value={lastName}
+                      onChangeText={setLastName}
+                    />
+                  </InputWrapper>
+                </View>
               </InputRow>
 
-              <InputField
-                label="Username *"
-                placeholder="Username"
-                value={username}
-                onChangeText={setUsername}
-                accessibilityState={{ required: true }}
-              />
+              <SemanticLabel color={theme.colors.text}>Username *</SemanticLabel>
+              <InputWrapper color={theme.colors.palette.primary.light90}>
+                <NativeInputField
+                  color={theme.colors.text}
+                  placeholder="Username"
+                  placeholderTextColor={theme.colors.inactive}
+                  value={username}
+                  onChangeText={setUsername}
+                  autoCapitalize="none"
+                />
+              </InputWrapper>
 
-              <InputField
-                label="Email *"
-                placeholder="Email"
-                icon="mail-outline"
-                keyboardType="email-address"
-                value={email}
-                onChangeText={setEmail}
-                accessibilityState={{ required: true }}
-              />
+              <SemanticLabel color={theme.colors.text}>Email *</SemanticLabel>
+              <InputWrapper color={theme.colors.palette.primary.light90}>
+                <Ionicons name="mail-outline" size={Width.iconSocial} color={theme.colors.inactive} style={{ marginRight: Spacing.sm }} />
+                <NativeInputField
+                  color={theme.colors.text}
+                  placeholder="Email"
+                  placeholderTextColor={theme.colors.inactive}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  value={email}
+                  onChangeText={setEmail}
+                />
+              </InputWrapper>
 
-              <InputField
-                label="Password *"
-                placeholder="Password"
-                password
-                value={password}
-                onChangeText={setPassword}
-                accessibilityState={{ required: true }}
-              />
+              <SemanticLabel color={theme.colors.text}>Password *</SemanticLabel>
+              <InputWrapper color={theme.colors.palette.primary.light90}>
+                <NativeInputField
+                  color={theme.colors.text}
+                  placeholder="Password"
+                  placeholderTextColor={theme.colors.inactive}
+                  secureTextEntry={!isPasswordVisible}
+                  value={password}
+                  onChangeText={setPassword}
+                />
+                <TouchableOpacity onPress={() => setIsPasswordVisible(!isPasswordVisible)}>
+                  <Ionicons
+                    name={isPasswordVisible ? 'eye-outline' : 'eye-off-outline'}
+                    size={Width.iconSocialLarge}
+                    color={theme.colors.inactive}
+                  />
+                </TouchableOpacity>
+              </InputWrapper>
 
-              <InputField
-                label="Confirm Password *"
-                placeholder="Confirm Password"
-                password
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                accessibilityState={{ required: true }}
-              />
+              <SemanticLabel color={theme.colors.text}>Confirm Password *</SemanticLabel>
+              <InputWrapper color={theme.colors.palette.primary.light90}>
+                <NativeInputField
+                  color={theme.colors.text}
+                  placeholder="Confirm Password"
+                  placeholderTextColor={theme.colors.inactive}
+                  secureTextEntry={!isConfirmPasswordVisible}
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                />
+                <TouchableOpacity onPress={() => setIsConfirmPasswordVisible(!isConfirmPasswordVisible)}>
+                  <Ionicons
+                    name={isConfirmPasswordVisible ? 'eye-outline' : 'eye-off-outline'}
+                    size={Width.iconSocialLarge}
+                    color={theme.colors.inactive}
+                  />
+                </TouchableOpacity>
+              </InputWrapper>
 
               {confirmPassword.length > 0 && password !== confirmPassword && (
                 <ErrorArea accessible={true} accessibilityLiveRegion="assertive" role="alert">
@@ -226,7 +266,6 @@ export default function Register() {
                     color="#ff4d4d"
                     style={{ marginRight: Spacing.sm }}
                   />
-
                   <ErrorText>The passwords entered do not match.</ErrorText>
                 </ErrorArea>
               )}
@@ -259,13 +298,13 @@ export default function Register() {
                   title="Create account"
                   disabled={!checked || password !== confirmPassword || password === ''}
                   onPress={handleRegister}
+                  color={theme.colors.primary}
                 />
 
                 <RowWithLink>
                   <SmallText>Already have an account?</SmallText>
-
                   <LinkArea role="link" onPress={() => router.push('/login')}>
-                    <LinkText>Log In</LinkText>
+                    <LinkText color={theme.colors.palette.primary.light40}>Log In</LinkText>
                   </LinkArea>
                 </RowWithLink>
               </Actions>
@@ -277,6 +316,8 @@ export default function Register() {
   );
 }
 
+// --- Styled Components ---
+
 const Screen = styled.SafeAreaView`
   flex: 1;
   background-color: ${({ theme }) => theme.colors.background};
@@ -284,9 +325,9 @@ const Screen = styled.SafeAreaView`
 
 const Container = styled.View`
   flex: 1;
-  padding-top: ${({ theme }) => theme.spacing.xxl}px;
-  padding-horizontal: ${({ theme }) => theme.spacing.margemLateral}px;
-  padding-bottom: ${({ theme }) => theme.spacing.md}px;
+  padding-top: ${Spacing.xxl}px;
+  padding-horizontal: ${Spacing.margemLateral}px;
+  padding-bottom: ${Spacing.md}px;
 `;
 
 const MainArea = styled.View`
@@ -299,15 +340,42 @@ const LoadingArea = styled.View`
 
 const InputRow = styled.View`
   flex-direction: row;
-  gap: ${({ theme }) => theme.spacing.md}px;
+  gap: ${Spacing.md}px;
+`;
+
+const SemanticLabel = styled.Text<{ color: string }>`
+  font-family: ${({ theme }) => theme.fonts.weights.medium};
+  font-size: ${({ theme }) => theme.fonts.sizes.base}px;
+  color: ${props => props.color};
+  margin-bottom: ${Spacing.xs}px;
+  margin-top: ${Spacing.md}px;
+`;
+
+{/* Alteração: Removido propriedades border-width e border-color para eliminar o stroke */}
+const InputWrapper = styled.View<{ color: string }>`
+  height: ${Height.socialButton}px;
+  background-color: ${props => props.color};
+  border-radius: ${({ theme }) => theme.borderRadius.medium}px;
+  flex-direction: row;
+  align-items: center;
+  padding-horizontal: ${Spacing.sm}px;
+`;
+
+const NativeInputField = styled(TextInput)<{ color: string }>`
+  flex: 1;
+  height: 100%;
+  font-family: ${({ theme }) => theme.fonts.weights.regular};
+  font-size: ${({ theme }) => theme.fonts.sizes.base}px;
+  color: ${props => props.color};
 `;
 
 const Actions = styled.View`
-  margin-top: ${({ theme }) => theme.spacing.sm}px;
+  margin-top: ${Spacing.sm}px;
 `;
 
 const CheckboxWrapper = styled.View`
-  margin-bottom: ${({ theme }) => theme.spacing.lg}px;
+  margin-top: ${Spacing.md}px;
+  margin-bottom: ${Spacing.lg}px;
 `;
 
 const CheckboxArea = styled.TouchableOpacity`
@@ -319,35 +387,36 @@ const RowWithLink = styled.View`
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  margin-top: ${({ theme }) => theme.spacing.md}px;
-  margin-bottom: ${({ theme }) => theme.spacing.md}px;
+  margin-top: ${Spacing.md}px;
+  margin-bottom: ${Spacing.md}px;
 `;
 
 const SmallText = styled.Text`
   color: ${({ theme }) => theme.colors.inactive};
-  ${({ theme }) => theme.text.textoPequeno};
+  font-family: ${({ theme }) => theme.fonts.weights.regular};
+  font-size: ${({ theme }) => theme.fonts.sizes.sm}px;
 `;
 
 const LinkArea = styled.TouchableOpacity`
-  margin-left: ${({ theme }) => theme.spacing.xs}px;
+  margin-left: ${Spacing.xs}px;
 `;
 
-const LinkText = styled.Text`
-  color: ${({ theme }) => theme.colors.palette.primary.light80};
-  ${({ theme }) => theme.text.textoPequeno};
+const LinkText = styled.Text<{ color?: string }>`
+  color: ${props => props.color || props.theme.colors.palette.primary.light80};
+  font-family: ${({ theme }) => theme.fonts.weights.semibold};
+  font-size: ${({ theme }) => theme.fonts.sizes.sm}px;
 `;
 
 const ErrorArea = styled.View`
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  padding: ${({ theme }) => theme.spacing.sm}px;
-  margin-bottom: ${({ theme }) => theme.spacing.md}px;
+  padding: ${Spacing.sm}px;
+  margin-top: ${Spacing.md}px;
 `;
 
 const ErrorText = styled.Text`
-  color: ${({ theme }) => theme.colors.error};
-  text-align: center;
-  font-weight: bold;
-  ${({ theme }) => theme.text.corpo.corpoTexto};
+  color: #ff4d4d;
+  font-family: ${({ theme }) => theme.fonts.weights.medium};
+  font-size: ${({ theme }) => theme.fonts.sizes.sm}px;
 `;

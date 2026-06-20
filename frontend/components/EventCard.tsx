@@ -24,8 +24,8 @@ const BackgroundImage = styled.ImageBackground.attrs({
 `;
 
 const GradientLayer = styled(LinearGradient).attrs({
-  colors: ['transparent', 'rgba(0,0,0,0.8)'],
-  locations: [0.4, 1.0],
+  colors: ['transparent', 'rgba(0,0,0,0.85)'], // Garante bom contraste em qualquer modo
+  locations: [0.3, 1.0],
 })<{ isCompact?: boolean }>`
   flex: 1;
   padding: ${({ isCompact, theme }) =>
@@ -43,8 +43,9 @@ const TimeBadge = styled.View<{ isCompact?: boolean }>`
   border-radius: ${({ theme }) => theme.borderRadius.round}px;
 `;
 
+// CORREÇÃO: Removidas as aspas de "white" para aplicar CSS nativo puro
 const TimeText = styled.Text`
-  color: ${({ theme }) => theme.colors.white};
+  color: white; 
   font-family: ${({ theme }) => theme.text.label.fontFamily};
   font-size: ${({ theme }) => theme.text.label.fontSize}px;
   line-height: ${({ theme }) => theme.text.label.lineHeight}px;
@@ -55,17 +56,19 @@ const CardFooter = styled.View`
   margin-bottom: ${({ theme }) => theme.spacing.xs}px;
 `;
 
+// CORREÇÃO: Alterado de theme.colors.white (que muda no light) para a cor estática #FFFFFF
 const DateText = styled.Text`
-  color: ${({ theme }) => theme.colors.white};
+  color: #FFFFFF; 
   font-family: ${({ theme }) => theme.text.textoPequeno.fontFamily};
   font-size: ${({ theme }) => theme.text.textoPequeno.fontSize}px;
   line-height: ${({ theme }) => theme.text.textoPequeno.lineHeight}px;
   margin-bottom: ${({ theme }) => theme.spacing.xs}px;
-  opacity: 0.9;
+  opacity: 0.85;
 `;
 
+// CORREÇÃO: Removidas as aspas de "white" para aplicar CSS nativo puro
 const TitleText = styled.Text`
-  color: ${({ theme }) => theme.colors.white};
+  color: white; 
   font-family: ${({ theme }) => theme.text.titulo.h1.fontFamily};
   font-size: ${({ theme }) => theme.text.titulo.h1.fontSize}px;
   line-height: ${({ theme }) => theme.text.titulo.h1.lineHeight}px;

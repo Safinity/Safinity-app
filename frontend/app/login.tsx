@@ -32,6 +32,8 @@ type SocialAuthResult = {
   signUp?: any;
 };
 
+type SecondFactorVerificationMode = 'classic' | 'future';
+
 function normalizeUsername(value?: string | null) {
   const normalized = value
     ?.toLowerCase()
@@ -55,6 +57,30 @@ function getSocialEmail(signUp: any) {
   return signUp?.emailAddress || signUp?.externalAccount?.emailAddress || null;
 }
 
+function canUseClassicSecondFactor(signInAttempt: any) {
+  return (
+    signInAttempt &&
+    typeof signInAttempt.prepareSecondFactor === 'function' &&
+    typeof signInAttempt.attemptSecondFactor === 'function'
+  );
+}
+
+function getFutureSignIn(signInAttempt: any) {
+  return signInAttempt?.mfa ? signInAttempt : signInAttempt?.__internal_future;
+}
+
+function getSignInStatus(signInAttempt: any) {
+  return signInAttempt?.status ?? signInAttempt?.__internal_future?.status;
+}
+
+function getSupportedSecondFactors(signInAttempt: any) {
+  return (
+    signInAttempt?.supportedSecondFactors ??
+    signInAttempt?.__internal_future?.supportedSecondFactors ??
+    []
+  );
+}
+
 export default function Login() {
   const { isLoaded, isSignedIn, getToken } = useAuth();
   const clerk = useClerk();
@@ -73,6 +99,7 @@ export default function Login() {
   const [secondFactorStrategy, setSecondFactorStrategy] = useState<
     'email_code' | 'phone_code' | 'totp' | 'backup_code' | null
   >(null);
+  const [secondFactorMode, setSecondFactorMode] = useState<SecondFactorVerificationMode>('classic');
   const [secondFactorHint, setSecondFactorHint] = useState('');
   const [isCompletingLogin, setIsCompletingLogin] = useState(false);
   const [activeSocialProvider, setActiveSocialProvider] = useState<SocialProvider | null>(null);
@@ -148,7 +175,11 @@ export default function Login() {
   }
 
   async function activateSessionIfAvailable(signInAttempt: any) {
-    const createdSessionId = signInAttempt?.createdSessionId || signIn?.createdSessionId;
+    const createdSessionId =
+      signInAttempt?.createdSessionId ||
+      signInAttempt?.__internal_future?.createdSessionId ||
+      signIn?.createdSessionId ||
+      signIn?.__internal_future?.createdSessionId;
 
     if (!createdSessionId) {
       return false;
@@ -179,6 +210,21 @@ export default function Login() {
   }
 
   async function attemptPasswordSignIn() {
+    const futureSignIn = signIn?.__internal_future;
+
+    if (futureSignIn?.password) {
+      const result = await futureSignIn.password({
+        identifier: email.trim(),
+        password,
+      });
+
+      if (result.error) {
+        throw result.error;
+      }
+
+      return futureSignIn;
+    }
+
     return signIn.create({
       identifier: email.trim(),
       password,
@@ -186,31 +232,113 @@ export default function Login() {
   }
 
   async function prepareSecondFactor(signInAttempt: any, factor: any) {
-    if (factor.strategy === 'email_code') {
+    console.warn('[Clerk-Auth] Clerk requested second factor:', {
+      status: signInAttempt?.status,
+      strategy: factor?.strategy,
+      clientTrustState: signInAttempt?.clientTrustState,
+    });
+
+    if (canUseClassicSecondFactor(signInAttempt) && factor.strategy === 'email_code') {
       const prepared = await signInAttempt.prepareSecondFactor({
         strategy: 'email_code',
         emailAddressId: factor.emailAddressId,
       });
       setPendingSignIn(prepared);
       setSecondFactorStrategy('email_code');
-      return;
+      setSecondFactorMode('classic');
+      return true;
     }
 
-    if (factor.strategy === 'phone_code') {
+    if (canUseClassicSecondFactor(signInAttempt) && factor.strategy === 'phone_code') {
       const prepared = await signInAttempt.prepareSecondFactor({
         strategy: 'phone_code',
         phoneNumberId: factor.phoneNumberId,
       });
       setPendingSignIn(prepared);
       setSecondFactorStrategy('phone_code');
-      return;
+      setSecondFactorMode('classic');
+      return true;
     }
 
-    setPendingSignIn(signInAttempt);
-    setSecondFactorStrategy(factor.strategy);
+    if (canUseClassicSecondFactor(signInAttempt)) {
+      setPendingSignIn(signInAttempt);
+      setSecondFactorStrategy(factor.strategy);
+      setSecondFactorMode('classic');
+      return true;
+    }
+
+    const futureSignIn = getFutureSignIn(signInAttempt);
+
+    if (futureSignIn?.mfa && factor.strategy === 'email_code') {
+      const result = await futureSignIn.mfa.sendEmailCode();
+
+      if (result.error) {
+        setError(result.error.message || 'Unable to send verification code.');
+        return false;
+      }
+
+      setPendingSignIn(futureSignIn);
+      setSecondFactorStrategy('email_code');
+      setSecondFactorMode('future');
+      return true;
+    }
+
+    if (futureSignIn?.mfa && factor.strategy === 'phone_code') {
+      const result = await futureSignIn.mfa.sendPhoneCode();
+
+      if (result.error) {
+        setError(result.error.message || 'Unable to send verification code.');
+        return false;
+      }
+
+      setPendingSignIn(futureSignIn);
+      setSecondFactorStrategy('phone_code');
+      setSecondFactorMode('future');
+      return true;
+    }
+
+    if (futureSignIn?.mfa && (factor.strategy === 'totp' || factor.strategy === 'backup_code')) {
+      setPendingSignIn(futureSignIn);
+      setSecondFactorStrategy(factor.strategy);
+      setSecondFactorMode('future');
+      return true;
+    }
+
+    setError(
+      'This account requires a second verification step, but the current Clerk sign-in object cannot prepare it. Please try again or review MFA/client trust settings in Clerk.',
+    );
+    return false;
   }
 
   async function verifySecondFactor() {
+    if (secondFactorMode === 'future') {
+      const futureSignIn = getFutureSignIn(pendingSignIn);
+
+      if (!futureSignIn?.mfa || !secondFactorStrategy) {
+        throw new Error('Unable to verify the second factor. Please restart sign in.');
+      }
+
+      const code = verificationCode.trim();
+      const result =
+        secondFactorStrategy === 'email_code'
+          ? await futureSignIn.mfa.verifyEmailCode({ code })
+          : secondFactorStrategy === 'phone_code'
+            ? await futureSignIn.mfa.verifyPhoneCode({ code })
+            : secondFactorStrategy === 'totp'
+              ? await futureSignIn.mfa.verifyTOTP({ code })
+              : await futureSignIn.mfa.verifyBackupCode({ code });
+
+      if (result.error) {
+        throw result.error;
+      }
+
+      return futureSignIn;
+    }
+
+    if (!pendingSignIn || typeof pendingSignIn.attemptSecondFactor !== 'function') {
+      throw new Error('Unable to verify the second factor. Please restart sign in.');
+    }
+
     return pendingSignIn.attemptSecondFactor({
       strategy: secondFactorStrategy,
       code: verificationCode.trim(),
@@ -219,7 +347,21 @@ export default function Login() {
 
   async function enterSecondFactorFlow(signInAttempt?: any) {
     const currentSignIn = signInAttempt ?? signIn;
-    const factors = currentSignIn?.supportedSecondFactors ?? signIn.supportedSecondFactors ?? [];
+    const status = getSignInStatus(currentSignIn) ?? getSignInStatus(signIn);
+    const secondFactorSignIn =
+      getSignInStatus(currentSignIn) === 'needs_second_factor' ||
+      getSignInStatus(currentSignIn) === 'needs_client_trust'
+        ? currentSignIn
+        : signIn;
+
+    if (status !== 'needs_second_factor' && status !== 'needs_client_trust') {
+      console.warn('[Clerk-Auth] Ignoring second factor without required status:', {
+        status,
+      });
+      return false;
+    }
+
+    const factors = getSupportedSecondFactors(secondFactorSignIn);
     const factor =
       factors.find((item: any) => item.strategy === 'email_code') ??
       factors.find((item: any) => item.strategy === 'phone_code') ??
@@ -227,11 +369,18 @@ export default function Login() {
       factors.find((item: any) => item.strategy === 'backup_code');
 
     if (!factor) {
-      setError('This account requires an unsupported second factor.');
+      setError(
+        'This account requires a second verification step. Disable MFA/client trust for this account in Clerk to sign in with password only.',
+      );
       return true;
     }
 
-    await prepareSecondFactor(currentSignIn, factor);
+    const didPrepare = await prepareSecondFactor(secondFactorSignIn, factor);
+
+    if (!didPrepare) {
+      return true;
+    }
+
     setSecondFactorHint(
       factor.strategy === 'email_code'
         ? `Enter the code sent to ${factor.safeIdentifier || 'your email'}`
@@ -269,11 +418,10 @@ export default function Login() {
       return true;
     }
 
-    const status = signInAttempt.status;
+    const status = getSignInStatus(signInAttempt) ?? getSignInStatus(signIn);
     const firstFactorVerified = signInAttempt.firstFactorVerification?.status === 'verified';
-    const supportedSecondFactors = signInAttempt.supportedSecondFactors ?? [];
     const inferredStatus =
-      status === 'needs_second_factor' || (firstFactorVerified && supportedSecondFactors.length)
+      status === 'needs_second_factor' || status === 'needs_client_trust'
         ? 'needs_second_factor'
         : status;
 
@@ -308,6 +456,7 @@ export default function Login() {
     setVerificationCode('');
     setPendingSignIn(null);
     setSecondFactorStrategy(null);
+    setSecondFactorMode('classic');
     setSecondFactorHint('');
 
     if (!isLoaded || !signIn) {
@@ -328,17 +477,13 @@ export default function Login() {
       }
 
       const statusMessage = getSignInStatusMessage(signInAttempt);
-      if (statusMessage.includes('needs_second_factor')) {
-        await enterSecondFactorFlow(signInAttempt);
-        return;
-      }
-
       setError(`Unable to complete sign in. Current ${statusMessage || 'status: unknown'}`);
     } catch (err: any) {
       console.error('[Clerk-Auth] Erro capturado no catch do handleLogin:', err);
-      if (signIn.status === 'needs_second_factor') {
-        await enterSecondFactorFlow(signIn);
-        return;
+      if (getSignInStatus(signIn) === 'needs_second_factor' && canUseClassicSecondFactor(signIn)) {
+        if (await enterSecondFactorFlow(signIn)) {
+          return;
+        }
       }
 
       setError(

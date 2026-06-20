@@ -12,17 +12,8 @@ import { useNotifications } from '@/context/NotificationsContext';
 import { getFriendProfile, toggleFriendship, type FriendProfileResponse } from '@/utils/friends';
 import { navigateToPreviousRoute } from '@/utils/navigationHistory';
 import { getUserImageSource } from '@/utils/userImages';
-import { userImages } from '../../../assets/images/Users/userImages';
 
 const { width } = Dimensions.get('window');
-
-function getAvatarSource(friend: FriendProfileResponse) {
-  const remoteImage = getUserImageSource(friend.image);
-
-  if (remoteImage) return remoteImage;
-
-  return userImages.default;
-}
 
 export default function FriendProfile() {
   const theme = useTheme();
@@ -86,6 +77,7 @@ export default function FriendProfile() {
       : currentFriendshipState === 'PENDING'
         ? 'pending'
         : 'add';
+  const avatarSource = getUserImageSource(friendData?.image);
 
   const handleFriendshipAction = async () => {
     if (!friendData) return;
@@ -164,11 +156,20 @@ export default function FriendProfile() {
 
         {/* Perfil */}
         <ProfileHeader role="summary" accessibilityLabel="User profile information">
-          <AvatarImage
-            source={getAvatarSource(friendData)}
-            role="image"
-            accessibilityLabel={`Profile picture of ${friendData.name}`}
-          />
+          {avatarSource ? (
+            <AvatarImage
+              source={avatarSource}
+              role="image"
+              accessibilityLabel={`Profile picture of ${friendData.name}`}
+            />
+          ) : (
+            <AvatarIcon
+              role="image"
+              accessibilityLabel={`Default profile icon of ${friendData.name}`}
+            >
+              <Ionicons name="person" size={44} color="#cfd3e0" />
+            </AvatarIcon>
+          )}
 
           <InfoSection>
             <DisplayName role="header">{friendData.name}</DisplayName>
@@ -272,6 +273,17 @@ const AvatarImage = styled.Image`
   border-radius: ${({ theme }) => theme.borderRadius.round}px;
   border-width: 2px;
   border-color: ${({ theme }) => theme.colors.primary};
+`;
+
+const AvatarIcon = styled.View`
+  width: ${({ theme }) => theme.height.friendProfileAvatar}px;
+  height: ${({ theme }) => theme.height.friendProfileAvatar}px;
+  border-radius: ${({ theme }) => theme.borderRadius.round}px;
+  border-width: 2px;
+  border-color: ${({ theme }) => theme.colors.primary};
+  background-color: ${({ theme }) => theme.colors.surfaceSoft};
+  align-items: center;
+  justify-content: center;
 `;
 
 const InfoSection = styled.View`

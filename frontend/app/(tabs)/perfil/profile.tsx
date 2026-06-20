@@ -18,6 +18,8 @@ import { Fonts } from '../../../constants/theme';
 import { useThemePreference } from '../../../context/ThemeContext';
 
 import EditIcon from '../../../assets/Icons/edit.png';
+import ProfileFundoImg from '../../../assets/images/Profile-fundo.png';
+import ProfileFundoDarkImg from '../../../assets/images/Profile-fundo-dark.png';
 import Header from '../../../components/ui/header'; // import do header customizado
 import {
   deleteMyAccount,

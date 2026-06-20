@@ -3,7 +3,13 @@ import { useAuth } from '@clerk/expo';
 import { Stack, router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Modal, type ImageSourcePropType } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  DeviceEventEmitter,
+  Modal,
+  type ImageSourcePropType,
+} from 'react-native';
 import styled from 'styled-components/native';
 import Camera from '../../../assets/Icons/camera.png';
 import InputField from '../../../components/InputField';
@@ -11,6 +17,7 @@ import Header from '../../../components/ui/header';
 import { Colors, Fonts } from '../../../constants/theme';
 import { LinearGradient } from 'expo-linear-gradient';
 import { getMyProfile, updateMyProfile, type AuthenticatedProfile } from '../../../utils/profile';
+import { PROFILE_UPDATED_EVENT } from '../../../utils/profileEvents';
 import { getUserImageSource } from '../../../utils/userImages';
 
 function getProfileImageSource(image: string | null | undefined): ImageSourcePropType | null {
@@ -181,13 +188,16 @@ export default function EditProfile() {
     try {
       setIsLoading(true);
       const token = await getTokenRef.current();
-      await updateMyProfile(token, {
+      const updatedProfile = await updateMyProfile(token, {
         name,
         username,
         imageBase64: selectedProfileImage?.base64,
         imageMimeType: selectedProfileImage?.mimeType,
       });
 
+      DeviceEventEmitter.emit(PROFILE_UPDATED_EVENT, {
+        image: updatedProfile?.image,
+      });
       setIsSuccessModalVisible(true);
     } catch (error) {
       console.error('Failed to update profile', error);

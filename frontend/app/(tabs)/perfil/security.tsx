@@ -1,10 +1,16 @@
 import { useAuth, useUser as useClerkUser } from '@clerk/expo';
 import React, { useEffect, useRef, useState } from 'react';
-import styled from 'styled-components/native';
-import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import styled, { useTheme } from 'styled-components/native';
+import {
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from 'react-native';
 import { Stack } from 'expo-router';
 import Header from '../../../components/ui/header';
-import { Colors, Spacing, Fonts } from '../../../constants/theme';
+import { Spacing, Fonts } from '../../../constants/theme';
 import InputField from '../../../components/InputField';
 import { getMyProfile } from '../../../utils/profile';
 
@@ -17,6 +23,7 @@ function getClerkErrorMessage(error: unknown) {
     errors?: { message?: string; longMessage?: string }[];
     message?: string;
   };
+
   const firstError = maybeError.errors?.[0];
 
   return (
@@ -28,17 +35,23 @@ function getClerkErrorMessage(error: unknown) {
 }
 
 const SecurityScreen = () => {
+  const theme = useTheme();
+
   const { isLoaded, isSignedIn, getToken } = useAuth();
   const { user: clerkUser } = useClerkUser();
+
   const [email, setEmail] = useState('');
   const [isLoadingEmail, setIsLoadingEmail] = useState(true);
   const [isSavingPassword, setIsSavingPassword] = useState(false);
+
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [repeatPassword, setRepeatPassword] = useState('');
+
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showRepeatPassword, setShowRepeatPassword] = useState(false);
+
   const getTokenRef = useRef(getToken);
   getTokenRef.current = getToken;
 
@@ -46,11 +59,10 @@ const SecurityScreen = () => {
     let isActive = true;
 
     async function loadEmail() {
-      if (!isLoaded) {
-        return;
-      }
+      if (!isLoaded) return;
 
-      const clerkEmail = clerkUser?.primaryEmailAddress?.emailAddress ?? '';
+      const clerkEmail =
+        clerkUser?.primaryEmailAddress?.emailAddress ?? '';
 
       if (!isSignedIn) {
         setEmail('');
@@ -60,6 +72,7 @@ const SecurityScreen = () => {
 
       try {
         setIsLoadingEmail(true);
+
         const token = await getTokenRef.current();
         const profile = await getMyProfile(token);
 
@@ -68,6 +81,7 @@ const SecurityScreen = () => {
         }
       } catch (error) {
         console.error('Failed to load security email', error);
+
         if (isActive) {
           setEmail(clerkEmail);
         }
@@ -83,7 +97,11 @@ const SecurityScreen = () => {
     return () => {
       isActive = false;
     };
-  }, [clerkUser?.primaryEmailAddress?.emailAddress, isLoaded, isSignedIn]);
+  }, [
+    clerkUser?.primaryEmailAddress?.emailAddress,
+    isLoaded,
+    isSignedIn,
+  ]);
 
   const handleSavePassword = async () => {
     const currentPasswordValue = currentPassword;
@@ -91,37 +109,59 @@ const SecurityScreen = () => {
     const repeatPasswordValue = repeatPassword;
 
     if (!isLoaded || !isSignedIn || !clerkUser) {
-      Alert.alert('Authentication required', 'Please sign in to update your password.');
+      Alert.alert(
+        'Authentication required',
+        'Please sign in to update your password.'
+      );
       return;
     }
 
     if (clerkUser.passwordEnabled && !currentPasswordValue) {
-      Alert.alert('Missing password', 'Please enter your current password.');
+      Alert.alert(
+        'Missing password',
+        'Please enter your current password.'
+      );
       return;
     }
 
     if (!newPasswordValue || !repeatPasswordValue) {
-      Alert.alert('Missing password', 'Please enter and repeat your new password.');
+      Alert.alert(
+        'Missing password',
+        'Please enter and repeat your new password.'
+      );
       return;
     }
 
     if (newPasswordValue.length < 8) {
-      Alert.alert('Weak password', 'Your new password must be at least 8 characters.');
+      Alert.alert(
+        'Weak password',
+        'Your new password must be at least 8 characters.'
+      );
       return;
     }
 
     if (newPasswordValue !== repeatPasswordValue) {
-      Alert.alert('Passwords do not match', 'Please repeat the same new password.');
+      Alert.alert(
+        'Passwords do not match',
+        'Please repeat the same new password.'
+      );
       return;
     }
 
-    if (currentPasswordValue && currentPasswordValue === newPasswordValue) {
-      Alert.alert('Same password', 'Please choose a different new password.');
+    if (
+      currentPasswordValue &&
+      currentPasswordValue === newPasswordValue
+    ) {
+      Alert.alert(
+        'Same password',
+        'Please choose a different new password.'
+      );
       return;
     }
 
     try {
       setIsSavingPassword(true);
+
       await clerkUser.updatePassword({
         currentPassword: currentPasswordValue || undefined,
         newPassword: newPasswordValue,
@@ -131,10 +171,18 @@ const SecurityScreen = () => {
       setCurrentPassword('');
       setNewPassword('');
       setRepeatPassword('');
-      Alert.alert('Password updated', 'Your password was updated successfully.');
+
+      Alert.alert(
+        'Password updated',
+        'Your password was updated successfully.'
+      );
     } catch (error) {
       console.error('Failed to update password', error);
-      Alert.alert('Unable to update password', getClerkErrorMessage(error));
+
+      Alert.alert(
+        'Unable to update password',
+        getClerkErrorMessage(error)
+      );
     } finally {
       setIsSavingPassword(false);
     }
@@ -143,7 +191,16 @@ const SecurityScreen = () => {
   return (
     <Container>
       <Stack.Screen options={{ title: 'Password & Security' }} />
-      <Header variant="back" title="Password & Security" showBottomDivider={false} />
+
+      <Header
+  variant="back"
+  title="Password & Security"
+  showBottomDivider={false}
+  // Adicione esta prop de estilo
+  titleStyle={{
+    color: theme.mode === 'light' ? '#000000' : theme.colors.text
+  }}
+/>
 
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -167,7 +224,9 @@ const SecurityScreen = () => {
             </Section>
 
             <Section>
-              <SectionTitle role="header">Change Password</SectionTitle>
+              <SectionTitle>
+                Change Password
+              </SectionTitle>
 
               <InputField
                 label="Current Password"
@@ -175,9 +234,14 @@ const SecurityScreen = () => {
                 onChangeText={setCurrentPassword}
                 placeholder="Enter current password"
                 password={true}
-                icon={showCurrentPassword ? 'eye-off-outline' : 'eye-outline'}
-                onIconPress={() => setShowCurrentPassword(!showCurrentPassword)}
-                accessibilityHint="Enter your current password to confirm your identity"
+                icon={
+                  showCurrentPassword
+                    ? 'eye-off-outline'
+                    : 'eye-outline'
+                }
+                onIconPress={() =>
+                  setShowCurrentPassword(!showCurrentPassword)
+                }
               />
 
               <InputField
@@ -186,9 +250,14 @@ const SecurityScreen = () => {
                 onChangeText={setNewPassword}
                 placeholder="Enter new password"
                 password={true}
-                icon={showNewPassword ? 'eye-off-outline' : 'eye-outline'}
-                onIconPress={() => setShowNewPassword(!showNewPassword)}
-                accessibilityHint="Password must be at least 8 characters"
+                icon={
+                  showNewPassword
+                    ? 'eye-off-outline'
+                    : 'eye-outline'
+                }
+                onIconPress={() =>
+                  setShowNewPassword(!showNewPassword)
+                }
               />
 
               <InputField
@@ -197,22 +266,29 @@ const SecurityScreen = () => {
                 onChangeText={setRepeatPassword}
                 placeholder="Repeat new password"
                 password={true}
-                icon={showRepeatPassword ? 'eye-off-outline' : 'eye-outline'}
-                onIconPress={() => setShowRepeatPassword(!showRepeatPassword)}
-                accessibilityHint="Repeat the new password exactly as entered above"
+                icon={
+                  showRepeatPassword
+                    ? 'eye-off-outline'
+                    : 'eye-outline'
+                }
+                onIconPress={() =>
+                  setShowRepeatPassword(!showRepeatPassword)
+                }
               />
 
               <SaveButton
-                role="button"
-                accessibilityLabel="Save password changes"
                 disabled={isSavingPassword}
                 $disabled={isSavingPassword}
                 onPress={handleSavePassword}
               >
                 {isSavingPassword ? (
-                  <ActivityIndicator color={Colors.white} />
+                  <ActivityIndicator
+                    color={theme.colors.onPrimary}
+                  />
                 ) : (
-                  <SaveButtonText>Save changes</SaveButtonText>
+                  <SaveButtonText>
+                    Save changes
+                  </SaveButtonText>
                 )}
               </SaveButton>
             </Section>
@@ -225,10 +301,9 @@ const SecurityScreen = () => {
 
 export default SecurityScreen;
 
-// Estilos
 const Container = styled.View`
   flex: 1;
-  background-color: ${Colors.background};
+  background-color: ${({ theme }) => theme.colors.background};
 `;
 
 const Content = styled.View`
@@ -243,14 +318,14 @@ const Section = styled.View`
 `;
 
 const SectionTitle = styled.Text`
-  color: ${Colors.white};
+  color: ${({ theme }) => theme.colors.text};
   font-family: ${Fonts.weights.semibold};
   font-size: 18px;
   margin-bottom: ${Spacing.md}px;
 `;
 
 const SaveButton = styled.TouchableOpacity<{ $disabled?: boolean }>`
-  background-color: ${Colors.palette.primary.normal};
+  background-color: ${({ theme }) => theme.colors.primary};
   border-radius: ${Spacing.md}px;
   padding: ${Spacing.md}px;
   align-items: center;
@@ -259,7 +334,7 @@ const SaveButton = styled.TouchableOpacity<{ $disabled?: boolean }>`
 `;
 
 const SaveButtonText = styled.Text`
-  color: ${Colors.white};
+  color: ${({ theme }) => theme.colors.onPrimary};
   font-family: ${Fonts.weights.semibold};
   font-size: 16px;
 `;

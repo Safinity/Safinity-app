@@ -295,11 +295,11 @@ export default function Register() {
                 </CheckboxWrapper>
 
                 <PrimaryButton
-                  title="Create account"
-                  disabled={!checked || password !== confirmPassword || password === ''}
-                  onPress={handleRegister}
-                  color={theme.colors.primary}
-                />
+  title="Create account"
+  disabled={!checked || password !== confirmPassword || password === ''}
+  onPress={handleRegister}
+  color={theme.colors.primary} // Use apenas esta prop
+/>
 
                 <RowWithLink>
                   <SmallText>Already have an account?</SmallText>
@@ -354,19 +354,23 @@ const SemanticLabel = styled.Text<{ color: string }>`
 {/* Alteração: Removido propriedades border-width e border-color para eliminar o stroke */}
 const InputWrapper = styled.View<{ color: string }>`
   height: ${Height.socialButton}px;
-  background-color: ${props => props.color};
+  /* Forçamos o fundo para branco se for light mode, ou mantemos a cor de fundo do tema */
+  background-color: ${({ theme, color }) => 
+    (theme.colors.mode === 'light') ? '#FFFFFF' : color};
   border-radius: ${({ theme }) => theme.borderRadius.medium}px;
   flex-direction: row;
   align-items: center;
   padding-horizontal: ${Spacing.sm}px;
 `;
 
-const NativeInputField = styled(TextInput)<{ color: string }>`
+const NativeInputField = styled(TextInput)`
   flex: 1;
   height: 100%;
   font-family: ${({ theme }) => theme.fonts.weights.regular};
   font-size: ${({ theme }) => theme.fonts.sizes.base}px;
-  color: ${props => props.color};
+  /* Forçamos a cor do texto para preto puro (#000000) */
+  /* Assim garantimos que fica legível sobre o fundo branco */
+  color: #000000;
 `;
 
 const Actions = styled.View`

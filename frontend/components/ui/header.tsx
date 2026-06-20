@@ -24,13 +24,13 @@ export type HeaderVariant = 'default' | 'back' | 'pageDetails';
 
 interface HeaderProps {
   variant?: HeaderVariant;
-  colorScheme?: 'dark' | 'light'; // Mantido por compatibilidade, mas a lógica agora segue o forceDarkLogo
+  colorScheme?: 'dark' | 'light';
   showBottomDivider?: boolean;
   title?: string;
   subtitle?: string;
   rightIcon?: keyof typeof Ionicons.glyphMap;
   onRightPress?: () => void;
-  forceDarkLogo?: boolean; // Controla se a página força o aspeto escuro (Logótipo escuro + Ícones brancos)
+  forceDarkLogo?: boolean;
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -98,18 +98,13 @@ const Header: React.FC<HeaderProps> = ({
     };
   }, [loadProfileImage]);
 
-  // REGRA DA MUDANÇA:
-  // Determina se o cabeçalho deve usar a aparência escura (seja pelo sistema ou forçado por esta página)
   const isDarkMode = theme.colors.mode === 'dark';
   const useDarkAppearance = isDarkMode || forceDarkLogo;
 
-  // 1. Lógica do Logótipo (Igual à anterior)
   const logoSource = useDarkAppearance
-    ? require('../../assets/logos/logo-header.png')       // Imagem para fundo escuro
-    : require('../../assets/logos/logo-header-light.png'); // Imagem para fundo claro
+    ? require('../../assets/logos/logo-header.png')
+    : require('../../assets/logos/logo-header-light.png');
 
-  // 2. Lógica dos Ícones baseada na mesma regra
-  // Se for aparência escura, o ícone deve ser BRANCO. Se for aparência clara, o ícone deve ser PRETO.
   const iconColor = useDarkAppearance ? Colors.white : theme.colors.black;
 
   const hasText = Boolean(title || subtitle);
@@ -119,72 +114,42 @@ const Header: React.FC<HeaderProps> = ({
       <SafeArea height={statusBarHeight} />
 
       <HeaderContent>
-        {/* DEFAULT HEADER */}
         {variant === 'default' && (
           <HeaderRow>
             <LogoContainer>
-              <LogoImage
-                source={logoSource}
-                resizeMode="contain"
-              />
+              <LogoImage source={logoSource} resizeMode="contain" />
             </LogoContainer>
 
             <IconRow>
-              <IconButton
-                onPress={() => router.push('/notifications')}
-                role="button"
-                accessibilityLabel="Notifications"
-              >
-                <Ionicons
-                  name="notifications-outline"
-                  size={Width.iconHeader}
-                  color={iconColor} // <-- Atualizado dinamicamente
-                />
+              <IconButton onPress={() => router.push('/notifications')}>
+                <Ionicons name="notifications-outline" size={Width.iconHeader} color={iconColor} />
                 {unreadCount > 0 && (
                   <NotificationBadge>
-                    <NotificationBadgeText>
-                      {unreadCount > 9 ? '9+' : unreadCount}
-                    </NotificationBadgeText>
+                    <NotificationBadgeText>{unreadCount > 9 ? '9+' : unreadCount}</NotificationBadgeText>
                   </NotificationBadge>
                 )}
               </IconButton>
 
-              <IconButton
-                onPress={() => router.push('/perfil/profile')}
-                role="button"
-                accessibilityLabel="Profile"
-              >
+              <IconButton onPress={() => router.push('/perfil/profile')}>
                 {profileImageSource ? (
-                  <ProfileAvatar
-                    source={profileImageSource}
-                    accessibilityLabel="Profile picture"
-                  />
+                  <ProfileAvatar source={profileImageSource} />
                 ) : (
-                  <Ionicons 
-                    name="person-circle" 
-                    size={Width.iconHeader} 
-                    color={iconColor} // <-- Atualizado dinamicamente
-                  />
+                  <Ionicons name="person-circle" size={Width.iconHeader} color={iconColor} />
                 )}
               </IconButton>
             </IconRow>
           </HeaderRow>
         )}
 
-        {/* BACK HEADER */}
         {variant === 'back' && (
           <BackContainer hasText={hasText}>
             <BackButtonRow>
-              <BackButton
-                onPress={() => navigateToPreviousRoute()}
-                accessibilityLabel="Go back"
-                role="button"
-              >
+              <BackButton onPress={() => navigateToPreviousRoute()}>
                 <Ionicons name="arrow-back" size={Width.iconHeader} color={iconColor} />
               </BackButton>
 
               {rightIcon && onRightPress && (
-                <RightButton onPress={onRightPress} accessibilityLabel="Right action" role="button">
+                <RightButton onPress={onRightPress}>
                   <Ionicons name={rightIcon} size={Width.iconHeader} color={iconColor} />
                 </RightButton>
               )}
@@ -192,22 +157,22 @@ const Header: React.FC<HeaderProps> = ({
 
             {title && (
               <TitleContainer>
-                <Title role="header">{title}</Title>
-
-                {subtitle && <Subtitle>{subtitle}</Subtitle>}
+                <Title role="header" useDarkAppearance={useDarkAppearance}>
+                  {title}
+                </Title>
+                {subtitle && (
+                  <Subtitle useDarkAppearance={useDarkAppearance}>
+                    {subtitle}
+                  </Subtitle>
+                )}
               </TitleContainer>
             )}
           </BackContainer>
         )}
 
-        {/* PAGE DETAILS HEADER */}
         {variant === 'pageDetails' && (
           <DetailsRow>
-            <BackButtonDetails
-              onPress={() => navigateToPreviousRoute()}
-              accessibilityLabel="Go back"
-              role="button"
-            >
+            <BackButtonDetails onPress={() => navigateToPreviousRoute()}>
               <Ionicons name="arrow-back" size={Width.iconHeader} color={iconColor} />
             </BackButtonDetails>
           </DetailsRow>
@@ -221,8 +186,6 @@ const Header: React.FC<HeaderProps> = ({
 
 export default Header;
 
-/* ---------------- styled components ---------------- */
-
 const HeaderFixedContainer = styled.View`
   position: absolute;
   top: 10;
@@ -233,7 +196,7 @@ const HeaderFixedContainer = styled.View`
 `;
 
 const SafeArea = styled.View<{ height: number }>`
-  height: ${({ height }: { height: number }) => height}px;
+  height: ${({ height }) => height}px;
 `;
 
 const HeaderContent = styled.View`
@@ -265,8 +228,8 @@ const BackButton = styled.Pressable`
 
 const RightButton = styled.Pressable`
   z-index: 99;
-  padding-bottom: ${({ theme }) => theme.spacing.sm}px;
-  border-radius: ${({ theme }) => theme.borderRadius.round}px;
+  padding-bottom: ${Spacing.sm}px;
+  border-radius: ${BorderRadius.round}px;
 `;
 
 const BackButtonDetails = styled.Pressable`
@@ -321,22 +284,20 @@ const NotificationBadgeText = styled.Text`
   font-family: ${TextStyles.label.fontFamily};
 `;
 
-/* PAGE DETAILS */
-
 const DetailsRow = styled.View`
   flex-direction: row;
   align-items: center;
   gap: ${Spacing.md}px;
 `;
 
-const Title = styled.Text`
-  color: ${Colors.white};
+const Title = styled.Text<{ useDarkAppearance?: boolean }>`
+  color: ${({ useDarkAppearance }) => (useDarkAppearance ? Colors.white : '#000000')};
   ${TextStyles.titulo.h};
   include-font-padding: false;
 `;
 
-const Subtitle = styled.Text`
-  color: ${Colors.inactive};
+const Subtitle = styled.Text<{ useDarkAppearance?: boolean }>`
+  color: ${({ useDarkAppearance }) => (useDarkAppearance ? Colors.inactive : '#666666')};
   margin-top: ${Spacing.xs}px;
   ${TextStyles.corpo.corpoTexto};
 `;

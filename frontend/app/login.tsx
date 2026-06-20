@@ -649,7 +649,9 @@ const SemanticLabel = styled.Text<{ color: string }>`
 
 const InputWrapper = styled.View<{ color: string; borderColor: string }>`
   height: ${Height.socialButton}px;
-  background-color: ${props => props.color};
+  /* Usamos a variável themeMode diretamente do contexto */
+  background-color: ${({ theme, color }) => 
+    (theme.mode === 'light' || color === '#FFFFFF') ? '#FFFFFF' : color};
   border-radius: ${({ theme }) => theme.borderRadius.medium}px;
   border-width: ${Height.separatorLine}px;
   border-color: ${props => props.borderColor};
@@ -664,7 +666,8 @@ const NativeInputField = styled(TextInput)<{ color: string }>`
   height: 100%;
   font-family: ${({ theme }) => theme.fonts.weights.regular};
   font-size: ${({ theme }) => theme.fonts.sizes.base}px;
-  color: ${props => props.color};
+  /* Força a cor do texto para PRETO se estivermos num fundo claro */
+  color: #000000; 
 `;
 
 const RowWithLink = styled.View`

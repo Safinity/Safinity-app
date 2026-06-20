@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { FlatList, StatusBar, ActivityIndicator, View } from 'react-native';
 import styled from 'styled-components/native';
 import { Stack } from 'expo-router';
@@ -12,6 +12,7 @@ import SearchInput from '../../components/ui/SearchInput';
 import FilterTags from '../../components/ui/FilterTags';
 import { HeroBanner } from '../../components/HeroBanner';
 import { EventCard } from '../../components/EventCard';
+import { matchesEventSearch } from '../../utils/eventSearch';
 
 const Container = styled.View`
   flex: 1;
@@ -53,6 +54,16 @@ const SectionContainer = styled.View`
 
 const VerticalSpacer = styled.View`
   height: 120px;
+`;
+
+const EmptySearchState = styled.Text`
+  color: ${({ theme }: any) => theme.colors.textMuted};
+  font-family: ${({ theme }: any) => theme.text.corpo.corpoTexto.fontFamily};
+  font-size: ${({ theme }: any) => theme.text.corpo.corpoTexto.fontSize}px;
+  line-height: ${({ theme }: any) => theme.text.corpo.corpoTexto.lineHeight}px;
+  text-align: center;
+  padding: ${({ theme }: any) => theme.spacing.xl}px
+    ${({ theme }: any) => theme.spacing.margemLateral}px;
 `;
 
 export default function EventsListScreen() {
@@ -97,12 +108,29 @@ export default function EventsListScreen() {
     }
   };
 
+  const searchedEvents = useMemo(
+    () => events.filter(event => matchesEventSearch(event, searchValue)),
+    [events, searchValue],
+  );
+
+  const filteredEvents = useMemo(() => {
+    if (selectedCategories.length === 0) {
+      return searchedEvents;
+    }
+
+    return searchedEvents.filter(event => {
+      const category = event.category ? String(event.category).trim().toLowerCase() : '';
+
+      return selectedCategories.some(selected => selected.toLowerCase() === category);
+    });
+  }, [searchedEvents, selectedCategories]);
+
   const visibleCategories =
     selectedCategories.length > 0
       ? selectedCategories
       : Array.from(
           new Set(
-            events
+            filteredEvents
               .map((event: any) => (event.category ? String(event.category).trim() : ''))
               .filter(Boolean),
           ),
@@ -150,14 +178,14 @@ export default function EventsListScreen() {
           </View>
         ) : (
           <>
-            {events.length > 0 &&
-              selectedCategories.every(
-                cat =>
-                  !events.some((e: any) => e.category?.toLowerCase().trim() === cat.toLowerCase()),
-              )}
+            {filteredEvents.length === 0 ? (
+              <EmptySearchState>
+                No events found{searchValue.trim() ? ` for “${searchValue.trim()}”` : ''}.
+              </EmptySearchState>
+            ) : null}
 
             {visibleCategories.map(category => {
-              const sectionEvents = events.filter((e: any) => {
+              const sectionEvents = filteredEvents.filter((e: any) => {
                 const apiCat = e.category ? String(e.category).trim().toLowerCase() : '';
                 return apiCat === category.toLowerCase();
               });

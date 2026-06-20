@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import styled from 'styled-components/native';
+import styled, { useTheme } from 'styled-components/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -153,6 +153,7 @@ export const HeroBanner = ({
   isLiveMode = false,
 }: any) => {
   const router = useRouter();
+  const theme = useTheme();
   const [isFavorite, setIsFavorite] = useState(false);
   const displayedIsFavorite = controlledIsFavorite ?? isFavorite;
 

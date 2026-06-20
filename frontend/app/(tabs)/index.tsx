@@ -19,6 +19,7 @@ import { useEventMode } from '../../context/EventModeContext';
 import { getMyProfile } from '../../utils/profile';
 import { getUserTickets, type UserTicket } from '../../utils/tickets';
 import { getEventImageSource } from '../../utils/eventImages';
+import { matchesEventSearch } from '../../utils/eventSearch';
 
 interface Event {
   id: string;
@@ -229,7 +230,8 @@ export default function HomeScreen() {
   const upcomingEvents = events.filter(
     e =>
       ['upcoming', 'active', 'planned'].includes(e.status) &&
-      e.category?.toLowerCase().includes(selectedCategory.toLowerCase()),
+      e.category?.toLowerCase().includes(selectedCategory.toLowerCase()) &&
+      matchesEventSearch(e, searchValue),
   );
 
   if (liveEvent) {
@@ -400,7 +402,9 @@ export default function HomeScreen() {
 
         <PaddedContent>
           <SectionHeader>
-            <SectionTitle>{selectedCategory} events</SectionTitle>
+            <SectionTitle>
+              {searchValue.trim() ? `Results in ${selectedCategory}` : `${selectedCategory} events`}
+            </SectionTitle>
             <Pressable onPress={() => router.push('/events-list')}>
               <SeeMore>See more</SeeMore>
             </Pressable>
@@ -420,6 +424,13 @@ export default function HomeScreen() {
           }}
           snapToInterval={280 + 16}
           decelerationRate="fast"
+          ListEmptyComponent={
+            <EmptySearchState>
+              {`No ${selectedCategory} events found${
+                searchValue.trim() ? ` for “${searchValue.trim()}”` : ''
+              }.`}
+            </EmptySearchState>
+          }
         />
       </Content>
     </Container>
@@ -633,6 +644,15 @@ const EmptyTicketText = styled.Text`
   line-height: ${({ theme }: any) => theme.text.corpo.corpoTexto.lineHeight}px;
   text-align: center;
   margin-top: ${({ theme }: any) => theme.spacing.sm}px;
+`;
+
+const EmptySearchState = styled.Text`
+  width: ${({ theme }: any) => theme.height.lg}px;
+  color: ${({ theme }: any) => theme.colors.textMuted};
+  font-family: ${({ theme }: any) => theme.text.corpo.corpoTexto.fontFamily};
+  font-size: ${({ theme }: any) => theme.text.corpo.corpoTexto.fontSize}px;
+  line-height: ${({ theme }: any) => theme.text.corpo.corpoTexto.lineHeight}px;
+  padding-vertical: ${({ theme }: any) => theme.spacing.lg}px;
 `;
 
 const SearchIntroTitle = styled.Text`

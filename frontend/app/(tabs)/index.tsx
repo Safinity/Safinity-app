@@ -20,6 +20,7 @@ import { getMyProfile } from '../../utils/profile';
 import { getUserTickets, type UserTicket } from '../../utils/tickets';
 import { getEventImageSource } from '../../utils/eventImages';
 import { matchesEventSearch } from '../../utils/eventSearch';
+import { ticketBarcodePattern } from '../../constants/ticketBarcode';
 
 interface Event {
   id: string;
@@ -73,29 +74,6 @@ function formatEventDate(start?: string | null, end?: string | null) {
 function getLocalAwareEventImageSource(image?: string | null) {
   return getEventImageSource(image, eventImages['banner-lista-eventos']);
 }
-
-const barcodePattern = [
-  { width: 1, gap: 0 },
-  { width: 1, gap: 0 },
-  { width: 3, gap: 2 },
-  { width: 1, gap: 0 },
-  { width: 4, gap: 1 },
-  { width: 2, gap: 3 },
-  { width: 1, gap: 0 },
-  { width: 3, gap: 0 },
-  { width: 1, gap: 4 },
-  { width: 4, gap: 0 },
-  { width: 2, gap: 1 },
-  { width: 1, gap: 0 },
-  { width: 3, gap: 2 },
-  { width: 1, gap: 0 },
-  { width: 2, gap: 3 },
-  { width: 4, gap: 1 },
-  { width: 1, gap: 0 },
-  { width: 3, gap: 0 },
-  { width: 1, gap: 2 },
-  { width: 4, gap: 0 },
-];
 
 export default function HomeScreen() {
   const { isLoaded, isSignedIn, getToken } = useAuth();
@@ -362,7 +340,7 @@ export default function HomeScreen() {
                       <Ionicons name="heart" size={theme.height.xs} color={theme.colors.white} />
                     </TicketTopRow>
                     <TicketBarcode>
-                      {barcodePattern.map((bar, index) => (
+                      {ticketBarcodePattern.map((bar, index) => (
                         <BarcodeBar
                           key={`${item.id}-${index}`}
                           style={{

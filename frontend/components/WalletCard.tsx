@@ -8,30 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 // Importações necessárias para resolver a imagem dinâmica do evento igual à Home
 import { getEventImageSource } from '../utils/eventImages';
 import { eventImages } from '../assets/images/Events';
-
-// Padrão do código de barras igual ao do Index
-const barcodePattern = [
-  { width: 1, gap: 0 },
-  { width: 1, gap: 0 },
-  { width: 3, gap: 2 },
-  { width: 1, gap: 0 },
-  { width: 4, gap: 1 },
-  { width: 2, gap: 3 },
-  { width: 1, gap: 0 },
-  { width: 3, gap: 0 },
-  { width: 1, gap: 4 },
-  { width: 4, gap: 0 },
-  { width: 2, gap: 1 },
-  { width: 1, gap: 0 },
-  { width: 3, gap: 2 },
-  { width: 1, gap: 0 },
-  { width: 2, gap: 3 },
-  { width: 4, gap: 1 },
-  { width: 1, gap: 0 },
-  { width: 3, gap: 0 },
-  { width: 1, gap: 2 },
-  { width: 4, gap: 0 },
-];
+import { ticketBarcodePattern } from '../constants/ticketBarcode';
 
 const CardContainer = styled.TouchableOpacity`
   width: 100%;
@@ -156,7 +133,7 @@ export const WalletCard = ({ event, ticketId }: WalletCardProps) => {
           </TicketTopRow>
 
           <TicketBarcode>
-            {barcodePattern.map((bar, index) => (
+            {ticketBarcodePattern.map((bar, index) => (
               <BarcodeBar
                 key={`${ticketId || event.id}-${index}`}
                 style={{

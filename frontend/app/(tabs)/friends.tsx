@@ -220,7 +220,8 @@ export default function FriendsScreen() {
               accessibilityLabel="Add a new friend"
               accessibilityHint="Go to the add friend screen"
             >
-              <Ionicons name="person-add-outline" size={24} color="white" />
+              {/* Substitui o Ionicons normal por este */}
+              <AddFriendIcon name="person-add-outline" size={24} />
             </TouchableOpacity>
           </SectionTitle>
         </RegionContainer>
@@ -366,4 +367,10 @@ const Buttons = styled.View`
   flex-direction: row;
   gap: ${({ theme }) => theme.spacing.xs}px;
   padding-left: ${({ theme }) => theme.spacing.xxs}px;
+`;
+
+// Adiciona isto lá em baixo com os teus Styled Components
+const AddFriendIcon = styled(Ionicons)`
+  /* Branco no Dark Mode, Preto no Light Mode */
+  color: ${({ theme }) => theme.colors.mode === 'dark' ? '#FFFFFF' : '#000000'};
 `;

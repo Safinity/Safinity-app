@@ -1,13 +1,17 @@
 import { useAuth } from '@clerk/expo';
 import React, { useEffect, useRef, useState } from 'react';
 import styled, { useTheme } from 'styled-components/native';
-import { ActivityIndicator, Alert } from 'react-native';
+import { ActivityIndicator, Alert, ImageBackground } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { Colors, Spacing, TextStyles } from '../../../constants/theme';
 import Header from '../../../components/ui/header';
 import PrimaryButton from '../../../components/PrimaryButton';
 import { deleteUserTicket, getUserTickets, type UserTicket } from '../../../utils/tickets';
 import { getEventImageSource as resolveEventImageSource } from '../../../utils/eventImages';
+
+// NOVOS IMPORTS: Imagens de fundo para Light e Dark Mode
+import ProfileFundoImg from '../../../assets/images/Profile-fundo.png';
+import ProfileFundoDarkImg from '../../../assets/images/Profile-fundo-dark.png';
 
 const fallbackTicketImage = require('../../../assets/images/bg-card-wallet.png');
 
@@ -152,8 +156,11 @@ const TicketScreen = () => {
   const event = ticket?.event;
   const imageSource = getEventImageSource(ticket);
 
+  // Define dinamicamente a imagem com base no modo de tema reativo
+  const backgroundImage = theme.colors.mode === 'dark' ? ProfileFundoDarkImg : ProfileFundoImg;
+
   return (
-    <Container>
+    <Container source={backgroundImage}>
       <Stack.Screen options={{ title: 'Ticket' }} />
       <Header
         variant="back"
@@ -238,7 +245,10 @@ const TicketScreen = () => {
 
 export default TicketScreen;
 
-const Container = styled.View`
+// ALTERADO: Container agora estende o ImageBackground e injeta resizeMode
+const Container = styled(ImageBackground).attrs({
+  resizeMode: 'cover',
+})`
   flex: 1;
   background-color: ${({ theme }) => theme.colors.background};
 `;

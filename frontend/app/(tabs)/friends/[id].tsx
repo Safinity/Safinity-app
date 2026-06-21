@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Dimensions, FlatList, Platform, ScrollView } from 'react-native';
+import { ActivityIndicator, Dimensions, FlatList, Platform, ScrollView, View } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
@@ -200,11 +200,20 @@ export default function FriendProfile() {
           horizontal
           showsHorizontalScrollIndicator={false}
           keyExtractor={item => item.id}
+          // Mantém o cálculo do scroll suave sincronizado com o espaçamento
           snapToInterval={width * 0.75 + theme.spacing.margemLateral}
           decelerationRate="fast"
-          contentContainerStyle={{ paddingRight: theme.spacing.margemLateral }}
+          
+          // 🌟 MODIFICAÇÃO AQUI: Adicionado padding horizontal completo para afastar das bordas esquerda e direita
+          contentContainerStyle={{ 
+            paddingHorizontal: theme.spacing.margemLateral 
+          }}
+          
           renderItem={({ item }) => (
-            <EventCard event={item} role="button" accessibilityLabel={`Event ${item.name}`} />
+            // 🌟 MODIFICAÇÃO AQUI: Removido o prop left individual e adicionado um gap/margin à direita para espaçar os cards entre si
+            <View style={{ marginRight: theme.spacing.md }}>
+              <EventCard event={item} role="button" accessibilityLabel={`Event ${item.name}`} />
+            </View>
           )}
         />
       </ScrollView>

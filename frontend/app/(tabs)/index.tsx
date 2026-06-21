@@ -612,7 +612,7 @@ const BarcodeBar = styled.View`
 const TicketFooter = styled.View``;
 
 const TicketDate = styled.Text`
-  color: ${({ theme }: any) => theme.colors.white};
+  color: #ffffff;
   font-family: ${({ theme }: any) => theme.text.textoPequeno.fontFamily};
   font-size: ${({ theme }: any) => theme.text.textoPequeno.fontSize}px;
   line-height: ${({ theme }: any) => theme.text.textoPequeno.lineHeight}px;
@@ -620,7 +620,7 @@ const TicketDate = styled.Text`
 `;
 
 const TicketTitle = styled.Text`
-  color: ${({ theme }: any) => theme.colors.white};
+  color: #ffffff;
   font-family: ${({ theme }: any) => theme.text.titulo.h2.fontFamily};
   font-size: ${({ theme }: any) => theme.text.titulo.h2.fontSize}px;
   line-height: ${({ theme }: any) => theme.text.titulo.h2.lineHeight}px;

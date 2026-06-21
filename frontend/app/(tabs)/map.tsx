@@ -16,7 +16,7 @@ import Svg, {
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { useLocalSearchParams, router, Stack } from 'expo-router';
-import { useAuth } from '@clerk/expo'; 
+import { useAuth } from '@clerk/expo';
 
 import Header from '../../components/ui/header';
 import SearchInput from '../../components/ui/SearchInput';
@@ -181,13 +181,12 @@ const HeatmapLegend = styled.View.attrs<{ currentTheme: 'light' | 'dark' }>(prop
   flex-direction: row;
   align-items: center;
   gap: 6px;
-  background-color: ${({ currentTheme }) => 
-    currentTheme === 'dark' ? 'rgba(20, 24, 34, 0.85)' : 'rgba(255, 255, 255, 0.92)'
-  };
-  
-  elevation: ${({ currentTheme }) => currentTheme === 'dark' ? 0 : 3};
+  background-color: ${({ currentTheme }) =>
+    currentTheme === 'dark' ? 'rgba(20, 24, 34, 0.85)' : 'rgba(255, 255, 255, 0.92)'};
+
+  elevation: ${({ currentTheme }) => (currentTheme === 'dark' ? 0 : 3)};
   shadow-color: #000000;
-  shadow-opacity: ${({ currentTheme }) => currentTheme === 'dark' ? 0 : 0.1};
+  shadow-opacity: ${({ currentTheme }) => (currentTheme === 'dark' ? 0 : 0.1)};
   shadow-radius: 4px;
 `;
 
@@ -209,7 +208,7 @@ const HeatmapLegendLabel = styled.Text<{ currentTheme: 'light' | 'dark' }>`
   font-size: ${({ theme }) => theme?.text?.label?.fontSize || 12}px;
   line-height: ${({ theme }) => theme?.text?.label?.lineHeight || 14}px;
   font-weight: 500;
-  color: ${({ currentTheme }) => currentTheme === 'dark' ? Colors.white : '#1C1C1E'};
+  color: ${({ currentTheme }) => (currentTheme === 'dark' ? Colors.white : '#1C1C1E')};
   opacity: 0.82;
 `;
 
@@ -336,7 +335,7 @@ export default function MapScreen() {
   }, [getToken]);
 
   const mapSource = mapPayload?.map;
-  
+
   // Incluído &t= para rebentar a cache da imagem nativa aquando da mutação do tema
   const mapImageUrl = mapPayload?.event?.id
     ? `${API_BASE}/events/${mapPayload.event.id}/static-map?theme=${currentTheme}&width=1024&height=1024&t=${currentTheme}`
@@ -672,15 +671,23 @@ export default function MapScreen() {
 
       <GestureDetector gesture={composedGesture}>
         <MapViewport>
-          <Animated.View style={[{ width: IMAGE_WIDTH, height: IMAGE_HEIGHT }, animatedStyle]} accessible={false}>
+          <Animated.View
+            style={[{ width: IMAGE_WIDTH, height: IMAGE_HEIGHT }, animatedStyle]}
+            accessible={false}
+          >
             <StaticMapPreview
               width={IMAGE_WIDTH}
               height={IMAGE_HEIGHT}
-              theme={currentTheme}  
+              theme={currentTheme}
               imageUrl={mapImageUrl}
             />
 
-            <Svg width={IMAGE_WIDTH} height={IMAGE_HEIGHT} style={{ position: 'absolute' }} pointerEvents="none">
+            <Svg
+              width={IMAGE_WIDTH}
+              height={IMAGE_HEIGHT}
+              style={{ position: 'absolute' }}
+              pointerEvents="none"
+            >
               {heatmapEnabled && (
                 <>
                   <Defs>
@@ -690,17 +697,39 @@ export default function MapScreen() {
 
                       return (
                         <RadialGradient key={gradientId} id={gradientId} cx="50%" cy="50%" r="50%">
-                          <Stop offset="0%" stopColor={getHeatColor(sensor.density, alpha)} stopOpacity={0.3} />
-                          <Stop offset="36%" stopColor={getHeatColor(sensor.density, alpha * 0.68)} stopOpacity={0.15} />
-                          <Stop offset="68%" stopColor={getHeatColor(sensor.density, alpha * 0.32)} stopOpacity={0.1} />
-                          <Stop offset="100%" stopColor={getHeatColor(sensor.density, 0)} stopOpacity={0} />
+                          <Stop
+                            offset="0%"
+                            stopColor={getHeatColor(sensor.density, alpha)}
+                            stopOpacity={0.3}
+                          />
+                          <Stop
+                            offset="36%"
+                            stopColor={getHeatColor(sensor.density, alpha * 0.68)}
+                            stopOpacity={0.15}
+                          />
+                          <Stop
+                            offset="68%"
+                            stopColor={getHeatColor(sensor.density, alpha * 0.32)}
+                            stopOpacity={0.1}
+                          />
+                          <Stop
+                            offset="100%"
+                            stopColor={getHeatColor(sensor.density, 0)}
+                            stopOpacity={0}
+                          />
                         </RadialGradient>
                       );
                     })}
                   </Defs>
 
                   {densitySensors.map(sensor => {
-                    const { x, y } = latLngToPixelFromBounds(sensor.lat, sensor.lng, bounds, IMAGE_WIDTH, IMAGE_HEIGHT);
+                    const { x, y } = latLngToPixelFromBounds(
+                      sensor.lat,
+                      sensor.lng,
+                      bounds,
+                      IMAGE_WIDTH,
+                      IMAGE_HEIGHT,
+                    );
                     const gradientId = `heat-${String(sensor.id).replace(/[^a-zA-Z0-9_-]/g, '-')}`;
 
                     return (
@@ -733,7 +762,9 @@ export default function MapScreen() {
                 <MapPin
                   key={String(pin.id)}
                   pin={pin}
-                  avatar={pin.type === 'friend' ? (getUserImageSource(pin.image) ?? undefined) : undefined}
+                  avatar={
+                    pin.type === 'friend' ? (getUserImageSource(pin.image) ?? undefined) : undefined
+                  }
                   bounds={bounds}
                   width={IMAGE_WIDTH}
                   height={IMAGE_HEIGHT}
@@ -772,7 +803,12 @@ export default function MapScreen() {
             )}
 
             {currentLocation && (
-              <UserMarker location={currentLocation} bounds={bounds} width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
+              <UserMarker
+                location={currentLocation}
+                bounds={bounds}
+                width={IMAGE_WIDTH}
+                height={IMAGE_HEIGHT}
+              />
             )}
           </Animated.View>
         </MapViewport>
@@ -801,14 +837,21 @@ export default function MapScreen() {
         )}
 
         <PaddingSearchInput>
-          <SearchInput variant="mapa" placeholder="Search..." value={searchValue} onChangeText={setSearchValue} />
+          <SearchInput
+            variant="mapa"
+            placeholder="Search..."
+            value={searchValue}
+            onChangeText={setSearchValue}
+          />
         </PaddingSearchInput>
 
         <FilterTags
           tags={tags}
           selectedTags={selectedTags}
           onTagPress={tag =>
-            setSelectedTags(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag])
+            setSelectedTags(prev =>
+              prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag],
+            )
           }
           variant="mapa"
           style={{ marginTop: Spacing.md }}
@@ -822,10 +865,12 @@ export default function MapScreen() {
           role="button"
           accessibilityLabel={heatmapEnabled ? 'Disable heatmap filter' : 'Enable heatmap filter'}
         >
-          <Ionicons 
-            name="flame" 
-            size={16} 
-            color={heatmapEnabled ? Colors.white : (currentTheme === 'dark' ? Colors.white : '#1C1C1E')} 
+          <Ionicons
+            name="flame"
+            size={16}
+            color={
+              heatmapEnabled ? Colors.white : currentTheme === 'dark' ? Colors.white : '#1C1C1E'
+            }
           />
           <HeatmapToggleText active={heatmapEnabled} currentTheme={currentTheme}>
             Heatmap
@@ -869,7 +914,12 @@ export default function MapScreen() {
         </NavigationFooter>
       )}
 
-      <SosButton onPress={() => router.push('/sos')} accessible role="button" accessibilityLabel="Emergency SOS button">
+      <SosButton
+        onPress={() => router.push('/sos')}
+        accessible
+        role="button"
+        accessibilityLabel="Emergency SOS button"
+      >
         <SOSButtonText>SOS</SOSButtonText>
       </SosButton>
     </Container>

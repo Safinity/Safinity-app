@@ -45,7 +45,7 @@ const TimeBadge = styled.View<{ isCompact?: boolean }>`
 
 // CORREÇÃO: Removidas as aspas de "white" para aplicar CSS nativo puro
 const TimeText = styled.Text`
-  color: white; 
+  color: white;
   font-family: ${({ theme }) => theme.text.label.fontFamily};
   font-size: ${({ theme }) => theme.text.label.fontSize}px;
   line-height: ${({ theme }) => theme.text.label.lineHeight}px;
@@ -58,7 +58,7 @@ const CardFooter = styled.View`
 
 // CORREÇÃO: Alterado de theme.colors.white (que muda no light) para a cor estática #FFFFFF
 const DateText = styled.Text`
-  color: #FFFFFF; 
+  color: #ffffff;
   font-family: ${({ theme }) => theme.text.textoPequeno.fontFamily};
   font-size: ${({ theme }) => theme.text.textoPequeno.fontSize}px;
   line-height: ${({ theme }) => theme.text.textoPequeno.lineHeight}px;
@@ -68,7 +68,7 @@ const DateText = styled.Text`
 
 // CORREÇÃO: Removidas as aspas de "white" para aplicar CSS nativo puro
 const TitleText = styled.Text`
-  color: white; 
+  color: white;
   font-family: ${({ theme }) => theme.text.titulo.h1.fontFamily};
   font-size: ${({ theme }) => theme.text.titulo.h1.fontSize}px;
   line-height: ${({ theme }) => theme.text.titulo.h1.lineHeight}px;

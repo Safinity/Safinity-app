@@ -29,7 +29,7 @@ const ContentWrapper = styled.View`
 const Title = styled.Text`
   font-family: ${({ theme }) => theme.fonts.weights.semibold};
   font-size: ${({ theme }) => theme.text.titulo.h.fontSize}px;
-  color: ${({ theme }) => theme.colors.white};
+  color: ${({ theme }) => theme.colors.textHeading};
   margin-bottom: ${({ theme }) => theme.spacing.sm}px;
   text-align: center;
 `;
@@ -37,7 +37,7 @@ const Title = styled.Text`
 const TextStyled = styled.Text`
   font-family: ${({ theme }) => theme.fonts.weights.light};
   font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
-  color: ${({ theme }) => theme.colors.white};
+  color: ${({ theme }) => theme.colors.textMuted};
   margin-bottom: ${({ theme }) => theme.spacing.xl}px;
   text-align: center;
 `;
@@ -56,20 +56,34 @@ const TagButton = styled.TouchableOpacity<{ selected: boolean }>`
   padding-horizontal: ${({ theme }) => theme.spacing.md}px;
   margin: ${({ theme }) => theme.spacing.xs}px;
   border-radius: ${({ theme }) => theme.borderRadius.round}px;
-  background-color: ${({ selected, theme }) =>
-    selected ? theme.colors.primary : theme.colors.white};
+  background-color: ${({ selected, theme }) => {
+    if (selected) return theme.colors.primary; // Roxo vibrante (#9242CC) para ambos os modos
+
+    // Imagem 1 (Dark Mode): Tag é branca pura. Imagem 2 (Light Mode): Tag é roxo pastel suave (light90)
+    return theme.colors.mode === 'dark' ? '#FFFFFF' : theme.colors.palette.primary.light90;
+  }};
 `;
 
 const TagLabel = styled.Text<{ selected: boolean }>`
   font-size: ${({ theme }) => theme.text.botao.fontSize}px;
   line-height: ${({ theme }) => theme.text.botao.lineHeight}px;
   font-family: ${({ theme }) => theme.fonts.weights.light};
-  color: ${({ selected, theme }) => (selected ? theme.colors.white : theme.colors.black)};
+  color: ${({ selected, theme }) => {
+    if (selected) return '#FFFFFF';
+
+    // Imagem 1: Texto escuro em cima da tag branca. Imagem 2: Roxo escuro/cinza sobre o fundo pastel
+    return theme.colors.mode === 'dark' ? '#1C1C1E' : theme.colors.palette.primary.dark40;
+  }};
 `;
 
 const NotesInput = styled.TextInput`
-  background-color: ${({ theme }) => theme.colors.white};
-  color: ${({ theme }) => theme.colors.neutralGray};
+  /* Imagem 1 (Dark Mode): Fundo Branco Puro. Imagem 2 (Light Mode): Usa a cor 'input' do tema (light90) */
+  background-color: ${({ theme }) =>
+    theme.colors.mode === 'dark' ? '#FFFFFF' : theme.colors.input};
+
+  /* Garante que o texto fica escuro (#1C1C1E) no Dark Mode para ser legível sobre o fundo branco */
+  color: ${({ theme }) => (theme.colors.mode === 'dark' ? '#1C1C1E' : theme.colors.text)};
+
   font-family: ${({ theme }) => theme.fonts.weights.light};
   font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
   border-radius: ${({ theme }) => theme.borderRadius.xlarge}px;
@@ -88,7 +102,8 @@ const ButtonRow = styled.View`
 
 const CancelButton = styled.TouchableOpacity`
   flex: 1;
-  background-color: ${({ theme }) => theme.colors.white};
+  /* Como visto em ambos os mockups, o botão "Cancel" tem um fundo roxo pastel ultra claro */
+  background-color: ${({ theme }) => theme.colors.palette.primary.light90};
   padding-vertical: ${({ theme }) => theme.spacing.sm}px;
   padding-horizontal: ${({ theme }) => theme.spacing.lg}px;
   height: 52px;
@@ -99,6 +114,7 @@ const CancelButton = styled.TouchableOpacity`
 
 const ConfirmButton = styled.TouchableOpacity`
   flex: 1;
+  /* Sólido roxo vibrante (#9242CC) ativo em ambos os modos */
   background-color: ${({ theme }) => theme.colors.primary};
   padding-vertical: ${({ theme }) => theme.spacing.sm}px;
   padding-horizontal: ${({ theme }) => theme.spacing.lg}px;
@@ -110,6 +126,7 @@ const ConfirmButton = styled.TouchableOpacity`
 
 const ButtonTextCancel = styled.Text`
   font-family: ${({ theme }) => theme.fonts.weights.medium};
+  /* Texto roxo sobre o fundo lavanda suave */
   color: ${({ theme }) => theme.colors.primary};
   font-size: ${({ theme }) => theme.text.botao.fontSize}px;
   text-align: center;
@@ -117,11 +134,10 @@ const ButtonTextCancel = styled.Text`
 
 const ButtonTextConfirm = styled.Text`
   font-family: ${({ theme }) => theme.fonts.weights.medium};
-  color: ${({ theme }) => theme.colors.white};
+  color: #ffffff;
   font-size: ${({ theme }) => theme.text.botao.fontSize}px;
   text-align: center;
 `;
-
 /* ---------------------- COMPONENT ---------------------- */
 
 export default function SOSForm() {
@@ -222,6 +238,7 @@ export default function SOSForm() {
         <NotesInput
           multiline
           placeholder="Write here any information you think we should know."
+          placeholderTextColor="#8E8E93"
           value={notes}
           onChangeText={setNotes}
         />

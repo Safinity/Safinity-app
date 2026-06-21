@@ -2,7 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { ScrollView, StatusBar, View, Text } from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import Head from 'expo-router/head';
-import styled from 'styled-components/native';
+// Importa o useTheme para lermos as propriedades do Light/Dark mode dentro do componente
+import styled, { useTheme } from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
 import Header from '../../components/ui/header';
 import api from '../../utils/api';
@@ -70,12 +71,15 @@ function normalizeEvent(event: any) {
 export default function EventDetailsScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
+  const theme = useTheme(); // Inicializa o hook de acesso ao tema ativo
 
   const [modalVisible, setModalVisible] = useState(false);
   const [event, setEvent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  // ⚠️ ESTE useMemo TEM DE VIR ANTES DE QUALQUER RETURN
+  // Define a lógica para a cor do ícone com fallback para a cor primária do tema se for light mode
+  const iconColor = theme.colors.mode === 'light' ? theme.colors.primary : 'white';
+
   const randomFriends = useMemo(
     () => [...usersData].sort(() => 0.5 - Math.random()).slice(0, 3),
     [],
@@ -132,7 +136,7 @@ export default function EventDetailsScreen() {
       </Head>
       <Stack.Screen options={{ title: pageTitle, headerShown: false }} />
 
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle={theme.colors.mode === 'light' ? 'dark-content' : 'light-content'} />
 
       <LinkTicketModal
         visible={modalVisible}
@@ -167,7 +171,8 @@ export default function EventDetailsScreen() {
                 })
               }
             >
-              <Ionicons name="map-outline" size={26} color="white" />
+              {/* Substituído "white" pelo iconColor dinâmico */}
+              <Ionicons name="map-outline" size={26} color={iconColor} />
               <ActionLabel>Map</ActionLabel>
             </ActionButton>
 
@@ -179,7 +184,8 @@ export default function EventDetailsScreen() {
                 })
               }
             >
-              <Ionicons name="calendar-outline" size={26} color="white" />
+              {/* Substituído "white" pelo iconColor dinâmico */}
+              <Ionicons name="calendar-outline" size={26} color={iconColor} />
               <ActionLabel>Calendar</ActionLabel>
             </ActionButton>
           </ActionGrid>
@@ -212,7 +218,7 @@ export default function EventDetailsScreen() {
   );
 }
 
-/* --- Styled Components (mantidos exatamente como estavam) --- */
+/* --- Styled Components --- */
 
 const Container = styled.View`
   flex: 1;
@@ -227,7 +233,7 @@ const ContentCard = styled.View`
 `;
 
 const SectionTitle = styled.Text`
-  color: ${({ theme }) => theme.colors.white};
+  color: ${({ theme }) => (theme.colors.mode === 'light' ? theme.colors.text : theme.colors.white)};
   font-family: ${({ theme }) => theme.text.titulo.h3.fontFamily};
   font-size: ${({ theme }) => theme.text.titulo.h3.fontSize}px;
   margin-top: ${({ theme }) => theme.spacing.lg}px;
@@ -257,7 +263,7 @@ const ActionButton = styled.TouchableOpacity`
 `;
 
 const ActionLabel = styled.Text`
-  color: ${({ theme }) => theme.colors.white};
+  color: ${({ theme }) => (theme.colors.mode === 'light' ? theme.colors.text : theme.colors.white)};
   margin-top: ${({ theme }) => theme.spacing.sm}px;
   font-family: ${({ theme }) => theme.text.label.fontFamily};
   font-size: ${({ theme }) => theme.text.label.fontSize + 2}px;
@@ -295,7 +301,7 @@ const LinkButton = styled.TouchableOpacity`
 `;
 
 const ButtonText = styled.Text`
-  color: ${({ theme }) => theme.colors.white};
+  color: #ffffff;
   font-family: ${({ theme }) => theme.text.botao.fontFamily};
   font-size: ${({ theme }) => theme.text.botao.fontSize}px;
   font-weight: bold;

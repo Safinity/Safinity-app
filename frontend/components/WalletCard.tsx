@@ -3,10 +3,16 @@ import styled from 'styled-components/native';
 import { Colors, Spacing, BorderRadius, TextStyles } from '../constants/theme';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+
+// Importações necessárias para resolver a imagem dinâmica do evento igual à Home
+import { getEventImageSource } from '../utils/eventImages';
+import { eventImages } from '../assets/images/Events';
+import { ticketBarcodePattern } from '../constants/ticketBarcode';
 
 const CardContainer = styled.TouchableOpacity`
   width: 100%;
-  height: 205px;
+  height: 185px;
   border-radius: ${BorderRadius.large}px;
   overflow: hidden;
   margin-bottom: ${Spacing.md}px;
@@ -21,17 +27,38 @@ const BackgroundImage = styled.ImageBackground.attrs({
 `;
 
 const GradientLayer = styled(LinearGradient).attrs({
-  colors: ['transparent', 'rgba(0,0,0,0.8)'],
-  locations: [0.4, 1.0],
+  colors: ['rgba(0,0,0,0.08)', 'rgba(146,66,204,0.48)', 'rgba(0,0,0,0.82)'],
+  locations: [0, 0.5, 1],
 })`
   flex: 1;
-  padding: ${Spacing.md}px;
-  justify-content: flex-end;
+  padding: ${Spacing.lg}px;
+  padding-right: 48px;
+  justify-content: space-between;
 `;
 
-const CardFooter = styled.View`
-  margin-top: auto;
+const TicketTopRow = styled.View`
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
 `;
+
+const TicketBarcode = styled.View`
+  position: absolute;
+  right: -17%;
+  top: 50%;
+  gap: ${Spacing.xs}px;
+  height: 16px;
+  transform: rotate(90deg);
+  flex-direction: row;
+`;
+
+const BarcodeBar = styled.View`
+  height: 100%;
+  background-color: white;
+  opacity: 0.9;
+`;
+
+const CardFooter = styled.View``;
 
 const DateText = styled.Text`
   color: ${Colors.white};
@@ -39,14 +66,13 @@ const DateText = styled.Text`
   font-size: ${TextStyles.textoPequeno.fontSize}px;
   line-height: ${TextStyles.textoPequeno.lineHeight}px;
   margin-bottom: ${Spacing.xs}px;
-  opacity: 0.9;
 `;
 
 const TitleText = styled.Text`
   color: ${Colors.white};
-  font-family: ${TextStyles.titulo.h1.fontFamily};
-  font-size: ${TextStyles.titulo.h1.fontSize}px;
-  line-height: ${TextStyles.titulo.h1.lineHeight}px;
+  font-family: ${TextStyles.titulo.h2.fontFamily};
+  font-size: ${TextStyles.titulo.h2.fontSize}px;
+  line-height: ${TextStyles.titulo.h2.lineHeight}px;
 `;
 
 interface WalletCardProps {
@@ -64,7 +90,8 @@ interface WalletCardProps {
 export const WalletCard = ({ event, ticketId }: WalletCardProps) => {
   const router = useRouter();
 
-  const imageSource = require('../assets/images/bg-card-wallet.png');
+  // Resolve a imagem de forma dinâmica com fallback para o banner padrão
+  const imageSource = getEventImageSource(event.image, eventImages['banner-lista-eventos']);
 
   const handlePress = () => {
     router.push({
@@ -101,9 +128,27 @@ export const WalletCard = ({ event, ticketId }: WalletCardProps) => {
     >
       <BackgroundImage source={imageSource}>
         <GradientLayer>
+          <TicketTopRow>
+            <Ionicons name="heart" size={16} color={Colors.white} />
+          </TicketTopRow>
+
+          <TicketBarcode>
+            {ticketBarcodePattern.map((bar, index) => (
+              <BarcodeBar
+                key={`${ticketId || event.id}-${index}`}
+                style={{
+                  width: bar.width,
+                  marginRight: bar.gap,
+                }}
+              />
+            ))}
+          </TicketBarcode>
+
           <CardFooter>
             <DateText>{formatEventDate(event.start_date, event.end_date)}</DateText>
-            <TitleText aria-level="3">{event.name || 'Untitled Event'}</TitleText>
+            <TitleText aria-level="3" numberOfLines={2}>
+              {event.name || 'Untitled Event'}
+            </TitleText>
           </CardFooter>
         </GradientLayer>
       </BackgroundImage>

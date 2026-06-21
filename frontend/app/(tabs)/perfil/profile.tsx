@@ -1,11 +1,4 @@
-import {
-  ActivityIndicator,
-  FlatList,
-  Modal,
-  Platform,
-  ScrollView,
-  View,
-} from 'react-native';
+import { ActivityIndicator, FlatList, Modal, Platform, ScrollView, View } from 'react-native';
 import { Link } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import { Stack, router } from 'expo-router';
@@ -112,7 +105,7 @@ const TitleLeftGroup = styled.View`
 const MainTitleIndicator = styled.View`
   width: 5px;
   height: 28px;
-  background-color: #7A39B8;
+  background-color: #7a39b8;
   border-radius: 3px;
   margin-right: 12px;
 `;
@@ -120,7 +113,7 @@ const MainTitleIndicator = styled.View`
 const MainTitle = styled.Text<{ $themeMode: string }>`
   font-size: 28px;
   font-weight: bold;
-  color: ${({ $themeMode }) => ($themeMode === 'dark' ? '#FFFFFF' : '#2D3142')}; 
+  color: ${({ $themeMode }) => ($themeMode === 'dark' ? '#FFFFFF' : '#2D3142')};
   font-family: ${({ theme }) => theme.text.titulo.h1.fontFamily};
 `;
 
@@ -172,7 +165,7 @@ const EditIconCircle = styled.View`
   width: 36px;
   height: 36px;
   border-radius: 18px;
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   align-items: center;
   justify-content: center;
   elevation: 3;
@@ -185,7 +178,7 @@ const EditIconCircle = styled.View`
 const EditImage = styled.Image`
   width: 18px;
   height: 18px;
-  tint-color: #7A39B8;
+  tint-color: #7a39b8;
 `;
 
 const PaddedContent = styled.View`
@@ -221,7 +214,7 @@ const LinkButton = styled.TouchableOpacity`
 `;
 
 const LinkButtonText = styled.Text`
-  color: #FFFFFF;
+  color: #ffffff;
   font-family: ${Fonts.weights.medium};
 `;
 
@@ -300,8 +293,8 @@ const LogoutButton = styled.TouchableOpacity`
   margin-top: 24px;
   margin-bottom: ${({ theme }) => theme.spacing.md}px;
   align-self: center;
-  width: 202px; 
-  align-items: center; 
+  width: 202px;
+  align-items: center;
 `;
 
 const LogoutText = styled.Text`
@@ -316,8 +309,8 @@ const DeleteAccountButton = styled.TouchableOpacity`
   padding: 12px 20px;
   margin-bottom: ${({ theme }) => theme.spacing.xxl}px;
   align-self: center;
-  width: 202px; 
-  align-items: center; 
+  width: 202px;
+  align-items: center;
 `;
 
 const DeleteAccountText = styled.Text`
@@ -382,8 +375,7 @@ const ModalButton = styled.TouchableOpacity<{ variant?: 'danger' | 'secondary' }
 `;
 
 const ModalButtonText = styled.Text<{ variant?: 'danger' | 'secondary' }>`
-  color: ${({ theme, variant }) =>
-    variant === 'danger' ? '#FFFFFF' : theme.colors.text};
+  color: ${({ theme, variant }) => (variant === 'danger' ? '#FFFFFF' : theme.colors.text)};
   font-family: ${Fonts.weights.medium};
   font-size: 14px;
 `;
@@ -474,7 +466,9 @@ export default function Profile() {
     }
 
     loadProfile();
-    return () => { isActive = false; };
+    return () => {
+      isActive = false;
+    };
   }, [isLoaded, isSignedIn]);
 
   const imageSource = getProfileImageSource(user);
@@ -507,7 +501,10 @@ export default function Profile() {
 
   if (isLoading) {
     return (
-      <BackgroundWrapper source={themeMode === 'light' ? ProfileFundoImg : ProfileFundoDarkImg} resizeMode="cover">
+      <BackgroundWrapper
+        source={themeMode === 'light' ? ProfileFundoImg : ProfileFundoDarkImg}
+        resizeMode="cover"
+      >
         <LoadingState>
           <ActivityIndicator color={theme.colors.primary} />
           <LoadingText>Loading...</LoadingText>
@@ -518,7 +515,10 @@ export default function Profile() {
 
   if (error || !user) {
     return (
-      <BackgroundWrapper source={themeMode === 'light' ? ProfileFundoImg : ProfileFundoDarkImg} resizeMode="cover">
+      <BackgroundWrapper
+        source={themeMode === 'light' ? ProfileFundoImg : ProfileFundoDarkImg}
+        resizeMode="cover"
+      >
         <LoadingState>
           <LoadingText>{error || 'Unable to load profile.'}</LoadingText>
         </LoadingState>
@@ -527,8 +527,8 @@ export default function Profile() {
   }
 
   return (
-    <BackgroundWrapper 
-      source={themeMode === 'light' ? ProfileFundoImg : ProfileFundoDarkImg} 
+    <BackgroundWrapper
+      source={themeMode === 'light' ? ProfileFundoImg : ProfileFundoDarkImg}
       resizeMode="cover"
     >
       <Container>
@@ -578,7 +578,11 @@ export default function Profile() {
 
         <CustomHeaderBar>
           <HeaderActionButton onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={26} color={themeMode === 'dark' ? '#FFFFFF' : '#2D3142'} />
+            <Ionicons
+              name="arrow-back"
+              size={26}
+              color={themeMode === 'dark' ? '#FFFFFF' : '#2D3142'}
+            />
           </HeaderActionButton>
           {/* O WalletBadge foi retirado daqui e movido para baixo */}
         </CustomHeaderBar>
@@ -589,10 +593,14 @@ export default function Profile() {
             <MainTitleIndicator />
             <MainTitle $themeMode={themeMode}>Profile</MainTitle>
           </TitleLeftGroup>
-          
+
           {/* A carteira agora vive aqui e fica na mesma linha do "Profile" */}
           <WalletBadge onPress={() => router.push('/perfil/wallet')}>
-            <Ionicons name="wallet-outline" size={22} color={themeMode === 'dark' ? '#FFFFFF' : '#2D3142'} />
+            <Ionicons
+              name="wallet-outline"
+              size={22}
+              color={themeMode === 'dark' ? '#FFFFFF' : '#2D3142'}
+            />
           </WalletBadge>
         </MainTitleRow>
 
@@ -696,16 +704,17 @@ export default function Profile() {
           </ThemeSettingsRow>
 
           <Link href="/perfil/terms" asChild>
-  <SettingsRow 
-    role="button" 
-    accessibilityLabel="Terms and conditions"
-  >
-    <SettingsText>Terms and Conditions</SettingsText>
-    <SettingsIcon accessible={false}>›</SettingsIcon>
-  </SettingsRow>
-</Link>
+            <SettingsRow role="button" accessibilityLabel="Terms and conditions">
+              <SettingsText>Terms and Conditions</SettingsText>
+              <SettingsIcon accessible={false}>›</SettingsIcon>
+            </SettingsRow>
+          </Link>
 
-          <LogoutButton onPress={handleLogout} role="button" accessibilityLabel="Log out of the app">
+          <LogoutButton
+            onPress={handleLogout}
+            role="button"
+            accessibilityLabel="Log out of the app"
+          >
             <LogoutText>Log out</LogoutText>
           </LogoutButton>
           <DeleteAccountButton

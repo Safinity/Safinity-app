@@ -2,19 +2,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@clerk/expo';
 import { router, useFocusEffect } from 'expo-router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  DeviceEventEmitter,
-  Platform,
-  StatusBar,
-  type ImageSourcePropType,
-} from 'react-native';
+import { DeviceEventEmitter, Platform, StatusBar, type ImageSourcePropType } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 
 import { useNotifications } from '@/context/NotificationsContext';
-import {
-  PROFILE_UPDATED_EVENT,
-  type ProfileUpdatedPayload,
-} from '@/utils/profileEvents';
+import { PROFILE_UPDATED_EVENT, type ProfileUpdatedPayload } from '@/utils/profileEvents';
 import { getMyProfile } from '@/utils/profile';
 import { getUserImageSource } from '@/utils/userImages';
 import { Colors, Spacing, Height, Width, BorderRadius, TextStyles } from '../../constants/theme';
@@ -125,7 +117,9 @@ const Header: React.FC<HeaderProps> = ({
                 <Ionicons name="notifications-outline" size={Width.iconHeader} color={iconColor} />
                 {unreadCount > 0 && (
                   <NotificationBadge>
-                    <NotificationBadgeText>{unreadCount > 9 ? '9+' : unreadCount}</NotificationBadgeText>
+                    <NotificationBadgeText>
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </NotificationBadgeText>
                   </NotificationBadge>
                 )}
               </IconButton>
@@ -160,11 +154,7 @@ const Header: React.FC<HeaderProps> = ({
                 <Title role="header" useDarkAppearance={useDarkAppearance}>
                   {title}
                 </Title>
-                {subtitle && (
-                  <Subtitle useDarkAppearance={useDarkAppearance}>
-                    {subtitle}
-                  </Subtitle>
-                )}
+                {subtitle && <Subtitle useDarkAppearance={useDarkAppearance}>{subtitle}</Subtitle>}
               </TitleContainer>
             )}
           </BackContainer>

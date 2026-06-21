@@ -10,7 +10,7 @@ import Header from '../../components/ui/header';
 import SearchInput from '../../components/ui/SearchInput';
 import FilterTags from '../../components/ui/FilterTags';
 import { CalendarCard } from '../../components/CalendarCard';
-import api from '../../utils/api'; 
+import api from '../../utils/api';
 import { useActivityFavourites } from '../../context/ActivityFavouritesContext';
 import { useEventMode } from '../../context/EventModeContext';
 
@@ -133,7 +133,7 @@ const MyCalendarButton = styled.TouchableOpacity`
 
 // CORREÇÃO: Alterado de theme.colors.white para a cor estática branca #FFFFFF
 const ButtonText = styled.Text`
-  color: #FFFFFF; 
+  color: #ffffff;
   font-family: ${({ theme }) => theme.text.botao.fontFamily};
   font-size: ${({ theme }) => theme.text.botao.fontSize}px;
   line-height: 20px;
@@ -319,7 +319,7 @@ export default function CalendarScreen() {
               } else if (localImages[item.image]) {
                 resolvedImage = localImages[item.image];
               } else {
-                resolvedImage = img1; 
+                resolvedImage = img1;
               }
 
               const activityId = String(item.id);

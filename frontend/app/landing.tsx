@@ -125,14 +125,18 @@ export default function Landing() {
       result.signIn?.status ? `signIn: ${result.signIn.status}` : null,
       result.signUp?.status ? `signUp: ${result.signUp.status}` : null,
       signUpMissingFields ? `missing: ${signUpMissingFields}` : null,
-    ].filter(Boolean).join(', ');
+    ]
+      .filter(Boolean)
+      .join(', ');
     return `${provider} sign in did not return a session${clerkStatus ? ` (${clerkStatus})` : ''}.`;
   }
 
   async function activateSocialSession(provider: SocialProvider, authResult: SocialAuthResult) {
     const completedResult = await completeSocialSignUpIfNeeded(authResult);
     const createdSessionId = getSocialSessionId(completedResult);
-    const activateSession = completedResult.setActive || (clerk?.setActive ? (params: { session: string }) => clerk.setActive(params) : undefined);
+    const activateSession =
+      completedResult.setActive ||
+      (clerk?.setActive ? (params: { session: string }) => clerk.setActive(params) : undefined);
     if (!createdSessionId) {
       setError(getMissingSocialSessionMessage(provider, completedResult));
       setActiveSocialProvider(null);
@@ -166,7 +170,11 @@ export default function Landing() {
       const authResult = await startSSOFlow({ strategy: 'oauth_google' });
       await activateSocialSession('Google', authResult);
     } catch (err: any) {
-      setError(err.errors?.[0]?.message || err.message || 'Unable to sign in with Google. Please try again.');
+      setError(
+        err.errors?.[0]?.message ||
+          err.message ||
+          'Unable to sign in with Google. Please try again.',
+      );
       stopSocialLoading();
     }
   }
@@ -178,19 +186,35 @@ export default function Landing() {
       const authResult = await startAppleAuthenticationFlow();
       await activateSocialSession('Apple', authResult);
     } catch (err: any) {
-      setError(err.errors?.[0]?.message || err.message || 'Unable to sign in with Apple. Please try again.');
+      setError(
+        err.errors?.[0]?.message ||
+          err.message ||
+          'Unable to sign in with Apple. Please try again.',
+      );
       stopSocialLoading();
     }
   }
 
   return (
-    <Background source={theme.colors.mode === 'light' ? require('../assets/images/Landing-light.png') : StaticImages.landingBg}>
-      <Head><title>Welcome to Safinity!</title></Head>
+    <Background
+      source={
+        theme.colors.mode === 'light'
+          ? require('../assets/images/Landing-light.png')
+          : StaticImages.landingBg
+      }
+    >
+      <Head>
+        <title>Welcome to Safinity!</title>
+      </Head>
       <Stack.Screen options={{ title: 'Welcome to Safinity!', headerShown: false }} />
 
       <LogoArea>
         <LogoImage
-          source={theme.colors.mode === 'light' ? require('../assets/images/Logo-light.png') : require('../assets/logos/logo-ss.png')}
+          source={
+            theme.colors.mode === 'light'
+              ? require('../assets/images/Logo-light.png')
+              : require('../assets/logos/logo-ss.png')
+          }
           resizeMode="contain"
           accessible={true}
           accessibilityLabel="Safinity"
@@ -200,13 +224,22 @@ export default function Landing() {
       <Content role="main">
         {error ? (
           <ErrorArea accessible={true} accessibilityLiveRegion="assertive" role="alert">
-            <Ionicons name="alert-circle" size={Width.iconAlert} color="#ff5252" style={{ marginRight: Spacing.sm }} />
+            <Ionicons
+              name="alert-circle"
+              size={Width.iconAlert}
+              color="#ff5252"
+              style={{ marginRight: Spacing.sm }}
+            />
             <ErrorText>{error}</ErrorText>
           </ErrorArea>
         ) : null}
 
         <SocialButton onPress={handleGoogleLogin} disabled={isSocialLoading || !isLoaded}>
-          <Ionicons name="logo-google" size={Width.iconSocial} color={theme.colors.mode === 'dark' ? '#000000' : '#FFFFFF'} />
+          <Ionicons
+            name="logo-google"
+            size={Width.iconSocial}
+            color={theme.colors.mode === 'dark' ? '#000000' : '#FFFFFF'}
+          />
           <SocialButtonText>
             {activeSocialProvider === 'Google' ? 'Connecting...' : 'Continue with Google'}
           </SocialButtonText>
@@ -214,7 +247,11 @@ export default function Landing() {
 
         {canUseAppleSignIn ? (
           <SocialButton onPress={handleAppleLogin} disabled={isSocialLoading || !isLoaded}>
-            <Ionicons name="logo-apple" size={Width.iconSocialLarge} color={theme.colors.mode === 'dark' ? '#000000' : '#FFFFFF'} />
+            <Ionicons
+              name="logo-apple"
+              size={Width.iconSocialLarge}
+              color={theme.colors.mode === 'dark' ? '#000000' : '#FFFFFF'}
+            />
             <SocialButtonText>
               {activeSocialProvider === 'Apple' ? 'Connecting...' : 'Continue with Apple'}
             </SocialButtonText>

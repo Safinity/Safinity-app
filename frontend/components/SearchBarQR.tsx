@@ -1,5 +1,5 @@
 import React from 'react';
-import styled from 'styled-components/native';
+import styled, { useTheme } from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, BorderRadius, Spacing } from '@/constants/theme';
 
@@ -20,13 +20,15 @@ export default function SearchBarQR({
   placeholder = 'Find friends',
   accessibilityLabel = 'Search friends by name or username', // label padrão
 }: Props) {
+  const theme = useTheme();
+
   return (
     <Wrapper>
       <Bar>
         <Ionicons
           name="search"
           size={24}
-          color={Colors.white}
+          color={theme.colors.textSubtle}
           accessibilityElementsHidden // ícone decorativo escondido do leitor de tela
           importantForAccessibility="no"
         />
@@ -35,7 +37,7 @@ export default function SearchBarQR({
           onChangeText={onChangeText}
           onSubmitEditing={onSubmitEditing}
           placeholder={placeholder}
-          placeholderTextColor={Colors.white}
+          placeholderTextColor={theme.colors.textSubtle}
           returnKeyType="search"
           accessibilityLabel={accessibilityLabel} // <- rótulo acessível
           accessible={true}
@@ -46,7 +48,7 @@ export default function SearchBarQR({
         <Ionicons
           name="qr-code-outline"
           size={34}
-          color={Colors.white}
+          color={theme.colors.icon}
           accessibilityElementsHidden
           importantForAccessibility="no"
         />
@@ -66,14 +68,17 @@ const Bar = styled.View`
   flex-direction: row;
   align-items: center;
   height: 58px;
-  background-color: ${Colors.grayNavbar};
+  background-color: ${({ theme }) =>
+    theme.colors.mode === 'light'
+      ? theme.colors.palette.primary.light90
+      : Colors.grayNavbar};
   border-radius: ${BorderRadius.large}px;
   padding: 0 ${Spacing.md}px;
 `;
 
 const Input = styled.TextInput`
   flex: 1;
-  color: ${Colors.white};
+  color: ${({ theme }) => theme.colors.text};
   font-size: 16px;
   margin-left: ${Spacing.sm}px;
 `;

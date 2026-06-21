@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import styled from 'styled-components/native';
+import styled, { useTheme } from 'styled-components/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, Stack } from 'expo-router';
 import Head from 'expo-router/head';
@@ -38,7 +38,7 @@ const MainContent = styled.View`
 
 const ToggleContainer = styled.View`
   flex-direction: row;
-  background-color: ${({ theme }) => theme.colors.white};
+  background-color: ${({ theme }) => theme.colors.palette.primary.light90};
   border-radius: ${({ theme }) => theme.borderRadius.large}px;
   height: ${({ theme }) => theme.height.sm}px;
   margin-top: ${({ theme }) => theme.spacing.xxxl}px;
@@ -64,13 +64,13 @@ const TabButton = styled(TouchableOpacity)`
 `;
 
 const TabText = styled.Text<{ active: boolean }>`
-  color: ${({ active, theme }) => (active ? theme.colors.white : theme.colors.background)};
+  color: ${({ active, theme }) => (active ? '#FFFFFF' : theme.colors.black)};
   ${({ theme }) => theme.text.botao};
 `;
 
 const CameraWrapper = styled.View`
   flex: 1;
-  border-radius: ${({ theme }) => theme.borderRadius.xlarge}px;
+  border-radius: ${({ theme }) => theme.borderRadius.large}px;
   overflow: hidden;
   margin-horizontal: ${({ theme }) => theme.spacing.margemLateral}px;
   margin-bottom: ${({ theme }) => theme.spacing.xl}px;
@@ -79,6 +79,7 @@ const CameraWrapper = styled.View`
 
 const ScannerRegion = styled.View`
   flex: 1;
+  margin-top: ${({ theme }) => theme.spacing.md}px;
 `;
 
 const QRCodeContainer = styled.View`
@@ -87,6 +88,12 @@ const QRCodeContainer = styled.View`
   align-items: center;
   margin-top: ${({ theme }) => theme.spacing.xl}px;
   padding-horizontal: ${({ theme }) => theme.spacing.margemLateral}px;
+`;
+
+const MyQRCodeContainer = styled(QRCodeContainer)`
+  justify-content: flex-start;
+  margin-top: ${({ theme }) => theme.spacing.xl}px;
+  padding-top: ${({ theme }) => theme.spacing.xl}px;
 `;
 
 const HelperText = styled.Text`
@@ -101,7 +108,10 @@ const QRCard = styled.View`
   width: 300px;
   height: 300px;
   border-radius: ${({ theme }) => theme.borderRadius.medium}px;
-  background-color: ${({ theme }) => theme.colors.white};
+  background-color: ${({ theme }) =>
+    theme.colors.mode === 'light'
+      ? theme.colors.palette.primary.light90
+      : 'transparent'};
   justify-content: center;
   align-items: center;
 `;
@@ -114,7 +124,7 @@ const ProfileName = styled.Text`
 `;
 
 const ProfileUsername = styled.Text`
-  color: ${({ theme }) => theme.colors.palette.neutral.neutral70};
+  color: ${({ theme }) => theme.colors.palette.neutral.neutral20};
   ${({ theme }) => theme.text.textoPequeno};
   margin-top: ${({ theme }) => theme.spacing.xs}px;
   text-align: center;
@@ -221,6 +231,7 @@ const ConfirmButtonText = styled.Text<{ variant?: 'primary' | 'secondary' }>`
 `;
 
 export default function QRCodeScreen() {
+  const theme = useTheme();
   const [mode, setMode] = useState<'scan' | 'my'>('scan');
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
@@ -259,10 +270,10 @@ export default function QRCodeScreen() {
       const svg = await QRCode.toString(response.payload, {
         type: 'svg',
         width: 260,
-        margin: 2,
+        margin: 1,
         color: {
-          dark: '#222734',
-          light: '#FFFFFF',
+          dark: theme.colors.mode === 'dark' ? '#FFFFFF' : '#222734',
+          light: '#00000000',
         },
       });
 
@@ -273,7 +284,7 @@ export default function QRCodeScreen() {
     } finally {
       setIsLoadingQr(false);
     }
-  }, [getToken, isLoaded, isSignedIn]);
+  }, [getToken, isLoaded, isSignedIn, theme.colors.mode]);
 
   useEffect(() => {
     if (mode === 'my' && isLoaded && !qrSvg && !isLoadingQr) {
@@ -502,7 +513,7 @@ export default function QRCodeScreen() {
           </ScannerRegion>
         ) : (
           <ScannerRegion role="region" accessibilityLabel="My QR code">
-            <QRCodeContainer>
+            <MyQRCodeContainer>
               <QRCard>
                 {isLoadingQr ? (
                   <ActivityIndicator size="large" color="#222734" />
@@ -545,7 +556,7 @@ export default function QRCodeScreen() {
                   importantForAccessibility="no"
                 />
               </RefreshButton>
-            </QRCodeContainer>
+            </MyQRCodeContainer>
           </ScannerRegion>
         )}
       </MainContent>

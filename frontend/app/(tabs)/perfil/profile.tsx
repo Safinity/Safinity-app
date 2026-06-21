@@ -22,6 +22,7 @@ import EditIcon from '../../../assets/Icons/edit.png';
 import ProfileFundoImg from '../../../assets/images/Profile-fundo.png';
 import ProfileFundoDarkImg from '../../../assets/images/Profile-fundo-dark.png';
 import Header from '../../../components/ui/header'; // import do header customizado
+import { LinkTicketModal } from '../../../components/LinkTicketModal';
 import {
   deleteMyAccount,
   getMyProfileWithEventImages,
@@ -417,6 +418,7 @@ export default function Profile() {
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [isLinkTicketModalVisible, setIsLinkTicketModalVisible] = useState(false);
   const [deleteAccountError, setDeleteAccountError] = useState('');
   const [error, setError] = useState('');
   const getTokenRef = useRef(getToken);
@@ -616,7 +618,11 @@ export default function Profile() {
         <Name $themeMode={themeMode}>{user.name || user.email || 'Safinity user'}</Name>
         <Username>@{user.username || 'user'}</Username>
 
-        <LinkButton role="button" accessibilityLabel="Link my ticket">
+        <LinkButton
+          onPress={() => setIsLinkTicketModalVisible(true)}
+          role="button"
+          accessibilityLabel="Link my ticket"
+        >
           <LinkButtonText>Link my ticket</LinkButtonText>
         </LinkButton>
 
@@ -714,6 +720,29 @@ export default function Profile() {
           </DeleteAccountButton>
         </PaddedContent>
       </Container>
+      <LinkTicketModal
+        visible={isLinkTicketModalVisible}
+        onClose={() => setIsLinkTicketModalVisible(false)}
+        onLinked={ticket => {
+          if (!ticket.event) {
+            return;
+          }
+
+          setUser(currentUser =>
+            currentUser
+              ? {
+                  ...currentUser,
+                  user_tickets: [
+                    { ...ticket, event: ticket.event },
+                    ...currentUser.user_tickets.filter(
+                      currentTicket => currentTicket.id !== ticket.id,
+                    ),
+                  ],
+                }
+              : currentUser,
+          );
+        }}
+      />
     </BackgroundWrapper>
   );
 }

@@ -6,11 +6,11 @@ import { useEventMode } from '@/context/EventModeContext';
 const NavbarContainer = styled.View`
   background-color: ${({ theme }) => theme.colors.navBackground};
   border-radius: ${({ theme }) => theme.borderRadius.xlarge}px;
-  
+
   /* Diminui a altura fora do modo de evento se quiseres, ou mantém theme.height.md */
-  height: ${({ $isEventMode, theme }) => 
-    $isEventMode ? theme.height.md : theme.height.md * 0.95 }px; 
-  
+  height: ${({ $isEventMode, theme }) =>
+    $isEventMode ? theme.height.md : theme.height.md * 0.95}px;
+
   margin-bottom: ${({ theme }) => theme.spacing.margemLateral}px;
   elevation: 8;
   shadow-color: ${({ theme }) => theme.colors.shadow};
@@ -19,11 +19,11 @@ const NavbarContainer = styled.View`
   shadow-radius: 18px;
   position: absolute;
   bottom: 0;
-  
-  left: ${({ $isEventMode, theme }) => 
-    $isEventMode ? theme.spacing.margemLateral  : theme.spacing.margemLateral * 1.3 }px;
-  right: ${({ $isEventMode, theme }) => 
-    $isEventMode ? theme.spacing.margemLateral  : theme.spacing.margemLateral * 1.3 }px;
+
+  left: ${({ $isEventMode, theme }) =>
+    $isEventMode ? theme.spacing.margemLateral : theme.spacing.margemLateral * 1.3}px;
+  right: ${({ $isEventMode, theme }) =>
+    $isEventMode ? theme.spacing.margemLateral : theme.spacing.margemLateral * 1.3}px;
 `;
 
 const TabBarContent = styled.View`
@@ -42,8 +42,7 @@ const TabButton = styled.TouchableOpacity`
 const TabIcon = styled(Ionicons).attrs<{ $isEventMode: boolean }>(({ theme, $isEventMode }) => ({
   size: $isEventMode ? theme.height.xs : theme.height.xs * 0.9,
 }))<{ $active: boolean; $isEventMode: boolean }>`
-  color: ${({ $active, theme }) =>
-    $active ? theme.colors.navActive : theme.colors.navInactive};
+  color: ${({ $active, theme }) => ($active ? theme.colors.navActive : theme.colors.navInactive)};
 `;
 
 const IconBox = styled.View`

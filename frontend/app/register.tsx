@@ -86,7 +86,9 @@ export default function Register() {
 
       router.replace('/onboarding/step1');
     } catch (clerkError: any) {
-      setError(clerkError.errors?.[0]?.message || clerkError.message || 'Invalid verification code');
+      setError(
+        clerkError.errors?.[0]?.message || clerkError.message || 'Invalid verification code',
+      );
     }
   };
 
@@ -110,10 +112,10 @@ export default function Register() {
         <title>Register | Safinity</title>
       </Head>
 
-      <Header 
-        variant="back" 
-        title="Register" 
-        subtitle="Create your account here!" 
+      <Header
+        variant="back"
+        title="Register"
+        subtitle="Create your account here!"
         titleColor={theme.colors.text}
         subtitleColor={theme.colors.text}
       />
@@ -208,7 +210,12 @@ export default function Register() {
 
               <SemanticLabel color={theme.colors.text}>Email *</SemanticLabel>
               <InputWrapper color={theme.colors.palette.primary.light90}>
-                <Ionicons name="mail-outline" size={Width.iconSocial} color={theme.colors.inactive} style={{ marginRight: Spacing.sm }} />
+                <Ionicons
+                  name="mail-outline"
+                  size={Width.iconSocial}
+                  color={theme.colors.inactive}
+                  style={{ marginRight: Spacing.sm }}
+                />
                 <NativeInputField
                   color={theme.colors.text}
                   placeholder="Email"
@@ -249,7 +256,9 @@ export default function Register() {
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
                 />
-                <TouchableOpacity onPress={() => setIsConfirmPasswordVisible(!isConfirmPasswordVisible)}>
+                <TouchableOpacity
+                  onPress={() => setIsConfirmPasswordVisible(!isConfirmPasswordVisible)}
+                >
                   <Ionicons
                     name={isConfirmPasswordVisible ? 'eye-outline' : 'eye-off-outline'}
                     size={Width.iconSocialLarge}
@@ -295,11 +304,11 @@ export default function Register() {
                 </CheckboxWrapper>
 
                 <PrimaryButton
-  title="Create account"
-  disabled={!checked || password !== confirmPassword || password === ''}
-  onPress={handleRegister}
-  color={theme.colors.primary} // Use apenas esta prop
-/>
+                  title="Create account"
+                  disabled={!checked || password !== confirmPassword || password === ''}
+                  onPress={handleRegister}
+                  color={theme.colors.primary} // Use apenas esta prop
+                />
 
                 <RowWithLink>
                   <SmallText>Already have an account?</SmallText>
@@ -351,12 +360,13 @@ const SemanticLabel = styled.Text<{ color: string }>`
   margin-top: ${Spacing.md}px;
 `;
 
-{/* Alteração: Removido propriedades border-width e border-color para eliminar o stroke */}
+{
+  /* Alteração: Removido propriedades border-width e border-color para eliminar o stroke */
+}
 const InputWrapper = styled.View<{ color: string }>`
   height: ${Height.socialButton}px;
   /* Forçamos o fundo para branco se for light mode, ou mantemos a cor de fundo do tema */
-  background-color: ${({ theme, color }) => 
-    (theme.colors.mode === 'light') ? '#FFFFFF' : color};
+  background-color: ${({ theme, color }) => (theme.colors.mode === 'light' ? '#FFFFFF' : color)};
   border-radius: ${({ theme }) => theme.borderRadius.medium}px;
   flex-direction: row;
   align-items: center;

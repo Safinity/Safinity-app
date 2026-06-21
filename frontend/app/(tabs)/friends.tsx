@@ -372,5 +372,5 @@ const Buttons = styled.View`
 // Adiciona isto lá em baixo com os teus Styled Components
 const AddFriendIcon = styled(Ionicons)`
   /* Branco no Dark Mode, Preto no Light Mode */
-  color: ${({ theme }) => theme.colors.mode === 'dark' ? '#FFFFFF' : '#000000'};
+  color: ${({ theme }) => (theme.colors.mode === 'dark' ? '#FFFFFF' : '#000000')};
 `;

@@ -532,8 +532,16 @@ export default function Login() {
       <MainArea role="main">
         <InputGroup>
           <SemanticLabel color={theme.colors.text}>Email *</SemanticLabel>
-          <InputWrapper color={theme.colors.palette.primary.light90} borderColor={theme.colors.palette.primary.light80}>
-            <Ionicons name="mail-outline" size={Width.iconSocial} color={theme.colors.inactive} style={{ marginRight: Spacing.sm }} />
+          <InputWrapper
+            color={theme.colors.palette.primary.light90}
+            borderColor={theme.colors.palette.primary.light80}
+          >
+            <Ionicons
+              name="mail-outline"
+              size={Width.iconSocial}
+              color={theme.colors.inactive}
+              style={{ marginRight: Spacing.sm }}
+            />
             <NativeInputField
               color={theme.colors.text}
               placeholder="Email"
@@ -546,7 +554,10 @@ export default function Login() {
           </InputWrapper>
 
           <SemanticLabel color={theme.colors.text}>Password *</SemanticLabel>
-          <InputWrapper color={theme.colors.palette.primary.light90} borderColor={theme.colors.palette.primary.light80}>
+          <InputWrapper
+            color={theme.colors.palette.primary.light90}
+            borderColor={theme.colors.palette.primary.light80}
+          >
             <NativeInputField
               color={theme.colors.text}
               placeholder="Password"
@@ -575,7 +586,12 @@ export default function Login() {
 
         {error ? (
           <ErrorArea accessible={true} accessibilityLiveRegion="assertive" role="alert">
-            <Ionicons name="alert-circle" size={Width.iconAlert} color="#ff5252" style={{ marginRight: Spacing.sm }} />
+            <Ionicons
+              name="alert-circle"
+              size={Width.iconAlert}
+              color="#ff5252"
+              style={{ marginRight: Spacing.sm }}
+            />
             <ErrorText>{error}</ErrorText>
           </ErrorArea>
         ) : null}
@@ -650,8 +666,8 @@ const SemanticLabel = styled.Text<{ color: string }>`
 const InputWrapper = styled.View<{ color: string; borderColor: string }>`
   height: ${Height.socialButton}px;
   /* Usamos a variável themeMode diretamente do contexto */
-  background-color: ${({ theme, color }) => 
-    (theme.mode === 'light' || color === '#FFFFFF') ? '#FFFFFF' : color};
+  background-color: ${({ theme, color }) =>
+    theme.mode === 'light' || color === '#FFFFFF' ? '#FFFFFF' : color};
   border-radius: ${({ theme }) => theme.borderRadius.medium}px;
   border-width: ${Height.separatorLine}px;
   border-color: ${props => props.borderColor};
@@ -667,7 +683,7 @@ const NativeInputField = styled(TextInput)<{ color: string }>`
   font-family: ${({ theme }) => theme.fonts.weights.regular};
   font-size: ${({ theme }) => theme.fonts.sizes.base}px;
   /* Força a cor do texto para PRETO se estivermos num fundo claro */
-  color: #000000; 
+  color: #000000;
 `;
 
 const RowWithLink = styled.View`

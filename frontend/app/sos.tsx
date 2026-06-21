@@ -58,7 +58,7 @@ const TagButton = styled.TouchableOpacity<{ selected: boolean }>`
   border-radius: ${({ theme }) => theme.borderRadius.round}px;
   background-color: ${({ selected, theme }) => {
     if (selected) return theme.colors.primary; // Roxo vibrante (#9242CC) para ambos os modos
-    
+
     // Imagem 1 (Dark Mode): Tag é branca pura. Imagem 2 (Light Mode): Tag é roxo pastel suave (light90)
     return theme.colors.mode === 'dark' ? '#FFFFFF' : theme.colors.palette.primary.light90;
   }};
@@ -70,7 +70,7 @@ const TagLabel = styled.Text<{ selected: boolean }>`
   font-family: ${({ theme }) => theme.fonts.weights.light};
   color: ${({ selected, theme }) => {
     if (selected) return '#FFFFFF';
-    
+
     // Imagem 1: Texto escuro em cima da tag branca. Imagem 2: Roxo escuro/cinza sobre o fundo pastel
     return theme.colors.mode === 'dark' ? '#1C1C1E' : theme.colors.palette.primary.dark40;
   }};
@@ -78,11 +78,12 @@ const TagLabel = styled.Text<{ selected: boolean }>`
 
 const NotesInput = styled.TextInput`
   /* Imagem 1 (Dark Mode): Fundo Branco Puro. Imagem 2 (Light Mode): Usa a cor 'input' do tema (light90) */
-  background-color: ${({ theme }) => (theme.colors.mode === 'dark' ? '#FFFFFF' : theme.colors.input)};
-  
+  background-color: ${({ theme }) =>
+    theme.colors.mode === 'dark' ? '#FFFFFF' : theme.colors.input};
+
   /* Garante que o texto fica escuro (#1C1C1E) no Dark Mode para ser legível sobre o fundo branco */
   color: ${({ theme }) => (theme.colors.mode === 'dark' ? '#1C1C1E' : theme.colors.text)};
-  
+
   font-family: ${({ theme }) => theme.fonts.weights.light};
   font-size: ${({ theme }) => theme.text.corpo.corpoTexto.fontSize}px;
   border-radius: ${({ theme }) => theme.borderRadius.xlarge}px;
@@ -133,7 +134,7 @@ const ButtonTextCancel = styled.Text`
 
 const ButtonTextConfirm = styled.Text`
   font-family: ${({ theme }) => theme.fonts.weights.medium};
-  color: #FFFFFF;
+  color: #ffffff;
   font-size: ${({ theme }) => theme.text.botao.fontSize}px;
   text-align: center;
 `;

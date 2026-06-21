@@ -203,12 +203,10 @@ export default function FriendProfile() {
           // Mantém o cálculo do scroll suave sincronizado com o espaçamento
           snapToInterval={width * 0.75 + theme.spacing.margemLateral}
           decelerationRate="fast"
-          
           // 🌟 MODIFICAÇÃO AQUI: Adicionado padding horizontal completo para afastar das bordas esquerda e direita
-          contentContainerStyle={{ 
-            paddingHorizontal: theme.spacing.margemLateral 
+          contentContainerStyle={{
+            paddingHorizontal: theme.spacing.margemLateral,
           }}
-          
           renderItem={({ item }) => (
             // 🌟 MODIFICAÇÃO AQUI: Removido o prop left individual e adicionado um gap/margin à direita para espaçar os cards entre si
             <View style={{ marginRight: theme.spacing.md }}>

@@ -126,7 +126,7 @@ export default function ActivityDetailsScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const theme = useTheme(); // Hook do tema ativo mapeado corretamente
-  
+
   const {
     favouriteActivityIds,
     updatingActivityIds,
@@ -199,7 +199,11 @@ export default function ActivityDetailsScreen() {
 
   return (
     <Container>
-      <StatusBar barStyle={theme.colors.mode === 'light' ? 'dark-content' : 'light-content'} translucent backgroundColor="transparent" />
+      <StatusBar
+        barStyle={theme.colors.mode === 'light' ? 'dark-content' : 'light-content'}
+        translucent
+        backgroundColor="transparent"
+      />
 
       {/* MAIN REGION */}
       <ScrollView
@@ -232,10 +236,10 @@ export default function ActivityDetailsScreen() {
           >
             <RouteIconWrapper>
               {/* Usa o theme vindo do useTheme() com as cores que pediste */}
-              <Ionicons 
-                name="location" 
-                size={24} 
-                color={theme.colors.mode === 'light' ? '#9866be': '#E9D5FF'} 
+              <Ionicons
+                name="location"
+                size={24}
+                color={theme.colors.mode === 'light' ? '#9866be' : '#E9D5FF'}
               />
             </RouteIconWrapper>
 

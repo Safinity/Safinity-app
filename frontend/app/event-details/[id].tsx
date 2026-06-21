@@ -233,7 +233,7 @@ const ContentCard = styled.View`
 `;
 
 const SectionTitle = styled.Text`
-  color: ${({ theme }) => theme.colors.mode === 'light' ? theme.colors.text : theme.colors.white};
+  color: ${({ theme }) => (theme.colors.mode === 'light' ? theme.colors.text : theme.colors.white)};
   font-family: ${({ theme }) => theme.text.titulo.h3.fontFamily};
   font-size: ${({ theme }) => theme.text.titulo.h3.fontSize}px;
   margin-top: ${({ theme }) => theme.spacing.lg}px;
@@ -263,7 +263,7 @@ const ActionButton = styled.TouchableOpacity`
 `;
 
 const ActionLabel = styled.Text`
-  color: ${({ theme }) => theme.colors.mode === 'light' ? theme.colors.text : theme.colors.white};
+  color: ${({ theme }) => (theme.colors.mode === 'light' ? theme.colors.text : theme.colors.white)};
   margin-top: ${({ theme }) => theme.spacing.sm}px;
   font-family: ${({ theme }) => theme.text.label.fontFamily};
   font-size: ${({ theme }) => theme.text.label.fontSize + 2}px;

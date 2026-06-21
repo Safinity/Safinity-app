@@ -1,13 +1,7 @@
 import { useAuth, useUser as useClerkUser } from '@clerk/expo';
 import React, { useEffect, useRef, useState } from 'react';
 import styled, { useTheme } from 'styled-components/native';
-import {
-  ActivityIndicator,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-} from 'react-native';
+import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { Stack } from 'expo-router';
 import Header from '../../../components/ui/header';
 import { Spacing, Fonts } from '../../../constants/theme';
@@ -61,8 +55,7 @@ const SecurityScreen = () => {
     async function loadEmail() {
       if (!isLoaded) return;
 
-      const clerkEmail =
-        clerkUser?.primaryEmailAddress?.emailAddress ?? '';
+      const clerkEmail = clerkUser?.primaryEmailAddress?.emailAddress ?? '';
 
       if (!isSignedIn) {
         setEmail('');
@@ -97,11 +90,7 @@ const SecurityScreen = () => {
     return () => {
       isActive = false;
     };
-  }, [
-    clerkUser?.primaryEmailAddress?.emailAddress,
-    isLoaded,
-    isSignedIn,
-  ]);
+  }, [clerkUser?.primaryEmailAddress?.emailAddress, isLoaded, isSignedIn]);
 
   const handleSavePassword = async () => {
     const currentPasswordValue = currentPassword;
@@ -109,53 +98,32 @@ const SecurityScreen = () => {
     const repeatPasswordValue = repeatPassword;
 
     if (!isLoaded || !isSignedIn || !clerkUser) {
-      Alert.alert(
-        'Authentication required',
-        'Please sign in to update your password.'
-      );
+      Alert.alert('Authentication required', 'Please sign in to update your password.');
       return;
     }
 
     if (clerkUser.passwordEnabled && !currentPasswordValue) {
-      Alert.alert(
-        'Missing password',
-        'Please enter your current password.'
-      );
+      Alert.alert('Missing password', 'Please enter your current password.');
       return;
     }
 
     if (!newPasswordValue || !repeatPasswordValue) {
-      Alert.alert(
-        'Missing password',
-        'Please enter and repeat your new password.'
-      );
+      Alert.alert('Missing password', 'Please enter and repeat your new password.');
       return;
     }
 
     if (newPasswordValue.length < 8) {
-      Alert.alert(
-        'Weak password',
-        'Your new password must be at least 8 characters.'
-      );
+      Alert.alert('Weak password', 'Your new password must be at least 8 characters.');
       return;
     }
 
     if (newPasswordValue !== repeatPasswordValue) {
-      Alert.alert(
-        'Passwords do not match',
-        'Please repeat the same new password.'
-      );
+      Alert.alert('Passwords do not match', 'Please repeat the same new password.');
       return;
     }
 
-    if (
-      currentPasswordValue &&
-      currentPasswordValue === newPasswordValue
-    ) {
-      Alert.alert(
-        'Same password',
-        'Please choose a different new password.'
-      );
+    if (currentPasswordValue && currentPasswordValue === newPasswordValue) {
+      Alert.alert('Same password', 'Please choose a different new password.');
       return;
     }
 
@@ -172,17 +140,11 @@ const SecurityScreen = () => {
       setNewPassword('');
       setRepeatPassword('');
 
-      Alert.alert(
-        'Password updated',
-        'Your password was updated successfully.'
-      );
+      Alert.alert('Password updated', 'Your password was updated successfully.');
     } catch (error) {
       console.error('Failed to update password', error);
 
-      Alert.alert(
-        'Unable to update password',
-        getClerkErrorMessage(error)
-      );
+      Alert.alert('Unable to update password', getClerkErrorMessage(error));
     } finally {
       setIsSavingPassword(false);
     }
@@ -193,14 +155,14 @@ const SecurityScreen = () => {
       <Stack.Screen options={{ title: 'Password & Security' }} />
 
       <Header
-  variant="back"
-  title="Password & Security"
-  showBottomDivider={false}
-  // Adicione esta prop de estilo
-  titleStyle={{
-    color: theme.mode === 'light' ? '#000000' : theme.colors.text
-  }}
-/>
+        variant="back"
+        title="Password & Security"
+        showBottomDivider={false}
+        // Adicione esta prop de estilo
+        titleStyle={{
+          color: theme.mode === 'light' ? '#000000' : theme.colors.text,
+        }}
+      />
 
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -224,9 +186,7 @@ const SecurityScreen = () => {
             </Section>
 
             <Section>
-              <SectionTitle>
-                Change Password
-              </SectionTitle>
+              <SectionTitle>Change Password</SectionTitle>
 
               <InputField
                 label="Current Password"
@@ -234,14 +194,8 @@ const SecurityScreen = () => {
                 onChangeText={setCurrentPassword}
                 placeholder="Enter current password"
                 password={true}
-                icon={
-                  showCurrentPassword
-                    ? 'eye-off-outline'
-                    : 'eye-outline'
-                }
-                onIconPress={() =>
-                  setShowCurrentPassword(!showCurrentPassword)
-                }
+                icon={showCurrentPassword ? 'eye-off-outline' : 'eye-outline'}
+                onIconPress={() => setShowCurrentPassword(!showCurrentPassword)}
               />
 
               <InputField
@@ -250,14 +204,8 @@ const SecurityScreen = () => {
                 onChangeText={setNewPassword}
                 placeholder="Enter new password"
                 password={true}
-                icon={
-                  showNewPassword
-                    ? 'eye-off-outline'
-                    : 'eye-outline'
-                }
-                onIconPress={() =>
-                  setShowNewPassword(!showNewPassword)
-                }
+                icon={showNewPassword ? 'eye-off-outline' : 'eye-outline'}
+                onIconPress={() => setShowNewPassword(!showNewPassword)}
               />
 
               <InputField
@@ -266,14 +214,8 @@ const SecurityScreen = () => {
                 onChangeText={setRepeatPassword}
                 placeholder="Repeat new password"
                 password={true}
-                icon={
-                  showRepeatPassword
-                    ? 'eye-off-outline'
-                    : 'eye-outline'
-                }
-                onIconPress={() =>
-                  setShowRepeatPassword(!showRepeatPassword)
-                }
+                icon={showRepeatPassword ? 'eye-off-outline' : 'eye-outline'}
+                onIconPress={() => setShowRepeatPassword(!showRepeatPassword)}
               />
 
               <SaveButton
@@ -282,13 +224,9 @@ const SecurityScreen = () => {
                 onPress={handleSavePassword}
               >
                 {isSavingPassword ? (
-                  <ActivityIndicator
-                    color={theme.colors.onPrimary}
-                  />
+                  <ActivityIndicator color={theme.colors.onPrimary} />
                 ) : (
-                  <SaveButtonText>
-                    Save changes
-                  </SaveButtonText>
+                  <SaveButtonText>Save changes</SaveButtonText>
                 )}
               </SaveButton>
             </Section>

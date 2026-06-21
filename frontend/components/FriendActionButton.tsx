@@ -17,10 +17,10 @@ const Button = styled.TouchableOpacity<{
   width: ${({ theme }) => theme.height.sm}px;
   height: ${({ theme }) => theme.height.sm}px;
   border-radius: ${({ theme }) => theme.borderRadius.medium}px;
-  
+
   /* Garante que o 'add', 'pending' e 'remove' usam sempre o Roxo Light (light90) fixo */
-  background-color: ${({ theme }) => theme.colors.palette.primary.light90}; 
-        
+  background-color: ${({ theme }) => theme.colors.palette.primary.light90};
+
   justify-content: center;
   align-items: center;
   opacity: ${({ disabled }) => (disabled ? 0.6 : 1)};
@@ -40,7 +40,7 @@ export default function FriendActionButton({
       : variant === 'pending'
         ? 'hourglass-outline'
         : 'person-remove-outline';
-        
+
   /* Como o fundo agora é sempre roxo light, o ícone de adicionar também deve ser roxo escuro para dar contraste */
   const iconColor = '#9242CC';
 

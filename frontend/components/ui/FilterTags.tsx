@@ -1,12 +1,7 @@
 import React from 'react';
 import styled from 'styled-components/native';
 import { useTheme } from 'styled-components/native';
-import {
-  Spacing,
-  Height,
-  BorderRadius,
-  TextStyles,
-} from '../../constants/theme';
+import { Spacing, Height, BorderRadius, TextStyles } from '../../constants/theme';
 
 export type FilterTagsVariant = 'homepage' | 'mapa';
 
@@ -15,16 +10,17 @@ export type FilterTagsVariant = 'homepage' | 'mapa';
  */
 const getTagTheme = (theme: any) => ({
   homepage: {
-    color: theme.colors.mode === 'dark' ? theme.colors.surface : theme.colors.palette.primary.light80,
-    selectedColor: theme.colors.primary,  // selected background
-    textColor: theme.colors.text,         // unselected text
-    selectedTextColor: '#FFFFFF',          // selected text color
+    color:
+      theme.colors.mode === 'dark' ? theme.colors.surface : theme.colors.palette.primary.light80,
+    selectedColor: theme.colors.primary, // selected background
+    textColor: theme.colors.text, // unselected text
+    selectedTextColor: '#FFFFFF', // selected text color
     borderColor: 'transparent',
     paddingLeft: Spacing.margemLateral,
     paddingRight: Spacing.lg,
   },
   mapa: {
-    color: theme.colors.mode === 'dark' ? theme.colors.surface : "white",
+    color: theme.colors.mode === 'dark' ? theme.colors.surface : 'white',
     selectedColor: theme.colors.primary,
     textColor: theme.colors.text,
     selectedTextColor: '#FFFFFF',
@@ -156,11 +152,7 @@ const FilterTags: React.FC<FilterTagsProps> = ({
               accessibilityHint="Aplica este filtro de atividades"
               focusable
             >
-              <TagText
-                selected={isSelected}
-                variant={variant}
-                theme={theme}
-              >
+              <TagText selected={isSelected} variant={variant} theme={theme}>
                 {tag}
               </TagText>
             </Tag>

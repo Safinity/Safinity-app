@@ -241,14 +241,22 @@ export const HeroBanner = ({
 
             <InfoRow>
               <InfoItem>
-                <Ionicons name="time-outline" size={18} color={theme.colors.mode === 'light' ? theme.colors.primary : theme.colors.white} />
+                <Ionicons
+                  name="time-outline"
+                  size={18}
+                  color={theme.colors.mode === 'light' ? theme.colors.primary : theme.colors.white}
+                />
                 <InfoText>
                   {event.date}, {event.startTime} - {event.endTime}
                 </InfoText>
               </InfoItem>
 
               <InfoItem>
-                <Ionicons name="location-outline" size={18} color={theme.colors.mode === 'light' ? theme.colors.primary : theme.colors.white}/>
+                <Ionicons
+                  name="location-outline"
+                  size={18}
+                  color={theme.colors.mode === 'light' ? theme.colors.primary : theme.colors.white}
+                />
                 <InfoText>{event.location}</InfoText>
               </InfoItem>
             </InfoRow>

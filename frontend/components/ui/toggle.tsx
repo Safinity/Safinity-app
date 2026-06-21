@@ -58,7 +58,6 @@ const ToggleContainer = styled.View`
   border-bottom-width: 1px;
   border-bottom-color: ${({ theme }) =>
     theme.colors.mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'};
-
 `;
 
 const ToggleContent = styled.View`
@@ -112,7 +111,7 @@ const AnimatedKnob = Animated.createAnimatedComponent(styled.View<{
     const isDark = theme.colors.mode === 'dark';
 
     if (isDark) {
-      return active ? theme.colors.palette.primary.dark50: theme.colors.background;
+      return active ? theme.colors.palette.primary.dark50 : theme.colors.background;
     }
     return active ? theme.colors.primary : theme.colors.inactive;
   }};

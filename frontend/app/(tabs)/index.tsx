@@ -361,17 +361,17 @@ export default function HomeScreen() {
                     <TicketTopRow>
                       <Ionicons name="heart" size={theme.height.xs} color={theme.colors.white} />
                     </TicketTopRow>
-<TicketBarcode>
-  {barcodePattern.map((bar, index) => (
-    <BarcodeBar
-      key={`${item.id}-${index}`}
-      style={{
-        width: bar.width,
-        marginRight: bar.gap,
-      }}
-    />
-  ))}
-</TicketBarcode>
+                    <TicketBarcode>
+                      {barcodePattern.map((bar, index) => (
+                        <BarcodeBar
+                          key={`${item.id}-${index}`}
+                          style={{
+                            width: bar.width,
+                            marginRight: bar.gap,
+                          }}
+                        />
+                      ))}
+                    </TicketBarcode>
                     <TicketFooter>
                       <TicketDate>{formatEventDate(event?.start_date, event?.end_date)}</TicketDate>
                       <TicketTitle numberOfLines={2}>{event?.name || 'Untitled event'}</TicketTitle>

@@ -12,11 +12,11 @@ const Button = styled.TouchableOpacity<{ disabled?: boolean }>`
   width: ${({ theme }) => theme.height.sm}px;
   height: ${({ theme }) => theme.height.sm}px;
   border-radius: ${({ theme }) => theme.borderRadius.medium}px;
-  
+
   /* Usa o roxo dinâmico do sistema (primary) ativo em ambos os modos */
   background-color: ${({ theme, disabled }) =>
     disabled ? theme.colors.palette.primary.light60 : theme.colors.primary};
-    
+
   justify-content: center;
   align-items: center;
   opacity: ${({ disabled }) => (disabled ? 0.6 : 1)};

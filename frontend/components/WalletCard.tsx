@@ -11,18 +11,31 @@ import { eventImages } from '../assets/images/Events';
 
 // Padrão do código de barras igual ao do Index
 const barcodePattern = [
-  { width: 1, gap: 0 }, { width: 1, gap: 0 }, { width: 3, gap: 2 },
-  { width: 1, gap: 0 }, { width: 4, gap: 1 }, { width: 2, gap: 3 },
-  { width: 1, gap: 0 }, { width: 3, gap: 0 }, { width: 1, gap: 4 },
-  { width: 4, gap: 0 }, { width: 2, gap: 1 }, { width: 1, gap: 0 },
-  { width: 3, gap: 2 }, { width: 1, gap: 0 }, { width: 2, gap: 3 },
-  { width: 4, gap: 1 }, { width: 1, gap: 0 }, { width: 3, gap: 0 },
-  { width: 1, gap: 2 }, { width: 4, gap: 0 },
+  { width: 1, gap: 0 },
+  { width: 1, gap: 0 },
+  { width: 3, gap: 2 },
+  { width: 1, gap: 0 },
+  { width: 4, gap: 1 },
+  { width: 2, gap: 3 },
+  { width: 1, gap: 0 },
+  { width: 3, gap: 0 },
+  { width: 1, gap: 4 },
+  { width: 4, gap: 0 },
+  { width: 2, gap: 1 },
+  { width: 1, gap: 0 },
+  { width: 3, gap: 2 },
+  { width: 1, gap: 0 },
+  { width: 2, gap: 3 },
+  { width: 4, gap: 1 },
+  { width: 1, gap: 0 },
+  { width: 3, gap: 0 },
+  { width: 1, gap: 2 },
+  { width: 4, gap: 0 },
 ];
 
 const CardContainer = styled.TouchableOpacity`
   width: 100%;
-  height: 185px; 
+  height: 185px;
   border-radius: ${BorderRadius.large}px;
   overflow: hidden;
   margin-bottom: ${Spacing.md}px;
@@ -156,7 +169,9 @@ export const WalletCard = ({ event, ticketId }: WalletCardProps) => {
 
           <CardFooter>
             <DateText>{formatEventDate(event.start_date, event.end_date)}</DateText>
-            <TitleText aria-level="3" numberOfLines={2}>{event.name || 'Untitled Event'}</TitleText>
+            <TitleText aria-level="3" numberOfLines={2}>
+              {event.name || 'Untitled Event'}
+            </TitleText>
           </CardFooter>
         </GradientLayer>
       </BackgroundImage>

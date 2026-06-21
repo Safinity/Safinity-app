@@ -30,14 +30,14 @@ const NotificationSettingsScreen = () => {
   return (
     <Container>
       <Stack.Screen options={{ title: 'Notification Settings', headerShown: false }} />
-      
-      <Header 
-        variant="back" 
-        title="Notification Settings" 
+
+      <Header
+        variant="back"
+        title="Notification Settings"
         showBottomDivider={false}
         colorScheme={isDark ? 'dark' : 'light'}
       />
-      
+
       <ScrollView showsVerticalScrollIndicator={false}>
         <Content>
           {/* O ToggleWrapper força que todos os textos lá dentro obedeçam à cor correta */}
@@ -89,7 +89,7 @@ export default NotificationSettingsScreen;
 
 const Container = styled.View`
   flex: 1;
-  background-color: ${({ theme }) => theme.colors.background}; 
+  background-color: ${({ theme }) => theme.colors.background};
 `;
 
 const Content = styled.View`
@@ -104,12 +104,15 @@ const Section = styled.View`
 
 // Hack infalível: Seleciona qualquer componente de texto dentro do Toggle e injeta a cor correta por cima de qualquer estilo antigo
 const ToggleWrapper = styled.View<{ isDark: boolean }>`
-  && Text, && text, && * {
+  && Text,
+  && text,
+  && * {
     color: ${({ isDark }) => (isDark ? '#FFFFFF' : '#222734')} !important;
   }
-  
+
   /* Ajusta especificamente o texto secundário/descrição para não ficar tão escuro */
-  && Text:nth-child(2), && Paragraph {
+  && Text:nth-child(2),
+  && Paragraph {
     color: ${({ isDark }) => (isDark ? '#b8b8be' : '#666666')} !important;
   }
 `;

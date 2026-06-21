@@ -19,7 +19,12 @@ const Label = styled.Text`
 
 export default function SecondaryButton({ title, onPress, accessibilityLabel }: any) {
   return (
-    <Button onPress={onPress} accessible={true} role="button" accessibilityLabel={accessibilityLabel || title}>
+    <Button
+      onPress={onPress}
+      accessible={true}
+      role="button"
+      accessibilityLabel={accessibilityLabel || title}
+    >
       <Label>{title}</Label>
     </Button>
   );

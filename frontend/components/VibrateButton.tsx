@@ -17,7 +17,6 @@ const Button = styled.TouchableOpacity<{ disabled?: boolean }>`
   align-items: center;
   opacity: ${({ disabled }) => (disabled ? 0.6 : 1)};
 
-  
   /* Mantém o fundo branco puro para não inverter no Light Mode */
   background-color: ${({ theme, disabled }) =>
     disabled ? theme.colors.palette.primary.light60 : '#FFFFFF'};

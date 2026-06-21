@@ -74,9 +74,32 @@
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "collectCoverageFrom": [
-      "**/*.(t|j)s"
+      "**/*.(t|j)s",
+      "!**/*.module.ts",
+      "!main.ts",
+      "!**/dto/**",
+      "!**/*.constants.ts",
+      "!**/*.decorator.ts",
+      "!**/*.types.ts"
     ],
     "coverageDirectory": "../coverage",
+    "coverageReporters": [
+      "text",
+      [
+        "lcov",
+        {
+          "projectRoot": ".."
+        }
+      ]
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 65,
+        "functions": 80,
+        "lines": 80,
+        "statements": 80
+      }
+    },
     "testEnvironment": "node"
   }
 }
